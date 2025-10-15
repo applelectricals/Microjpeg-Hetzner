@@ -3,7 +3,7 @@ FROM node:20-bookworm
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies (Ubuntu packages - same as Render)
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     imagemagick \
     libraw-bin \
@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y \
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies (including devDependencies for build)
+# Install ALL dependencies (needed for db:push)
 ENV NPM_CONFIG_PRODUCTION=false
 RUN npm ci
 
@@ -26,7 +26,7 @@ COPY . .
 # Build the application
 RUN npm run build
 
-# Set environment to production
+# Set environment
 ENV NODE_ENV=production
 ENV PORT=10000
 
@@ -37,5 +37,5 @@ EXPOSE 10000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:10000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Run DB migration and start app
-CMD npm run db:push && npm start
+# Run migrations then start (use shell form, not exec form)
+CMD sh -c "npm run db:push && npm start"
