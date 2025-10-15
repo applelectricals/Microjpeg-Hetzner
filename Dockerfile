@@ -1,22 +1,22 @@
-FROM node:20-alpine
+FROM node:20-bookworm
 
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies (ImageMagick for image processing)
-RUN apk add --no-cache \
+# Install system dependencies (Ubuntu packages - same as Render)
+RUN apt-get update && apt-get install -y \
     imagemagick \
-    libraw \
+    libraw-bin \
     dcraw \
     python3 \
     make \
-    g++
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package*.json ./
 
 # Install dependencies (including devDependencies for build)
-# NPM_CONFIG_PRODUCTION=false ensures devDependencies are installed
 ENV NPM_CONFIG_PRODUCTION=false
 RUN npm ci
 
@@ -24,7 +24,6 @@ RUN npm ci
 COPY . .
 
 # Build the application
-# This runs: vite build && esbuild server/index.ts
 RUN npm run build
 
 # Set environment to production
