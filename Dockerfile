@@ -37,5 +37,5 @@ EXPOSE 10000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
   CMD node -e "require('http').get('http://localhost:10000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
-# Start the application
-CMD ["npm", "start"]
+# Run DB migration and start app
+CMD npm run db:push && npm start
