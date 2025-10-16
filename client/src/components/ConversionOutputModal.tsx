@@ -5,6 +5,12 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 
+// Import format icons
+import avifIcon from '@/assets/format-icons/avif.jpg';
+import jpegIcon from '@/assets/format-icons/jpeg.jpg';
+import pngIcon from '@/assets/format-icons/png.jpg';
+import webpIcon from '@/assets/format-icons/webp.jpg';
+
 // Types
 interface FileWithPreview extends File {
   id: string;
@@ -55,6 +61,49 @@ const formatFileSize = (bytes: number): string => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+// Helper function to get format-specific styling - same as landing page
+const getFormatInfo = (format: string) => {
+  const formatMap: Record<string, { icon: string; color: string; bgColor: string; textColor: string }> = {
+    'avif': { 
+      icon: avifIcon, 
+      color: '#F59E0B', // Yellow/orange
+      bgColor: '#FEF3C7', 
+      textColor: '#92400E' 
+    },
+    'jpeg': { 
+      icon: jpegIcon, 
+      color: '#10B981', // Green
+      bgColor: '#D1FAE5', 
+      textColor: '#065F46' 
+    },
+    'jpg': { 
+      icon: jpegIcon, 
+      color: '#10B981', // Green
+      bgColor: '#D1FAE5', 
+      textColor: '#065F46' 
+    },
+    'png': { 
+      icon: pngIcon, 
+      color: '#3B82F6', // Blue
+      bgColor: '#DBEAFE', 
+      textColor: '#1E40AF' 
+    },
+    'webp': { 
+      icon: webpIcon, 
+      color: '#F97316', // Orange
+      bgColor: '#FED7AA', 
+      textColor: '#EA580C' 
+    }
+  };
+  
+  return formatMap[format] || {
+    icon: jpegIcon,
+    color: '#6B7280',
+    bgColor: '#F3F4F6',
+    textColor: '#374151'
+  };
 };
 
 export default function ConversionOutputModal({
@@ -482,32 +531,50 @@ export default function ConversionOutputModal({
                               />
                             </div>
                             
-                            {/* File info and results */}
-                            <div className="flex-1">
-                              <h4 className="font-semibold text-brand-dark mb-1">
-                                {file.name.length > 20 ? `${file.name.substring(0, 20)}...` : file.name}
-                              </h4>
-                              <div className="space-y-1">
-                                {fileResults.map((result) => (
-                                  <div key={result.id} className="flex items-center justify-between">
-                                    <div className="text-sm text-gray-600">
-                                      {formatFileSize(result.originalSize)} → {formatFileSize(result.compressedSize)} 
-                                      <span className="text-green-600 font-medium ml-1">
-                                        ({result.compressionRatio}% smaller)
+                            {/* File info and results - TinyPNG style like landing page */}
+                            <div className="flex items-center gap-3 flex-shrink-0">
+                              <div>
+                                <h4 className="font-semibold text-brand-dark">
+                                  {file.name.length > 8 ? `${file.name.substring(0, 8)}...` : file.name}
+                                </h4>
+                                <p className="text-sm text-gray-600">
+                                  {formatFileSize(fileResults[0].originalSize)} • {fileResults.length} format{fileResults.length > 1 ? 's' : ''}
+                                </p>
+                              </div>
+                            </div>
+                            
+                            {/* Format results inline - TinyPNG style like landing page */}
+                            <div className="flex items-center gap-3 flex-wrap flex-1 justify-end">
+                              {fileResults.map((result) => {
+                                const formatInfo = getFormatInfo((result.outputFormat || 'unknown').toLowerCase());
+                                return (
+                                  <div key={result.id} className="flex items-center gap-2">
+                                    {/* Compression percentage */}
+                                    <div className="text-right">
+                                      <div className="text-lg font-bold text-gray-700">
+                                        {result.compressedSize > result.originalSize ? '+' : '-'}{Math.abs(result.compressionRatio)}%
+                                      </div>
+                                      <div className="text-sm text-gray-500">{formatFileSize(result.compressedSize)}</div>
+                                    </div>
+                                    
+                                    {/* Format icon/button - exact same as landing page */}
+                                    <div 
+                                      className="flex items-center gap-1 px-2 py-1 rounded cursor-pointer hover:opacity-80 transition-opacity"
+                                      style={{ backgroundColor: formatInfo.color }}
+                                      onClick={() => window.open(result.downloadUrl, '_blank')}
+                                    >
+                                      <img 
+                                        src={formatInfo.icon} 
+                                        alt={result.outputFormat} 
+                                        className="w-4 h-4 object-contain"
+                                      />
+                                      <span className="text-white text-xs font-bold">
+                                        {(result.outputFormat || 'unknown').toUpperCase()}
                                       </span>
                                     </div>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => window.open(result.downloadUrl, '_blank')}
-                                      data-testid={`button-download-${result.id}`}
-                                      className="ml-2"
-                                    >
-                                      <Download className="w-3 h-3" />
-                                    </Button>
                                   </div>
-                                ))}
-                              </div>
+                                );
+                              })}
                             </div>
                           </div>
                         </div>

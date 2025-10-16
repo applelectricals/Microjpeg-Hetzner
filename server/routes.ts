@@ -1537,19 +1537,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
             result = { success: true, outputSize: stats.size };
           }
           
-          // Get file stats
+          // Get file stats - enhanced validation for RAW files
           const originalStats = await fs.stat(file.path);
           const compressedStats = await fs.stat(outputPath);
-          // Calculate compression ratio using original file size
-          const compressionRatio = Math.round((1 - compressedStats.size / originalStats.size) * 100);
+          
+          // CRITICAL: Ensure file sizes are valid numbers
+          const originalSize = originalStats.size && !isNaN(originalStats.size) ? originalStats.size : 1;
+          const compressedSize = compressedStats.size && !isNaN(compressedStats.size) ? compressedStats.size : 1;
+          
+          // Calculate compression ratio with validation - prevent NaN
+          let compressionRatio = 0;
+          if (originalSize > 0 && compressedSize > 0) {
+            compressionRatio = Math.round((1 - compressedSize / originalSize) * 100);
+            // Ensure compressionRatio is valid
+            if (isNaN(compressionRatio) || !isFinite(compressionRatio)) {
+              compressionRatio = 0;
+            }
+          }
+          
+          console.log(`📊 File stats for ${file.originalname}:`, {
+            originalSize,
+            compressedSize,
+            compressionRatio,
+            isRawFile,
+            outputFormat
+          });
           
           // Update job with compression results - wrap in try/catch to prevent database crashes
           try {
             await storage.updateCompressionJob(job.id, {
               status: "completed",
               compressedPath: outputPath,
-              compressedSize: compressedStats.size,
-              compressionRatio: compressionRatio,
+              compressedSize: compressedSize, // Use validated size
+              compressionRatio: compressionRatio, // Use validated ratio
               outputFormat: outputFormat, // Store the actual output format
             });
           } catch (dbError) {
@@ -1560,9 +1580,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const resultData = {
             id: job.id, // Use actual job ID
             originalName: file.originalname,
-            originalSize: originalStats.size,
-            compressedSize: compressedStats.size,
-            compressionRatio,
+            originalSize: originalSize, // Use validated size
+            compressedSize: compressedSize, // Use validated size
+            compressionRatio: compressionRatio, // Use validated ratio
             downloadUrl: `/api/download/${job.id}`,
             originalFormat: file.mimetype.split('/')[1].toUpperCase(),
             outputFormat: outputFormat.toUpperCase(),
@@ -5828,7 +5848,16 @@ async function processSpecialFormatConversion(
       
       // Skip Sharp processing for RAW files since we handled everything
       const stats = await fs.stat(outputPath);
-      return { success: true, outputSize: stats.size, previewPath: thumbnailPath || previewPath };
+      const outputSize = stats.size;
+      
+      console.log(`✅ RAW conversion completed:`, {
+        inputPath,
+        outputPath,
+        outputSize,
+        success: true
+      });
+      
+      return { success: true, outputSize: outputSize, previewPath: thumbnailPath || previewPath };
       
       // Clean up temp file after processing (we'll do this in finally block)
     } else if (inputFormat === 'svg') {

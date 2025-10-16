@@ -377,14 +377,19 @@ export default function ConversionPage() {
         const convertedResults = result.results.map((r: any) => {
           console.log('Processing result:', r);
           
-          // Ensure compressionRatio is valid
-          const compressionRatio = typeof r.compressionRatio === 'number' && !isNaN(r.compressionRatio) 
-            ? r.compressionRatio 
-            : Math.round(((r.originalSize - r.compressedSize) / r.originalSize) * 100);
+          // Ensure compressionRatio is valid - more robust validation
+          let compressionRatio = r.compressionRatio;
+          if (typeof compressionRatio !== 'number' || isNaN(compressionRatio) || !isFinite(compressionRatio)) {
+            // Calculate compression ratio if missing or invalid
+            const originalSize = typeof r.originalSize === 'number' && r.originalSize > 0 ? r.originalSize : 1;
+            const compressedSize = typeof r.compressedSize === 'number' && r.compressedSize > 0 ? r.compressedSize : 1;
+            compressionRatio = Math.round(((originalSize - compressedSize) / originalSize) * 100);
+            console.log(`Calculated compression ratio: ${compressionRatio}% (${originalSize} -> ${compressedSize})`);
+          }
           
           // Ensure sizes are valid
-          const originalSize = typeof r.originalSize === 'number' && !isNaN(r.originalSize) ? r.originalSize : 0;
-          const compressedSize = typeof r.compressedSize === 'number' && !isNaN(r.compressedSize) ? r.compressedSize : 0;
+          const originalSize = typeof r.originalSize === 'number' && !isNaN(r.originalSize) && r.originalSize > 0 ? r.originalSize : 1;
+          const compressedSize = typeof r.compressedSize === 'number' && !isNaN(r.compressedSize) && r.compressedSize > 0 ? r.compressedSize : 1;
           
           const processedResult = {
             id: r.id,
