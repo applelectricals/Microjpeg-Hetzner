@@ -330,16 +330,12 @@ export default function ConversionPage() {
         formData.append('files', file);
       });
       
-      // Prepare settings for /api/compress endpoint (same as landing page)
+      // Prepare settings for /api/compress endpoint (EXACT COPY from landing page)
       const settings = {
-        quality: Math.max(10, Math.min(100, qualityPercent || 80)), // Ensure valid quality range
-        outputFormat: [urlParams!.to], // Array format like landing page
-        resizeOption: sizePercent < 100 ? 'resize-percentage' : 'keep-original',
-        resizePercentage: sizePercent < 100 ? Math.max(25, Math.min(100, sizePercent || 100)) : undefined, // Only include if resizing, ensure valid range
-        compressionAlgorithm: 'standard',
-        webOptimization: 'optimize-web',
-        pageIdentifier: conversionConfig.pageIdentifier,
-        sessionId: Math.random().toString(36).substr(2, 9) // Generate session ID
+        quality: qualityPercent || 80, // Use simple quality like landing page
+        outputFormat: [urlParams!.to], // Array format exactly like landing page
+        resizeOption: 'keep-original', // Landing page uses keep-original for RAW files
+        compressionAlgorithm: 'standard', // Same as landing page
       };
 
       formData.append('settings', JSON.stringify(settings));
