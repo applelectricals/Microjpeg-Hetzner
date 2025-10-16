@@ -1308,7 +1308,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           case 'cr2-free':
           case '/convert/cr2-to-jpg':
             return 'cr2-free';
+          // Add support for all individual conversion page identifiers
           default:
+            // Handle dynamic conversion page identifiers (format: from-to-format)
+            if (pageId.match(/^[a-z0-9]+-to-[a-z0-9]+$/)) {
+              return 'anonymous'; // Individual conversion pages are free/anonymous
+            }
             return null;
         }
       };

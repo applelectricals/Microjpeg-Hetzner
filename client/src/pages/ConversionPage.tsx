@@ -180,13 +180,13 @@ const parseConversionFromParams = (params: any, location: string): { from: strin
   return null;
 };
 
-// Session Management Utilities
+// Session Management Utilities  
 const SESSION_LIMITS = {
   free: { 
-    compressions: 25,
-    conversions: 5,
-    maxFileSize: 25 * 1024 * 1024,
-    maxConcurrent: 1,
+    compressions: 500,  // Match landing page (500 monthly operations)
+    conversions: 500,   // Match landing page 
+    maxFileSize: 25 * 1024 * 1024,  // Keep 25MB for conversions
+    maxConcurrent: 5,   // Allow 5 concurrent uploads as per requirements
     timeoutSeconds: 30
   }
 };
@@ -323,75 +323,27 @@ export default function ConversionPage() {
     setProcessingProgress(0);
     setProcessingFileIds(new Set(files.map(f => f.id)));
 
-    // Add counter validation before upload 
     try {
-      const response = await fetch('/api/universal-usage-stats', {
-        method: 'GET',
-        credentials: 'include',
-        cache: 'no-store',
-      });
-      
-      if (response.ok) {
-        const stats = await response.json();
-        const operationType = fromFormat!.category === 'raw' ? 'raw' : 'standard';
-        const rawStats = stats.stats?.[operationType] || {};
-        const { used: hourlyUsed = 0, limit: hourlyLimit = 5 } = rawStats.hourly || {};
-        const { used: dailyUsed = 0, limit: dailyLimit = 10 } = rawStats.daily || {};
-        
-        if (hourlyUsed >= hourlyLimit) {
-          const nextHour = new Date(Date.now() + 60*60*1000).toLocaleTimeString('en-US', { 
-            hour: '2-digit', 
-            minute: '2-digit'
-          });
-          toast({
-            title: "Hourly Limit Reached",
-            description: `You've reached your hourly limit of ${hourlyLimit} ${operationType} operations. Please try again after ${nextHour}, or upgrade for unlimited access!`,
-            variant: "destructive",
-          });
-          setIsProcessing(false);
-          setModalState('hidden');
-          return;
-        }
-        
-        if (dailyUsed >= dailyLimit) {
-          toast({
-            title: "Daily Limit Reached", 
-            description: `You've reached your daily limit of ${dailyLimit} ${operationType} operations. Limit resets at midnight, or upgrade for unlimited access!`,
-            variant: "destructive",
-          });
-          setIsProcessing(false);
-          setModalState('hidden');
-          return;
-        }
-      }
-    } catch (error) {
-      console.log('Could not check limits:', error);
-      // Continue with upload if limit check fails
-    }
-
-    try {
-      // Process files using the appropriate endpoint
+      // Use the same successful pattern as landing page
       const formData = new FormData();
       files.forEach(file => {
         formData.append('files', file);
       });
       
-      // Set parameters based on conversion config
-      formData.append('outputFormat', urlParams!.to);
-      formData.append('quality', qualityPercent.toString());
-      formData.append('resize', sizePercent < 100 ? 'true' : 'false');
-      formData.append('resizePercentage', sizePercent.toString());
-      
-      if (sizePercent >= 100) {
-        formData.append('width', '2560');
-        formData.append('height', '2560'); 
-        formData.append('maintainAspect', 'true');
-      }
-      formData.append('pageIdentifier', conversionConfig.pageIdentifier);
+      // Prepare settings for /api/compress endpoint (same as landing page)
+      const settings = {
+        quality: qualityPercent,
+        outputFormat: [urlParams!.to], // Array format like landing page
+        resizeOption: sizePercent < 100 ? 'resize-percentage' : 'keep-original',
+        resizePercentage: sizePercent,
+        compressionAlgorithm: 'standard',
+        webOptimization: 'optimize-web',
+        pageIdentifier: conversionConfig.pageIdentifier,
+        sessionId: Math.random().toString(36).substr(2, 9) // Generate session ID
+      };
 
-      // Choose endpoint based on source format
-      const endpoint = conversionConfig.endpoint;
-      
+      formData.append('settings', JSON.stringify(settings));
+
       // Start proper progress simulation
       const estimatedTime = fromFormat!.category === 'raw' 
         ? Math.max(30000, files.length * 15000) // RAW files take longer
@@ -401,7 +353,8 @@ export default function ConversionPage() {
         setProcessingProgress(progress);
       });
 
-      const response = await fetch(endpoint, {
+      // Use the same endpoint as landing page - this works for both regular and RAW files
+      const response = await fetch('/api/compress', {
         method: 'POST',
         body: formData
       });
@@ -416,15 +369,15 @@ export default function ConversionPage() {
 
       const result = await response.json();
       
-      // Handle batch results
+      // Handle results (same structure as landing page)
       if (result.results && Array.isArray(result.results)) {
         const convertedResults = result.results.map((r: any) => ({
           id: r.id,
-          originalName: r.originalFilename || r.originalName,
+          originalName: r.originalName,
           originalSize: r.originalSize,
-          compressedSize: r.convertedSize || r.compressedSize || r.finalSize,
-          compressionRatio: r.compressionRatio || Math.round(((r.originalSize - (r.convertedSize || r.compressedSize || r.finalSize)) / r.originalSize) * 100),
-          downloadUrl: r.downloadUrl || `/api/download/${r.id}`,
+          compressedSize: r.compressedSize,
+          compressionRatio: r.compressionRatio,
+          downloadUrl: r.downloadUrl,
           originalFormat: urlParams!.from,
           outputFormat: urlParams!.to,
           wasConverted: conversionConfig.operation === 'convert'

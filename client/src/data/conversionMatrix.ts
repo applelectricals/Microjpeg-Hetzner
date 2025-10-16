@@ -275,7 +275,7 @@ const generateConversions = (): ConversionConfig[] => {
         : [`${fromFormat.displayName} Support`, `High Quality ${toFormat.displayName}`, 'Instant Processing', 'Format Conversion'],
       defaultQuality: toFormat.supportsQuality ? 85 : 100,
       defaultSize: 100,
-      endpoint: fromFormat.category === 'raw' ? '/api/convert-special' : '/api/process',
+      endpoint: '/api/compress',
       pageIdentifier: `${from}-to-${to}`
     };
     

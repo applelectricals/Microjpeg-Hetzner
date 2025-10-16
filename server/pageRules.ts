@@ -464,11 +464,35 @@ export const ALLOWED_PAGE_IDENTIFIERS = Object.keys(PAGE_RULES);
 
 // ✅ UTILITY FUNCTIONS
 export function getPageLimits(pageIdentifier: string): PageLimits | null {
-  return PAGE_RULES[pageIdentifier] || null;
+  // Check if it's in the static rules
+  if (PAGE_RULES[pageIdentifier]) {
+    return PAGE_RULES[pageIdentifier];
+  }
+  
+  // For dynamic conversion page identifiers, use free-no-auth limits
+  if (pageIdentifier.match(/^[a-z0-9]+-to-[a-z0-9]+$/)) {
+    return {
+      ...PAGE_RULES['free-no-auth'],
+      pageIdentifier: pageIdentifier,
+      displayName: `${pageIdentifier.replace('-to-', ' to ').toUpperCase()} Converter`
+    };
+  }
+  
+  return null;
 }
 
 export function isValidPageIdentifier(pageIdentifier: string): boolean {
-  return ALLOWED_PAGE_IDENTIFIERS.includes(pageIdentifier);
+  // Check if it's in the static list
+  if (ALLOWED_PAGE_IDENTIFIERS.includes(pageIdentifier)) {
+    return true;
+  }
+  
+  // Check if it's a dynamic conversion page identifier (format: from-to-format)
+  if (pageIdentifier.match(/^[a-z0-9]+-to-[a-z0-9]+$/)) {
+    return true;
+  }
+  
+  return false;
 }
 
 export function validateFileSize(file: { size: number }, pageIdentifier: string): { valid: boolean; error?: string } {
