@@ -1460,48 +1460,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`File: ${file.originalname}, inputFormat: ${inputFormat}, fileExt: ${fileExtName}, isRawFile: ${isRawFile}`);
           
           let result;
-          if (isRawFile) {
-            // Use CompressionEngine's dcraw.js processing for RAW files - much more reliable
-            console.log(`Using CompressionEngine.processRawWithDcraw for ${file.originalname} -> ${outputFormat}`);
-            try {
-              const resizeOptions: any = {};
-              
-              // Handle resize if needed
-              if (settings.resizeOption === 'resize-percentage' && settings.resizePercentage && settings.resizePercentage < 100) {
-                resizeOptions.resizePercentage = settings.resizePercentage;
-                console.log(`Resize requested: ${settings.resizePercentage}%`);
-              }
-              
-              await CompressionEngine.processRawWithDcraw(
-                file.path,
-                outputPath,
-                outputFormat,
-                {
-                  quality: settings.quality,
-                  resizePercentage: settings.resizePercentage // Pass resize percentage
-                }
-              );
-              
-              // Get result info for consistency
-              const stats = await fs.stat(outputPath);
-              result = { success: true, outputSize: stats.size };
-              console.log(`RAW conversion completed: ${file.originalname} -> ${outputFormat} (${stats.size} bytes)`);
-            } catch (error) {
-              console.error(`CompressionEngine RAW conversion failed for ${file.originalname}:`, error);
-              throw error; // Re-throw to be caught by the outer error handler
-            }
-          } else if (inputFormat === 'svg' || (inputFormat === 'svg' && outputFormat === 'tiff')) {
-            // Use the professional formats conversion engine only for SVG conversions
-            console.log(`Using professional formats conversion engine for SVG: ${file.originalname} -> ${outputFormat}`);
+          if (isRawFile || inputFormat === 'svg' || (inputFormat === 'svg' && outputFormat === 'tiff')) {
+            // Use the EXACT same engine as /professional-formats/convert for RAW files and SVG conversions
+            // SVG needs special handling for rasterization, especially when converting to TIFF
+            console.log(`Using professional formats conversion engine for ${file.originalname} -> ${outputFormat}`);
             try {
               // Calculate resize dimensions if needed  
+              // Handle both premium page format (resizeOption) and CR2 page format (direct resize parameter)
               const shouldResize = (settings.resizeOption === 'resize-percentage' && settings.resizePercentage && settings.resizePercentage < 100) ||
                                    (settings.resize && settings.resizePercentage && settings.resizePercentage < 100);
               
               result = await processSpecialFormatConversion(
                 file.path,
                 outputPath,
-                fileExtName, // Use actual extension for SVG
+                isRawFile ? 'raw' : fileExtName, // Professional formats engine expects 'raw' for all RAW files
                 outputFormat,
                 {
                   quality: settings.quality,
@@ -1512,9 +1484,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   maintainAspect: true
                 }
               );
-              console.log(`SVG conversion result:`, result);
+              console.log(`RAW conversion result:`, result);
             } catch (error) {
-              console.error(`SVG conversion failed for ${file.originalname}:`, error);
+              console.error(`RAW conversion failed for ${file.originalname}:`, error);
               throw error; // Re-throw to be caught by the outer error handler
             }
           } else {
