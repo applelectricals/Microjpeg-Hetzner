@@ -360,13 +360,28 @@ export default function ConversionOutputModal({
                                   alt={file.name}
                                   className="w-full h-full object-cover"
                                   onError={(e) => {
-                                    // Fallback to icon if preview fails
-                                    const target = e.currentTarget;
-                                    target.style.display = 'none';
-                                    const parent = target.parentElement;
-                                    if (parent) {
-                                      parent.className = 'w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0';
-                                      parent.innerHTML = '<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
+                                    // If client-side preview fails (e.g., RAW files), try showing converted result as thumbnail
+                                    const result = fileResults[0]; // Get first converted result for this file
+                                    if (result && result.downloadUrl) {
+                                      const target = e.currentTarget;
+                                      target.src = result.downloadUrl;
+                                      target.onerror = () => {
+                                        // Final fallback to icon only if converted image also fails
+                                        const parent = target.parentElement;
+                                        if (parent) {
+                                          parent.className = 'w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0';
+                                          parent.innerHTML = '<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
+                                        }
+                                      };
+                                    } else {
+                                      // No converted result available yet, fallback to icon
+                                      const target = e.currentTarget;
+                                      target.style.display = 'none';
+                                      const parent = target.parentElement;
+                                      if (parent) {
+                                        parent.className = 'w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center flex-shrink-0';
+                                        parent.innerHTML = '<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
+                                      }
                                     }
                                   }}
                                 />
@@ -433,20 +448,35 @@ export default function ConversionOutputModal({
                       <div key={file.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
                         <div className="p-4">
                           <div className="flex items-center gap-4">
-                            {/* Thumbnail */}
+                            {/* Thumbnail - Enhanced handling like landing page */}
                             <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
                               <img 
                                 src={fileResults[0]?.downloadUrl || URL.createObjectURL(file)}
                                 alt={file.name}
                                 className="w-full h-full object-cover"
                                 onError={(e) => {
-                                  // Fallback to icon
-                                  const target = e.currentTarget;
-                                  target.style.display = 'none';
-                                  const parent = target.parentElement;
-                                  if (parent) {
-                                    parent.className = 'w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0';
-                                    parent.innerHTML = '<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
+                                  // Enhanced fallback like landing page
+                                  const result = fileResults[0]; // Get converted result for RAW files
+                                  if (result && result.downloadUrl && e.currentTarget.src !== result.downloadUrl) {
+                                    const target = e.currentTarget;
+                                    target.src = result.downloadUrl;
+                                    target.onerror = () => {
+                                      // Final fallback to icon only if converted image also fails
+                                      const parent = target.parentElement;
+                                      if (parent) {
+                                        parent.className = 'w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0';
+                                        parent.innerHTML = '<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
+                                      }
+                                    };
+                                  } else {
+                                    // Fallback to icon
+                                    const target = e.currentTarget;
+                                    target.style.display = 'none';
+                                    const parent = target.parentElement;
+                                    if (parent) {
+                                      parent.className = 'w-16 h-16 bg-gradient-to-br from-green-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0';
+                                      parent.innerHTML = '<svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>';
+                                    }
                                   }
                                 }}
                               />

@@ -332,10 +332,10 @@ export default function ConversionPage() {
       
       // Prepare settings for /api/compress endpoint (same as landing page)
       const settings = {
-        quality: qualityPercent,
+        quality: Math.max(10, Math.min(100, qualityPercent || 80)), // Ensure valid quality range
         outputFormat: [urlParams!.to], // Array format like landing page
         resizeOption: sizePercent < 100 ? 'resize-percentage' : 'keep-original',
-        resizePercentage: sizePercent,
+        resizePercentage: sizePercent < 100 ? Math.max(25, Math.min(100, sizePercent || 100)) : undefined, // Only include if resizing, ensure valid range
         compressionAlgorithm: 'standard',
         webOptimization: 'optimize-web',
         pageIdentifier: conversionConfig.pageIdentifier,
@@ -371,22 +371,43 @@ export default function ConversionPage() {
       
       // Handle results (same structure as landing page)
       if (result.results && Array.isArray(result.results)) {
-        const convertedResults = result.results.map((r: any) => ({
-          id: r.id,
-          originalName: r.originalName,
-          originalSize: r.originalSize,
-          compressedSize: r.compressedSize,
-          compressionRatio: r.compressionRatio,
-          downloadUrl: r.downloadUrl,
-          originalFormat: urlParams!.from,
-          outputFormat: urlParams!.to,
-          wasConverted: conversionConfig.operation === 'convert'
-        }));
+        console.log('Raw API result:', result);
+        console.log('Processing results for', urlParams!.from, 'to', urlParams!.to);
+        
+        const convertedResults = result.results.map((r: any) => {
+          console.log('Processing result:', r);
+          
+          // Ensure compressionRatio is valid
+          const compressionRatio = typeof r.compressionRatio === 'number' && !isNaN(r.compressionRatio) 
+            ? r.compressionRatio 
+            : Math.round(((r.originalSize - r.compressedSize) / r.originalSize) * 100);
+          
+          // Ensure sizes are valid
+          const originalSize = typeof r.originalSize === 'number' && !isNaN(r.originalSize) ? r.originalSize : 0;
+          const compressedSize = typeof r.compressedSize === 'number' && !isNaN(r.compressedSize) ? r.compressedSize : 0;
+          
+          const processedResult = {
+            id: r.id,
+            originalName: r.originalName,
+            originalSize,
+            compressedSize,
+            compressionRatio,
+            downloadUrl: r.downloadUrl,
+            originalFormat: urlParams!.from,
+            outputFormat: urlParams!.to,
+            wasConverted: conversionConfig.operation === 'convert'
+          };
+          
+          console.log('Processed result:', processedResult);
+          return processedResult;
+        });
         
         setSession(prev => ({
           ...prev,
           results: [...prev.results, ...convertedResults]
         }));
+      } else {
+        console.error('Invalid results structure:', result);
       }
 
       setProcessingProgress(100);
