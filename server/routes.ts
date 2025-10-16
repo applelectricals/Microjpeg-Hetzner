@@ -1460,20 +1460,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`File: ${file.originalname}, inputFormat: ${inputFormat}, fileExt: ${fileExtName}, isRawFile: ${isRawFile}`);
           
           let result;
-          if (isRawFile || inputFormat === 'svg' || (inputFormat === 'svg' && outputFormat === 'tiff')) {
-            // Use the EXACT same engine as /professional-formats/convert for RAW files and SVG conversions
-            // SVG needs special handling for rasterization, especially when converting to TIFF
-            console.log(`Using professional formats conversion engine for ${file.originalname} -> ${outputFormat}`);
+          if (isRawFile) {
+            // Use CompressionEngine's dcraw.js processing for RAW files - much more reliable
+            console.log(`Using CompressionEngine.processRawWithDcraw for ${file.originalname} -> ${outputFormat}`);
+            try {
+              const resizeOptions: any = {};
+              
+              // Handle resize if needed
+              if (settings.resizeOption === 'resize-percentage' && settings.resizePercentage && settings.resizePercentage < 100) {
+                resizeOptions.resizePercentage = settings.resizePercentage;
+                console.log(`Resize requested: ${settings.resizePercentage}%`);
+              }
+              
+              await CompressionEngine.processRawWithDcraw(
+                file.path,
+                outputPath,
+                outputFormat,
+                {
+                  quality: settings.quality,
+                  resizePercentage: settings.resizePercentage // Pass resize percentage
+                }
+              );
+              
+              // Get result info for consistency
+              const stats = await fs.stat(outputPath);
+              result = { success: true, outputSize: stats.size };
+              console.log(`RAW conversion completed: ${file.originalname} -> ${outputFormat} (${stats.size} bytes)`);
+            } catch (error) {
+              console.error(`CompressionEngine RAW conversion failed for ${file.originalname}:`, error);
+              throw error; // Re-throw to be caught by the outer error handler
+            }
+          } else if (inputFormat === 'svg' || (inputFormat === 'svg' && outputFormat === 'tiff')) {
+            // Use the professional formats conversion engine only for SVG conversions
+            console.log(`Using professional formats conversion engine for SVG: ${file.originalname} -> ${outputFormat}`);
             try {
               // Calculate resize dimensions if needed  
-              // Handle both premium page format (resizeOption) and CR2 page format (direct resize parameter)
               const shouldResize = (settings.resizeOption === 'resize-percentage' && settings.resizePercentage && settings.resizePercentage < 100) ||
                                    (settings.resize && settings.resizePercentage && settings.resizePercentage < 100);
               
               result = await processSpecialFormatConversion(
                 file.path,
                 outputPath,
-                isRawFile ? 'raw' : fileExtName, // Professional formats engine expects 'raw' for all RAW files
+                fileExtName, // Use actual extension for SVG
                 outputFormat,
                 {
                   quality: settings.quality,
@@ -1484,9 +1512,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   maintainAspect: true
                 }
               );
-              console.log(`RAW conversion result:`, result);
+              console.log(`SVG conversion result:`, result);
             } catch (error) {
-              console.error(`RAW conversion failed for ${file.originalname}:`, error);
+              console.error(`SVG conversion failed for ${file.originalname}:`, error);
               throw error; // Re-throw to be caught by the outer error handler
             }
           } else {
@@ -1539,11 +1567,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Get file stats - enhanced validation for RAW files
           const originalStats = await fs.stat(file.path);
+          
+          // Check if output file was actually created and has reasonable size
+          const outputExists = await fs.access(outputPath).then(() => true).catch(() => false);
+          if (!outputExists) {
+            throw new Error(`Output file was not created: ${outputPath}`);
+          }
+          
           const compressedStats = await fs.stat(outputPath);
           
+          // CRITICAL: Check for suspiciously small files (likely conversion failures)
+          if (compressedStats.size < 100) { // Less than 100 bytes is likely a failure
+            console.error(`⚠️  Suspiciously small output file: ${compressedStats.size} bytes for ${file.originalname}`);
+            console.error(`Original size: ${originalStats.size} bytes`);
+            console.error(`Output path: ${outputPath}`);
+            
+            // For RAW files, this is likely a dcraw failure
+            if (isRawFile) {
+              throw new Error(`RAW conversion failed: Output file too small (${compressedStats.size} bytes). Check dcraw.js installation.`);
+            }
+          }
+          
           // CRITICAL: Ensure file sizes are valid numbers
-          const originalSize = originalStats.size && !isNaN(originalStats.size) ? originalStats.size : 1;
-          const compressedSize = compressedStats.size && !isNaN(compressedStats.size) ? compressedStats.size : 1;
+          const originalSize = originalStats.size && !isNaN(originalStats.size) && originalStats.size > 0 ? originalStats.size : 1;
+          const compressedSize = compressedStats.size && !isNaN(compressedStats.size) && compressedStats.size > 0 ? compressedStats.size : 1;
           
           // Calculate compression ratio with validation - prevent NaN
           let compressionRatio = 0;

@@ -48,22 +48,23 @@ export class CompressionEngine {
     inputPath: string, 
     outputPath: string, 
     outputFormat: string,
-    options: { quality?: number; width?: number; height?: number } = {}
+    options: { quality?: number; width?: number; height?: number; resizePercentage?: number } = {}
   ): Promise<void> {
-    const { quality = 75, width, height } = options;
+    const { quality = 75, width, height, resizePercentage } = options;
     
     try {
-      console.log(`Processing RAW file with dcraw: ${inputPath} -> ${outputPath}`);
+      console.log(`Processing RAW file with dcraw: ${inputPath} -> ${outputPath}`, { quality, width, height, resizePercentage });
       
       // Read the RAW file
       const rawBuffer = await fs.readFile(inputPath);
+      console.log(`Read RAW file: ${rawBuffer.length} bytes`);
       
       // Process with dcraw - extract as TIFF for maximum quality
       let dcrawOptions: any = {
         exportAsTiff: true,
         use16BitLinearMode: false, // Use 8-bit for better compression
         useExportMode: true,
-        verbose: false
+        verbose: true // Enable verbose for debugging
       };
       
       // For RAW to RAW (same format), use light processing
@@ -73,23 +74,45 @@ export class CompressionEngine {
           use16BitLinearMode: true, // Preserve bit depth for RAW
           useExportMode: true,
           noAutoBrightness: true, // Preserve original exposure
-          verbose: false
+          verbose: true
         };
       }
       
+      console.log(`Running dcraw with options:`, dcrawOptions);
       const result = dcraw(rawBuffer, dcrawOptions);
       
       if (!result || result.length === 0) {
-        throw new Error('dcraw processing returned empty result');
+        console.error(`❌ dcraw returned empty result for ${inputPath}`);
+        console.error(`Input buffer size: ${rawBuffer.length} bytes`);
+        console.error(`dcraw options:`, dcrawOptions);
+        throw new Error(`dcraw processing returned empty result for ${inputPath}`);
       }
       
-      console.log(`dcraw processed ${rawBuffer.length} bytes -> ${result.length} bytes`);
+      console.log(`✅ dcraw processed ${rawBuffer.length} bytes -> ${result.length} bytes`);
+      
+      // Verify the result buffer looks like valid TIFF data
+      if (result.length < 1000) { // TIFF headers alone should be larger than this
+        console.error(`❌ dcraw result suspiciously small: ${result.length} bytes`);
+        throw new Error(`dcraw result too small: ${result.length} bytes`);
+      }
       
       // Now use Sharp to convert the TIFF to the desired output format
       let sharpInstance = sharp(result);
       
-      // Apply resizing if specified
-      if (width || height) {
+      // Apply resizing if specified - enhanced support for percentage-based resize
+      if (resizePercentage && resizePercentage < 100 && resizePercentage > 0) {
+        // Get metadata to calculate target dimensions
+        const metadata = await sharpInstance.metadata();
+        if (metadata.width && metadata.height) {
+          const targetWidth = Math.round(metadata.width * (resizePercentage / 100));
+          const targetHeight = Math.round(metadata.height * (resizePercentage / 100));
+          console.log(`Resizing RAW: ${metadata.width}x${metadata.height} -> ${targetWidth}x${targetHeight} (${resizePercentage}%)`);
+          sharpInstance = sharpInstance.resize(targetWidth, targetHeight, {
+            fit: 'fill', // Exact dimensions
+            withoutEnlargement: true
+          });
+        }
+      } else if (width || height) {
         sharpInstance = sharpInstance.resize(width, height, {
           fit: 'inside',
           withoutEnlargement: true
@@ -139,9 +162,25 @@ export class CompressionEngine {
       
       console.log(`Successfully processed RAW file to ${outputFormat.toUpperCase()}`);
       
-    } catch (error) {
-      console.error(`dcraw processing failed:`, error);
-      throw new Error(`RAW processing failed: ${error.message}`);
+      // Verify the output file was created and has reasonable size
+      const outputStats = await fs.stat(outputPath);
+      if (outputStats.size < 100) {
+        console.error(`❌ Output file suspiciously small: ${outputStats.size} bytes`);
+        throw new Error(`Output file too small: ${outputStats.size} bytes`);
+      }
+      
+      console.log(`✅ RAW conversion complete: ${outputPath} (${outputStats.size} bytes)`);
+      
+    } catch (error: any) {
+      console.error(`❌ dcraw processing failed for ${inputPath}:`, error);
+      console.error(`Error details:`, {
+        message: error?.message || 'Unknown error',
+        stack: error?.stack || 'No stack trace',
+        inputPath,
+        outputPath,
+        outputFormat
+      });
+      throw new Error(`RAW processing failed: ${error?.message || 'Unknown error'}`);
     }
   }
 
