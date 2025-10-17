@@ -16,8 +16,5 @@ export const pool = new Pool({
   connectionTimeoutMillis: 10000,
 });
 
-<<<<<<< HEAD
+
 export const db = drizzle(pool, { schema });
-=======
-export const db = drizzle(pool, { schema });
->>>>>>> f397d1a8e99dee288b610662490cb299d6e9d559
