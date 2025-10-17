@@ -26,7 +26,7 @@ import { pageIdentifierMiddleware } from './pageIdentifierMiddleware';
 import { DualUsageTracker } from './services/DualUsageTracker';
 import { OPERATION_CONFIG } from './config/operationLimits';
 import { ensureSuperuser, logAdminAction, getAppSettings, updateAppSettings, setSuperuserBypass } from './superuser';
-import { adminAuditLogs, userUsage } from '@shared/schema';
+import { adminAuditLogs } from '@shared/schema';
 import { registerConversionRoutes } from './conversionMiddleware';
 import { subscriptionTierAccessControl, tierBasedRouting, apiTierAccessControl } from './subscriptionTierMiddleware';
 
