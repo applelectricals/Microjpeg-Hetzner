@@ -1,5 +1,5 @@
-import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { Pool } from 'pg';
 import * as schema from "@shared/schema";
 
 if (!process.env.DATABASE_URL) {
@@ -8,13 +8,12 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-// Create PostgreSQL connection (no WebSocket)
-const client = postgres(process.env.DATABASE_URL, {
-  max: 10, // Connection pool size
-  idle_timeout: 20,
-  connect_timeout: 10,
+// Use standard PostgreSQL connection (no WebSocket)
+export const pool = new Pool({ 
+  connectionString: process.env.DATABASE_URL,
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
 });
 
-export const db = drizzle(client, { schema });
-export const pool = client; // For backward compatibility if needed
-```
+export const db = drizzle(pool, { schema });
