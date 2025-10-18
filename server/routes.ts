@@ -1678,7 +1678,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const successfulFiles = results
         .filter(r => !r.error && r.compressedFileName)
         .map(r => r.compressedFileName);
-      
+      // ADD THESE DEBUG LOGS HERE:
+console.log(`🔍 Total results: ${results.length}`);
+console.log(`🔍 Successful jobs: ${successfulJobs.length}`);
+console.log(`🔍 Results array:`, JSON.stringify(results, null, 2));
+
+if (successfulJobs.length > 0) {
+  // Record each successful operation with DualUsageTracker
+  for (const result of successfulJobs) {
+    try {
+      console.log(`🔧 Recording operation: ${result.originalName} (${result.originalSize} bytes) on page ${pageIdentifier}`);
+      await dualTracker.recordOperation(result.originalName, result.originalSize, pageIdentifier);
+      console.log(`✅ Operation recorded successfully for ${result.originalName}`);
+    } catch (recordError) {
+      console.error(`❌ Failed to record operation for ${result.originalName}:`, recordError);
+    }
+  }
+  
+  console.log(`✅ Recorded ${successfulJobs.length} successful operations via DualUsageTracker`);
+} else {
+  console.log(`⚠️ No successful jobs to record!`);
+}
       // Store batch info in memory (you could use Redis in production)
       global.batchFiles = global.batchFiles || {};
       global.batchFiles[batchId] = {
