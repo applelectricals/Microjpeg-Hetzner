@@ -123,42 +123,69 @@ const parseConversionFromParams = (params: any, location: string): { from: strin
     }
   }
   
-  // Handle /tools/:format pattern (e.g., jpg)
+  // Handle /tools/:format and /compress/:format patterns (e.g., jpg)
   if (params.format) {
-    // Check for malformed compress routes like /tools/jpg-to-jpg
+    // Determine the current URL pattern to provide correct redirects
+    const isCompressRoute = location.includes('/compress/');
+    const currentPrefix = isCompressRoute ? '/compress' : '/tools';
+    const newPrefix = isCompressRoute ? '/compress' : '/compress'; // Always redirect to /compress for consistency
+    
+    // Check for malformed compress routes like /tools/jpg-to-jpg or /compress/jpg-to-jpg
     const malformedMatch = params.format.match(/^([a-z0-9]+)-to-([a-z0-9]+)$/);
     if (malformedMatch) {
       const [, from, to] = malformedMatch;
       
-      // If source and target are the same, it's a compression operation - redirect
+      // If source and target are the same, it's a compression operation - redirect to new format
       if (from === to) {
-        console.warn(`Malformed compress route detected: /tools/${params.format}. Redirecting to /tools/${from}`);
-        window.location.replace(`/tools/${from}`);
+        console.warn(`Malformed compress route detected: ${currentPrefix}/${params.format}. Redirecting to /compress/${from}`);
+        window.location.replace(`/compress/${from}`);
         return null;
       } else {
         // If source and target are different, it should be a convert route - redirect
-        console.warn(`Malformed compress route detected: /tools/${params.format}. Redirecting to /convert/${params.format}`);
+        console.warn(`Malformed compress route detected: ${currentPrefix}/${params.format}. Redirecting to /convert/${params.format}`);
         window.location.replace(`/convert/${params.format}`);
         return null;
       }
     }
     
-    // Normal compression format
+    // Normal compression format - redirect old /tools/ URLs to new /compress/ URLs
+    if (!isCompressRoute && location.includes('/tools/')) {
+      console.log(`Redirecting from /tools/${params.format} to /compress/${params.format}`);
+      window.location.replace(`/compress/${params.format}`);
+      return null;
+    }
+    
     return { from: params.format, to: params.format, operation: 'compress' };
   }
   
   // Fallback: parse from URL path with malformed route detection
   const convertMatch = location.match(/\/convert\/([a-z0-9]+)-to-([a-z0-9]+)$/);
-  const compressMatch = location.match(/\/tools\/([a-z0-9]+)$/);
-  const malformedCompressMatch = location.match(/\/tools\/([a-z0-9]+)-to-([a-z0-9]+)$/);
+  const newCompressMatch = location.match(/\/compress\/([a-z0-9]+)$/);
+  const oldCompressMatch = location.match(/\/tools\/([a-z0-9]+)$/);
+  const malformedNewCompressMatch = location.match(/\/compress\/([a-z0-9]+)-to-([a-z0-9]+)$/);
+  const malformedOldCompressMatch = location.match(/\/tools\/([a-z0-9]+)-to-([a-z0-9]+)$/);
   
   // Handle malformed compress URLs in fallback
-  if (malformedCompressMatch) {
-    const [, from, to] = malformedCompressMatch;
+  if (malformedNewCompressMatch) {
+    const [, from, to] = malformedNewCompressMatch;
     
     if (from === to) {
-      console.warn(`Malformed compress URL detected: ${location}. Redirecting to /tools/${from}`);
-      window.location.replace(`/tools/${from}`);
+      console.warn(`Malformed compress URL detected: ${location}. Redirecting to /compress/${from}`);
+      window.location.replace(`/compress/${from}`);
+      return null;
+    } else {
+      console.warn(`Malformed compress URL detected: ${location}. Redirecting to /convert/${from}-to-${to}`);
+      window.location.replace(`/convert/${from}-to-${to}`);
+      return null;
+    }
+  }
+  
+  if (malformedOldCompressMatch) {
+    const [, from, to] = malformedOldCompressMatch;
+    
+    if (from === to) {
+      console.warn(`Malformed compress URL detected: ${location}. Redirecting to /compress/${from}`);
+      window.location.replace(`/compress/${from}`);
       return null;
     } else {
       console.warn(`Malformed compress URL detected: ${location}. Redirecting to /convert/${from}-to-${to}`);
@@ -172,9 +199,17 @@ const parseConversionFromParams = (params: any, location: string): { from: strin
     return { from, to, operation: 'convert' };
   }
   
-  if (compressMatch) {
-    const [, format] = compressMatch;
+  if (newCompressMatch) {
+    const [, format] = newCompressMatch;
     return { from: format, to: format, operation: 'compress' };
+  }
+  
+  if (oldCompressMatch) {
+    const [, format] = oldCompressMatch;
+    // Redirect old /tools/ URLs to new /compress/ URLs
+    console.log(`Redirecting from /tools/${format} to /compress/${format}`);
+    window.location.replace(`/compress/${format}`);
+    return null;
   }
   
   return null;

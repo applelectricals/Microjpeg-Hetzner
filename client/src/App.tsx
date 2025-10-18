@@ -220,6 +220,7 @@ function Router() {
         
         {/* Dynamic Conversion Routes - All 80 format combinations - MUST come AFTER specific routes */}
         <Route path="/convert/:conversion" component={ConversionPage} />
+        <Route path="/compress/:format" component={ConversionPage} />
         <Route path="/tools/:format" component={ConversionPage} />
         
         <Route path="/verify-email" component={EmailVerification} />

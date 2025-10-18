@@ -49,7 +49,7 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
       maxFileSize: 10 * 1024 * 1024, // 10MB
       maxOperationsPerDay: 25,
       maxOperationsPerHour: 5,
-      maxConcurrentUploads: 1,
+      maxConcurrentUploads: 5,
       processingTimeout: 30,
       allowedFormats: '*', // All image formats supported
       overageRate: 0,
@@ -60,7 +60,7 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
       'Max 10MB file size',
       'Max 25 operations/day',
       'Max 5 operations/hour',
-      '1 concurrent upload'
+      '5 concurrent upload'
     ],
     requiresSignup: false,
   },
@@ -77,7 +77,7 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
       maxFileSize: 10 * 1024 * 1024, // 10MB
       maxOperationsPerDay: 25,
       maxOperationsPerHour: 5,
-      maxConcurrentUploads: 1,
+      maxConcurrentUploads: 5,
       processingTimeout: 30,
       allowedFormats: '*', // All image formats supported
       overageRate: 0,
@@ -88,7 +88,7 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
       'Max 10MB file size',
       'Max 25 operations/day',
       'Max 5 operations/hour',
-      '1 concurrent upload'
+      '5 concurrent upload'
     ],
     requiresSignup: true,
   },
@@ -189,7 +189,7 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
       maxFileSize: 25 * 1024 * 1024, // 25MB
       maxOperationsPerDay: 10,
       maxOperationsPerHour: 5, // Max 5 operations/hour as per rules
-      maxConcurrentUploads: 1,
+      maxConcurrentUploads: 5,
       processingTimeout: 60,
       allowedFormats: ['cr2'], // Only CR2 to JPG
       overageRate: 0,
@@ -199,7 +199,7 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
       'Only CR2 to JPG',
       'Max 25MB file size',
       'Max 10 operations/day',
-      '1 concurrent upload'
+      '5 concurrent upload'
     ],
     requiresSignup: false,
   },

@@ -42,7 +42,7 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     hourly: 5,
     
     maxFileSize: 10 * 1024 * 1024, // 10MB
-    maxConcurrentUploads: 1,
+    maxConcurrentUploads: 5,
     
     inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
                    'image/svg+xml', 'image/tiff', 'image/tif',
@@ -73,7 +73,7 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     hourly: 5,
     
     maxFileSize: 10 * 1024 * 1024, // 10MB
-    maxConcurrentUploads: 1,
+    maxConcurrentUploads: 5,
     
     inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
                    'image/svg+xml', 'image/tiff', 'image/tif',
@@ -211,7 +211,7 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     hourly: 5, // Reasonable hourly limit
     
     maxFileSize: 25 * 1024 * 1024, // 25MB
-    maxConcurrentUploads: 1,
+    maxConcurrentUploads: 5,
     
     inputFormats: ['.cr2'], // Only CR2 files
     outputFormats: ['jpeg'], // Only JPG output
@@ -242,7 +242,7 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     hourly: 5, // Reasonable hourly limit
     
     maxFileSize: 25 * 1024 * 1024, // 25MB for RAW files
-    maxConcurrentUploads: 1,
+    maxConcurrentUploads: 5,
     
     inputFormats: ['.cr2', '.cr3'], // CR2 and CR3 files
     outputFormats: ['png'], // Only PNG output
@@ -275,7 +275,7 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     hourly: 5,
     
     maxFileSize: 10 * 1024 * 1024, // 10MB
-    maxConcurrentUploads: 1,
+    maxConcurrentUploads: 5,
     
     inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
                    'image/svg+xml', 'image/tiff', 'image/tif',
@@ -302,7 +302,7 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     hourly: 5,
     
     maxFileSize: 10 * 1024 * 1024, // 10MB
-    maxConcurrentUploads: 1,
+    maxConcurrentUploads: 5,
     
     inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
                    'image/svg+xml', 'image/tiff', 'image/tif',
@@ -390,7 +390,7 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     hourly: 5,
     
     maxFileSize: 10 * 1024 * 1024, // 10MB
-    maxConcurrentUploads: 1,
+    maxConcurrentUploads: 5,
     
     inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
                    'image/svg+xml', 'image/tiff', 'image/tif'],
@@ -442,7 +442,7 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     hourly: 5,
     
     maxFileSize: 25 * 1024 * 1024, // 25MB (larger for RAW files)
-    maxConcurrentUploads: 1,
+    maxConcurrentUploads: 5,
     
     inputFormats: ['.cr2', '.cr3'],
     outputFormats: ['png'],
@@ -476,6 +476,23 @@ export function getPageLimits(pageIdentifier: string): PageLimits | null {
       pageIdentifier: pageIdentifier,
       displayName: `${pageIdentifier.replace('-to-', ' to ').toUpperCase()} Converter`
     };
+  }
+  
+  // For dynamic compression page identifiers (format-to-format where from equals to)
+  if (pageIdentifier.match(/^[a-z0-9]+-to-[a-z0-9]+$/)) {
+    const parts = pageIdentifier.split('-to-');
+    if (parts.length === 2 && parts[0] === parts[1]) {
+      return {
+        ...PAGE_RULES['free-no-auth'],
+        pageIdentifier: pageIdentifier,
+        displayName: `${parts[0].toUpperCase()} Compressor`,
+        specialRules: [
+          ...PAGE_RULES['free-no-auth'].specialRules || [],
+          'Compression operation (same input and output format)',
+          'Quality and size optimization available'
+        ]
+      };
+    }
   }
   
   return null;

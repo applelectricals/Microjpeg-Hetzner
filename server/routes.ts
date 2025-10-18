@@ -3614,7 +3614,7 @@ if (successfulJobs.length > 0) {
         // Anonymous user limits using unified plan configuration
         const anonPlan = getUnifiedPlan('anonymous');
         
-        // Enforce 1 concurrent upload for anonymous users
+        // Enforce 5 concurrent upload for anonymous users
         if (files.length > anonPlan.limits.maxConcurrentUploads) {
           return res.status(400).json({ 
             error: `Free users can only upload ${anonPlan.limits.maxConcurrentUploads} file at a time. Sign up for batch uploads!`,
