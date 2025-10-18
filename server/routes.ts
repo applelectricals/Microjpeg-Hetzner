@@ -963,7 +963,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if user is authenticated
       const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
       const user = isUserAuthenticated ? req.user : null;
-      const sessionId = req.body.sessionId || req.sessionID;
+      // Parse settings to get sessionId
+let sessionId = req.sessionID; // Default to server session
+try {
+  const settings = typeof req.body.settings === 'string' 
+    ? JSON.parse(req.body.settings) 
+    : req.body.settings;
+  
+  if (settings?.sessionId) {
+    sessionId = settings.sessionId;
+    console.log(`🔧 Using client sessionId from settings: ${sessionId}`);
+  } else {
+    console.log(`🔧 Using server sessionId (no client session provided): ${sessionId}`);
+  }
+} catch (e) {
+  console.log(`🔧 Using server sessionId (settings parse failed): ${sessionId}`);
+}
       const userId = (user as any)?.claims?.sub || null;
       
       // Get user tier configuration
