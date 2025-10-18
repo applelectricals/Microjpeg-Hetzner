@@ -689,6 +689,8 @@ export default function MicroJPEGLanding() {
         outputFormat: conversionEnabled && selectedFormats.length > 0 ? selectedFormats : 'keep-original',
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
+        sessionId: sessionManager.getSessionId(), // ← ADD THIS LINE
+        pageIdentifier: 'free-no-auth', // ← ADD THIS TOO (if not already there)
       };
 
       // Add settings to FormData
@@ -942,6 +944,8 @@ export default function MicroJPEGLanding() {
         outputFormat: [format], // Only process this specific format
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
+        sessionId: sessionManager.getSessionId(), // ← ADD THIS LINE
+        pageIdentifier: 'free-no-auth', // ← ADD THIS TOO (if not already there)
       };
 
       formData.append('settings', JSON.stringify(settings));
