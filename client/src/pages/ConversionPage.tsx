@@ -324,23 +324,25 @@ export default function ConversionPage() {
     setProcessingFileIds(new Set(files.map(f => f.id)));
 
     try {
-      // Use the same successful pattern as landing page
-      const formData = new FormData();
-      files.forEach(file => {
-        formData.append('files', file);
-      });
-      
-      // Prepare settings for /api/compress endpoint (same as landing page)
-      const settings = {
-        quality: Math.max(10, Math.min(100, qualityPercent || 80)), // Ensure valid quality range
-        outputFormat: [normalizedFormat], // ← Fixed: sends 'jpeg'
-        resizeOption: sizePercent < 100 ? 'resize-percentage' : 'keep-original',
-        resizePercentage: sizePercent < 100 ? Math.max(25, Math.min(100, sizePercent || 100)) : undefined, // Only include if resizing, ensure valid range
-        compressionAlgorithm: 'standard',
-        webOptimization: 'optimize-web',
-        pageIdentifier: conversionConfig.pageIdentifier,
-        sessionId: Math.random().toString(36).substr(2, 9) // Generate session ID
-      };
+    // Use the same successful pattern as landing page
+    const formData = new FormData();
+    files.forEach(file => {
+    formData.append('files', file);
+  });
+  
+    // Normalize jpg → jpeg for backend compatibility
+    const normalizedFormat = urlParams!.to === 'jpg' ? 'jpeg' : urlParams!.to;
+  
+    // Prepare settings for /api/compress endpoint (EXACT COPY from landing page)
+    const settings = {
+    quality: qualityPercent || 80, // Use simple quality like landing page
+    outputFormat: [normalizedFormat], // ← Use normalized format
+    resizeOption: 'keep-original', // Landing page uses keep-original for RAW files
+    compressionAlgorithm: 'standard', // Same as landing page
+    webOptimization: 'optimize-web',
+    pageIdentifier: conversionConfig.pageIdentifier,
+    sessionId: Math.random().toString(36).substr(2, 9) // Generate session ID
+ };
 
       formData.append('settings', JSON.stringify(settings));
 
