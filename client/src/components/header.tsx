@@ -47,21 +47,23 @@ export default function Header() {
   }, []);
 
   const MonthlyCounter = () => {
-    if (!usageStats?.stats) return null;
-    const stats = usageStats.stats;
-    const monthlyUsed = (stats.regular?.monthly?.used || 0) + (stats.raw?.monthly?.used || 0);
-    const monthlyLimit = (stats.regular?.monthly?.limit || 500) + (stats.raw?.monthly?.limit || 20);
+  if (!usageStats?.stats) return null;
 
-    return (
-      <div className="flex items-center gap-2 text-xs" data-testid="header-monthly-counter">
-        <Activity className="w-4 h-4 text-blue-600" />
-        <span className="font-medium text-brand-dark">
-          {monthlyUsed}/{monthlyLimit}
-        </span>
-        <span className="text-gray-500">operations this month</span>
-      </div>
-    );
-  };
+  const stats = usageStats.stats;
+  
+  // Combined operations count (both regular + RAW share the same limit)
+  const monthlyUsed = (stats.regular?.monthly?.used || 0) + (stats.raw?.monthly?.used || 0);
+  const monthlyLimit = 500; // Fixed limit for all operation types
+
+  return (
+    <div className="flex items-center gap-2 text-xs" data-testid="header-monthly-counter">
+      <Activity className="w-4 h-4 text-blue-600" />
+      <span className="font-medium text-brand-dark">
+        {monthlyUsed}/{monthlyLimit}
+      </span>
+    </div>
+  );
+};
 
   return (
     <>
@@ -76,11 +78,10 @@ export default function Header() {
           </div>
           
           {usageStats?.stats && (
-            <div className="flex items-center gap-1 text-xs">
-              <Activity className="w-3 h-3 text-blue-600" />
+           <div className="flex items-center gap-1 text-xs">
+           <Activity className="w-3 h-3 text-blue-600" />
               <span className="font-medium text-brand-dark">
-                {((usageStats.stats.regular?.monthly?.used || 0) + (usageStats.stats.raw?.monthly?.used || 0))}/
-                {((usageStats.stats.regular?.monthly?.limit || 500) + (usageStats.stats.raw?.monthly?.limit || 20))}
+              {((usageStats.stats.regular?.monthly?.used || 0) + (usageStats.stats.raw?.monthly?.used || 0))}/500
               </span>
             </div>
           )}
