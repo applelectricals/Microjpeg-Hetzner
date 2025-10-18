@@ -732,6 +732,14 @@ export default function MicroJPEGLanding() {
       // Server tracks monthly 500 operations per IP for anonymous users
       if (data.results && data.results.length > 0) {
         console.log(`Processed ${data.results.length} files - server handles all tracking`);
+        console.log(`Processed ${data.results.length} files - server handles all tracking`);
+
+      // Trigger counter refresh in header
+         window.dispatchEvent(new Event('refreshUniversalCounter'));
+         console.log('🔄 Counter refresh event dispatched');
+
+      // Update UI with results
+         setResults(data.results);
       }
 
       // Get the latest session data to ensure we don't lose any previous results
