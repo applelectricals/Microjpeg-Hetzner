@@ -1687,6 +1687,7 @@ if (successfulJobs.length > 0) {
   // Record each successful operation with DualUsageTracker
   for (const result of successfulJobs) {
     try {
+      console.log(`🔧 DualTracker info: userId=${userId}, sessionId=${sessionId}, userType=${userType}`);
       console.log(`🔧 Recording operation: ${result.originalName} (${result.originalSize} bytes) on page ${pageIdentifier}`);
       await dualTracker.recordOperation(result.originalName, result.originalSize, pageIdentifier);
       console.log(`✅ Operation recorded successfully for ${result.originalName}`);
