@@ -737,9 +737,6 @@ export default function MicroJPEGLanding() {
       // Trigger counter refresh in header
          window.dispatchEvent(new Event('refreshUniversalCounter'));
          console.log('🔄 Counter refresh event dispatched');
-
-      // Update UI with results
-         setResults(data.results);
       }
 
       // Get the latest session data to ensure we don't lose any previous results
