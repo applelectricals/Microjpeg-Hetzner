@@ -1138,22 +1138,41 @@ try {
     }
   });
 
-  // Compression endpoint for both guest and authenticated users  
-  app.post("/api/compress", upload.array('files', 20), requireScopeFromAuth, async (req, res) => {
-    try {
-      const files = req.files as Express.Multer.File[];
-      if (!files || files.length === 0) {
-        return res.status(400).json({ error: "No files uploaded" });
-      }
+// Compression endpoint for both guest and authenticated users  
+app.post("/api/compress", upload.array('files', 20), requireScopeFromAuth, async (req, res) => {
+  try {
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) {
+      return res.status(400).json({ error: "No files uploaded" });
+    }
 
-      // Check if user is authenticated
-      console.log('Authentication check:', {
-        hasIsAuthenticated: !!req.isAuthenticated,
-        isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
-        hasUser: !!req.user,
-        sessionID: req.sessionID,
-        session: req.session
-      });
+    // 🔍 DEBUG LOGS - Add these lines right after file validation
+    console.log('🔍 DEBUG - req.body.settings type:', typeof req.body.settings);
+    console.log('🔍 DEBUG - req.body.settings value:', req.body.settings);
+    
+    if (req.body.settings) {
+      try {
+        const parsed = typeof req.body.settings === 'string' 
+          ? JSON.parse(req.body.settings) 
+          : req.body.settings;
+        console.log('🔍 DEBUG - Parsed settings:', parsed);
+        console.log('🔍 DEBUG - SessionId in settings:', parsed.sessionId);
+      } catch (e) {
+        console.log('🔍 DEBUG - Failed to parse settings:', e);
+      }
+    } else {
+      console.log('🔍 DEBUG - No settings found in request body');
+    }
+    // 🔍 END DEBUG LOGS
+
+    // Check if user is authenticated
+    console.log('Authentication check:', {
+      hasIsAuthenticated: !!req.isAuthenticated,
+      isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+      hasUser: !!req.user,
+      sessionID: req.sessionID,
+      session: req.session
+    });
       
       const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
       let user = isUserAuthenticated ? req.user : null;
