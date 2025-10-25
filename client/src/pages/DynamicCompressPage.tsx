@@ -119,8 +119,8 @@ const DynamicCompressPage: React.FC = () => {
     );
   }
 
-  // Error state
-  if (tierError || !tierLimits || !usage) {
+  // Error state - only show error if loading is done AND there's an actual error
+  if (!authLoading && !tierLoading && (tierError || (!tierLimits && !tierLoading))) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
         <Header />
@@ -128,6 +128,43 @@ const DynamicCompressPage: React.FC = () => {
           <div className="bg-white rounded-lg shadow-lg p-8 max-w-md text-center">
             <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-gray-800 mb-2">Unable to Load Workspace</h2>
+            <p className="text-gray-600 mb-4">
+              Failed to load your tier information. Please try again.
+            </p>
+            <Button 
+              onClick={() => {
+                refetch();
+                window.location.reload();
+              }}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Retry
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Safety check - provide defaults if data is missing
+  const safeTierLimits = tierLimits || {
+    tier_name: 'starter',
+    tier_display_name: 'Starter',
+    monthly_operations: 3000,
+    max_file_size_regular: 75,
+    max_file_size_raw: 250,
+    max_batch_size: 20,
+    price_monthly: 9.00
+  };
+
+  const safeUsage = usage || {
+    operations_used: 0,
+    operations_limit: 3000,
+    operations_remaining: 3000,
+    usage_percentage: 0,
+    period_start: new Date().toISOString(),
+    period_end: new Date().toISOString()
+  };
             <p className="text-gray-600 mb-4">
               {tierError || 'Failed to load your tier information. Please try again.'}
             </p>
@@ -146,7 +183,7 @@ const DynamicCompressPage: React.FC = () => {
   // Get max file size based on file type
   const getMaxFileSize = (filename: string): number => {
     const isRaw = isRawFile(filename);
-    const limitMB = isRaw ? tierLimits.max_file_size_raw : tierLimits.max_file_size_regular;
+    const limitMB = isRaw ? safeTierLimits.max_file_size_raw : safeTierLimits.max_file_size_regular;
     return limitMB * 1024 * 1024;
   };
 
@@ -156,12 +193,12 @@ const DynamicCompressPage: React.FC = () => {
     if (file.size > maxSize) {
       return {
         valid: false,
-        error: `File "${file.name}" exceeds ${formatFileSize(maxSize)} limit for your ${tierLimits.tier_display_name} plan`
+        error: `File "${file.name}" exceeds ${formatFileSize(maxSize)} limit for your ${safeTierLimits.tier_display_name} plan`
       };
     }
 
     // Check if user has remaining operations
-    if (usage.operations_used >= usage.operations_limit) {
+    if (safeUsage.operations_used >= safeUsage.operations_limit) {
       return {
         valid: false,
         error: 'You have reached your monthly operation limit. Please upgrade your plan or wait for the next billing cycle.'
@@ -179,10 +216,10 @@ const DynamicCompressPage: React.FC = () => {
     const errors: string[] = [];
 
     // Check batch size limit
-    if (files.length + selectedFiles.length > tierLimits.max_batch_size) {
+    if (files.length + selectedFiles.length > safeTierLimits.max_batch_size) {
       toast({
         title: "Batch size limit exceeded",
-        description: `Your ${tierLimits.tier_display_name} plan allows up to ${tierLimits.max_batch_size} files per batch. You can upload ${tierLimits.max_batch_size - files.length} more files.`,
+        description: `Your ${safeTierLimits.tier_display_name} plan allows up to ${safeTierLimits.max_batch_size} files per batch. You can upload ${safeTierLimits.max_batch_size - files.length} more files.`,
         variant: "destructive",
       });
       return;
@@ -283,7 +320,7 @@ const DynamicCompressPage: React.FC = () => {
     }
 
     // Check remaining operations
-    const remainingOps = usage.operations_limit - usage.operations_used;
+    const remainingOps = safeUsage.operations_limit - safeUsage.operations_used;
     if (files.length > remainingOps) {
       toast({
         title: "Insufficient operations",
@@ -401,8 +438,8 @@ const DynamicCompressPage: React.FC = () => {
           <div className="flex items-center justify-center gap-3 mb-4">
             <img src={logoUrl} alt="Micro JPEG" className="h-16 w-16" />
             <TierBadge 
-              tier={tierLimits.tier_name}
-              displayName={tierLimits.tier_display_name}
+              tier={safeTierLimits.tier_name}
+              displayName={safeTierLimits.tier_display_name}
               size="lg"
             />
           </div>
@@ -416,35 +453,35 @@ const DynamicCompressPage: React.FC = () => {
 
         {/* Usage Stats */}
         <UsageStats
-          operationsUsed={usage.operations_used}
-          operationsLimit={usage.operations_limit}
-          apiCallsUsed={usage.api_calls_used}
-          apiCallsLimit={usage.api_calls_limit}
-          periodEnd={usage.period_end}
-          tierName={tierLimits.tier_display_name}
+          operationsUsed={safeUsage.operations_used}
+          operationsLimit={safeUsage.operations_limit}
+          apiCallsUsed={safeUsage.api_calls_used}
+          apiCallsLimit={safeUsage.api_calls_limit}
+          periodEnd={safeUsage.period_end}
+          tierName={safeTierLimits.tier_display_name}
         />
 
         {/* Tier Features Banner */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 mb-8 text-white">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <h3 className="text-xl font-bold mb-2">Your {tierLimits.tier_display_name} Benefits</h3>
+              <h3 className="text-xl font-bold mb-2">Your {safeTierLimits.tier_display_name} Benefits</h3>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4" />
-                  <span>{tierLimits.max_file_size_regular}MB files</span>
+                  <span>{safeTierLimits.max_file_size_regular}MB files</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="w-4 h-4" />
-                  <span>{tierLimits.max_batch_size} files/batch</span>
+                  <span>{safeTierLimits.max_batch_size} files/batch</span>
                 </div>
-                {tierLimits.priority_processing && (
+                {safeTierLimits.priority_processing && (
                   <div className="flex items-center gap-2">
                     <Zap className="w-4 h-4" />
                     <span>Priority processing</span>
                   </div>
                 )}
-                {tierLimits.has_analytics && (
+                {safeTierLimits.has_analytics && (
                   <div className="flex items-center gap-2">
                     <TrendingUp className="w-4 h-4" />
                     <span>Analytics</span>
@@ -452,7 +489,7 @@ const DynamicCompressPage: React.FC = () => {
                 )}
               </div>
             </div>
-            {tierLimits.tier_name !== 'business' && (
+            {safeTierLimits.tier_name !== 'business' && (
               <Button
                 onClick={() => setLocation('/pricing')}
                 className="bg-white text-blue-600 hover:bg-gray-100"
@@ -504,11 +541,11 @@ const DynamicCompressPage: React.FC = () => {
                   or click to browse files
                 </p>
                 <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
-                  <span>Up to {tierLimits.max_file_size_regular}MB per file</span>
+                  <span>Up to {safeTierLimits.max_file_size_regular}MB per file</span>
                   <span>•</span>
-                  <span>RAW files up to {tierLimits.max_file_size_raw}MB</span>
+                  <span>RAW files up to {safeTierLimits.max_file_size_raw}MB</span>
                   <span>•</span>
-                  <span>Max {tierLimits.max_batch_size} files</span>
+                  <span>Max {safeTierLimits.max_batch_size} files</span>
                 </div>
               </div>
 
@@ -824,7 +861,7 @@ const DynamicCompressPage: React.FC = () => {
             </Card>
 
             {/* Priority Processing Badge (if applicable) */}
-            {tierLimits.priority_processing && (
+            {safeTierLimits.priority_processing && (
               <Card className="p-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
                 <div className="flex items-start gap-3">
                   <Zap className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
