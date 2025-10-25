@@ -7,7 +7,7 @@
 import { Router, Request, Response } from 'express';
 import { tierLimitService } from '../services/TierLimitService';
 import { usageTracker } from '../services/UsageTracker';
-import { authenticateToken } from '../middleware/auth';
+import { authenticateToken } from '../auth';
 
 const router = Router();
 
