@@ -1,882 +1,349 @@
 /**
- * DYNAMIC COMPRESS PAGE - Tier-Aware Paid User Page
+ * DYNAMIC COMPRESS PAGE - Paid Users Only
  * 
- * This unified page serves all paid tiers (Starter, Pro, Business)
- * - Dynamically loads user's tier limits from database
- * - Matches micro-jpeg-landing.tsx design and layout
- * - Shows tier-specific features and limits
- * - Requires authentication (redirects anonymous users)
- * - Real-time usage tracking with visual feedback
- * 
- * Page Identifier: paid-user-compress
+ * Simple tier-based compression page with dark mode
+ * - 6 tiers: Starter-M, Starter-Y, Pro-M, Pro-Y, Business-M, Business-Y
+ * - Auto-converts to JPEG on upload
+ * - Format buttons trigger instant conversion
+ * - Inline results display
  */
 
-import { useState, useRef, useCallback, useEffect } from 'react';
-import { useLocation } from 'wouter';
-import { 
-  Upload, Settings, Download, Zap, Shield, Sparkles, X, Check, 
-  ArrowRight, ImageIcon, ChevronDown, ChevronUp, Crown, Plus, 
-  Minus, AlertCircle, TrendingUp, CheckCircle, AlertTriangle 
-} from 'lucide-react';
+import { useState, useRef, useCallback } from 'react';
+import { Upload, Download, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { useTierLimits } from '@/hooks/useTierLimits';
-import { apiRequest } from '@/lib/queryClient';
 import Header from '@/components/header';
-import TierBadge from '@/components/TierBadge';
-import UsageStats from '@/components/UsageStats';
 import logoUrl from '@assets/mascot-logo-optimized.png';
+
+// Format icons
 import avifIcon from '@/assets/format-icons/avif.jpg';
 import jpegIcon from '@/assets/format-icons/jpeg.jpg';
 import pngIcon from '@/assets/format-icons/png.jpg';
 import webpIcon from '@/assets/format-icons/webp.jpg';
+import tiffIcon from '@/assets/format-icons/tiff.jpg';
 
-// ✅ PAGE IDENTIFIER
-const PAGE_IDENTIFIER = 'paid-user-compress'; // For paid/authenticated users only
+const FORMATS = [
+  { id: 'jpeg', name: 'JPEG', icon: jpegIcon },
+  { id: 'png', name: 'PNG', icon: pngIcon },
+  { id: 'webp', name: 'WEBP', icon: webpIcon },
+  { id: 'avif', name: 'AVIF', icon: avifIcon },
+  { id: 'tiff', name: 'TIFF', icon: tiffIcon },
+];
 
-// Types
-interface FileWithPreview extends File {
-  id: string;
-  preview?: string;
-}
-
-interface CompressionResult {
+interface ProcessedFile {
   id: string;
   originalName: string;
+  format: string;
+  url: string;
+  size: number;
   originalSize: number;
-  compressedSize: number;
-  compressionRatio: number;
-  downloadUrl: string;
-  originalFormat: string;
-  outputFormat: string;
-  wasConverted: boolean;
+  savings: number;
 }
 
-// RAW file extensions
-const RAW_EXTENSIONS = ['cr2', 'cr3', 'arw', 'crw', 'dng', 'nef', 'orf', 'raf', 'rw2', 'pef', 'srw'];
-
-const isRawFile = (filename: string): boolean => {
-  const ext = filename.split('.').pop()?.toLowerCase() || '';
-  return RAW_EXTENSIONS.includes(ext);
-};
-
-const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return '0 MB';
-  const mb = bytes / (1024 * 1024);
-  return mb >= 1 ? `${mb.toFixed(1)} MB` : `${(bytes / 1024).toFixed(1)} KB`;
-};
-
-const DynamicCompressPage: React.FC = () => {
-  const [, setLocation] = useLocation();
+export default function DynamicCompressPage() {
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
-  const { tierLimits, usage, isLoading: tierLoading, error: tierError, refetch } = useTierLimits();
-
-  // State
-  const [files, setFiles] = useState<FileWithPreview[]>([]);
-  const [results, setResults] = useState<CompressionResult[]>([]);
-  const [isDragging, setIsDragging] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [compressionQuality, setCompressionQuality] = useState(80);
-  const [outputFormat, setOutputFormat] = useState<'jpeg' | 'png' | 'webp' | 'avif'>('jpeg');
-  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
-  const [preserveMetadata, setPreserveMetadata] = useState(false);
-  const [batchDownloadUrl, setBatchDownloadUrl] = useState<string | null>(null);
-
+  
+  const [files, setFiles] = useState<File[]>([]);
+  const [processing, setProcessing] = useState(false);
+  const [processedFiles, setProcessedFiles] = useState<ProcessedFile[]>([]);
+  const [dragActive, setDragActive] = useState(false);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
 
-  // Redirect anonymous users to landing page with message
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      setLocation('/?redirect=compress&message=signin_required');
+  // Auto-process to JPEG on upload
+  const processToJPEG = async (uploadedFiles: File[]) => {
+    setProcessing(true);
+    
+    for (const file of uploadedFiles) {
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('format', 'jpeg');
+        formData.append('quality', '85');
+        formData.append('pageIdentifier', 'paid-user-compress');
+        
+        const response = await fetch('/api/compress', {
+          method: 'POST',
+          body: formData,
+          credentials: 'include',
+        });
+
+        if (!response.ok) throw new Error('Compression failed');
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const originalSize = file.size;
+        const compressedSize = blob.size;
+        const savings = ((originalSize - compressedSize) / originalSize) * 100;
+
+        const processed: ProcessedFile = {
+          id: `${Date.now()}-${Math.random()}`,
+          originalName: file.name,
+          format: 'JPEG',
+          url,
+          size: compressedSize,
+          originalSize,
+          savings,
+        };
+
+        setProcessedFiles(prev => [...prev, processed]);
+      } catch (error) {
+        toast({
+          title: "Compression failed",
+          description: `Failed to process ${file.name}`,
+          variant: "destructive",
+        });
+      }
     }
-  }, [isAuthenticated, authLoading, setLocation]);
-
-  // Refetch usage data when component mounts
-  useEffect(() => {
-    if (isAuthenticated) {
-      refetch();
-    }
-  }, [isAuthenticated, refetch]);
-
-  // Loading state
-  if (authLoading || tierLoading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 text-lg">Loading your workspace...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Error state - only show error if loading is done AND there's an actual error
-  if (!authLoading && !tierLoading && (tierError || (!tierLimits && !tierLoading))) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-        <Header />
-        <div className="flex items-center justify-center py-20">
-          <div className="bg-white rounded-lg shadow-lg p-8 max-w-md text-center">
-            <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Unable to Load Workspace</h2>
-            <p className="text-gray-600 mb-4">
-              Failed to load your tier information. Please try again.
-            </p>
-            <Button 
-              onClick={() => {
-                refetch();
-                window.location.reload();
-              }}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Retry
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Safety check - provide defaults if data is missing
-  const safeTierLimits = tierLimits || {
-    tier_name: 'starter',
-    tier_display_name: 'Starter',
-    monthly_operations: 3000,
-    max_file_size_regular: 75,
-    max_file_size_raw: 250,
-    max_batch_size: 20,
-    price_monthly: 9.00
+    
+    setProcessing(false);
   };
 
-  const safeUsage = usage || {
-    operations_used: 0,
-    operations_limit: 3000,
-    operations_remaining: 3000,
-    usage_percentage: 0,
-    period_start: new Date().toISOString(),
-    period_end: new Date().toISOString()
-  };
+  // Convert to specific format
+  const convertToFormat = async (file: File, format: string) => {
+    setProcessing(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('format', format);
+      formData.append('quality', '85');
+      formData.append('pageIdentifier', 'paid-user-compress');
+      
+      const response = await fetch('/api/compress', {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      });
 
-  // Get max file size based on file type
-  const getMaxFileSize = (filename: string): number => {
-    const isRaw = isRawFile(filename);
-    const limitMB = isRaw ? safeTierLimits.max_file_size_raw : safeTierLimits.max_file_size_regular;
-    return limitMB * 1024 * 1024;
-  };
+      if (!response.ok) throw new Error('Conversion failed');
 
-  // File validation
-  const validateFile = (file: File): { valid: boolean; error?: string } => {
-    const maxSize = getMaxFileSize(file.name);
-    if (file.size > maxSize) {
-      return {
-        valid: false,
-        error: `File "${file.name}" exceeds ${formatFileSize(maxSize)} limit for your ${safeTierLimits.tier_display_name} plan`
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+
+      const processed: ProcessedFile = {
+        id: `${Date.now()}-${Math.random()}`,
+        originalName: file.name,
+        format: format.toUpperCase(),
+        url,
+        size: blob.size,
+        originalSize: file.size,
+        savings: ((file.size - blob.size) / file.size) * 100,
       };
-    }
 
-    // Check if user has remaining operations
-    if (safeUsage.operations_used >= safeUsage.operations_limit) {
-      return {
-        valid: false,
-        error: 'You have reached your monthly operation limit. Please upgrade your plan or wait for the next billing cycle.'
-      };
+      setProcessedFiles(prev => [...prev, processed]);
+      
+      toast({
+        title: "Conversion complete",
+        description: `Converted to ${format.toUpperCase()}`,
+      });
+    } catch (error) {
+      toast({
+        title: "Conversion failed",
+        description: `Failed to convert to ${format.toUpperCase()}`,
+        variant: "destructive",
+      });
     }
-
-    return { valid: true };
+    
+    setProcessing(false);
   };
 
   // Handle file selection
-  const handleFileSelect = useCallback((selectedFiles: FileList | null) => {
+  const handleFiles = useCallback((selectedFiles: FileList | null) => {
     if (!selectedFiles || selectedFiles.length === 0) return;
-
-    const newFiles: FileWithPreview[] = [];
-    const errors: string[] = [];
-
-    // Check batch size limit
-    if (files.length + selectedFiles.length > safeTierLimits.max_batch_size) {
-      toast({
-        title: "Batch size limit exceeded",
-        description: `Your ${safeTierLimits.tier_display_name} plan allows up to ${safeTierLimits.max_batch_size} files per batch. You can upload ${safeTierLimits.max_batch_size - files.length} more files.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    Array.from(selectedFiles).forEach((file) => {
-      const validation = validateFile(file);
-      
-      if (validation.valid) {
-        const fileWithPreview: FileWithPreview = Object.assign(file, {
-          id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          preview: URL.createObjectURL(file)
-        });
-        newFiles.push(fileWithPreview);
-      } else {
-        errors.push(validation.error || 'File validation failed');
-      }
-    });
-
-    if (errors.length > 0) {
-      toast({
-        title: "Some files were not added",
-        description: errors[0],
-        variant: "destructive",
-      });
-    }
-
-    if (newFiles.length > 0) {
-      setFiles(prev => [...prev, ...newFiles]);
-      toast({
-        title: "Files added",
-        description: `${newFiles.length} file(s) ready to compress`,
-      });
-    }
-  }, [files, tierLimits, usage, toast]);
-
-  // Drag and drop handlers
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
+    
+    const fileArray = Array.from(selectedFiles);
+    setFiles(fileArray);
+    
+    // Auto-process to JPEG
+    processToJPEG(fileArray);
   }, []);
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
+  const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (dropZoneRef.current && !dropZoneRef.current.contains(e.relatedTarget as Node)) {
-      setIsDragging(false);
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
     }
-  }, []);
-
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
   }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsDragging(false);
-
-    const droppedFiles = e.dataTransfer.files;
-    handleFileSelect(droppedFiles);
-  }, [handleFileSelect]);
-
-  // Remove file
-  const handleRemoveFile = useCallback((fileId: string) => {
-    setFiles(prev => {
-      const file = prev.find(f => f.id === fileId);
-      if (file?.preview) {
-        URL.revokeObjectURL(file.preview);
-      }
-      return prev.filter(f => f.id !== fileId);
-    });
-  }, []);
-
-  // Clear all files
-  const handleClearAll = useCallback(() => {
-    files.forEach(file => {
-      if (file.preview) {
-        URL.revokeObjectURL(file.preview);
-      }
-    });
-    setFiles([]);
-    setResults([]);
-    setBatchDownloadUrl(null);
-  }, [files]);
-
-  // Compress files
-  const handleCompress = useCallback(async () => {
-    if (files.length === 0) {
-      toast({
-        title: "No files selected",
-        description: "Please select files to compress",
-        variant: "destructive",
-      });
-      return;
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFiles(e.dataTransfer.files);
     }
+  }, [handleFiles]);
 
-    // Check remaining operations
-    const remainingOps = safeUsage.operations_limit - safeUsage.operations_used;
-    if (files.length > remainingOps) {
-      toast({
-        title: "Insufficient operations",
-        description: `You have ${remainingOps} operations remaining. Remove ${files.length - remainingOps} files or upgrade your plan.`,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsProcessing(true);
-    setUploadProgress(0);
-
-    try {
-      const formData = new FormData();
-      
-      files.forEach(file => {
-        formData.append('files', file);
-      });
-      
-      formData.append('quality', compressionQuality.toString());
-      formData.append('outputFormat', outputFormat);
-      formData.append('preserveMetadata', preserveMetadata.toString());
-      formData.append('pageIdentifier', PAGE_IDENTIFIER);
-
-      const response = await apiRequest<{
-        success: boolean;
-        results: CompressionResult[];
-        batchDownloadUrl?: string;
-      }>('/api/compress/batch', {
-        method: 'POST',
-        body: formData,
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / (progressEvent.total || 1));
-          setUploadProgress(percentCompleted);
-        },
-      });
-
-      if (response.success && response.results) {
-        setResults(response.results);
-        setBatchDownloadUrl(response.batchDownloadUrl || null);
-        
-        // Refetch usage data after successful compression
-        refetch();
-
-        toast({
-          title: "Compression complete!",
-          description: `Successfully compressed ${response.results.length} file(s)`,
-        });
-
-        // Calculate average compression
-        const avgRatio = response.results.reduce((sum, r) => sum + r.compressionRatio, 0) / response.results.length;
-        
-        toast({
-          title: `Average ${avgRatio.toFixed(1)}% compression achieved`,
-          description: "Files are ready to download",
-        });
-      }
-    } catch (error: any) {
-      console.error('Compression error:', error);
-      toast({
-        title: "Compression failed",
-        description: error.message || "An error occurred during compression",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessing(false);
-      setUploadProgress(0);
-    }
-  }, [files, compressionQuality, outputFormat, preserveMetadata, usage, toast, refetch]);
-
-  // Download single file
-  const handleDownload = useCallback((result: CompressionResult) => {
-    const link = document.createElement('a');
-    link.href = result.downloadUrl;
-    link.download = result.originalName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }, []);
-
-  // Download all as ZIP
-  const handleDownloadAll = useCallback(() => {
-    if (!batchDownloadUrl) return;
-
-    const link = document.createElement('a');
-    link.href = batchDownloadUrl;
-    link.download = 'compressed-images.zip';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    toast({
-      title: "Downloading all files",
-      description: "Your compressed images are being downloaded as a ZIP file",
-    });
-  }, [batchDownloadUrl, toast]);
-
-  // Format icons mapping
-  const formatIcons = {
-    jpeg: jpegIcon,
-    png: pngIcon,
-    webp: webpIcon,
-    avif: avifIcon,
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   };
 
+  const downloadFile = (file: ProcessedFile) => {
+    const link = document.createElement('a');
+    link.href = file.url;
+    link.download = `${file.originalName.split('.')[0]}-${file.format.toLowerCase()}.${file.format.toLowerCase()}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const removeProcessed = (id: string) => {
+    setProcessedFiles(prev => prev.filter(f => f.id !== id));
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
+        <div className="text-center text-white">
+          <h2 className="text-2xl font-bold mb-4">Authentication Required</h2>
+          <p className="text-gray-400">Please sign in to access the compression tool.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white">
       <Header />
       
-      {/* Main Container */}
-      <div className="container mx-auto px-4 py-8 max-w-7xl">
-        
-        {/* Hero Section */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
+      {/* Hero Section */}
+      <div className="container mx-auto px-4 py-16">
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-3 mb-6">
             <img src={logoUrl} alt="Micro JPEG" className="h-16 w-16" />
-            <TierBadge 
-              tier={safeTierLimits.tier_name}
-              displayName={safeTierLimits.tier_display_name}
-              size="lg"
-            />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Professional Image Compression
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Compress images with advanced settings and priority processing
-          </p>
-        </div>
-
-        {/* Usage Stats */}
-        <UsageStats
-          operationsUsed={safeUsage.operations_used}
-          operationsLimit={safeUsage.operations_limit}
-          apiCallsUsed={safeUsage.api_calls_used}
-          apiCallsLimit={safeUsage.api_calls_limit}
-          periodEnd={safeUsage.period_end}
-          tierName={safeTierLimits.tier_display_name}
-        />
-
-        {/* Tier Features Banner */}
-        <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl p-6 mb-8 text-white">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h3 className="text-xl font-bold mb-2">Your {safeTierLimits.tier_display_name} Benefits</h3>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4" />
-                  <span>{safeTierLimits.max_file_size_regular}MB files</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4" />
-                  <span>{safeTierLimits.max_batch_size} files/batch</span>
-                </div>
-                {safeTierLimits.priority_processing && (
-                  <div className="flex items-center gap-2">
-                    <Zap className="w-4 h-4" />
-                    <span>Priority processing</span>
-                  </div>
-                )}
-                {safeTierLimits.has_analytics && (
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="w-4 h-4" />
-                    <span>Analytics</span>
-                  </div>
-                )}
-              </div>
+            <div className="px-4 py-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-sm font-semibold">
+              {user?.tier || 'Pro'} Plan
             </div>
-            {safeTierLimits.tier_name !== 'business' && (
-              <Button
-                onClick={() => setLocation('/pricing')}
-                className="bg-white text-blue-600 hover:bg-gray-100"
-              >
-                Upgrade Plan
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            )}
           </div>
-        </div>
-
-        {/* Main Compression Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
-          {/* Left Column - Upload & Settings */}
-          <div className="lg:col-span-2 space-y-6">
-            
-            {/* Upload Zone */}
-            <Card className="p-8">
-              <div
-                ref={dropZoneRef}
-                onDragEnter={handleDragEnter}
-                onDragLeave={handleDragLeave}
-                onDragOver={handleDragOver}
-                onDrop={handleDrop}
-                className={`
-                  border-2 border-dashed rounded-xl p-12 text-center transition-all cursor-pointer
-                  ${isDragging 
-                    ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'
-                  }
-                `}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  multiple
-                  accept="image/*,.cr2,.cr3,.arw,.dng,.nef,.orf,.raf,.rw2"
-                  onChange={(e) => handleFileSelect(e.target.files)}
-                  className="hidden"
-                />
-                
-                <Upload className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  Drop your images here
-                </h3>
-                <p className="text-gray-600 mb-4">
-                  or click to browse files
-                </p>
-                <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
-                  <span>Up to {safeTierLimits.max_file_size_regular}MB per file</span>
-                  <span>•</span>
-                  <span>RAW files up to {safeTierLimits.max_file_size_raw}MB</span>
-                  <span>•</span>
-                  <span>Max {safeTierLimits.max_batch_size} files</span>
-                </div>
-              </div>
-
-              {/* File List */}
-              {files.length > 0 && (
-                <div className="mt-6 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-semibold text-gray-900">
-                      {files.length} file{files.length !== 1 ? 's' : ''} selected
-                    </h4>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleClearAll}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <X className="w-4 h-4 mr-1" />
-                      Clear all
-                    </Button>
-                  </div>
-
-                  <div className="space-y-2 max-h-64 overflow-y-auto">
-                    {files.map((file) => (
-                      <div
-                        key={file.id}
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                      >
-                        <div className="flex items-center gap-3 flex-1 min-w-0">
-                          {file.preview && (
-                            <img
-                              src={file.preview}
-                              alt={file.name}
-                              className="w-12 h-12 object-cover rounded"
-                            />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-gray-900 truncate">
-                              {file.name}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {formatFileSize(file.size)}
-                              {isRawFile(file.name) && (
-                                <Badge variant="secondary" className="ml-2">RAW</Badge>
-                              )}
-                            </p>
-                          </div>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveFile(file.id)}
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </Card>
-
-            {/* Settings Panel */}
-            <Card className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Settings className="w-5 h-5 text-blue-600" />
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Compression Settings
-                  </h3>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
-                >
-                  {showAdvancedSettings ? (
-                    <>
-                      <ChevronUp className="w-4 h-4 mr-1" />
-                      Hide Advanced
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="w-4 h-4 mr-1" />
-                      Show Advanced
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {/* Quality Slider */}
-              <div className="space-y-4">
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="font-medium text-gray-700">
-                      Compression Quality
-                    </label>
-                    <span className="text-sm font-semibold text-blue-600">
-                      {compressionQuality}%
-                    </span>
-                  </div>
-                  <input
-                    type="range"
-                    min="1"
-                    max="100"
-                    value={compressionQuality}
-                    onChange={(e) => setCompressionQuality(parseInt(e.target.value))}
-                    className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>Smaller file</span>
-                    <span>Better quality</span>
-                  </div>
-                </div>
-
-                {/* Output Format */}
-                <div>
-                  <label className="font-medium text-gray-700 block mb-2">
-                    Output Format
-                  </label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {(['jpeg', 'png', 'webp', 'avif'] as const).map((format) => (
-                      <button
-                        key={format}
-                        onClick={() => setOutputFormat(format)}
-                        className={`
-                          p-3 rounded-lg border-2 transition-all
-                          ${outputFormat === format
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-blue-300'
-                          }
-                        `}
-                      >
-                        <img
-                          src={formatIcons[format]}
-                          alt={format.toUpperCase()}
-                          className="w-8 h-8 mx-auto mb-1"
-                        />
-                        <span className="text-xs font-medium text-gray-700 uppercase">
-                          {format}
-                        </span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Advanced Settings */}
-                {showAdvancedSettings && (
-                  <div className="pt-4 border-t space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <label className="font-medium text-gray-700">
-                          Preserve Metadata
-                        </label>
-                        <p className="text-xs text-gray-500">
-                          Keep EXIF, GPS, and other metadata
-                        </p>
-                      </div>
-                      <Switch
-                        checked={preserveMetadata}
-                        onCheckedChange={setPreserveMetadata}
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Compress Button */}
-              <Button
-                onClick={handleCompress}
-                disabled={files.length === 0 || isProcessing}
-                className="w-full mt-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3"
-                size="lg"
-              >
-                {isProcessing ? (
-                  <>
-                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
-                    Processing... {uploadProgress}%
-                  </>
-                ) : (
-                  <>
-                    <Zap className="w-5 h-5 mr-2" />
-                    Compress {files.length} {files.length === 1 ? 'Image' : 'Images'}
-                  </>
-                )}
-              </Button>
-
-              {isProcessing && (
-                <Progress value={uploadProgress} className="mt-3" />
-              )}
-            </Card>
-          </div>
-
-          {/* Right Column - Results & Info */}
-          <div className="space-y-6">
-            
-            {/* Results Card */}
-            {results.length > 0 && (
-              <Card className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Compressed Files
-                  </h3>
-                  {batchDownloadUrl && (
-                    <Button
-                      onClick={handleDownloadAll}
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <Download className="w-4 h-4 mr-1" />
-                      Download All
-                    </Button>
-                  )}
-                </div>
-
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {results.map((result) => (
-                    <div
-                      key={result.id}
-                      className="p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-green-200"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-gray-900 truncate">
-                            {result.originalName}
-                          </p>
-                          <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
-                            <span>{formatFileSize(result.originalSize)}</span>
-                            <ArrowRight className="w-3 h-3" />
-                            <span className="font-semibold text-green-600">
-                              {formatFileSize(result.compressedSize)}
-                            </span>
-                          </div>
-                        </div>
-                        <Button
-                          onClick={() => handleDownload(result)}
-                          size="sm"
-                          variant="ghost"
-                        >
-                          <Download className="w-4 h-4" />
-                        </Button>
-                      </div>
-                      
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-white rounded-full h-2 overflow-hidden">
-                          <div
-                            className="h-full bg-gradient-to-r from-green-500 to-blue-500"
-                            style={{ width: `${result.compressionRatio}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm font-semibold text-green-600">
-                          {result.compressionRatio.toFixed(1)}%
-                        </span>
-                      </div>
-
-                      {result.wasConverted && (
-                        <Badge variant="secondary" className="mt-2">
-                          Converted to {result.outputFormat.toUpperCase()}
-                        </Badge>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            )}
-
-            {/* Quick Stats */}
-            <Card className="p-6 bg-gradient-to-br from-blue-50 to-purple-50">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Quick Stats
-              </h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Files processed</span>
-                  <span className="font-semibold text-gray-900">
-                    {results.length}
-                  </span>
-                </div>
-                {results.length > 0 && (
-                  <>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Avg. compression</span>
-                      <span className="font-semibold text-green-600">
-                        {(results.reduce((sum, r) => sum + r.compressionRatio, 0) / results.length).toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-600">Space saved</span>
-                      <span className="font-semibold text-green-600">
-                        {formatFileSize(
-                          results.reduce((sum, r) => sum + (r.originalSize - r.compressedSize), 0)
-                        )}
-                      </span>
-                    </div>
-                  </>
-                )}
-              </div>
-            </Card>
-
-            {/* Security Badge */}
-            <Card className="p-6">
-              <div className="flex items-start gap-3">
-                <Shield className="w-6 h-6 text-green-500 flex-shrink-0 mt-1" />
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">
-                    100% Secure
-                  </h4>
-                  <p className="text-sm text-gray-600">
-                    Your images are automatically deleted within 24 hours. 
-                    We use enterprise-grade encryption and never share your data.
-                  </p>
-                </div>
-              </div>
-            </Card>
-
-            {/* Priority Processing Badge (if applicable) */}
-            {safeTierLimits.priority_processing && (
-              <Card className="p-6 bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
-                <div className="flex items-start gap-3">
-                  <Zap className="w-6 h-6 text-yellow-500 flex-shrink-0 mt-1" />
-                  <div>
-                    <h4 className="font-semibold text-gray-900 mb-1">
-                      Priority Processing Active
-                    </h4>
-                    <p className="text-sm text-gray-600">
-                      Your files are processed faster with dedicated resources.
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            )}
-          </div>
-        </div>
-
-        {/* Footer Info */}
-        <div className="mt-12 text-center text-sm text-gray-500">
-          <p>
-            Need help? Contact support at{' '}
-            <a href="mailto:support@micro-jpeg.com" className="text-blue-600 hover:underline">
-              support@micro-jpeg.com
-            </a>
+          <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+            Professional Image Processing
+          </h1>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+            Upload images and convert to any format instantly
           </p>
         </div>
+
+        {/* Upload Area */}
+        <div className="max-w-4xl mx-auto mb-12">
+          <div
+            ref={dropZoneRef}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            className={`
+              relative border-2 border-dashed rounded-2xl p-12 text-center
+              transition-all duration-300 cursor-pointer
+              ${dragActive 
+                ? 'border-blue-500 bg-blue-500/10' 
+                : 'border-gray-600 bg-gray-800/50 hover:border-gray-500'
+              }
+            `}
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept="image/*"
+              onChange={(e) => handleFiles(e.target.files)}
+              className="hidden"
+            />
+            
+            <Upload className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+            <h3 className="text-2xl font-semibold mb-2 text-white">
+              Drop images here or click to upload
+            </h3>
+            <p className="text-gray-400 mb-6">
+              Auto-converts to JPEG • Supports PNG, WEBP, AVIF, TIFF
+            </p>
+
+            {/* Format Buttons */}
+            {files.length > 0 && !processing && (
+              <div className="flex justify-center gap-3 mt-6">
+                {FORMATS.map(format => (
+                  <button
+                    key={format.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      files.forEach(file => convertToFormat(file, format.id));
+                    }}
+                    className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition-colors"
+                  >
+                    <img src={format.icon} alt={format.name} className="w-6 h-6 rounded" />
+                    <span className="text-sm font-medium">{format.name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {processing && (
+              <div className="flex items-center justify-center gap-2 mt-6">
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span>Processing...</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Results Section */}
+        {processedFiles.length > 0 && (
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-2xl font-bold mb-6">Processed Files</h2>
+            <div className="grid gap-4">
+              {processedFiles.map(file => (
+                <div
+                  key={file.id}
+                  className="bg-gray-800/50 border border-gray-700 rounded-xl p-6 flex items-center justify-between"
+                >
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg mb-1">{file.originalName}</h3>
+                    <div className="flex items-center gap-4 text-sm text-gray-400">
+                      <span className="px-2 py-1 bg-blue-500/20 text-blue-400 rounded">
+                        {file.format}
+                      </span>
+                      <span>{formatFileSize(file.originalSize)} → {formatFileSize(file.size)}</span>
+                      <span className="text-green-400">
+                        {file.savings > 0 ? `-${file.savings.toFixed(1)}%` : 'Converted'}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <Button
+                      onClick={() => downloadFile(file)}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </Button>
+                    <Button
+                      onClick={() => removeProcessed(file.id)}
+                      variant="ghost"
+                      size="icon"
+                      className="text-gray-400 hover:text-white"
+                    >
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
-};
-
-export default DynamicCompressPage;
+}
