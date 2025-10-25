@@ -12,7 +12,7 @@
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'wouter';
 import { 
   Upload, Settings, Download, Zap, Shield, Sparkles, X, Check, 
   ArrowRight, ImageIcon, ChevronDown, ChevronUp, Crown, Plus, 
@@ -73,7 +73,7 @@ const formatFileSize = (bytes: number): string => {
 };
 
 const DynamicCompressPage: React.FC = () => {
-  const navigate = useNavigate();
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
   const { tierLimits, usage, isLoading: tierLoading, error: tierError, refetch } = useTierLimits();
@@ -96,9 +96,9 @@ const DynamicCompressPage: React.FC = () => {
   // Redirect anonymous users to landing page with message
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      navigate('/?redirect=compress&message=signin_required');
+      setLocation('/?redirect=compress&message=signin_required');
     }
-  }, [isAuthenticated, authLoading, navigate]);
+  }, [isAuthenticated, authLoading, setLocation]);
 
   // Refetch usage data when component mounts
   useEffect(() => {
@@ -454,7 +454,7 @@ const DynamicCompressPage: React.FC = () => {
             </div>
             {tierLimits.tier_name !== 'business' && (
               <Button
-                onClick={() => navigate('/pricing')}
+                onClick={() => setLocation('/pricing')}
                 className="bg-white text-blue-600 hover:bg-gray-100"
               >
                 Upgrade Plan
