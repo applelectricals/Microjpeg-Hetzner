@@ -41,14 +41,47 @@ interface UsageData {
 }
 
 interface UseTierLimitsReturn {
-  tierLimits: TierLimits | null;
-  usage: UsageData | null;
+  tierLimits: TierLimits;
+  usage: UsageData;
   isLoading: boolean;
   error: string | null;
   refetch: () => void;
 }
 
 export const useTierLimits = (): UseTierLimitsReturn => {
+  // Default tier limits
+  const defaultTierLimits: TierLimits = {
+    tier_name: 'starter',
+    tier_display_name: 'Starter',
+    tier_description: 'Perfect for individual users',
+    monthly_operations: 3000,
+    daily_operations: null,
+    hourly_operations: null,
+    max_file_size_regular: 75,
+    max_file_size_raw: 250,
+    max_concurrent_uploads: 5,
+    max_batch_size: 20,
+    processing_timeout_seconds: 300,
+    priority_processing: false,
+    api_calls_monthly: 1000,
+    team_seats: 1,
+    has_analytics: false,
+    has_webhooks: false,
+    has_custom_profiles: false,
+    has_white_label: false,
+    price_monthly: 9.00,
+    price_yearly: 90.00
+  };
+
+  const defaultUsage: UsageData = {
+    operations_used: 0,
+    operations_limit: 3000,
+    api_calls_used: 0,
+    api_calls_limit: 1000,
+    period_start: new Date().toISOString(),
+    period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+  };
+
   // Fetch tier limits
   const { 
     data: tierLimitsData, 
@@ -61,30 +94,6 @@ export const useTierLimits = (): UseTierLimitsReturn => {
     retry: 1,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     refetchOnWindowFocus: false,
-    placeholderData: {
-      tierLimits: {
-        tier_name: 'starter',
-        tier_display_name: 'Starter',
-        tier_description: 'Perfect for individual users',
-        monthly_operations: 3000,
-        daily_operations: null,
-        hourly_operations: null,
-        max_file_size_regular: 75,
-        max_file_size_raw: 250,
-        max_concurrent_uploads: 5,
-        max_batch_size: 20,
-        processing_timeout_seconds: 300,
-        priority_processing: false,
-        api_calls_monthly: 1000,
-        team_seats: 1,
-        has_analytics: false,
-        has_webhooks: false,
-        has_custom_profiles: false,
-        has_white_label: false,
-        price_monthly: 9.00,
-        price_yearly: 90.00
-      }
-    }
   });
 
   // Fetch usage data
@@ -100,16 +109,6 @@ export const useTierLimits = (): UseTierLimitsReturn => {
     staleTime: 1 * 60 * 1000, // Cache for 1 minute (more frequent updates)
     refetchOnWindowFocus: true, // Refetch usage on window focus
     refetchInterval: 5 * 60 * 1000, // Auto-refetch every 5 minutes
-    placeholderData: {
-      usage: {
-        operations_used: 0,
-        operations_limit: 3000,
-        api_calls_used: 0,
-        api_calls_limit: 1000,
-        period_start: new Date().toISOString(),
-        period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-      }
-    }
   });
 
   const refetch = () => {
@@ -118,8 +117,8 @@ export const useTierLimits = (): UseTierLimitsReturn => {
   };
 
   return {
-    tierLimits: tierLimitsData?.tierLimits || null,
-    usage: usageData?.usage || null,
+    tierLimits: tierLimitsData?.tierLimits || defaultTierLimits,
+    usage: usageData?.usage || defaultUsage,
     isLoading: limitsLoading || usageLoading,
     error: limitsError?.message || usageError?.message || null,
     refetch
