@@ -1,0 +1,13 @@
+node_modules/
+dist/
+build/
+.env
+.env.*
+*.log
+uploads/
+compressed/
+previews/
+.DS_Store
+FINAL_BACKUP_FROM_REPLIT/
+*.exe
+FINAL_BACKUP_FROM_REPLIT/
