@@ -165,20 +165,6 @@ const DynamicCompressPage: React.FC = () => {
     period_start: new Date().toISOString(),
     period_end: new Date().toISOString()
   };
-            <p className="text-gray-600 mb-4">
-              Failed to load your tier information. Please try again.
-            </p>
-            <Button 
-              onClick={() => refetch()}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              Retry
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   // Get max file size based on file type
   const getMaxFileSize = (filename: string): number => {
