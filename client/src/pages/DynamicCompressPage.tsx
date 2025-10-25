@@ -166,14 +166,14 @@ const DynamicCompressPage: React.FC = () => {
     period_end: new Date().toISOString()
   };
             <p className="text-gray-600 mb-4">
-              {tierError || 'Failed to load your tier information. Please try again.'}
+              Failed to load your tier information. Please try again.
             </p>
-            <button
+            <Button 
               onClick={() => refetch()}
-              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+              className="bg-blue-600 hover:bg-blue-700"
             >
               Retry
-            </button>
+            </Button>
           </div>
         </div>
       </div>
