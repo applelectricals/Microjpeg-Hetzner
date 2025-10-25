@@ -1,4 +1,6 @@
-import userRoutes from './routes/api-user-routes';
+// Old user routes (kept for reference) - replaced by simplified user tier routes
+// import userRoutes from './routes/api-user-routes';
+import userTierRoutes from './routes/user-tier-routes';
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -102,7 +104,7 @@ app.use((req, res, next) => {
   const server = await registerRoutes(app);
 
   // User tier and usage routes
-  app.use('/api/user', userRoutes);
+  app.use('/api/user', userTierRoutes);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
