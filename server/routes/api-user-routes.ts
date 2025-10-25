@@ -7,15 +7,22 @@
 import { Router, Request, Response } from 'express';
 import { tierLimitService } from '../services/TierLimitService';
 import { usageTracker } from '../services/UsageTracker';
-import { authenticateToken } from '../apiAuth';
 
 const router = Router();
+
+// Simple auth check middleware - replace with your actual auth
+const requireAuth = (req: Request, res: Response, next: any) => {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  next();
+};
 
 /**
  * GET /api/user/tier-limits
  * Fetch current user's tier limits
  */
-router.get('/tier-limits', authenticateToken, async (req: Request, res: Response) => {
+router.get('/tier-limits', requireAuth, async (req: Request, res: Response) => {
   try {
     const user = req.user;
     
@@ -70,7 +77,7 @@ router.get('/tier-limits', authenticateToken, async (req: Request, res: Response
  * GET /api/user/usage
  * Fetch current user's usage statistics
  */
-router.get('/usage', authenticateToken, async (req: Request, res: Response) => {
+router.get('/usage', requireAuth, async (req: Request, res: Response) => {
   try {
     const user = req.user;
     
@@ -108,7 +115,7 @@ router.get('/usage', authenticateToken, async (req: Request, res: Response) => {
  * GET /api/user/profile
  * Get user profile with subscription info
  */
-router.get('/profile', authenticateToken, async (req: Request, res: Response) => {
+router.get('/profile', requireAuth, async (req: Request, res: Response) => {
   try {
     const user = req.user;
     
@@ -149,7 +156,7 @@ router.get('/profile', authenticateToken, async (req: Request, res: Response) =>
  * GET /api/user/can-operate
  * Check if user can perform operations
  */
-router.get('/can-operate', authenticateToken, async (req: Request, res: Response) => {
+router.get('/can-operate', requireAuth, async (req: Request, res: Response) => {
   try {
     const user = req.user;
     
@@ -182,7 +189,7 @@ router.get('/can-operate', authenticateToken, async (req: Request, res: Response
  * POST /api/user/invalidate-cache
  * Invalidate user's cache (for testing/debugging)
  */
-router.post('/invalidate-cache', authenticateToken, async (req: Request, res: Response) => {
+router.post('/invalidate-cache', requireAuth, async (req: Request, res: Response) => {
   try {
     const user = req.user;
     
