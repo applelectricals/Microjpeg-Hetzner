@@ -1,7 +1,5 @@
 // server/cron/checkExpiredSubscriptions.ts
-import { db } from '../db';
-import { userAccounts } from '../db/schema';
-import { lt, eq, and } from 'drizzle-orm';
+import { pool } from '../db';
 
 export async function checkExpiredSubscriptions() {
   console.log('Checking for expired subscriptions...');
@@ -9,25 +7,23 @@ export async function checkExpiredSubscriptions() {
   
   try {
     // Find all users with expired subscriptions
-    const expiredUsers = await db
-      .select()
-      .from(userAccounts)
-      .where(
-        and(
-          lt(userAccounts.subscriptionEndDate, now),
-          eq(userAccounts.subscriptionStatus, 'active')
-        )
-      );
+    const result = await pool.query(`
+      SELECT user_id, email, tier_name, subscription_end_date
+      FROM user_accounts
+      WHERE subscription_end_date < $1
+        AND subscription_status = 'active'
+        AND tier_name != 'free'
+    `, [now]);
+    
+    const expiredUsers = result.rows;
     
     // Downgrade to free tier
     for (const user of expiredUsers) {
-      await db
-        .update(userAccounts)
-        .set({
-          tierName: 'free',
-          subscriptionStatus: 'expired'
-        })
-        .where(eq(userAccounts.userId, user.userId));
+      await pool.query(`
+        UPDATE user_accounts
+        SET tier_name = 'free', subscription_status = 'expired'
+        WHERE user_id = $1
+      `, [user.user_id]);
       
       console.log(`✓ User ${user.email} downgraded to free tier (subscription expired)`);
     }

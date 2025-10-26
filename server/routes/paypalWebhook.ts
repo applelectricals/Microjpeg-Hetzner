@@ -1,6 +1,5 @@
 import { Router } from 'express';
-import { db } from '../db';
-import { sql } from 'drizzle-orm';
+import { pool } from '../db';
 import { subscriptionService } from '../services/SubscriptionService';
 
 const router = Router();
@@ -90,17 +89,23 @@ async function handleSubscriptionActivated(event: any) {
   const fullTierName = tierName + tierSuffix; // e.g., 'starter-m', 'pro-y'
   
   try {
-    await db.execute(sql`
+    await pool.query(`
       UPDATE user_accounts 
       SET 
-        tier_name = ${fullTierName},
+        tier_name = $1,
         subscription_status = 'active',
-        subscription_start_date = ${new Date(subscription.start_time)},
-        subscription_end_date = ${new Date(subscription.billing_info.next_billing_time)},
+        subscription_start_date = $2,
+        subscription_end_date = $3,
         payment_method = 'paypal',
-        payment_amount = ${parseFloat(subscription.billing_info.last_payment.amount.value)}
-      WHERE user_id = ${customId}
-    `);
+        payment_amount = $4
+      WHERE user_id = $5
+    `, [
+      fullTierName,
+      new Date(subscription.start_time),
+      new Date(subscription.billing_info.next_billing_time),
+      parseFloat(subscription.billing_info.last_payment.amount.value),
+      customId
+    ]);
     console.log(`✅ User account updated: ${customId} → ${fullTierName}`);
   } catch (error) {
     console.error('❌ Failed to update user_accounts:', error);
@@ -112,30 +117,30 @@ async function handleSubscriptionActivated(event: any) {
 async function handleSubscriptionCancelled(event: any) {
   const subscriptionId = event.resource.id;
   
-  await db.execute(sql`
+  await pool.query(`
     UPDATE subscriptions 
     SET status = 'canceled', canceled_at = NOW()
-    WHERE provider_subscription_id = ${subscriptionId}
-  `);
+    WHERE provider_subscription_id = $1
+  `, [subscriptionId]);
 
   // ✅ NEW: Also downgrade user_accounts to free
-  await db.execute(sql`
+  await pool.query(`
     UPDATE user_accounts 
     SET tier_name = 'free', subscription_status = 'canceled'
     WHERE user_id = (
       SELECT user_id FROM subscriptions 
-      WHERE provider_subscription_id = ${subscriptionId}
+      WHERE provider_subscription_id = $1
     )
-  `);
+  `, [subscriptionId]);
 
-  await db.execute(sql`
+  await pool.query(`
     UPDATE users 
     SET tier = 'free', subscription_status = 'canceled'
     WHERE id = (
       SELECT user_id FROM subscriptions 
-      WHERE provider_subscription_id = ${subscriptionId}
+      WHERE provider_subscription_id = $1
     )
-  `);
+  `, [subscriptionId]);
 
   console.log(`❌ Subscription cancelled: ${subscriptionId}`);
 }
@@ -147,11 +152,11 @@ async function handleSubscriptionCreated(event: any) {
 async function handleSubscriptionSuspended(event: any) {
   const subscriptionId = event.resource.id;
   
-  await db.execute(sql`
+  await pool.query(`
     UPDATE subscriptions 
     SET status = 'suspended'
-    WHERE provider_subscription_id = ${subscriptionId}
-  `);
+    WHERE provider_subscription_id = $1
+  `, [subscriptionId]);
 
   console.log(`⏸️ Subscription suspended: ${subscriptionId}`);
 }

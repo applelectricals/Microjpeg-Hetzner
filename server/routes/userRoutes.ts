@@ -1,8 +1,6 @@
 // server/routes/userRoutes.ts
 import { Router } from 'express';
-import { db } from '../db';
-import { userAccounts } from '../db/schema';
-import { eq } from 'drizzle-orm';
+import { pool } from '../db';
 
 const router = Router();
 
@@ -80,41 +78,40 @@ router.get('/tier-info', async (req, res) => {
     if (!req.session?.userId) {
       return res.json({
         authenticated: false,
-        tier: TIER_CONFIGS['free']
+        tier: {
+          ...TIER_CONFIGS['free'],
+          pageIdentifier: 'free-no-auth' // Not authenticated
+        }
       });
     }
 
     // Fetch user from database
-    const user = await db
-      .select()
-      .from(userAccounts)
-      .where(eq(userAccounts.userId, req.session.userId))
-      .limit(1);
+    const result = await pool.query(
+      'SELECT * FROM user_accounts WHERE user_id = $1',
+      [req.session.userId]
+    );
 
-    if (!user || user.length === 0) {
+    if (result.rows.length === 0) {
       return res.json({
         authenticated: true,
         tier: TIER_CONFIGS['free']
       });
     }
 
-    const userData = user[0];
+    const userData = result.rows[0];
     
     // Check if subscription is expired
     const now = new Date();
-    const isExpired = userData.subscriptionEndDate && new Date(userData.subscriptionEndDate) < now;
+    const isExpired = userData.subscription_end_date && new Date(userData.subscription_end_date) < now;
     
     // If expired, downgrade to free
-    let effectiveTier = userData.tierName || 'free';
+    let effectiveTier = userData.tier_name || 'free';
     if (isExpired && effectiveTier !== 'free') {
       // Auto-downgrade to free
-      await db
-        .update(userAccounts)
-        .set({ 
-          tierName: 'free',
-          subscriptionStatus: 'expired'
-        })
-        .where(eq(userAccounts.userId, userData.userId));
+      await pool.query(
+        'UPDATE user_accounts SET tier_name = $1, subscription_status = $2 WHERE user_id = $3',
+        ['free', 'expired', userData.user_id]
+      );
       
       effectiveTier = 'free';
     }
@@ -122,21 +119,26 @@ router.get('/tier-info', async (req, res) => {
     // Get tier config
     const tierConfig = TIER_CONFIGS[effectiveTier] || TIER_CONFIGS['free'];
 
+    // Calculate days remaining
+    let daysRemaining = null;
+    if (userData.subscription_end_date) {
+      const endDate = new Date(userData.subscription_end_date);
+      daysRemaining = Math.max(0, Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)));
+    }
+
     res.json({
       authenticated: true,
       tier: tierConfig,
       subscription: {
-        status: userData.subscriptionStatus,
-        startDate: userData.subscriptionStartDate,
-        endDate: userData.subscriptionEndDate,
-        paymentAmount: userData.paymentAmount,
-        daysRemaining: userData.subscriptionEndDate 
-          ? Math.max(0, Math.ceil((new Date(userData.subscriptionEndDate).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
-          : null
+        status: userData.subscription_status,
+        startDate: userData.subscription_start_date,
+        endDate: userData.subscription_end_date,
+        paymentAmount: userData.payment_amount,
+        daysRemaining: daysRemaining
       },
       user: {
         email: userData.email,
-        userId: userData.userId
+        userId: userData.user_id
       }
     });
 
