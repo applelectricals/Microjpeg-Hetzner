@@ -522,6 +522,7 @@ export default function MicroJPEGLanding() {
           setTierInfo(data.tier);
           setSubscription(data.subscription);
           setUserTier(data.tier.tierName);
+          setIsLoadingTier(false); // ✅ CRITICAL: Stop loading
           console.log('✅ Paid tier loaded:', data.tier.tierName);
         } else {
           console.log('⚠️ Tier API error, redirecting to free page');
