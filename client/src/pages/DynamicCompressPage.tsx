@@ -296,60 +296,102 @@ export default function DynamicCompressPage() {
     }
   }, [tierConfig, toast]);
 
-  // Process files
+  // Process files - EXACT IMPLEMENTATION FROM LANDING PAGE
   const processFiles = async (filesToProcess: FileWithPreview[]) => {
     setIsProcessing(true);
     setShowModal(true);
-    setProcessingProgress(0);
-    
-    const newResults: CompressionResult[] = [];
-    const totalOperations = filesToProcess.length * selectedFormats.length;
-    let completed = 0;
+    setProcessingProgress(15);
 
-    for (const file of filesToProcess) {
-      for (const format of selectedFormats) {
-        try {
-          const formData = new FormData();
-          formData.append('file', file);
-          formData.append('format', format);
-          formData.append('quality', '85');
-          formData.append('pageIdentifier', 'paid-user-compress');
-          
-          const response = await fetch('/api/compress', {
-            method: 'POST',
-            body: formData,
-            credentials: 'include',
-          });
+    let progressInterval: NodeJS.Timeout | undefined;
 
-          if (!response.ok) throw new Error('Compression failed');
+    try {
+      // Prepare FormData - EXACTLY like landing page
+      const formData = new FormData();
+      
+      // Add ALL files at once
+      filesToProcess.forEach((file) => {
+        formData.append('files', file as File);
+      });
 
-          const blob = await response.blob();
-          const url = URL.createObjectURL(blob);
+      // Prepare compression settings - EXACT format from landing page
+      const settings = {
+        quality: 85,
+        outputFormat: selectedFormats.length > 0 ? selectedFormats : 'keep-original',
+        resizeOption: 'keep-original',
+        compressionAlgorithm: 'standard',
+        pageIdentifier: 'paid-user-compress', // For paid users
+      };
 
-          newResults.push({
-            id: `${file.id}-${format}`,
-            originalName: file.name,
-            originalSize: file.size,
-            compressedSize: blob.size,
-            compressionRatio: ((file.size - blob.size) / file.size) * 100,
-            downloadUrl: url,
-            outputFormat: format.toUpperCase()
-          });
+      formData.append('settings', JSON.stringify(settings));
 
-          completed++;
-          setProcessingProgress(Math.round((completed / totalOperations) * 100));
-        } catch (error) {
-          toast({
-            title: "Compression failed",
-            description: `Failed to compress ${file.name} to ${format.toUpperCase()}`,
-            variant: "destructive",
-          });
-        }
+      // Start progress simulation
+      const totalSize = filesToProcess.reduce((sum, file) => sum + file.size, 0);
+      const estimatedDuration = Math.max(1000, Math.min(5000, filesToProcess.length * 800 + totalSize / 1024 / 1024 * 100));
+      
+      let currentProgress = 15;
+      progressInterval = setInterval(() => {
+        const increment = Math.random() * 8 + 2;
+        currentProgress = Math.min(currentProgress + increment, 85);
+        setProcessingProgress(Math.floor(currentProgress));
+      }, Math.max(estimatedDuration / 20, 200));
+
+      // Make API call
+      const response = await fetch('/api/compress', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
       }
+
+      const data = await response.json();
+      
+      clearInterval(progressInterval);
+      setProcessingProgress(100);
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      // Convert API results to our format
+      if (data.results && data.results.length > 0) {
+        const newResults: CompressionResult[] = data.results.map((result: any) => ({
+          id: `${result.id || Date.now()}-${Math.random()}`,
+          originalName: result.originalName,
+          originalSize: result.originalSize,
+          compressedSize: result.compressedSize,
+          compressionRatio: result.compressionRatio,
+          downloadUrl: result.downloadUrl,
+          outputFormat: result.outputFormat.toUpperCase()
+        }));
+
+        setResults(newResults);
+        
+        toast({
+          title: "Compression complete!",
+          description: `Successfully processed ${newResults.length} file(s)`,
+        });
+      }
+
+      setIsProcessing(false);
+
+    } catch (error) {
+      console.error('Compression error:', error);
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+      
+      toast({
+        title: "Compression failed",
+        description: error instanceof Error ? error.message : "An error occurred during compression",
+        variant: "destructive",
+      });
+      
+      setIsProcessing(false);
+      setShowModal(false);
     }
-    
-    setResults(newResults);
-    setIsProcessing(false);
   };
 
   const toggleFormat = (format: string) => {
