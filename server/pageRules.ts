@@ -432,6 +432,226 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     ]
   },
 
+  // NEW TIER SYSTEM - Dynamic Compress Page
+  
+  // Free tier - 200/month, 7MB regular, 15MB RAW, batch 3
+  '/compress/free-tier': {
+    pageIdentifier: '/compress/free-tier',
+    displayName: 'Free Tier',
+    
+    monthly: 200,
+    daily: 10,
+    hourly: 3,
+    
+    maxFileSize: 7 * 1024 * 1024, // 7MB for regular files
+    maxConcurrentUploads: 3,
+    
+    inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
+                   'image/svg+xml', 'image/tiff', 'image/tif',
+                   '.cr2', '.arw', '.dng', '.nef', '.orf', '.raf', '.rw2'],
+    outputFormats: ['jpeg', 'png', 'webp', 'avif'],
+    autoConversionFormat: 'jpeg',
+    
+    requiresAuth: false,
+    requiresPayment: false,
+    
+    specialRules: [
+      'Free tier with 200 operations/month',
+      'RAW files limited to 15MB',
+      'Regular files limited to 7MB',
+      'Batch upload: 3 files max'
+    ]
+  },
+
+  // Starter Monthly - $9/month, 75MB, batch 10, unlimited
+  '/compress/starter-monthly': {
+    pageIdentifier: '/compress/starter-monthly',
+    displayName: 'Starter Monthly ($9)',
+    
+    monthly: 999999, // Unlimited
+    daily: 999999,
+    hourly: 999999,
+    
+    maxFileSize: 75 * 1024 * 1024, // 75MB
+    maxConcurrentUploads: 10,
+    
+    inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
+                   'image/svg+xml', 'image/tiff', 'image/tif',
+                   '.cr2', '.arw', '.dng', '.nef', '.orf', '.raf', '.rw2'],
+    outputFormats: ['jpeg', 'png', 'webp', 'avif'],
+    autoConversionFormat: 'jpeg',
+    
+    requiresAuth: true,
+    requiresPayment: true,
+    paymentAmount: 9,
+    subscriptionDuration: 30,
+    
+    specialRules: [
+      'Unlimited operations',
+      '75MB file size limit',
+      'Batch upload: 10 files',
+      'Authentication and payment required'
+    ]
+  },
+
+  // Starter Yearly - $49/year, 75MB, batch 10, unlimited
+  '/compress/starter-yearly': {
+    pageIdentifier: '/compress/starter-yearly',
+    displayName: 'Starter Yearly ($49)',
+    
+    monthly: 999999, // Unlimited
+    daily: 999999,
+    hourly: 999999,
+    
+    maxFileSize: 75 * 1024 * 1024, // 75MB
+    maxConcurrentUploads: 10,
+    
+    inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
+                   'image/svg+xml', 'image/tiff', 'image/tif',
+                   '.cr2', '.arw', '.dng', '.nef', '.orf', '.raf', '.rw2'],
+    outputFormats: ['jpeg', 'png', 'webp', 'avif'],
+    autoConversionFormat: 'jpeg',
+    
+    requiresAuth: true,
+    requiresPayment: true,
+    paymentAmount: 49,
+    subscriptionDuration: 365,
+    
+    specialRules: [
+      'Unlimited operations',
+      '75MB file size limit',
+      'Batch upload: 10 files',
+      'Authentication and payment required',
+      'Yearly billing'
+    ]
+  },
+
+  // Pro Monthly - $19/month, 150MB, batch 20, unlimited
+  '/compress/pro-monthly': {
+    pageIdentifier: '/compress/pro-monthly',
+    displayName: 'PRO Monthly ($19)',
+    
+    monthly: 999999, // Unlimited
+    daily: 999999,
+    hourly: 999999,
+    
+    maxFileSize: 150 * 1024 * 1024, // 150MB
+    maxConcurrentUploads: 20,
+    
+    inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
+                   'image/svg+xml', 'image/tiff', 'image/tif',
+                   '.cr2', '.arw', '.dng', '.nef', '.orf', '.raf', '.rw2'],
+    outputFormats: ['jpeg', 'png', 'webp', 'avif'],
+    autoConversionFormat: 'jpeg',
+    
+    requiresAuth: true,
+    requiresPayment: true,
+    paymentAmount: 19,
+    subscriptionDuration: 30,
+    
+    specialRules: [
+      'Unlimited operations',
+      '150MB file size limit',
+      'Batch upload: 20 files',
+      'Authentication and payment required'
+    ]
+  },
+
+  // Pro Yearly - $149/year, 150MB, batch 20, unlimited
+  '/compress/pro-yearly': {
+    pageIdentifier: '/compress/pro-yearly',
+    displayName: 'PRO Yearly ($149)',
+    
+    monthly: 999999, // Unlimited
+    daily: 999999,
+    hourly: 999999,
+    
+    maxFileSize: 150 * 1024 * 1024, // 150MB
+    maxConcurrentUploads: 20,
+    
+    inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
+                   'image/svg+xml', 'image/tiff', 'image/tif',
+                   '.cr2', '.arw', '.dng', '.nef', '.orf', '.raf', '.rw2'],
+    outputFormats: ['jpeg', 'png', 'webp', 'avif'],
+    autoConversionFormat: 'jpeg',
+    
+    requiresAuth: true,
+    requiresPayment: true,
+    paymentAmount: 149,
+    subscriptionDuration: 365,
+    
+    specialRules: [
+      'Unlimited operations',
+      '150MB file size limit',
+      'Batch upload: 20 files',
+      'Authentication and payment required',
+      'Yearly billing'
+    ]
+  },
+
+  // Business Monthly - $49/month, 200MB, batch 50, unlimited
+  '/compress/business-monthly': {
+    pageIdentifier: '/compress/business-monthly',
+    displayName: 'BUSINESS Monthly ($49)',
+    
+    monthly: 999999, // Unlimited
+    daily: 999999,
+    hourly: 999999,
+    
+    maxFileSize: 200 * 1024 * 1024, // 200MB
+    maxConcurrentUploads: 50,
+    
+    inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
+                   'image/svg+xml', 'image/tiff', 'image/tif',
+                   '.cr2', '.arw', '.dng', '.nef', '.orf', '.raf', '.rw2'],
+    outputFormats: ['jpeg', 'png', 'webp', 'avif'],
+    autoConversionFormat: 'jpeg',
+    
+    requiresAuth: true,
+    requiresPayment: true,
+    paymentAmount: 49,
+    subscriptionDuration: 30,
+    
+    specialRules: [
+      'Unlimited operations',
+      '200MB file size limit',
+      'Batch upload: 50 files',
+      'Authentication and payment required'
+    ]
+  },
+
+  // Business Yearly - $399/year, 200MB, batch 50, unlimited
+  '/compress/business-yearly': {
+    pageIdentifier: '/compress/business-yearly',
+    displayName: 'BUSINESS Yearly ($399)',
+    
+    monthly: 999999, // Unlimited
+    daily: 999999,
+    hourly: 999999,
+    
+    maxFileSize: 200 * 1024 * 1024, // 200MB
+    maxConcurrentUploads: 50,
+    
+    inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
+                   'image/svg+xml', 'image/tiff', 'image/tif',
+                   '.cr2', '.arw', '.dng', '.nef', '.orf', '.raf', '.rw2'],
+    outputFormats: ['jpeg', 'png', 'webp', 'avif'],
+    autoConversionFormat: 'jpeg',
+    
+    requiresAuth: true,
+    requiresPayment: true,
+    paymentAmount: 399,
+    subscriptionDuration: 365,
+    
+    specialRules: [
+      'Unlimited operations',
+      '200MB file size limit',
+      'Batch upload: 50 files',
+      'Authentication and payment required',
+      'Yearly billing'
+    ]
+  },
+
   // CR2 to PNG conversion - /convert/cr2-to-png
   '/convert/cr2-to-png': {
     pageIdentifier: '/convert/cr2-to-png',
