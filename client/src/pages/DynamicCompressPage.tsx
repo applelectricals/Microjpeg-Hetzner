@@ -372,9 +372,17 @@ const isConversionRequest = (originalFormat: string, targetFormat: string): bool
 export default function MicroJPEGLanding() {
   const { isAuthenticated, user } = useAuth();
   const [userTier, setUserTier] = useState<string>('free');
-  const [tierInfo, setTierInfo] = useState<TierInfo | null>(null);
+  const [tierInfo, setTierInfo] = useState<TierInfo | null>({
+    tierName: 'free',
+    tierDisplay: 'Free',
+    maxFileSize: 7,
+    maxRawFileSize: 15,
+    maxBatchSize: 3,
+    operationsLimit: 200,
+    pageIdentifier: 'free-no-auth'
+  });
   const [subscription, setSubscription] = useState<any>(null);
-  const [isLoadingTier, setIsLoadingTier] = useState(true);
+  const [isLoadingTier, setIsLoadingTier] = useState(false);
   
   // Use server usage data instead of local session data
   const [session, setSession] = useState<SessionData>(() => {
@@ -485,53 +493,40 @@ export default function MicroJPEGLanding() {
     return null;
   }, [userTier]);
   
-  // Fetch user tier information from API
+  // Fetch user tier information from API (non-blocking with timeout)
   useEffect(() => {
     const fetchTierInfo = async () => {
       try {
+        // Add 3-second timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
         const response = await fetch('/api/user/tier-info', {
-          credentials: 'include'
+          credentials: 'include',
+          signal: controller.signal
         });
+        
+        clearTimeout(timeoutId);
         
         if (response.ok) {
           const data: TierResponse = await response.json();
           setTierInfo(data.tier);
           setSubscription(data.subscription);
           setUserTier(data.tier.tierName);
+          console.log('✅ Tier loaded:', data.tier.tierName);
         } else {
-          // Default to free tier
-          const freeTier: TierInfo = {
-            tierName: 'free',
-            tierDisplay: 'Free',
-            maxFileSize: 7,
-            maxRawFileSize: 15,
-            maxBatchSize: 3,
-            operationsLimit: 200,
-            pageIdentifier: isAuthenticated ? 'free-auth' : 'free-no-auth'
-          };
-          setTierInfo(freeTier);
-          setUserTier('free');
+          console.log('⚠️ Tier API returned non-OK, using free tier');
         }
       } catch (error) {
-        console.error('Failed to fetch tier:', error);
-        // Default to free tier on error
-        const freeTier: TierInfo = {
-          tierName: 'free',
-          tierDisplay: 'Free',
-          maxFileSize: 7,
-          maxRawFileSize: 15,
-          maxBatchSize: 3,
-          operationsLimit: 200,
-          pageIdentifier: isAuthenticated ? 'free-auth' : 'free-no-auth'
-        };
-        setTierInfo(freeTier);
-        setUserTier('free');
-      } finally {
-        setIsLoadingTier(false);
+        console.log('⚠️ Tier fetch failed, using default free tier:', error);
+        // Already initialized with free tier, no action needed
       }
     };
 
-    fetchTierInfo();
+    // Only fetch if authenticated, otherwise keep default free tier
+    if (isAuthenticated) {
+      fetchTierInfo();
+    }
   }, [isAuthenticated]);
   
   // Lead magnet state
@@ -1460,16 +1455,9 @@ export default function MicroJPEGLanding() {
 
 
   // Show loading state while fetching tier
-  if (isLoadingTier) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <div className="text-white text-lg">Loading your workspace...</div>
-        </div>
-      </div>
-    );
-  }
+  // Loading screen removed - now non-blocking
+  // Tier loads in background while page is usable
+  
 
   return (
     <>
