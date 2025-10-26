@@ -313,13 +313,23 @@ export default function DynamicCompressPage() {
         formData.append('files', file as File);
       });
 
+      // Determine page identifier based on tier
+      let pageId = '/compress';
+      if (tierConfig.tierName === 'free') {
+        pageId = isAuthenticated ? 'free-auth' : 'free-no-auth';
+      } else if (tierConfig.tierName.includes('pro')) {
+        pageId = '/compress/pro';
+      } else if (tierConfig.tierName.includes('business')) {
+        pageId = '/compress/enterprise';
+      }
+
       // Prepare compression settings - EXACT format from landing page
       const settings = {
         quality: 85,
         outputFormat: selectedFormats.length > 0 ? selectedFormats : 'keep-original',
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
-        pageIdentifier: 'paid-user-compress', // For paid users
+        pageIdentifier: pageId,
       };
 
       formData.append('settings', JSON.stringify(settings));
@@ -462,6 +472,13 @@ export default function DynamicCompressPage() {
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left side - Hero Text */}
             <div className="space-y-6 text-center lg:text-left">
+              {/* Tier Badge */}
+              <div className="flex justify-center lg:justify-start">
+                <Badge className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-4 py-1 text-sm font-semibold">
+                  {tierConfig.tierDisplay} Plan
+                </Badge>
+              </div>
+              
               <div className="space-y-4 sm:space-y-6">
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
                   <span className="text-white">{tierConfig.heroTitle.split(' ')[0]} {tierConfig.heroTitle.split(' ')[1]}</span>{' '}
