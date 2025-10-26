@@ -2,7 +2,7 @@
  * SIMPLIFIED USER TIER API ROUTES
  * 
  * Endpoints for user tier info and usage
- * - GET /api/user/tier-info - Get user's tier and limits
+ * - GET /api/user/usage - Get user's tier and limits
  * - POST /api/user/check-operation - Check if user can perform operation
  * - POST /api/user/increment-usage - Increment usage counter
  */
@@ -13,10 +13,10 @@ import { pool } from '../db';
 const router = Router();
 
 /**
- * GET /api/user/tier-info
- * Get user's tier information and usage
+ * GET /api/user/usage
+ * Get user's tier information and usage/usage summary
  */
-router.get('/tier-info', async (req: Request, res: Response) => {
+router.get('/usage', async (req: Request, res: Response) => {
   try {
     // Get user email from session/auth
     const userEmail = req.user?.email || 'richngrand@gmail.com'; // Default for testing

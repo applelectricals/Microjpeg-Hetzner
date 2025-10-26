@@ -85,7 +85,28 @@ async function handleSubscriptionActivated(event: any) {
     periodEnd: new Date(subscription.billing_info.next_billing_time)
   });
 
-  console.log(`✅ Subscription activated: User ${customId} → ${tierName}`);
+  // ✅ NEW: Also update user_accounts table with tier
+  const tierSuffix = billingCycle === 'monthly' ? '-m' : '-y';
+  const fullTierName = tierName + tierSuffix; // e.g., 'starter-m', 'pro-y'
+  
+  try {
+    await db.execute(sql`
+      UPDATE user_accounts 
+      SET 
+        tier_name = ${fullTierName},
+        subscription_status = 'active',
+        subscription_start_date = ${new Date(subscription.start_time)},
+        subscription_end_date = ${new Date(subscription.billing_info.next_billing_time)},
+        payment_method = 'paypal',
+        payment_amount = ${parseFloat(subscription.billing_info.last_payment.amount.value)}
+      WHERE user_id = ${customId}
+    `);
+    console.log(`✅ User account updated: ${customId} → ${fullTierName}`);
+  } catch (error) {
+    console.error('❌ Failed to update user_accounts:', error);
+  }
+
+  console.log(`✅ Subscription activated: User ${customId} → ${fullTierName}`);
 }
 
 async function handleSubscriptionCancelled(event: any) {
@@ -95,6 +116,16 @@ async function handleSubscriptionCancelled(event: any) {
     UPDATE subscriptions 
     SET status = 'canceled', canceled_at = NOW()
     WHERE provider_subscription_id = ${subscriptionId}
+  `);
+
+  // ✅ NEW: Also downgrade user_accounts to free
+  await db.execute(sql`
+    UPDATE user_accounts 
+    SET tier_name = 'free', subscription_status = 'canceled'
+    WHERE user_id = (
+      SELECT user_id FROM subscriptions 
+      WHERE provider_subscription_id = ${subscriptionId}
+    )
   `);
 
   await db.execute(sql`
