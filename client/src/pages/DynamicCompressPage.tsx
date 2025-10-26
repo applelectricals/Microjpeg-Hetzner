@@ -372,17 +372,19 @@ const isConversionRequest = (originalFormat: string, targetFormat: string): bool
 export default function MicroJPEGLanding() {
   const { isAuthenticated, user } = useAuth();
   const [userTier, setUserTier] = useState<string>('free');
-  const [tierInfo, setTierInfo] = useState<TierInfo | null>({
-    tierName: 'free',
-    tierDisplay: 'Free',
-    maxFileSize: 7,
-    maxRawFileSize: 15,
-    maxBatchSize: 3,
-    operationsLimit: 200,
-    pageIdentifier: 'free-no-auth'
-  });
+  
+  // CRITICAL: Redirect non-paid users to free page
+  useEffect(() => {
+    if (!isAuthenticated) {
+      // Not logged in → Redirect to free page
+      window.location.href = '/free';
+      return;
+    }
+    // Logged in, check tier below
+  }, [isAuthenticated]);
+  const [tierInfo, setTierInfo] = useState<TierInfo | null>(null);
   const [subscription, setSubscription] = useState<any>(null);
-  const [isLoadingTier, setIsLoadingTier] = useState(false);
+  const [isLoadingTier, setIsLoadingTier] = useState(true); // Loading until we verify paid tier
   
   // Use server usage data instead of local session data
   const [session, setSession] = useState<SessionData>(() => {
@@ -493,7 +495,7 @@ export default function MicroJPEGLanding() {
     return null;
   }, [userTier]);
   
-  // Fetch user tier information from API (non-blocking with timeout)
+  // Fetch user tier information from API (paid users only)
   useEffect(() => {
     const fetchTierInfo = async () => {
       try {
@@ -510,22 +512,33 @@ export default function MicroJPEGLanding() {
         
         if (response.ok) {
           const data: TierResponse = await response.json();
+          
+          // CRITICAL: If free tier, redirect to /free page
+          if (data.tier.tierName === 'free') {
+            window.location.href = '/free';
+            return;
+          }
+          
           setTierInfo(data.tier);
           setSubscription(data.subscription);
           setUserTier(data.tier.tierName);
-          console.log('✅ Tier loaded:', data.tier.tierName);
+          console.log('✅ Paid tier loaded:', data.tier.tierName);
         } else {
-          console.log('⚠️ Tier API returned non-OK, using free tier');
+          console.log('⚠️ Tier API error, redirecting to free page');
+          window.location.href = '/free';
         }
       } catch (error) {
-        console.log('⚠️ Tier fetch failed, using default free tier:', error);
-        // Already initialized with free tier, no action needed
+        console.log('⚠️ Tier fetch failed, redirecting to free page:', error);
+        window.location.href = '/free';
       }
     };
 
-    // Only fetch if authenticated, otherwise keep default free tier
+    // Only fetch if authenticated
     if (isAuthenticated) {
       fetchTierInfo();
+    } else {
+      // Not authenticated → redirect
+      window.location.href = '/free';
     }
   }, [isAuthenticated]);
   
@@ -1455,8 +1468,17 @@ export default function MicroJPEGLanding() {
 
 
   // Show loading state while fetching tier
-  // Loading screen removed - now non-blocking
-  // Tier loads in background while page is usable
+  // Show loading while verifying paid tier
+  if (isLoadingTier) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="text-white text-lg">Verifying subscription...</div>
+        </div>
+      </div>
+    );
+  }
   
 
   return (

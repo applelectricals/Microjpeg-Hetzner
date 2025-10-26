@@ -4,17 +4,8 @@ import { pool } from '../db';
 
 const router = Router();
 
-// Tier configuration mapping
+// Tier configuration mapping - PAID TIERS ONLY
 const TIER_CONFIGS = {
-  'free': {
-    tierName: 'free',
-    tierDisplay: 'Free',
-    maxFileSize: 7,
-    maxRawFileSize: 15,
-    maxBatchSize: 3,
-    operationsLimit: 200,
-    pageIdentifier: 'free-auth'
-  },
   'starter-m': {
     tierName: 'starter-m',
     tierDisplay: 'Starter Monthly',
@@ -71,30 +62,26 @@ const TIER_CONFIGS = {
   }
 };
 
-// GET /api/user/tier-info
+// GET /api/user/tier-info - PAID TIERS ONLY
 router.get('/tier-info', async (req, res) => {
   try {
     // Check if user is authenticated
     if (!req.session?.userId) {
-      return res.json({
-        authenticated: false,
-        tier: {
-          ...TIER_CONFIGS['free'],
-          pageIdentifier: 'free-no-auth' // Not authenticated
-        }
+      return res.status(403).json({
+        error: 'Authentication required',
+        message: 'This endpoint is for paid subscribers only'
       });
     }
 
     // Fetch user from database
     const result = await pool.query(
-      'SELECT * FROM user_accounts WHERE user_id = $1',
+      'SELECT * FROM users WHERE id = $1',
       [req.session.userId]
     );
 
     if (result.rows.length === 0) {
-      return res.json({
-        authenticated: true,
-        tier: TIER_CONFIGS['free']
+      return res.status(404).json({
+        error: 'User not found'
       });
     }
 
@@ -104,20 +91,28 @@ router.get('/tier-info', async (req, res) => {
     const now = new Date();
     const isExpired = userData.subscription_end_date && new Date(userData.subscription_end_date) < now;
     
-    // If expired, downgrade to free
-    let effectiveTier = userData.tier_name || 'free';
-    if (isExpired && effectiveTier !== 'free') {
-      // Auto-downgrade to free
-      await pool.query(
-        'UPDATE user_accounts SET tier_name = $1, subscription_status = $2 WHERE user_id = $3',
-        ['free', 'expired', userData.user_id]
-      );
-      
-      effectiveTier = 'free';
+    // Get effective tier
+    let effectiveTier = userData.subscription_tier || 'free_registered';
+    
+    // If expired or free tier, return 403
+    if (isExpired || effectiveTier === 'free_registered' || effectiveTier === 'free') {
+      return res.status(403).json({
+        error: 'Subscription required',
+        message: 'Please subscribe to access premium features',
+        tier: effectiveTier
+      });
     }
 
-    // Get tier config
-    const tierConfig = TIER_CONFIGS[effectiveTier] || TIER_CONFIGS['free'];
+    // Get tier config (only paid tiers)
+    const tierConfig = TIER_CONFIGS[effectiveTier];
+    
+    if (!tierConfig) {
+      return res.status(403).json({
+        error: 'Invalid tier',
+        message: 'Your tier is not recognized',
+        tier: effectiveTier
+      });
+    }
 
     // Calculate days remaining
     let daysRemaining = null;
@@ -138,7 +133,7 @@ router.get('/tier-info', async (req, res) => {
       },
       user: {
         email: userData.email,
-        userId: userData.user_id
+        userId: userData.id
       }
     });
 
