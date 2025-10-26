@@ -55,7 +55,7 @@ interface TierConfig {
   features: Array<{ icon: string; title: string; subtitle: string }>;
 }
 
-// Tier configurations - matches new PAGE_RULES
+// Tier configurations - USE EXISTING PAGE IDENTIFIERS
 const TIER_CONFIGS: Record<string, TierConfig> = {
   'free': {
     tierName: 'free',
@@ -64,7 +64,7 @@ const TIER_CONFIGS: Record<string, TierConfig> = {
     maxRawFileSize: 15,
     maxBatchSize: 3,
     operationsLimit: 200,
-    pageIdentifier: '/compress/free-tier',
+    pageIdentifier: 'free-auth', // Use existing identifier
     heroTitle: 'Professional Image Compression',
     heroSubtitle: 'For Photographers & Developers',
     heroHighlight: 'Free Forever',
@@ -83,7 +83,7 @@ const TIER_CONFIGS: Record<string, TierConfig> = {
     maxRawFileSize: 75,
     maxBatchSize: 10,
     operationsLimit: 99999,
-    pageIdentifier: '/compress/starter-monthly',
+    pageIdentifier: 'premium-29', // Use existing premium identifier
     heroTitle: 'Professional Image Compression',
     heroSubtitle: 'Starter Plan - Perfect for Individual Use',
     heroHighlight: '$9/month',
@@ -102,7 +102,7 @@ const TIER_CONFIGS: Record<string, TierConfig> = {
     maxRawFileSize: 75,
     maxBatchSize: 10,
     operationsLimit: 99999,
-    pageIdentifier: '/compress/starter-yearly',
+    pageIdentifier: 'premium-29', // Use existing premium identifier
     heroTitle: 'Professional Image Compression',
     heroSubtitle: 'Starter Plan - Best Value',
     heroHighlight: '$49/year',
@@ -121,7 +121,7 @@ const TIER_CONFIGS: Record<string, TierConfig> = {
     maxRawFileSize: 150,
     maxBatchSize: 20,
     operationsLimit: 99999,
-    pageIdentifier: '/compress/pro-monthly',
+    pageIdentifier: 'premium-29', // Use existing premium identifier
     heroTitle: 'Professional Image Compression',
     heroSubtitle: 'PRO Plan - For Professionals',
     heroHighlight: '$19/month',
@@ -140,7 +140,7 @@ const TIER_CONFIGS: Record<string, TierConfig> = {
     maxRawFileSize: 150,
     maxBatchSize: 20,
     operationsLimit: 99999,
-    pageIdentifier: '/compress/pro-yearly',
+    pageIdentifier: 'premium-29', // Use existing premium identifier
     heroTitle: 'Professional Image Compression',
     heroSubtitle: 'PRO Plan - Best Value',
     heroHighlight: '$149/year',
@@ -159,7 +159,7 @@ const TIER_CONFIGS: Record<string, TierConfig> = {
     maxRawFileSize: 200,
     maxBatchSize: 50,
     operationsLimit: 99999,
-    pageIdentifier: '/compress/business-monthly',
+    pageIdentifier: 'enterprise-99', // Use existing enterprise identifier
     heroTitle: 'Professional Image Compression',
     heroSubtitle: 'BUSINESS Plan - Enterprise Grade',
     heroHighlight: '$49/month',
@@ -178,7 +178,7 @@ const TIER_CONFIGS: Record<string, TierConfig> = {
     maxRawFileSize: 200,
     maxBatchSize: 50,
     operationsLimit: 99999,
-    pageIdentifier: '/compress/business-yearly',
+    pageIdentifier: 'enterprise-99', // Use existing enterprise identifier
     heroTitle: 'Professional Image Compression',
     heroSubtitle: 'BUSINESS Plan - Best Value',
     heroHighlight: '$399/year',
@@ -306,6 +306,15 @@ export default function DynamicCompressPage() {
 
   // Process files - EXACT IMPLEMENTATION FROM LANDING PAGE
   const processFiles = async (filesToProcess: FileWithPreview[]) => {
+    console.log('🔍 DEBUG: Starting compression');
+    console.log('📊 Tier Config:', {
+      tierName: tierConfig.tierName,
+      tierDisplay: tierConfig.tierDisplay,
+      pageIdentifier: tierConfig.pageIdentifier,
+      maxFileSize: tierConfig.maxFileSize,
+      maxBatchSize: tierConfig.maxBatchSize
+    });
+    
     setIsProcessing(true);
     setShowModal(true);
     setProcessingProgress(15);
@@ -330,6 +339,7 @@ export default function DynamicCompressPage() {
         pageIdentifier: tierConfig.pageIdentifier,
       };
 
+      console.log('📤 Sending to API:', settings);
       formData.append('settings', JSON.stringify(settings));
 
       // Start progress simulation
