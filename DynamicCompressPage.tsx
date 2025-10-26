@@ -24,6 +24,7 @@ import webpIcon from '@/assets/format-icons/webp.jpg';
 import betaUser1 from '@assets/01_1756987891168.webp';
 import betaUser2 from '@assets/06_1756987891169.webp';
 import betaUser3 from '@assets/07_1756987891169.webp';
+
 // Lazy load heavy components for better performance
 const AdSenseAd = lazy(() => import('@/components/AdSenseAd').then(m => ({ default: m.AdSenseAd })));
 const OurProducts = lazy(() => import('@/components/our-products'));
@@ -56,13 +57,50 @@ interface SessionData {
   batchDownloadUrl?: string;
 }
 
+interface TierInfo {
+  tierName: string;
+  tierDisplay: string;
+  maxFileSize: number;
+  maxRawFileSize: number;
+  maxBatchSize: number;
+  operationsLimit: number;
+  pageIdentifier: string;
+}
+
+interface TierResponse {
+  authenticated: boolean;
+  tier: TierInfo;
+  subscription?: {
+    status: string;
+    startDate: string;
+    endDate: string;
+    paymentAmount: number;
+    daysRemaining: number;
+  };
+  user?: {
+    email: string;
+    userId: string;
+  };
+}
+
 // ✅ PAGE IDENTIFIER - NEVER change this constant
 const PAGE_IDENTIFIER = 'free-no-auth'; // Main landing page for anonymous users
 
 // All limits enforced server-side with IP-based tracking
 // Anonymous users: 500 monthly operations (no hourly/daily limits)
-const MAX_FILE_SIZE = 7 * 1024 * 1024; // 7MB per file for regular formats
-const MAX_RAW_FILE_SIZE = 15 * 1024 * 1024; // 15MB per file for RAW formats
+// Tier-aware limits helper (returns sizes in MB)
+const getTierLimits = (tier: string) => {
+  const limits: Record<string, { regular: number; raw: number; batch: number }> = {
+    free: { regular: 7, raw: 15, batch: 3 },
+    'starter-m': { regular: 75, raw: 75, batch: 10 },
+    'starter-y': { regular: 75, raw: 75, batch: 10 },
+    'pro-m': { regular: 150, raw: 150, batch: 20 },
+    'pro-y': { regular: 150, raw: 150, batch: 20 },
+    'business-m': { regular: 200, raw: 200, batch: 50 },
+    'business-y': { regular: 200, raw: 200, batch: 50 },
+  };
+  return limits[tier] || limits.free;
+};
 
 // FAQ Data Structure
 const FAQ_DATA = {
@@ -333,6 +371,18 @@ const isConversionRequest = (originalFormat: string, targetFormat: string): bool
 
 export default function MicroJPEGLanding() {
   const { isAuthenticated, user } = useAuth();
+  const [userTier, setUserTier] = useState<string>('free');
+  const [tierInfo, setTierInfo] = useState<TierInfo | null>({
+    tierName: 'free',
+    tierDisplay: 'Free',
+    maxFileSize: 7,
+    maxRawFileSize: 15,
+    maxBatchSize: 3,
+    operationsLimit: 200,
+    pageIdentifier: isAuthenticated ? 'free-auth' : 'free-no-auth'
+  });
+  const [subscription, setSubscription] = useState<any>(null);
+  const [isLoadingTier, setIsLoadingTier] = useState(false); // already initialized to free
   
   // Use server usage data instead of local session data
   const [session, setSession] = useState<SessionData>(() => {
@@ -376,6 +426,52 @@ export default function MicroJPEGLanding() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
+  // Fetch tier on mount
+  useEffect(() => {
+    const fetchTier = async () => {
+      try {
+        const response = await fetch('/api/user/tier-info', { credentials: 'include' });
+        if (response.ok) {
+          const data = await response.json();
+          if (data?.tier?.name) setUserTier(data.tier.name);
+        }
+      } catch (err) {
+        // silent - keep default tier
+        console.debug('Failed to fetch user tier', err);
+      }
+    };
+    if (isAuthenticated) fetchTier();
+  }, [isAuthenticated]);
+
+  // Helper to map user tier + auth to a canonical pageIdentifier
+  const getTierPageIdentifier = (tier: string, auth: boolean) => {
+    if (!auth) return 'free-no-auth';
+    if (tier === 'free') return 'free-auth';
+    if (tier.startsWith('starter')) return 'premium-29';
+    if (tier.startsWith('pro')) return 'premium-29';
+    if (tier.startsWith('business')) return 'enterprise-99';
+    return 'free-auth';
+  };
+
+  // Helper to map internal tier keys to a friendly display name used in the hero
+  const getTierDisplayName = (tier: string) => {
+    const names: Record<string, string> = {
+      'starter-m': '$9/month',
+      'starter-y': '$49/year',
+      'pro-m': '$19/month',
+      'pro-y': '$149/year',
+      'business-m': '$49/month',
+      'business-y': '$399/year',
+    };
+    return names[tier] || 'Free Forever';
+  };
+
+  // Compute current tier limits (sizes in bytes)
+  const tierLimits = getTierLimits(userTier);
+  const MAX_FILE_SIZE = tierLimits.regular * 1024 * 1024;
+  const MAX_RAW_FILE_SIZE = tierLimits.raw * 1024 * 1024;
+  const MAX_BATCH_SIZE = tierLimits.batch;
+
   // Simple client-side file validation - server enforces all limits with IP tracking
   const validateFile = useCallback(async (file: File, isUserAuthenticated: boolean = false): Promise<string | null> => {
     const fileExtension = file.name.toLowerCase().split('.').pop();
@@ -385,17 +481,53 @@ export default function MicroJPEGLanding() {
       return `${file.name}: Unsupported format. Please use JPEG, PNG, WebP, AVIF, TIFF, SVG, or RAW formats (CR2, ARW, DNG, NEF, ORF, RAF, RW2).`;
     }
     
-    // Use different file size limits for RAW vs regular files
-    const maxSize = isRawFormat ? MAX_RAW_FILE_SIZE : MAX_FILE_SIZE;
-    const sizeLabel = isRawFormat ? "15MB" : "7MB";
-    const fileType = isRawFormat ? "RAW" : "regular";
+  // Use different file size limits for RAW vs regular files
+  const maxSize = isRawFormat ? MAX_RAW_FILE_SIZE : MAX_FILE_SIZE;
+  const sizeLabel = `${isRawFormat ? tierLimits.raw : tierLimits.regular}MB`;
+  const fileType = isRawFormat ? "RAW" : "regular";
     
     if (file.size > maxSize) {
       return `${file.name}: File too large. Maximum size is ${sizeLabel} for ${fileType} files.`;
     }
     
     return null;
-  }, []);
+  }, [userTier]);
+  
+  // Fetch user tier information from API (non-blocking)
+  useEffect(() => {
+    const fetchTierInfo = async () => {
+      try {
+        // Add 3-second timeout to prevent hanging
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 3000);
+        
+        const response = await fetch('/api/user/tier-info', {
+          credentials: 'include',
+          signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (response.ok) {
+          const data: TierResponse = await response.json();
+          setTierInfo(data.tier);
+          setSubscription(data.subscription);
+          setUserTier(data.tier.tierName);
+          console.log('✅ Tier loaded:', data.tier.tierName);
+        } else {
+          console.log('⚠️ Tier API returned non-OK status, using free tier');
+        }
+      } catch (error) {
+        console.log('⚠️ Tier fetch failed, using default free tier:', error);
+        // Already initialized with free tier, so just log
+      }
+    };
+
+    // Only fetch if authenticated
+    if (isAuthenticated) {
+      fetchTierInfo();
+    }
+  }, [isAuthenticated]);
   
   // Lead magnet state
   const [leadMagnetEmail, setLeadMagnetEmail] = useState('');
@@ -694,7 +826,7 @@ export default function MicroJPEGLanding() {
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
         sessionId: sessionManager.getSessionId(), // ← ADD THIS LINE
-        pageIdentifier: 'free-no-auth', // ← ADD THIS TOO (if not already there)
+  pageIdentifier: getTierPageIdentifier(userTier, isAuthenticated),
       };
 
       // Add settings to FormData
@@ -949,7 +1081,7 @@ export default function MicroJPEGLanding() {
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
         sessionId: sessionManager.getSessionId(), // ← ADD THIS LINE
-        pageIdentifier: 'free-no-auth', // ← ADD THIS TOO (if not already there)
+  pageIdentifier: getTierPageIdentifier(userTier, isAuthenticated),
       };
 
       formData.append('settings', JSON.stringify(settings));
@@ -1352,6 +1484,17 @@ export default function MicroJPEGLanding() {
                 {isAuthenticated ? (
                   // Signed-in users see upgrade message
                   <>
+                    {/* Tier Badge - shows for paid users */}
+                    {isAuthenticated && userTier !== 'free' && subscription && (
+                      <Badge className="bg-gradient-to-r from-teal-500 to-teal-600 text-white px-6 py-2 text-base font-semibold mb-4 shadow-lg">
+                        {getTierDisplayName(userTier)} Plan
+                        {subscription?.daysRemaining && (
+                          <span className="ml-2 opacity-90">
+                            • {subscription.daysRemaining} days remaining
+                          </span>
+                        )}
+                      </Badge>
+                    )}
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
                       <span className="text-white">Professional Image</span>{' '}
                       <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-yellow-400">
@@ -1361,7 +1504,7 @@ export default function MicroJPEGLanding() {
                       <span className="text-white">For Photographers & Developers</span>
                       <br />
                       <span className="text-3xl sm:text-4xl lg:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">
-                        Free Forever
+                        {userTier === 'free' ? 'Free Forever' : getTierDisplayName(userTier)}
                       </span>
                     </h1>
                     <p className="text-lg sm:text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
@@ -1381,7 +1524,7 @@ export default function MicroJPEGLanding() {
                       <span className="text-white">For Photographers & Developers</span>
                       <br />
                       <span className="text-3xl sm:text-4xl lg:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">
-                        Free Forever
+                        {userTier === 'free' ? 'Free Forever' : getTierDisplayName(userTier)}
                       </span>
                     </h1>
                     <p className="text-lg sm:text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
@@ -1500,8 +1643,16 @@ export default function MicroJPEGLanding() {
         <p className="text-base font-medium text-white">
           Drop images here or click to upload
         </p>
-        <p className="text-sm text-gray-400">
-          Each image up to 15MB for RAW & 7MB for Regular
+        <p className="text-sm text-gray-400 mt-2">
+          {tierInfo ? (
+            <>
+              Each image up to {tierInfo.maxRawFileSize}MB for RAW & {tierInfo.maxFileSize}MB for Regular
+              <br />
+              (CR2, RAW, JPEG, PNG, WEBP, AVIF, SVG, TIFF | Max {tierInfo.maxBatchSize} files)
+            </>
+          ) : (
+            'Loading tier information...'
+          )}
         </p>
         <p className="text-xs text-gray-500">
           JPG, PNG, WEBP, AVIF, SVG, TIFF, RAW (CR2, ARW, DNG, NEF, ORF, RAF, RW2)
