@@ -92,12 +92,12 @@ const PAGE_IDENTIFIER = 'free-no-auth'; // Main landing page for anonymous users
 const getTierLimits = (tier: string) => {
   const limits: Record<string, { regular: number; raw: number; batch: number }> = {
     free: { regular: 7, raw: 15, batch: 3 },
-    'starter-m': { regular: 75, raw: 75, batch: 10 },
-    'starter-y': { regular: 75, raw: 75, batch: 10 },
-    'pro-m': { regular: 150, raw: 150, batch: 20 },
-    'pro-y': { regular: 150, raw: 150, batch: 20 },
-    'business-m': { regular: 200, raw: 200, batch: 50 },
-    'business-y': { regular: 200, raw: 200, batch: 50 },
+    'starter-m': { regular: 75, raw: 75, batch: 5 },
+    'starter-y': { regular: 75, raw: 75, batch: 5 },
+    'pro-m': { regular: 150, raw: 150, batch: 10 },
+    'pro-y': { regular: 150, raw: 150, batch: 10 },
+    'business-m': { regular: 200, raw: 200, batch: 20 },
+    'business-y': { regular: 200, raw: 200, batch: 20 },
   };
   return limits[tier] || limits.free;
 };
@@ -1175,7 +1175,7 @@ export default function MicroJPEGLanding() {
     const errors: string[] = [];
 
     // Check batch upload limit - free tier page allows only 1 file at a time
-    const maxBatchSize = 1; // Anonymous users: 1 file at a time
+   // const maxBatchSize = 1; // Anonymous users: 1 file at a time
     if (fileArray.length > maxBatchSize) {
       toast({
         title: "Upload limit reached",
