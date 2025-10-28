@@ -84,25 +84,10 @@ interface TierResponse {
 }
 
 // ============================================
-// CONSTANTS
+// ✅ FIXED: Tier-aware limits (NO hardcoded PAGE_IDENTIFIER)
 // ============================================
-const SUPPORTED_FORMATS = [
-  'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif',
-  'image/tiff', 'image/tif', 'image/x-tiff', 'image/x-tif', 'image/svg+xml',
-  '', '.cr2', '.arw', '.dng', '.nef', '.orf', '.raf', '.rw2'
-];
-
-const OUTPUT_FORMATS = ['jpeg', 'png', 'webp', 'avif', 'tiff'];
-
-// ============================================
-// TIER CONFIGURATION
-// ============================================
-// All limits enforced server-side with IP-based tracking
-// Anonymous users: 500 monthly operations (no hourly/daily limits)
-// Tier-aware limits helper (returns sizes in MB)
 const getTierLimits = (tier: string) => {
   const limits: Record<string, { regular: number; raw: number; batch: number }> = {
-    free: { regular: 7, raw: 15, batch: 3 },
     'starter-m': { regular: 75, raw: 75, batch: 5 },
     'starter-y': { regular: 75, raw: 75, batch: 5 },
     'pro-m': { regular: 150, raw: 150, batch: 10 },
@@ -113,7 +98,7 @@ const getTierLimits = (tier: string) => {
   return limits[tier] || limits['starter-m'];
 };
 
-// Maps new tiers to legacy backend identifiers
+// ✅ FIXED: Maps tiers to legacy backend identifiers
 const getTierPageIdentifier = (tier: string): string => {
   const tierMap: Record<string, string> = {
     'starter-m': 'premium-29',
@@ -123,12 +108,19 @@ const getTierPageIdentifier = (tier: string): string => {
     'business-m': 'enterprise-99',
     'business-y': 'enterprise-99',
   };
-  
-  const identifier = tierMap[tier];
-  
-  console.log(`🔍 getTierPageIdentifier: tier="${tier}" → identifier="${identifier}"`);
-  
-  return identifier || 'premium-29';
+  return tierMap[tier] || 'premium-29';
+};
+
+const getTierDisplayName = (tier: string) => {
+  const names: Record<string, string> = {
+    'starter-m': '$9/month',
+    'starter-y': '$49/year',
+    'pro-m': '$19/month',
+    'pro-y': '$149/year',
+    'business-m': '$49/month',
+    'business-y': '$399/year',
+  };
+  return names[tier] || 'Free Forever';
 };
 
 // FAQ Data Structure
@@ -229,9 +221,13 @@ const FAQ_DATA = {
   ]
 };
 
-// SessionManager removed - using imported sessionManager and DualUsageTracker
+const SUPPORTED_FORMATS = [
+  'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif',
+  'image/tiff', 'image/tif', 'image/x-tiff', 'image/x-tif', 'image/svg+xml',
+  '', '.cr2', '.arw', '.dng', '.nef', '.orf', '.raf', '.rw2'
+];
+const OUTPUT_FORMATS = ['jpeg', 'png', 'webp', 'avif', 'tiff'];
 
-// Processing Progress Estimation
 class ProcessingEstimator {
   static estimateTime(file: File, operation: 'compress' | 'convert'): number {
     const sizeMB = file.size / (1024 * 1024);
@@ -264,9 +260,6 @@ class ProcessingEstimator {
   }
 }
 
-// validateFile function moved inside component to access checkOperation hook
-
-// Helper function to group results by original filename
 const groupResultsByOriginalName = (results: CompressionResult[]) => {
   const groups = new Map<string, CompressionResult[]>();
   
@@ -284,36 +277,35 @@ const groupResultsByOriginalName = (results: CompressionResult[]) => {
   }));
 };
 
-// Helper function to get format-specific styling
 const getFormatInfo = (format: string) => {
   const formatMap: Record<string, { icon: string; color: string; bgColor: string; textColor: string }> = {
     'avif': { 
       icon: avifIcon, 
-      color: '#F59E0B', // Yellow/orange
+      color: '#F59E0B',
       bgColor: '#FEF3C7', 
       textColor: '#92400E' 
     },
     'jpeg': { 
       icon: jpegIcon, 
-      color: '#10B981', // Green
+      color: '#10B981',
       bgColor: '#D1FAE5', 
       textColor: '#065F46' 
     },
     'jpg': { 
       icon: jpegIcon, 
-      color: '#10B981', // Green
+      color: '#10B981',
       bgColor: '#D1FAE5', 
       textColor: '#065F46' 
     },
     'png': { 
       icon: pngIcon, 
-      color: '#3B82F6', // Blue
+      color: '#3B82F6',
       bgColor: '#DBEAFE', 
       textColor: '#1E40AF' 
     },
     'webp': { 
       icon: webpIcon, 
-      color: '#F97316', // Orange
+      color: '#F97316',
       bgColor: '#FED7AA', 
       textColor: '#EA580C' 
     }
@@ -327,8 +319,6 @@ const getFormatInfo = (format: string) => {
   };
 };
 
-// Main Component
-// Social sharing tracking function
 const trackSocialShare = async (platform: string) => {
   try {
     const response = await fetch('/api/social-share', {
@@ -346,34 +336,22 @@ const trackSocialShare = async (platform: string) => {
       const data = await response.json();
       if (data.points) {
         const platformName = platform.charAt(0).toUpperCase() + platform.slice(1);
-        // You can add toast notification here if needed
       }
     }
   } catch (error) {
-    // Silently fail - don't interrupt user experience
+    // Silently fail
   }
 };
 
-// Simplified social sharing function will be defined inside the component
-
-// Loyalty program sharing function will be defined inside the component
-
-
-// Results sharing function - shares actual compression results (moved inside component for session access)
-
-// Helper function to check if format conversion is needed
 const isConversionRequest = (originalFormat: string, targetFormat: string): boolean => {
-  // Normalize formats (remove dots and convert to lowercase)
   const normalizeFormat = (format: string) => format.replace('.', '').toLowerCase();
   const original = normalizeFormat(originalFormat);
   const target = normalizeFormat(targetFormat);
   
-  // If target is 'keep-original' or same as original, no conversion needed
   if (target === 'keep-original' || target === original) {
     return false;
   }
   
-  // Format aliases mapping
   const formatAliases: { [key: string]: string } = {
     'jpg': 'jpeg',
     'jpeg': 'jpeg',
@@ -385,7 +363,6 @@ const isConversionRequest = (originalFormat: string, targetFormat: string): bool
   const normalizedOriginal = formatAliases[original] || original;
   const normalizedTarget = formatAliases[target] || target;
   
-  // Return true if formats are different (conversion needed)
   return normalizedOriginal !== normalizedTarget;
 };
 
@@ -393,35 +370,30 @@ export default function MicroJPEGLanding() {
   const { isAuthenticated, user } = useAuth();
   const [userTier, setUserTier] = useState<string>('free');
   
-  // CRITICAL: Redirect non-paid users to free page
+  // ✅ FIXED: Redirect free users to landing page
   useEffect(() => {
     if (!isAuthenticated) {
-      // Not logged in → Redirect to free page
-      window.location.href = '/free';
+      window.location.href = '/';
       return;
     }
-    // Logged in, check tier below
   }, [isAuthenticated]);
+  
   const [tierInfo, setTierInfo] = useState<TierInfo | null>(null);
   const [subscription, setSubscription] = useState<any>(null);
-  const [isLoadingTier, setIsLoadingTier] = useState(true); // Loading until we verify paid tier
+  const [isLoadingTier, setIsLoadingTier] = useState(true);
   
-  // Use server usage data instead of local session data
   const [session, setSession] = useState<SessionData>(() => {
     const initialSession = sessionManager.getSession();
     return initialSession;
   });
 
-  // Server usage data automatically updates via React Query
-
-  // Keep component session state in sync with SessionManager
   useEffect(() => {
     const currentSession = sessionManager.getSession();
     if (currentSession.results.length !== session.results.length) {
-      console.log('Syncing session state - SessionManager has', currentSession.results.length, 'results, component has', session.results.length);
       setSession(currentSession);
     }
   }, [session.results.length]);
+  
   const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
   const [newlyAddedFiles, setNewlyAddedFiles] = useState<FileWithPreview[]>([]);
   const [fileObjectUrls, setFileObjectUrls] = useState<Map<string, string>>(new Map());
@@ -431,15 +403,14 @@ export default function MicroJPEGLanding() {
   const [processingFileIds, setProcessingFileIds] = useState<Set<string>>(new Set());
   const [formatQueue, setFormatQueue] = useState<string[]>([]);
   const [currentlyProcessingFormat, setCurrentlyProcessingFormat] = useState<string | null>(null);
-  const [conversionEnabled, setConversionEnabled] = useState(true); // Always enable format selection
-  const [selectedFormats, setSelectedFormats] = useState<string[]>(['jpeg']); // Default to JPEG compression/conversion
+  const [conversionEnabled, setConversionEnabled] = useState(true);
+  const [selectedFormats, setSelectedFormats] = useState<string[]>(['jpeg']);
   const [showModal, setShowModal] = useState(false);
   const [showPricing, setShowPricing] = useState(false);
   const [modalState, setModalState] = useState<'processing' | 'complete'>('processing');
   const [dragActive, setDragActive] = useState(false);
   const [showAllFormats, setShowAllFormats] = useState(false);
   
-  // Launch offer dialog states
   const [showSignInDialog, setShowSignInDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [claimingOffer, setClaimingOffer] = useState(false);
@@ -448,7 +419,6 @@ export default function MicroJPEGLanding() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  // Fetch tier on mount
   useEffect(() => {
     const fetchTier = async () => {
       try {
@@ -458,43 +428,18 @@ export default function MicroJPEGLanding() {
           if (data?.tier?.name) setUserTier(data.tier.name);
         }
       } catch (err) {
-        // silent - keep default tier
         console.debug('Failed to fetch user tier', err);
       }
     };
     if (isAuthenticated) fetchTier();
   }, [isAuthenticated]);
 
-  // Helper to map user tier + auth to a canonical pageIdentifier
-  const getTierPageIdentifier = (tier: string, auth: boolean) => {
-    //if (!auth) return 'free-no-auth';
-    //if (tier === 'free') return 'free-auth';
-    if (tier.startsWith('starter')) return 'premium-29';
-    if (tier.startsWith('pro')) return 'premium-29';
-    if (tier.startsWith('business')) return 'enterprise-99';
-    return 'free-auth';
-  };
-
-  // Helper to map internal tier keys to a friendly display name used in the hero
-  const getTierDisplayName = (tier: string) => {
-    const names: Record<string, string> = {
-      'starter-m': '$9/month',
-      'starter-y': '$49/year',
-      'pro-m': '$19/month',
-      'pro-y': '$149/year',
-      'business-m': '$49/month',
-      'business-y': '$399/year',
-    };
-    return names[tier] || 'Free Forever';
-  };
-
-  // Compute current tier limits (sizes in bytes)
+  // ✅ FIXED: Compute tier limits dynamically
   const tierLimits = getTierLimits(userTier);
   const MAX_FILE_SIZE = tierLimits.regular * 1024 * 1024;
   const MAX_RAW_FILE_SIZE = tierLimits.raw * 1024 * 1024;
   const MAX_BATCH_SIZE = tierLimits.batch;
 
-  // Simple client-side file validation - server enforces all limits with IP tracking
   const validateFile = useCallback(async (file: File, isUserAuthenticated: boolean = false): Promise<string | null> => {
     const fileExtension = file.name.toLowerCase().split('.').pop();
     const isRawFormat = ['.cr2', '.arw', '.dng', '.nef', '.orf', '.rw2'].some(ext => file.name.toLowerCase().endsWith(ext));
@@ -503,23 +448,21 @@ export default function MicroJPEGLanding() {
       return `${file.name}: Unsupported format. Please use JPEG, PNG, WebP, AVIF, TIFF, SVG, or RAW formats (CR2, ARW, DNG, NEF, ORF, RAF, RW2).`;
     }
     
-  // Use different file size limits for RAW vs regular files
-  const maxSize = isRawFormat ? MAX_RAW_FILE_SIZE : MAX_FILE_SIZE;
-  const sizeLabel = `${isRawFormat ? tierLimits.raw : tierLimits.regular}MB`;
-  const fileType = isRawFormat ? "RAW" : "regular";
+    const maxSize = isRawFormat ? MAX_RAW_FILE_SIZE : MAX_FILE_SIZE;
+    const sizeLabel = `${isRawFormat ? tierLimits.raw : tierLimits.regular}MB`;
+    const fileType = isRawFormat ? "RAW" : "regular";
     
     if (file.size > maxSize) {
       return `${file.name}: File too large. Maximum size is ${sizeLabel} for ${fileType} files.`;
     }
     
     return null;
-  }, [userTier]);
+  }, [tierLimits, MAX_FILE_SIZE, MAX_RAW_FILE_SIZE]);
   
-  // Fetch user tier information from API (paid users only)
+  // ✅ FIXED: Check if free tier and redirect to landing page
   useEffect(() => {
     const fetchTierInfo = async () => {
       try {
-        // Add 3-second timeout to prevent hanging
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
         
@@ -533,33 +476,28 @@ export default function MicroJPEGLanding() {
         if (response.ok) {
           const data: TierResponse = await response.json();
           
-          // CRITICAL: If free tier, redirect to /free page
-          if (data.tier.tierName === 'free') {
-            window.location.href = '/free';
+          // ✅ CRITICAL: If free tier, redirect to landing page
+          if (data.tier.tierName === 'free' || data.tier.tierName === 'free_registered' || data.tier.tierName === 'free_anonymous') {
+            window.location.href = '/';
             return;
           }
           
           setTierInfo(data.tier);
           setSubscription(data.subscription);
           setUserTier(data.tier.tierName);
-          setIsLoadingTier(false); // ✅ CRITICAL: Stop loading
-          console.log('✅ Paid tier loaded:', data.tier.tierName);
+          setIsLoadingTier(false);
         } else {
-          console.log('⚠️ Tier API error, redirecting to free page');
-          window.location.href = '/free';
+          window.location.href = '/';
         }
       } catch (error) {
-        console.log('⚠️ Tier fetch failed, redirecting to free page:', error);
-        window.location.href = '/free';
+        window.location.href = '/';
       }
     };
 
-    // Only fetch if authenticated
     if (isAuthenticated) {
       fetchTierInfo();
     } else {
-      // Not authenticated → redirect
-      window.location.href = '/free';
+      window.location.href = '/';
     }
   }, [isAuthenticated]);
   
