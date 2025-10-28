@@ -131,7 +131,103 @@ const getTierPageIdentifier = (tier: string): string => {
   return identifier || 'premium-29';
 };
 
-
+// FAQ Data Structure
+const FAQ_DATA = {
+  General: [
+    {
+      question: "Why should I compress my images for my website?",
+      answer: "Optimizing your images with Micro JPEG brings several benefits to your website. Micro JPEG reduces file sizes by up to 80% without sacrificing quality, leading to faster page loads. This optimization is essential for keeping user attention and ensuring an enjoyable user experience. Additionally, it minimizes bandwidth usage, making your website more efficient and cost-effective. Image compression also plays a role in SEO, as efficiently compressed images contribute to faster page speeds and improve your website's search engine ranking."
+    },
+    {
+      question: "What file formats does Micro JPEG support for image compression?",
+      answer: "Micro JPEG supports over 13 input formats including JPEG, PNG, WebP, AVIF, TIFF, SVG, BMP, GIF, ICO, and RAW formats (CR2, NEF, ARW, DNG, ORF, RW2, PEF, SRW, RAF). You can compress to popular web formats like JPEG, PNG, WebP, and AVIF for optimal web performance."
+    },
+    {
+      question: "Is the privacy of my images ensured?",
+      answer: "Absolutely! Your privacy is our top priority. All uploaded images are automatically deleted from our servers within 24 hours. We use enterprise-grade security measures to protect your data during processing. Your images are never stored permanently, shared with third parties, or used for any purpose other than compression. We're GDPR compliant and maintain strict data protection standards."
+    },
+    {
+      question: "What does Micro JPEG do?",
+      answer: "Micro JPEG is a professional image compression and optimization service that helps websites load faster by reducing image file sizes without losing quality. We offer both a user-friendly web interface and a powerful API for developers, supporting batch processing, format conversion, and advanced compression algorithms."
+    },
+    {
+      question: "Why did you create Micro JPEG?",
+      answer: "We created Micro JPEG to solve the growing problem of slow-loading websites caused by large image files. With the increasing importance of page speed for SEO and user experience, we wanted to provide the most advanced compression technology that maintains visual quality while dramatically reducing file sizes. Our goal is to make the web faster, one image at a time."
+    }
+  ],
+  Compression: [
+    {
+      question: "How much compression can I expect?",
+      answer: "Micro JPEG typically achieves 60-80% file size reduction while maintaining excellent visual quality. The exact compression ratio depends on your original image format, quality settings, and content type. Our advanced algorithms are specifically optimized for web images and often outperform other compression services."
+    },
+    {
+      question: "What's the difference between lossy and lossless compression?",
+      answer: "Lossy compression removes some image data to achieve smaller file sizes, which may slightly reduce quality but is often imperceptible. Lossless compression reduces file size without any quality loss by optimizing how the data is stored. Micro JPEG offers both options, allowing you to choose based on your specific needs."
+    },
+    {
+      question: "Can I compress images in bulk?",
+      answer: "Yes! Premium users can upload and compress multiple images simultaneously with our batch processing feature. You can also download all compressed images as a single ZIP file. Free users can compress one image at a time, while Premium users can process up to 5 images concurrently."
+    },
+    {
+      question: "Do you support RAW image formats?",
+      answer: "Yes, we support popular RAW formats including CR2 (Canon), NEF (Nikon), ARW (Sony), DNG (Adobe), and others. RAW files are converted to web-optimized formats like JPEG or PNG with professional-grade processing to maintain the highest possible quality."
+    }
+  ],
+  API: [
+    {
+      question: "How do I get started with the Micro JPEG API?",
+      answer: "Getting started is simple! Sign up for a free account, generate your API key from the dashboard, and you'll have 500 free operations per month. Our comprehensive documentation includes code examples in multiple programming languages, and you can start compressing images within minutes."
+    },
+    {
+      question: "What are the API rate limits?",
+      answer: "Free tier users get 500 operations/month with 25 operations/day and 5 operations/hour limits. Premium users get 50,000 operations/month with higher rate limits. Enterprise users have custom limits based on their needs. All limits reset monthly."
+    },
+    {
+      question: "Do you offer SDKs for different programming languages?",
+      answer: "Our REST API works with any programming language that can make HTTP requests. We provide detailed documentation with examples in Python, JavaScript, PHP, cURL, and more. We're also working on official SDKs for popular languages - contact us if you have specific requirements."
+    },
+    {
+      question: "Can I use the API for commercial projects?",
+      answer: "Absolutely! Our API is designed for commercial use. We offer different tiers to match your usage needs, from small websites to large-scale applications processing millions of images. Enterprise users get dedicated support and custom solutions."
+    }
+  ],
+  Pricing: [
+    {
+      question: "Is there a free plan available?",
+      answer: "Yes! Our free plan includes 500 compressions per month, web interface access, API access, support for all image formats, and community support. It's perfect for trying our service or small personal projects."
+    },
+    {
+      question: "What's included in the Premium plan?",
+      answer: "Premium ($20/month) includes 50,000 operations, larger file size limits (100MB), batch processing, priority support, advanced compression settings, multiple output formats, and higher API rate limits. Perfect for professional websites and developers."
+    },
+    {
+      question: "Do you offer Enterprise solutions?",
+      answer: "Yes! Our Enterprise plan includes unlimited operations, dedicated infrastructure, custom integrations, SLA guarantees, dedicated account management, and white-label solutions. Contact our sales team for custom pricing based on your specific needs."
+    },
+    {
+      question: "Can I cancel my subscription anytime?",
+      answer: "Yes, you can cancel your subscription at any time with no cancellation fees. Your subscription will continue until the end of your current billing period, and you can always downgrade to our free plan. We also offer a 30-day money-back guarantee for new Premium subscriptions."
+    }
+  ],
+  WordPress: [
+    {
+      question: "How does the WordPress plugin work?",
+      answer: "Our WordPress plugin automatically compresses images when you upload them to your media library. It integrates seamlessly with your existing workflow - just install, configure your compression settings, and all new uploads will be optimized automatically. You can also bulk-optimize existing images."
+    },
+    {
+      question: "Will the plugin slow down my website?",
+      answer: "Not at all! The compression happens in the background via our API, so it won't affect your website's performance. In fact, the compressed images will make your website load faster for visitors. The plugin is lightweight and optimized for minimal impact on your WordPress installation."
+    },
+    {
+      question: "Can I optimize existing images in my media library?",
+      answer: "Yes! The plugin includes a bulk optimization feature that lets you compress all existing images in your media library with just a few clicks. You can select specific images or optimize your entire library, and track the progress in real-time."
+    },
+    {
+      question: "Is the WordPress plugin free?",
+      answer: "The plugin itself is free to install, but it uses your Micro JPEG API quota. Free accounts get 500 compressions per month, which works great for small to medium websites. For larger sites, you might want to consider our Premium plan for higher limits."
+    }
+  ]
+};
 
 // SessionManager removed - using imported sessionManager and DualUsageTracker
 
