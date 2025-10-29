@@ -1197,7 +1197,7 @@ app.post("/api/compress", upload.array('files', 20), requireScopeFromAuth, async
   console.log('User:', req.user?.email || 'anonymous');
   console.log('Files count:', req.files?.length);
   console.log('Files sizes:', req.files?.map(f => `${f.originalname}: ${f.size} bytes`));
-
+   }
 // Compression endpoint for both guest and authenticated users  
 app.post("/api/compress", upload.array('files', 20), requireScopeFromAuth, async (req, res) => {
   try {
