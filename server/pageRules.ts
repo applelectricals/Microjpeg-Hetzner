@@ -135,9 +135,9 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     pageIdentifier: 'premium-29',
     displayName: 'Premium Plan ($29)',
     
-    monthly: 10000,
-    daily: 334, // Roughly 10000/30 days
-    hourly: 100,
+    //monthly: 10000,
+    //daily: 334, // Roughly 10000/30 days
+    //hourly: 100,
     
     maxFileSize: 50 * 1024 * 1024, // 50MB
     maxConcurrentUploads: 3,
@@ -170,9 +170,9 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     pageIdentifier: 'enterprise-99',
     displayName: 'Enterprise Plan ($99)',
     
-    monthly: 50000,
-    daily: 1667, // Roughly 50000/30 days
-    hourly: 999999, // No rate limits
+    //monthly: 50000,
+    //daily: 1667, // Roughly 50000/30 days
+    //hourly: 999999, // No rate limits
     
     maxFileSize: 200 * 1024 * 1024, // 200MB
     maxConcurrentUploads: 5,
@@ -294,9 +294,9 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     pageIdentifier: '/compress/free',
     displayName: 'Free Compression (New URL)',
     
-    monthly: 500,
-    daily: 25,
-    hourly: 5,
+    monthly: 250,
+    //daily: 25,
+    //hourly: 5,
     
     maxFileSize: 10 * 1024 * 1024, // 10MB
     maxConcurrentUploads: 5,
@@ -323,8 +323,8 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     displayName: 'Pro Compression (New URL)',
     
     monthly: 10000,
-    daily: 334,
-    hourly: 100,
+    //daily: 334,
+    //hourly: 100,
 
     maxFileSize: 150 * 1024 * 1024, // 150MB
     maxConcurrentUploads: 3,
@@ -353,8 +353,8 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     displayName: 'Enterprise Compression (New URL)',
     
     monthly: 50000,
-    daily: 1667,
-    hourly: 999999,
+    //daily: 1667,
+    //hourly: 999999,
     
     maxFileSize: 200 * 1024 * 1024, // 200MB
     maxConcurrentUploads: 5,
@@ -383,8 +383,8 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     displayName: 'Bulk Image Compression (New URL)',
     
     monthly: 500,
-    daily: 25,
-    hourly: 5,
+    //daily: 25,
+    //hourly: 5,
     
     maxFileSize: 10 * 1024 * 1024, // 10MB
     maxConcurrentUploads: 5,
@@ -435,8 +435,8 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     displayName: 'Free Tier',
     
     monthly: 200,
-    daily: 10,
-    hourly: 3,
+    //daily: 10,
+    //hourly: 3,
     
     maxFileSize: 7 * 1024 * 1024, // 7MB for regular files
     maxConcurrentUploads: 3,
