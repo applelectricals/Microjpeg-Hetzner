@@ -274,7 +274,7 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     daily: 25,
     hourly: 5,
     
-    maxFileSize: 10 * 1024 * 1024, // 10MB
+    maxFileSize: 150 * 1024 * 1024, // 150MB
     maxConcurrentUploads: 5,
     
     inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
@@ -329,7 +329,7 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     daily: 334,
     hourly: 100,
     
-    maxFileSize: 50 * 1024 * 1024, // 50MB
+    maxFileSize: 200 * 1024 * 1024, // 200MB
     maxConcurrentUploads: 3,
     
     inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
