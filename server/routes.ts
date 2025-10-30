@@ -1,4 +1,4 @@
-import { debug429Middleware } from './debugMiddleware';
+
 import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
@@ -520,8 +520,8 @@ async function ensureDirectories() {
 export async function registerRoutes(app: Express): Promise<Server> {
   await ensureDirectories();
   
-  app.use(debug429Middleware);
   
+
   // Enable compression middleware for better performance
   app.use(compression({
     filter: (req, res) => {
