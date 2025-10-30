@@ -2620,45 +2620,45 @@ if (successfulJobs.length > 0) {
       }
 
       // Rate limiting: Check if user has already claimed reward for this platform today
-      const today = new Date();
-      const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-      const rateLimitKey = `loyalty_${identifier}_${platform}_${dateKey}`;
+      //const today = new Date();
+      //const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      //const rateLimitKey = `loyalty_${identifier}_${platform}_${dateKey}`;
       
       // Simple in-memory rate limiting (in production, use Redis or database)
-      if (UsageTracker.hasClaimedTodayReward(rateLimitKey)) {
+      //if (UsageTracker.hasClaimedTodayReward(rateLimitKey)) {
         
-        return res.status(429).json({ 
-          error: "Daily limit reached", 
-          message: `You can only earn rewards once per day per platform. Try again tomorrow!`,
-          nextClaimTime: "tomorrow"
-        });
-      }
+       // return res.status(429).json({ 
+        //  error: "Daily limit reached", 
+         // message: `You can only earn rewards once per day per platform. Try again tomorrow!`,
+         // nextClaimTime: "tomorrow"
+        //});
+      //}
 
       // Mark this platform as claimed for today
-      UsageTracker.markRewardClaimed(rateLimitKey);
+      //UsageTracker.markRewardClaimed(rateLimitKey);
 
       // If URL provided, store it for future verification
-      if (postUrl) {
-        console.log(`URL verification: User ${identifier} shared on ${platform}: ${postUrl}`);
+      //if (postUrl) {
+       // console.log(`URL verification: User ${identifier} shared on ${platform}: ${postUrl}`);
         // Store for later verification - in production, add to verification queue
-      }
+      //}
 
       // Award operations (works for both authenticated and guest users)
-      await UsageTracker.addBonusOperations(userId, sessionId, operationsToAdd, `Social share on ${platform}`);
+      //await UsageTracker.addBonusOperations(userId, sessionId, operationsToAdd, `Social share on ${platform}`);
 
-      res.json({ 
-        success: true, 
-        operations: operationsToAdd,
-        platform: platform,
-        message: `You earned ${operationsToAdd} bonus operations for sharing on ${platform}!`,
-        nextClaimTime: "tomorrow"
-      });
+      //res.json({ 
+       // success: true, 
+       // operations: operationsToAdd,
+       // platform: platform,
+       // message: `You earned ${operationsToAdd} bonus operations for sharing on ${platform}!`,
+       // nextClaimTime: "tomorrow"
+      //});
 
-    } catch (error) {
-      console.error("Loyalty share tracking error:", error);
-      res.status(500).json({ error: "Failed to process loyalty share" });
-    }
-  });
+    //} catch (error) {
+     // console.error("Loyalty share tracking error:", error);
+    //  res.status(500).json({ error: "Failed to process loyalty share" });
+    //}
+  //});
 
   // Subscription info endpoint
   app.get('/api/subscription-info', async (req, res) => {
