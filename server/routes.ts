@@ -1,3 +1,4 @@
+import { debug429Middleware } from './debugMiddleware';
 import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
@@ -518,6 +519,8 @@ async function ensureDirectories() {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   await ensureDirectories();
+  
+  app.use(debug429Middleware);
   
   // Enable compression middleware for better performance
   app.use(compression({
@@ -1141,15 +1144,8 @@ try {
       for (const job of jobs) {
         const usageCheck = await UsageTracker.checkLimit(user, req, 1, false);
         if (!usageCheck.allowed) {
-          try {
-        console.log('=== Checking rate limit ===');
-        console.log('User:', req.user?.email || 'anonymous');
-        console.log('Files:', req.files?.length || 0);
-      } catch (err) {
-        console.error('Logging error:', err);
-    }
           
-          return res.status(429).json({
+            return res.status(429).json({
             error: "Usage limit exceeded",
             message: usageCheck.message || "You have reached your compression limit",
             usage: usageCheck.usage
