@@ -1141,6 +1141,14 @@ try {
       for (const job of jobs) {
         const usageCheck = await UsageTracker.checkLimit(user, req, 1, false);
         if (!usageCheck.allowed) {
+          console.log('=== 429 TRIGGERED ===');
+          console.log('Reason: [describe which check failed]');
+          console.log('User:', req.user?.email);
+          console.log('File size:', totalFileSize);
+          console.log('Current usage:', currentUsage);
+          console.log('Limit:', limit);
+          console.log('========================');
+          
           return res.status(429).json({
             error: "Usage limit exceeded",
             message: usageCheck.message || "You have reached your compression limit",
@@ -1450,6 +1458,13 @@ app.post("/api/compress", upload.array('files', 20), requireScopeFromAuth, async
       for (const file of files) {
         const canPerform = await dualTracker.canPerformOperation(file.originalname, file.size, pageIdentifier);
         if (!canPerform.allowed) {
+          console.log('=== 429 TRIGGERED ===');
+          console.log('Reason: [describe which check failed]');
+          console.log('User:', req.user?.email);
+          console.log('File size:', totalFileSize);
+          console.log('Current usage:', currentUsage);
+          console.log('Limit:', limit);
+          console.log('========================');
           return res.status(429).json({
             error: 'Usage limit exceeded',
             message: canPerform.reason,
@@ -2617,6 +2632,14 @@ if (successfulJobs.length > 0) {
       
       // Simple in-memory rate limiting (in production, use Redis or database)
       if (UsageTracker.hasClaimedTodayReward(rateLimitKey)) {
+        console.log('=== 429 TRIGGERED ===');
+        console.log('Reason: [describe which check failed]');
+        console.log('User:', req.user?.email);
+        console.log('File size:', totalFileSize);
+        console.log('Current usage:', currentUsage);
+        console.log('Limit:', limit);
+        console.log('========================');
+        
         return res.status(429).json({ 
           error: "Daily limit reached", 
           message: `You can only earn rewards once per day per platform. Try again tomorrow!`,
@@ -3722,6 +3745,14 @@ if (successfulJobs.length > 0) {
         const operationCheck = await dualTracker.canPerformOperation(file.originalname, file.size, pageIdentifier);
         
         if (!operationCheck.allowed) {
+          console.log('=== 429 TRIGGERED ===');
+          console.log('Reason: [describe which check failed]');
+          console.log('User:', req.user?.email);
+          console.log('File size:', totalFileSize);
+          console.log('Current usage:', currentUsage);
+          console.log('Limit:', limit);
+          console.log('========================');
+          
           return res.status(429).json({
             error: "Operation limit exceeded",
             message: operationCheck.reason,
@@ -4708,6 +4739,14 @@ if (successfulJobs.length > 0) {
       // Check for IP-based abuse (max 3 signups per IP per day)
       const ipSignupCount = await storage.getLeadMagnetSignupCountByIP(ipAddress);
       if (ipSignupCount >= 3) {
+        console.log('=== 429 TRIGGERED ===');
+        console.log('Reason: [describe which check failed]');
+        console.log('User:', req.user?.email);
+        console.log('File size:', totalFileSize);
+        console.log('Current usage:', currentUsage);
+        console.log('Limit:', limit);
+        console.log('========================');
+        
         return res.status(429).json({ 
           error: 'Too many signups from this location',
           message: 'Maximum 3 signups per day from the same location. Please try again tomorrow.' 
