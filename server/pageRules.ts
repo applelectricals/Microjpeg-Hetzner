@@ -269,10 +269,7 @@ export const PAGE_RULES: Record<string, PageLimits> = {
   '/compress': {
     pageIdentifier: '/compress',
     displayName: 'Main Compress Landing',
-    
-    monthly: 500,
-    daily: 25,
-    hourly: 5,
+
     
     maxFileSize: 150 * 1024 * 1024, // 150MB
     maxConcurrentUploads: 5,
@@ -328,8 +325,8 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     monthly: 10000,
     daily: 334,
     hourly: 100,
-    
-    maxFileSize: 200 * 1024 * 1024, // 200MB
+
+    maxFileSize: 150 * 1024 * 1024, // 150MB
     maxConcurrentUploads: 3,
     
     inputFormats: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
@@ -411,9 +408,7 @@ export const PAGE_RULES: Record<string, PageLimits> = {
     pageIdentifier: '/compress/raw',
     displayName: 'RAW File Compression (New URL)',
     
-    monthly: 500,
-    daily: 25,
-    hourly: 5,
+  
     
     maxFileSize: 25 * 1024 * 1024, // 25MB (larger for RAW files)
     maxConcurrentUploads: 1,
