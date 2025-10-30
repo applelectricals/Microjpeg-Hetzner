@@ -1144,7 +1144,7 @@ try {
           console.log('=== 429 TRIGGERED ===');
           console.log('Reason: [describe which check failed]');
           console.log('User:', req.user?.email);
-          console.log('File size:', totalFileSize);
+          console.log('File size:', req.files?.reduce((sum, f) => sum + f.size, 0));
           console.log('Current usage:', currentUsage);
           console.log('Limit:', limit);
           console.log('========================');
@@ -1461,7 +1461,7 @@ app.post("/api/compress", upload.array('files', 20), requireScopeFromAuth, async
           console.log('=== 429 TRIGGERED ===');
           console.log('Reason: [describe which check failed]');
           console.log('User:', req.user?.email);
-          console.log('File size:', totalFileSize);
+          console.log('File size:', req.files?.reduce((sum, f) => sum + f.size, 0));
           console.log('Current usage:', currentUsage);
           console.log('Limit:', limit);
           console.log('========================');
@@ -2635,7 +2635,7 @@ if (successfulJobs.length > 0) {
         console.log('=== 429 TRIGGERED ===');
         console.log('Reason: [describe which check failed]');
         console.log('User:', req.user?.email);
-        console.log('File size:', totalFileSize);
+        console.log('File size:', req.files?.reduce((sum, f) => sum + f.size, 0));
         console.log('Current usage:', currentUsage);
         console.log('Limit:', limit);
         console.log('========================');
@@ -3748,7 +3748,7 @@ if (successfulJobs.length > 0) {
           console.log('=== 429 TRIGGERED ===');
           console.log('Reason: [describe which check failed]');
           console.log('User:', req.user?.email);
-          console.log('File size:', totalFileSize);
+          console.log('File size:', req.files?.reduce((sum, f) => sum + f.size, 0));
           console.log('Current usage:', currentUsage);
           console.log('Limit:', limit);
           console.log('========================');
@@ -4742,7 +4742,7 @@ if (successfulJobs.length > 0) {
         console.log('=== 429 TRIGGERED ===');
         console.log('Reason: [describe which check failed]');
         console.log('User:', req.user?.email);
-        console.log('File size:', totalFileSize);
+        console.log('File size:', req.files?.reduce((sum, f) => sum + f.size, 0));
         console.log('Current usage:', currentUsage);
         console.log('Limit:', limit);
         console.log('========================');
