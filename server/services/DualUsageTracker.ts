@@ -63,119 +63,145 @@ export class DualUsageTracker {
     this.auditContext = auditContext;
   }
 
-  // Check if operation is allowed
-  async canPerformOperation(
-    filename: string, 
-    fileSize: number,
-    pageIdentifier?: string
-  ): Promise<{
-    allowed: boolean;
-    reason?: string;
-    limits?: any;
-    usage?: any;
-    wasBypassed?: boolean;
-    upgradeRequired?: boolean;
-  }> {
-    const fileType = getFileType(filename);
+async canPerformOperation(
+  filename: string, 
+  fileSize: number,
+  pageIdentifier?: string
+): Promise<{
+  allowed: boolean;
+  reason?: string;
+  limits?: any;
+  usage?: any;
+  wasBypassed?: boolean;
+  upgradeRequired?: boolean;
+}> {
+  const fileType = getFileType(filename);
+  
+  if (fileType === 'unknown') {
+    return { 
+      allowed: false, 
+      reason: 'Unsupported file format' 
+    };
+  }
+
+  // Check for superuser bypass
+  if (this.auditContext?.superBypass) {
+    console.log('🔓 Superuser bypass: Operation allowed without limit checks');
+    return {
+      allowed: true,
+      reason: 'superuser_bypass',
+      wasBypassed: true
+    };
+  }
+
+  // Check global enforcement settings
+  const appSettings = await getAppSettings();
+  const enforceMonthly = appSettings.countersEnforcement.monthly;
+
+  // If enforcement is disabled, allow operation
+  if (!enforceMonthly) {
+    console.log('⚠️ Global enforcement disabled: Operation allowed');
+    return {
+      allowed: true,
+      reason: 'enforcement_disabled',
+      wasBypassed: true
+    };
+  }
+
+  // ==================================================
+  // PAID USERS - UNLIMITED OPERATIONS
+  // ==================================================
+  const isPaidUser = ['premium', 'pro', 'business', 'enterprise'].includes(this.userType);
+  
+  if (isPaidUser) {
+    console.log(`✅ Paid user (${this.userType}) - unlimited operations`);
     
-    if (fileType === 'unknown') {
-      return { 
-        allowed: false, 
-        reason: 'Unsupported file format' 
-      };
-    }
-
-    // Check for superuser bypass
-    if (this.auditContext?.superBypass) {
-      console.log('🔓 Superuser bypass: Operation allowed without limit checks');
-      return {
-        allowed: true,
-        reason: 'superuser_bypass',
-        wasBypassed: true
-      };
-    }
-
-    // Check global enforcement settings
-    const appSettings = await getAppSettings();
-    const enforceMonthly = appSettings.countersEnforcement.monthly;
-
-    // If enforcement is disabled, allow operation
-    if (!enforceMonthly) {
-      console.log('⚠️ Global enforcement disabled: Operation allowed');
-      return {
-        allowed: true,
-        reason: 'enforcement_disabled',
-        wasBypassed: true
-      };
-    }
-
-    // ==================================================
-    // PAID USERS - UNLIMITED OPERATIONS
-    // ==================================================
-    if (['premium', 'test_premium', 'pro', 'business', 'enterprise'].includes(this.userType)) {
-      console.log(`✅ Paid user (${this.userType}) - unlimited operations`);
-
-      // Only check file size for paid users
-      const maxSize = LIMITS[this.userType as 'premium' | 'test_premium' | 'pro' | 'business' | 'enterprise'].maxFileSize;
-      
-      if (fileSize > maxSize) {
-        return {
-          allowed: false,
-          reason: `File too large. Maximum ${Math.round(maxSize / 1024 / 1024)}MB for ${this.userType} plan.`
-        };
-      }
-      
-      return {
-        allowed: true,
-        usage: null, // No usage limits for paid users
-        limits: { unlimited: true }
-      };
-    }
-
-    // ==================================================
-    // FREE USERS - MONTHLY LIMITS ONLY
-    // ==================================================
+    // Determine max file size based on plan
+    let maxSize: number;
     
-    // Check file size limit for free users
-    const maxSize = fileType === 'raw' 
-      ? LIMITS.free.raw.maxFileSize 
-      : LIMITS.free.regular.maxFileSize;
+    switch(this.userType) {
+      case 'premium':
+        maxSize = 75 * 1024 * 1024; // 75MB
+        break;
+      case 'pro':
+        maxSize = 150 * 1024 * 1024; // 150MB
+        break;
+      case 'business':
+      case 'enterprise':
+        maxSize = 200 * 1024 * 1024; // 200MB
+        break;
+      default:
+        maxSize = 75 * 1024 * 1024; // Default to 75MB
+    }
     
+    // Check file size for paid users
     if (fileSize > maxSize) {
       return {
         allowed: false,
-        reason: `File too large. Maximum ${Math.round(maxSize / 1024 / 1024)}MB for ${fileType} files. Upgrade to Premium for files up to 75MB!`,
-        upgradeRequired: true
+        reason: `File too large. Maximum ${Math.round(maxSize / 1024 / 1024)}MB for ${this.userType} plan.`
       };
     }
-
-    // Get current usage for free users
-    const usage = await this.getCurrentUsage();
-    const monthlyLimit = fileType === 'raw' 
-      ? LIMITS.free.raw.monthly 
-      : LIMITS.free.regular.monthly;
     
-    const currentUsage = fileType === 'raw' 
-      ? usage.rawMonthly 
-      : usage.regularMonthly;
-
-    // Check monthly limit (only limit that exists for free users)
-    if (currentUsage >= monthlyLimit) {
-      return {
-        allowed: false,
-        reason: `You've reached your free monthly limit of ${monthlyLimit} ${fileType} operations. Upgrade to Premium for unlimited processing!`,
-        usage,
-        limits: { monthly: monthlyLimit },
-        upgradeRequired: true
-      };
-    }
-
-    return { 
+    return {
       allowed: true,
-      usage,
-      limits: { monthly: monthlyLimit }
+      usage: null, // No usage limits for paid users
+      limits: { 
+        unlimited: true,
+        maxFileSize: Math.round(maxSize / 1024 / 1024) + 'MB'
+      }
     };
   }
+
+  // ==================================================
+  // FREE USERS - MONTHLY LIMITS + FILE SIZE LIMITS
+  // ==================================================
+  
+  console.log(`📊 Free user check - File type: ${fileType}, Size: ${(fileSize / 1024 / 1024).toFixed(2)}MB`);
+  
+  // Check file size limit for free users
+  const maxSize = fileType === 'raw' 
+    ? LIMITS.free.raw.maxFileSize 
+    : LIMITS.free.regular.maxFileSize;
+  
+  if (fileSize > maxSize) {
+    return {
+      allowed: false,
+      reason: `File too large. Maximum ${Math.round(maxSize / 1024 / 1024)}MB for ${fileType} files on free plan. Upgrade to Premium for files up to 75MB!`,
+      upgradeRequired: true
+    };
+  }
+
+  // Get current usage for free users
+  const usage = await this.getCurrentUsage();
+  const monthlyLimit = fileType === 'raw' 
+    ? LIMITS.free.raw.monthly 
+    : LIMITS.free.regular.monthly;
+  
+  const currentUsage = fileType === 'raw' 
+    ? usage.rawMonthly 
+    : usage.regularMonthly;
+
+  // Check monthly limit (only limit that exists for free users)
+  if (currentUsage >= monthlyLimit) {
+    return {
+      allowed: false,
+      reason: `You've reached your free monthly limit of ${monthlyLimit} ${fileType} operations. Upgrade to Premium for unlimited processing!`,
+      usage,
+      limits: { monthly: monthlyLimit },
+      upgradeRequired: true
+    };
+  }
+
+  console.log(`✅ Free user allowed - Usage: ${currentUsage}/${monthlyLimit}`);
+
+  return { 
+    allowed: true,
+    usage,
+    limits: { monthly: monthlyLimit }
+  };
+}
+
+
 
   // Record successful operation with audit trail
   async recordOperation(
