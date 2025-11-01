@@ -197,9 +197,9 @@ const validateFile = (
   
   // Premium users with active subscription get 50MB limit
   if (isPremiumUser && subscriptionStatus === 'active') {
-    const maxSize = 50 * 1024 * 1024; // 50MB
+    const maxSize = 75 * 1024 * 1024; // 75MB
     if (file.size > maxSize) {
-      return `${file.name}: File too large. Premium members can upload files up to 50MB.`;
+      return `${file.name}: File too large. Premium members can upload files up to 75MB.`;
     }
   } 
   // Free users (authenticated or anonymous) get 10MB limit

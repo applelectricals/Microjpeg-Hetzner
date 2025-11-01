@@ -122,10 +122,10 @@ const validateFile = (file: File): string | null => {
     return `${file.name}: Unsupported format. Please use JPEG, PNG, WebP, AVIF, TIFF, SVG, or RAW formats (CR2, ARW, DNG, NEF, ORF, RAF, RW2).`;
   }
   
-  // PREMIUM PAGE: Fixed 50MB limit (Premium Plan)
-  const maxSize = 50 * 1024 * 1024; // 50MB
+  // PREMIUM PAGE: Fixed 75MB limit (Premium Plan)
+  const maxSize = 75 * 1024 * 1024; // 75MB
   if (file.size > maxSize) {
-    return `${file.name}: File too large. Premium users can upload files up to 50MB.`;
+    return `${file.name}: File too large. Premium users can upload files up to 75MB.`;
   }
   
   return null;
