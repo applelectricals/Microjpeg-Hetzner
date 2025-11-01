@@ -67,6 +67,27 @@ export const bulkQueue: Queue = new Bull('bulk-processing', {
   settings: queueConfig.settings,
 });
 
+// Sequential batch processing queue - ONE FILE AT A TIME
+// Ensures predictable performance and memory usage for batch operations
+export const sequentialBatchQueue: Queue = new Bull('sequential-batch-processing', {
+  redis: {
+    host: redis.options.host,
+    port: redis.options.port,
+    password: redis.options.password,
+    db: redis.options.db,
+    ...(redis.options.tls && { tls: redis.options.tls })
+  },
+  defaultJobOptions: {
+    ...queueConfig.defaultJobOptions,
+    delay: 0, // Process immediately, but sequentially
+    timeout: 1200000, // 20 minute timeout for large batch operations
+  },
+  settings: {
+    ...queueConfig.settings,
+    maxStalledCount: 2, // More lenient for long-running batch jobs
+  },
+});
+
 // Priority levels for different user tiers
 export const QUEUE_PRIORITIES = {
   enterprise: 1,    // Highest priority
@@ -82,6 +103,7 @@ export const JOB_TYPES = {
   PROCESS_RAW: 'process-raw',
   CONVERT_FORMAT: 'convert-format',
   BULK_PROCESS: 'bulk-process',
+  SEQUENTIAL_BATCH: 'sequential-batch-process', // NEW: Sequential processing
 } as const;
 
 // Queue health check
@@ -89,19 +111,22 @@ export async function checkQueueHealth(): Promise<{
   imageQueue: boolean;
   rawQueue: boolean;
   bulkQueue: boolean;
+  sequentialBatchQueue: boolean;
 }> {
   try {
     // Check if queues are ready by testing basic operations
-    const [imageHealth, rawHealth, bulkHealth] = await Promise.all([
+    const [imageHealth, rawHealth, bulkHealth, sequentialHealth] = await Promise.all([
       imageQueue.client.ping().then(() => true).catch(() => false),
       rawQueue.client.ping().then(() => true).catch(() => false),
       bulkQueue.client.ping().then(() => true).catch(() => false),
+      sequentialBatchQueue.client.ping().then(() => true).catch(() => false),
     ]);
 
     return {
       imageQueue: imageHealth,
       rawQueue: rawHealth,
       bulkQueue: bulkHealth,
+      sequentialBatchQueue: sequentialHealth,
     };
   } catch (error) {
     console.error('Queue health check failed:', error);
@@ -109,6 +134,7 @@ export async function checkQueueHealth(): Promise<{
       imageQueue: false,
       rawQueue: false,
       bulkQueue: false,
+      sequentialBatchQueue: false,
     };
   }
 }
@@ -116,7 +142,7 @@ export async function checkQueueHealth(): Promise<{
 // Get queue statistics
 export async function getQueueStats() {
   try {
-    const [imageStats, rawStats, bulkStats] = await Promise.all([
+    const [imageStats, rawStats, bulkStats, sequentialStats] = await Promise.all([
       Promise.all([
         imageQueue.getWaiting(),
         imageQueue.getActive(),
@@ -134,6 +160,12 @@ export async function getQueueStats() {
         bulkQueue.getActive(),
         bulkQueue.getCompleted(),
         bulkQueue.getFailed(),
+      ]),
+      Promise.all([
+        sequentialBatchQueue.getWaiting(),
+        sequentialBatchQueue.getActive(),
+        sequentialBatchQueue.getCompleted(),
+        sequentialBatchQueue.getFailed(),
       ]),
     ]);
 
@@ -156,6 +188,12 @@ export async function getQueueStats() {
         completed: bulkStats[2].length,
         failed: bulkStats[3].length,
       },
+      sequentialBatchQueue: {
+        waiting: sequentialStats[0].length,
+        active: sequentialStats[1].length,
+        completed: sequentialStats[2].length,
+        failed: sequentialStats[3].length,
+      },
     };
   } catch (error) {
     console.error('Failed to get queue stats:', error);
@@ -168,8 +206,9 @@ export async function closeAllQueues(): Promise<void> {
   try {
     await Promise.all([
       imageQueue.close(),
-      rawQueue.close(), 
+      rawQueue.close(),
       bulkQueue.close(),
+      sequentialBatchQueue.close(),
     ]);
     console.log('All queues closed gracefully');
   } catch (error) {
