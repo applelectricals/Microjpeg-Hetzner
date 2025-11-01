@@ -14,12 +14,16 @@ export const OPERATION_CONFIG = {
       anonymous: 10 * 1024 * 1024,     // 10MB
       free: 10 * 1024 * 1024,          // 10MB
       premium: 75 * 1024 * 1024,       // 75MB
+      pro: 75 * 1024 * 1024,           // 75MB (alias for premium)
+      test_premium: 75 * 1024 * 1024,  // 75MB
       enterprise: 200 * 1024 * 1024,   // 200MB
     },
     raw: {
       anonymous: 25 * 1024 * 1024,     // 25MB
       free: 50 * 1024 * 1024,          // 50MB
       premium: 75 * 1024 * 1024,       // 75MB
+      pro: 75 * 1024 * 1024,           // 75MB (alias for premium)
+      test_premium: 75 * 1024 * 1024,  // 75MB
       enterprise: 500 * 1024 * 1024,   // 500MB
     }
   },
@@ -40,6 +44,16 @@ export const OPERATION_CONFIG = {
       regular: { monthly: 10000, daily: 1000, hourly: 100 },
       raw: { monthly: 500, daily: 50, hourly: 10 },
       totalBandwidthMB: 50000, // 50GB monthly
+    },
+    pro: {
+      regular: { monthly: 10000, daily: 1000, hourly: 100 },
+      raw: { monthly: 500, daily: 50, hourly: 10 },
+      totalBandwidthMB: 50000, // 50GB monthly (alias for premium)
+    },
+    test_premium: {
+      regular: { monthly: 300, daily: 300, hourly: 20 },
+      raw: { monthly: 300, daily: 300, hourly: 20 },
+      totalBandwidthMB: 5000, // 5GB monthly
     },
     enterprise: {
       regular: { monthly: 50000, daily: 5000, hourly: 500 },
