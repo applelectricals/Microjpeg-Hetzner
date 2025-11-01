@@ -67,7 +67,7 @@ export default function ApiDashboard() {
           tier: 'Pro',
           monthlyLimit: 10000,
           rateLimit: 100,
-          maxFileSize: '50MB',
+          maxFileSize: '75MB',
           permissions: ['compress', 'convert', 'batch'],
           color: 'blue'
         };

@@ -96,7 +96,7 @@ export class TestPremiumExpiryManager {
             <h3 style="margin: 0 0 15px 0; color: #d97706;">💎 Premium Plan Benefits:</h3>
             <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
               <li><strong>10,000 operations/month</strong> (33x more than Free)</li>
-              <li><strong>50MB file size limit</strong> (5x bigger than Free)</li>
+              <li><strong>75MB file size limit</strong> (5x bigger than Free)</li>
               <li><strong>All formats including RAW</strong> (CR2, ARW, DNG, NEF, etc.)</li>
               <li><strong>Advanced quality controls</strong></li>
               <li><strong>No ads</strong> - clean, professional interface</li>

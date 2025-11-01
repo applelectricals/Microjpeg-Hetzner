@@ -73,7 +73,7 @@ const SESSION_LIMITS = {
     hourlyOperations: 100, // Max 100 operations/hour for test premium
     compressions: 300, // Max 300 operations/day for test premium
     conversions: 50, // Max 50 conversions/day for test premium
-    maxFileSize: 50 * 1024 * 1024, // 50MB per file
+    maxFileSize: 50 * 1024 * 1024, // 75MB per file
     maxConcurrent: 3, // 3 concurrent uploads
     timeoutSeconds: 120 // 120 second processing timeout
   },
@@ -195,7 +195,7 @@ const validateFile = (
     return `${file.name}: Unsupported format. Please use JPEG, PNG, WebP, AVIF, TIFF, SVG, or RAW formats (CR2, ARW, DNG, NEF, ORF, RAF, RW2).`;
   }
   
-  // Premium users with active subscription get 50MB limit
+  // Premium users with active subscription get 75MB limit
   if (isPremiumUser && subscriptionStatus === 'active') {
     const maxSize = 75 * 1024 * 1024; // 75MB
     if (file.size > maxSize) {
@@ -205,7 +205,7 @@ const validateFile = (
   // Free users (authenticated or anonymous) get 10MB limit
   else {
     if (file.size > SESSION_LIMITS.free.maxFileSize) {
-      return `${file.name}: File too large. Maximum size is 10MB. Upgrade to Premium for files up to 50MB.`;
+      return `${file.name}: File too large. Maximum size is 10MB. Upgrade to Premium for files up to 75MB.`;
     }
   }
   
@@ -1549,12 +1549,12 @@ export default function TestPremiumCompress() {
                 <h1 className="text-3xl lg:text-5xl font-bold font-poppins text-brand-dark leading-tight">
                   Loving the Power?<br />
                   <span style={{color: '#AD0000'}}>Premium Unlocks Everything.</span><br />
-                  <span className="text-brand-dark">10K Operations • 50MB Files • Full API Access</span>
+                  <span className="text-brand-dark">10K Operations • 75MB Files • Full API Access</span>
                 </h1>
                 
                 <p className="text-lg text-brand-dark/80 font-opensans max-w-md">
                   You're experiencing Premium power right now! <span style={{color: '#AD0000'}} className="font-semibold">Don't lose this advantage</span> when your trial ends. 
-                  Keep the 50MB files, priority processing, and full API access. 
+                  Keep the 75MB files, priority processing, and full API access. 
                   <span style={{color: '#AD0000'}} className="font-semibold">Make this your permanent edge.</span>
                 </p>
                 
@@ -1606,7 +1606,7 @@ export default function TestPremiumCompress() {
                     <div>
                       <div className="flex items-center justify-center gap-2 mb-1">
                         <span className="w-2 h-2 bg-brand-gold rounded-full"></span>
-                        <span className="text-xs text-brand-gold font-semibold">300 operations for 24 hours / Max 50MB per image</span>
+                        <span className="text-xs text-brand-gold font-semibold">300 operations for 24 hours / Max 75MB per image</span>
                       </div>
                       
                       <p className="text-xs text-gray-500 mt-1">
@@ -1944,7 +1944,7 @@ export default function TestPremiumCompress() {
               <Crown className="w-8 h-8 text-brand-gold mx-auto mb-3" />
               <div className="text-lg font-semibold text-brand-dark mb-2">Premium Benefits Active</div>
               <div className="space-y-1 text-sm text-gray-600">
-                <div>✓ 50MB file limit</div>
+                <div>✓ 75MB file limit</div>
                 <div>✓ Priority processing</div>
                 <div>✓ Full API access</div>
                 <div>✓ Email support</div>
@@ -2251,7 +2251,7 @@ export default function TestPremiumCompress() {
                   <div className="flex items-center justify-between py-3 border-b border-white/20">
                     <span className="text-white/80">Max File Size</span>
                     <div className="text-right">
-                      <div className="text-sm text-white/60">Premium: 50MB</div>
+                      <div className="text-sm text-white/60">Premium: 75MB</div>
                       <div className="text-lg font-bold text-yellow-400">Enterprise: 200MB</div>
                     </div>
                   </div>

@@ -25,7 +25,7 @@ async function testTiers() {
   console.log('✅ CR2 20MB validation:', rawTest.valid ? 'PASS' : 'FAIL');
 
   const tooLarge = await tierLimitService.validateFileSize('photo.jpg', 50 * 1024 * 1024, 'free');
-  console.log('✅ JPG 50MB validation:', tooLarge.valid ? 'FAIL' : 'PASS (correctly rejected)');
+  console.log('✅ JPG 75MB validation:', tooLarge.valid ? 'FAIL' : 'PASS (correctly rejected)');
 
   console.log('\n✅ All tests passed!');
   process.exit(0);

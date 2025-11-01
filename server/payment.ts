@@ -26,14 +26,14 @@ export const PLANS = {
     name: 'Test Premium',
     price: 1,
     operations: 300,
-    features: ['300 operations (24-hour access)', '50MB file limit', 'All Premium features', 'Priority support']
+    features: ['300 operations (24-hour access)', '75MB file limit', 'All Premium features', 'Priority support']
   },
   premium: {
     id: 'premium',
     name: 'Premium',
     price: 29,
     operations: 10000,
-    features: ['10,000 operations/month', '50MB file limit', 'Priority processing', 'API access', 'Email support']
+    features: ['10,000 operations/month', '75MB file limit', 'Priority processing', 'API access', 'Email support']
   },
   enterprise: {
     id: 'enterprise',

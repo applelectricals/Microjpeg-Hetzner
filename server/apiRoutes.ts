@@ -431,7 +431,7 @@ router.get('/special/formats', authenticateApiKey, rateLimitMiddleware, async (r
         vector: {
           formats: ['SVG'],
           description: 'Scalable Vector Graphics',
-          maxFileSize: '50MB',
+          maxFileSize: '75MB',
           processingTime: '5-10 seconds'
         },
         formats: {

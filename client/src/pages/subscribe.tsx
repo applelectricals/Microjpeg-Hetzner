@@ -28,7 +28,7 @@ const plans: Record<string, PlanDetails> = {
     price: '$1',
     operations: '300 operations (24-hour access)',
     features: [
-      '50MB max file size',
+      '75MB max file size',
       'All Premium features',
       'Advanced quality controls',
       'No ads',
@@ -44,7 +44,7 @@ const plans: Record<string, PlanDetails> = {
     price: '$29',
     operations: '10,000 operations/month',
     features: [
-      '50MB max file size',
+      '75MB max file size',
       'Email support',
       'Higher processing priority',
       '100 operations/hour',

@@ -65,7 +65,7 @@ const featureComparison = [
   {
     name: 'Upload file size',
     free: '10MB (25MB RAW)',
-    starter: '50MB',
+    starter: '75MB',
     pro: '100MB',
     business: '500MB'
   },

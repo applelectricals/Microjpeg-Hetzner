@@ -48,7 +48,7 @@ export default function TermsOfService() {
                 </p>
                 <ul className="list-disc pl-6 text-gray-700 space-y-2">
                   <li><strong>Free Tier:</strong> 10MB maximum file size, 500 operations per month, 5 requests per hour</li>
-                  <li><strong>Pro Tier:</strong> 50MB maximum file size, 10,000 operations per month, 100 requests per hour</li>
+                  <li><strong>Pro Tier:</strong> 75MB maximum file size, 10,000 operations per month, 100 requests per hour</li>
                   <li><strong>Enterprise Tier:</strong> 200MB maximum file size, 50,000 operations per month, 10,000 requests per hour</li>
                 </ul>
                 <p className="text-gray-700 mt-4">

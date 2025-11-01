@@ -62,7 +62,7 @@ export default function PurchaseFlow({ source = 'manual', onClose }: PurchaseFlo
 
   const plans: PlanFeature[] = [
     { feature: "Monthly Operations", free: "500", premium: "10,000", enterprise: "50,000" },
-    { feature: "File Size Limit", free: "10MB", premium: "50MB", enterprise: "200MB" },
+    { feature: "File Size Limit", free: "10MB", premium: "75MB", enterprise: "200MB" },
     { feature: "API Access", free: true, premium: true, enterprise: true },
     { feature: "Priority Processing", free: false, premium: true, enterprise: true },
     { feature: "Email Support", free: false, premium: true, enterprise: true },
@@ -382,7 +382,7 @@ export default function PurchaseFlow({ source = 'manual', onClose }: PurchaseFlo
             </Button>
             <ul className="text-sm space-y-2">
               <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />300 operations</li>
-              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />50MB file limit</li>
+              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />75MB file limit</li>
               <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />24-hour access</li>
             </ul>
           </CardContent>
@@ -416,7 +416,7 @@ export default function PurchaseFlow({ source = 'manual', onClose }: PurchaseFlo
             </Button>
             <ul className="text-sm space-y-2">
               <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />10,000 operations/month</li>
-              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />50MB file limit</li>
+              <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />75MB file limit</li>
               <li className="flex items-center"><CheckCircle className="w-4 h-4 text-green-500 mr-2" />Email support</li>
             </ul>
           </CardContent>
@@ -757,7 +757,7 @@ export default function PurchaseFlow({ source = 'manual', onClose }: PurchaseFlo
         <h3 className="font-semibold text-green-900 mb-2">🎉 You now have access to:</h3>
         <ul className="text-sm text-green-800 space-y-1">
           <li>• {planPricing[selectedPlan].price === 0 ? '500' : selectedPlan === 'pro' ? '10,000' : 'Unlimited'} operations per month</li>
-          <li>• {selectedPlan === 'free' ? '10MB' : selectedPlan === 'pro' ? '50MB' : '500MB'} file size limit</li>
+          <li>• {selectedPlan === 'free' ? '10MB' : selectedPlan === 'pro' ? '75MB' : '500MB'} file size limit</li>
           {selectedPlan !== 'free' && <li>• API access with your personal key</li>}
           {selectedPlan !== 'free' && <li>• Priority processing queue</li>}
           {selectedPlan === 'enterprise' && <li>• Dedicated account manager</li>}

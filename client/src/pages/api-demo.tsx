@@ -250,7 +250,7 @@ console.log('Conversion result:', result);`;
                 Convert scalable SVG files to raster formats with precise quality control
               </p>
               <div className="mt-3 text-xs text-blue-600 font-medium">
-                Max 50MB • 5-10 sec processing
+                Max 75MB • 5-10 sec processing
               </div>
             </Card>
 

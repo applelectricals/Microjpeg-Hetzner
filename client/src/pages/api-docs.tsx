@@ -105,7 +105,7 @@ const result = await response.json();`
     {
       name: "Premium",
       operations: "10,000/month",
-      fileSize: "50MB", 
+      fileSize: "75MB", 
       formats: "All formats + RAW",
       concurrent: "5",
       api: "✓",
@@ -547,7 +547,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Premium: 10K ops</span>
-                      <span>50MB files</span>
+                      <span>75MB files</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span>Enterprise: 50K ops</span>
@@ -863,7 +863,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                         <tr>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Max File Size</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">10MB</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">50MB</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">75MB</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">200MB</td>
                         </tr>
                         <tr>
@@ -1378,7 +1378,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                     <h4 className="font-semibold text-blue-800">Pro</h4>
                     <p className="text-sm text-blue-600">100 req/hour</p>
                     <p className="text-xs text-blue-500">10K operations/month</p>
-                    <p className="text-xs text-blue-500 mt-1">50MB file limit</p>
+                    <p className="text-xs text-blue-500 mt-1">75MB file limit</p>
                   </div>
                   <div className="text-center p-4 bg-purple-50 rounded border border-purple-200">
                     <h4 className="font-semibold text-purple-800">Enterprise</h4>

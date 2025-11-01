@@ -41,7 +41,7 @@ const tiers = [
     price: '$1',
     description: 'Try Premium features for 24 hours',
     operations: '300 operations (24-hour access)',
-    fileSize: '50MB max file size',
+    fileSize: '75MB max file size',
     features: [
       'All Premium features',
       'Advanced quality controls',
@@ -67,7 +67,7 @@ const tiers = [
     price: '$29',
     description: 'Best for professionals',
     operations: '10,000 operations/month',
-    fileSize: '50MB max file size',
+    fileSize: '75MB max file size',
     features: [
       'Everything in Free',
       'Email support',

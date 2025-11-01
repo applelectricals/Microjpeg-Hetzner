@@ -2831,7 +2831,7 @@ export default function MicroJPEGLanding() {
                   <div className="text-xs opacity-75 text-black">vs 500 on Free</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-brand-dark mb-2">50MB</div>
+                  <div className="text-3xl font-bold text-brand-dark mb-2">75MB</div>
                   <div className="text-sm text-black">Max File Size</div>
                   <div className="text-xs opacity-75 text-black">vs 10MB on Free</div>
                 </div>

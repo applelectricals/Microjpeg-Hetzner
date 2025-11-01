@@ -20,7 +20,7 @@ export const OPERATION_CONFIG = {
     },
     raw: {
       anonymous: 25 * 1024 * 1024,     // 25MB
-      free: 50 * 1024 * 1024,          // 50MB
+      free: 75 * 1024 * 1024,          // 75MB
       premium: 75 * 1024 * 1024,       // 75MB
       pro: 75 * 1024 * 1024,           // 75MB (alias for premium)
       test_premium: 75 * 1024 * 1024,  // 75MB

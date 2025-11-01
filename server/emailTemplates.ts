@@ -10,7 +10,7 @@ export interface PaymentConfirmationData {
 export function getWelcomeEmailTemplate(firstName: string, plan: string): string {
   const planFeatures = {
     free: ['500 operations/month', '10MB file limit', 'Basic compression'],
-    pro: ['10,000 operations/month', '50MB file limit', 'Priority processing', 'API access', 'Email support'],
+    pro: ['10,000 operations/month', '75MB file limit', 'Priority processing', 'API access', 'Email support'],
     enterprise: ['Unlimited operations', '500MB file limit', 'Custom integrations', '99.9% SLA', 'Phone support']
   };
 
@@ -172,7 +172,7 @@ export function getWelcomeEmailTemplate(firstName: string, plan: string): string
               <span>Operations/Month</span>
             </div>
             <div class="stat-card">
-              <span class="stat-number">${plan === 'pro' ? '50MB' : '500MB'}</span>
+              <span class="stat-number">${plan === 'pro' ? '75MB' : '500MB'}</span>
               <span>File Size Limit</span>
             </div>
           </div>

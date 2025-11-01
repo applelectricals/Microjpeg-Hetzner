@@ -165,7 +165,7 @@ export default function RazorpayCheckout() {
               <ul className="space-y-1">
                 <li className="flex items-center text-sm">
                   <Shield className="w-4 h-4 text-green-500 mr-2" />
-                  50MB max file size
+                  75MB max file size
                 </li>
                 <li className="flex items-center text-sm">
                   <Shield className="w-4 h-4 text-green-500 mr-2" />

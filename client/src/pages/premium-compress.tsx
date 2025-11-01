@@ -67,7 +67,7 @@ interface SessionData {
   timestamp?: number;
 }
 
-// Premium Plan Limits (Pro Plan - 10,000 operations/month, 50MB files, 3 concurrent uploads)
+// Premium Plan Limits (Pro Plan - 10,000 operations/month, 75MB files, 3 concurrent uploads)
 
 const SUPPORTED_FORMATS = [
   'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif',
@@ -113,7 +113,7 @@ class ProcessingEstimator {
   }
 }
 
-// PREMIUM PAGE VALIDATION - Fixed 50MB limit, All formats, 3 concurrent uploads
+// PREMIUM PAGE VALIDATION - Fixed 75MB limit, All formats, 3 concurrent uploads
 const validateFile = (file: File): string | null => {
   const fileExtension = file.name.toLowerCase().split('.').pop();
   const isRawFormat = ['.cr2', '.arw', '.dng', '.nef', '.orf', '.raf', '.rw2'].some(ext => file.name.toLowerCase().endsWith(ext));
@@ -978,7 +978,7 @@ export default function MicroJPEGLanding() {
     }
 
     fileArray.forEach((file) => {
-      // PREMIUM PAGE: Simple validation with fixed 50MB limit
+      // PREMIUM PAGE: Simple validation with fixed 75MB limit
       const error = validateFile(file);
       if (error) {
         // console.log('Validation error:', error);
@@ -1530,7 +1530,7 @@ export default function MicroJPEGLanding() {
                     <div>
                       <div className="flex items-center justify-center gap-2 mb-1">
                         <span className="w-2 h-2 bg-brand-gold rounded-full"></span>
-                        <span className="text-xs text-brand-gold font-semibold">10,000 operations/month | Max 50MB per image</span>
+                        <span className="text-xs text-brand-gold font-semibold">10,000 operations/month | Max 75MB per image</span>
                       </div>
                       
                       <p className="text-xs text-gray-500 mt-1">
@@ -1868,7 +1868,7 @@ export default function MicroJPEGLanding() {
               <Crown className="w-8 h-8 text-brand-gold mx-auto mb-3" />
               <div className="text-lg font-semibold text-brand-dark mb-2">Premium Benefits Active</div>
               <div className="space-y-1 text-sm text-gray-600">
-                <div>✓ 50MB file limit</div>
+                <div>✓ 75MB file limit</div>
                 <div>✓ Priority processing</div>
                 <div>✓ Full API access</div>
                 <div>✓ Email support</div>
@@ -2175,7 +2175,7 @@ export default function MicroJPEGLanding() {
                   <div className="flex items-center justify-between py-3 border-b border-white/20">
                     <span className="text-white/80">Max File Size</span>
                     <div className="text-right">
-                      <div className="text-sm text-white/60">Premium: 50MB</div>
+                      <div className="text-sm text-white/60">Premium: 75MB</div>
                       <div className="text-lg font-bold text-yellow-400">Enterprise: 200MB</div>
                     </div>
                   </div>

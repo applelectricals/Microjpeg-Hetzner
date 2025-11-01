@@ -113,7 +113,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 const upload = multer({
   dest: "uploads/",
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB limit (increased for Premium users)
+    fileSize: 75 * 1024 * 1024, // 75MB limit (increased for Premium users)
   },
   fileFilter: (req, file, cb) => {
     // Check format access based on user plan using unified configuration
@@ -134,7 +134,7 @@ const upload = multer({
 const specialUpload = multer({
   dest: "uploads/",
   limits: {
-    fileSize: 50 * 1024 * 1024, // 50MB limit for special formats (free trial)
+    fileSize: 75 * 1024 * 1024, // 75MB limit for special formats (free trial)
   },
   fileFilter: (req, file, cb) => {
     // Special formats: JPG, PNG, RAW (ARW, CR2, DNG, NEF), SVG, TIFF

@@ -28,14 +28,14 @@ export default function SubscriptionSuccess() {
       price: '$1.00',
       icon: Zap,
       color: 'blue',
-      description: '24-hour premium trial with 50MB file limit and all premium features'
+      description: '24-hour premium trial with 75MB file limit and all premium features'
     },
     'premium': {
       name: 'Premium',
       price: '$29.00',
       icon: Crown,
       color: 'green',
-      description: 'Monthly premium plan with 50MB file limit and advanced features'
+      description: 'Monthly premium plan with 75MB file limit and advanced features'
     },
     'enterprise': {
       name: 'Enterprise',
@@ -115,8 +115,8 @@ export default function SubscriptionSuccess() {
                 <div className="space-y-3 text-sm text-gray-700 dark:text-gray-300">
                   <div className="flex items-center gap-3 justify-center">
                     <CheckCircle className={`w-4 h-4 text-${plan.color}-600 flex-shrink-0`} />
-                    <span>Start uploading images up to {planType === 'test-premium' ? '50MB for 24 hours' : 
-                     planType === 'premium' ? '50MB' : '200MB'}</span>
+                    <span>Start uploading images up to {planType === 'test-premium' ? '75MB for 24 hours' : 
+                     planType === 'premium' ? '75MB' : '200MB'}</span>
                   </div>
                   <div className="flex items-center gap-3 justify-center">
                     <CheckCircle className={`w-4 h-4 text-${plan.color}-600 flex-shrink-0`} />
