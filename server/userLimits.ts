@@ -1,26 +1,26 @@
 // User types and limits (parallel system to page-based tracking)
 export const USER_LIMITS = {
   free: {
-    monthly: { raw: 100, regular: 500, total: 500 },
-    daily: { raw: 10, regular: 25, total: 25 },
-    hourly: { raw: 5, regular: 5, total: 5 },
-    maxFileSize: 10 * 1024 * 1024, // 10MB for regular files
-    maxRawFileSize: 25 * 1024 * 1024, // 25MB for RAW files
+    monthly: { raw: 100, regular: 100, total: 200 },
+    daily: { raw: null, regular: null, total: null },
+    hourly: { raw: null, regular: null, total: null },
+    maxFileSize: 7 * 1024 * 1024, // 7MB for regular files
+    maxRawFileSize: 15 * 1024 * 1024, // 15MB for RAW files
     concurrent: 1
   },
   premium: {
-    monthly: { total: 10000 },
-    daily: { total: 500 },
-    hourly: { total: 100 },
+    monthly: { total: null },
+    daily: { total: null },
+    hourly: { total: null },
     maxFileSize: 75 * 1024 * 1024, // 75MB
-    concurrent: 3
+    concurrent: 1
   },
   enterprise: {
-    monthly: { total: 50000 },
-    daily: { total: 5000 },
-    hourly: { total: 1000 },
+    monthly: { total: null },
+    daily: { total: null },
+    hourly: { total: null },
     maxFileSize: 200 * 1024 * 1024, // 200MB
-    concurrent: 5
+    concurrent: 1
   }
 };
 

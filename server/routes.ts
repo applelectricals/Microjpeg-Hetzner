@@ -2359,7 +2359,7 @@ if (successfulJobs.length > 0) {
       console.log(`🔧 PAGE IDENTIFIER usage-stats: userId=${userId}, pageIdentifier=${pageIdentifier}, scope=${scope}, sessionId=${sessionId}`);
       
       // Using DualUsageTracker system only
-      const operationStats = { monthlyUsed: 0, monthlyLimit: 500, dailyUsed: 0, dailyLimit: 25, hourlyUsed: 0, hourlyLimit: 5 };
+      const operationStats = { monthlyUsed: 0, monthlyLimit: 200, dailyUsed: 0, dailyLimit: 25, hourlyUsed: 0, hourlyLimit: 5 };
       
       // Check for lead magnet credits if user is authenticated
       let leadMagnetCredits = null;
@@ -2441,7 +2441,7 @@ if (successfulJobs.length > 0) {
       console.log(`🔧 PAGE SPECIFIC usage-stats: pageIdentifier=${pageIdentifier}, userId=${userId}, sessionId=${sessionId}`);
       
       // Using DualUsageTracker system only
-      const operationStats = { monthlyUsed: 0, monthlyLimit: 500, dailyUsed: 0, dailyLimit: 25, hourlyUsed: 0, hourlyLimit: 5 };
+      const operationStats = { monthlyUsed: 0, monthlyLimit: 200, dailyUsed: 0, dailyLimit: 25, hourlyUsed: 0, hourlyLimit: 5 };
       
       // Check for lead magnet credits if user is authenticated
       let leadMagnetCredits = null;

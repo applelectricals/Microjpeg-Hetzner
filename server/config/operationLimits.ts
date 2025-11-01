@@ -31,33 +31,33 @@ export const OPERATION_CONFIG = {
   // Operation limits by user type
   limits: {
     anonymous: {
-      regular: { monthly: 500, daily: 25, hourly: 5 },
-      raw: { monthly: 20, daily: 10, hourly: 5 },
+      regular: { monthly: 100, daily: null, hourly: null },
+      raw: { monthly: 100, daily: null, hourly: null },
       totalBandwidthMB: 1000, // 1GB monthly
     },
     free: {
-      regular: { monthly: 500, daily: 50, hourly: 10 },
-      raw: { monthly: 100, daily: 25, hourly: 10 },
+      regular: { monthly: 100, daily: null, hourly: null },
+      raw: { monthly: 100, daily: null, hourly: null },
       totalBandwidthMB: 2000, // 2GB monthly
     },
     premium: {
-      regular: { monthly: 10000, daily: 1000, hourly: 100 },
-      raw: { monthly: 500, daily: 50, hourly: 10 },
+      regular: { monthly: null, daily: null, hourly: null },
+      raw: { monthly: null, daily: null, hourly: null },
       totalBandwidthMB: 50000, // 50GB monthly
     },
     pro: {
-      regular: { monthly: 10000, daily: 1000, hourly: 100 },
-      raw: { monthly: 500, daily: 50, hourly: 10 },
+      regular: { monthly: null, daily: null, hourly: null },
+      raw: { monthly: null, daily: null, hourly: null },
       totalBandwidthMB: 50000, // 50GB monthly (alias for premium)
     },
     test_premium: {
-      regular: { monthly: 300, daily: 300, hourly: 20 },
-      raw: { monthly: 300, daily: 300, hourly: 20 },
+      regular: { monthly: null, daily: null, hourly: null },
+      raw: { monthly: null, daily: null, hourly: null },
       totalBandwidthMB: 5000, // 5GB monthly
     },
     enterprise: {
-      regular: { monthly: 50000, daily: 5000, hourly: 500 },
-      raw: { monthly: 5000, daily: 500, hourly: 50 },
+      regular: { monthly: null, daily: null, hourly: null },
+      raw: { monthly: null, daily: null, hourly: null },
       totalBandwidthMB: 500000, // 500GB monthly
     }
   },
@@ -65,8 +65,8 @@ export const OPERATION_CONFIG = {
   // Special page overrides (optional)
   pageOverrides: {
     '/convert/cr2-to-jpg': {
-      anonymous: { monthly: 10, daily: 3 },
-      free: { monthly: 20, daily: 5 }
+      anonymous: { monthly: 100, daily: null },
+      free: { monthly: 100, daily: null }
     }
   }
 };

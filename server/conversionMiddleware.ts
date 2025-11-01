@@ -17,10 +17,10 @@ export const PAGE_CONFIGS = {
     planName: 'free',
     autoOutput: 'jpg',
     limits: {
-      maxFileSize: 10 * 1024 * 1024, // 10MB
-      monthlyLimit: 500,
-      dailyLimit: 25,
-      hourlyLimit: 5,
+      maxFileSize:  *7 1024 * 1024, // 7MB
+      monthlyLimit: 100,
+      dailyLimit: null,
+      hourlyLimit: null,
       concurrent: 1
     },
     allowedOutputs: ['jpg', 'png', 'webp', 'avif', 'tiff']
@@ -32,10 +32,10 @@ export const PAGE_CONFIGS = {
     planName: 'free-authenticated',
     autoOutput: 'jpg',
     limits: {
-      maxFileSize: 10 * 1024 * 1024, // 10MB
-      monthlyLimit: 500,
-      dailyLimit: 25,
-      hourlyLimit: 5,
+      maxFileSize:  7 * 1024 * 1024, // 7MB
+      monthlyLimit: 100,
+      dailyLimit: null,
+      hourlyLimit: null,
       concurrent: 1
     },
     allowedOutputs: ['jpg', 'png', 'webp', 'avif']
@@ -49,9 +49,9 @@ export const PAGE_CONFIGS = {
     autoOutput: 'jpg',
     limits: {
       maxFileSize: 75 * 1024 * 1024, // 75MB
-      dailyLimit: 300, // 300 operations for 1 day only
-      hourlyLimit: 20,
-      concurrent: 3
+      dailyLimit: null, // 300 operations for 1 day only
+      hourlyLimit: null,
+      concurrent: 1
     },
     allowedOutputs: ['jpg', 'png', 'webp', 'avif']
   },
@@ -66,7 +66,7 @@ export const PAGE_CONFIGS = {
       maxFileSize: 75 * 1024 * 1024, // 75MB
       monthlyLimit: 10000,
       hourlyLimit: 100,
-      concurrent: 3
+      concurrent: 1
     },
     allowedOutputs: ['jpg', 'png', 'webp', 'avif']
   },
@@ -80,7 +80,7 @@ export const PAGE_CONFIGS = {
     limits: {
       maxFileSize: 200 * 1024 * 1024, // 200MB
       monthlyLimit: 50000,
-      concurrent: 5
+      concurrent: 1
     },
     allowedOutputs: ['jpg', 'png', 'webp', 'avif']
   }
@@ -215,17 +215,17 @@ export const MIME_TYPES: Record<string, string[]> = {
 // Limits for 78 single conversion pages (same for all users)
 export const SINGLE_CONVERSION_LIMITS = {
   RAW: {
-    maxFileSize: 25 * 1024 * 1024, // 25MB for RAW files
+    maxFileSize: 15 * 1024 * 1024, // 15MB for RAW files
     monthlyLimit: 100,
-    dailyLimit: 10,
-    hourlyLimit: 5,
+    dailyLimit: null,
+    hourlyLimit: null,
     concurrent: 1
   },
   REGULAR: {
-    maxFileSize: 10 * 1024 * 1024, // 10MB for regular files
-    monthlyLimit: 500,
-    dailyLimit: 25,
-    hourlyLimit: 5,
+    maxFileSize: 7 * 1024 * 1024, // 7MB for regular files
+    monthlyLimit: 100,
+    dailyLimit: null,
+    hourlyLimit: null,
     concurrent: 1
   }
 };

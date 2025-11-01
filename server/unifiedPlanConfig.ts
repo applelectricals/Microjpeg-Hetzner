@@ -42,15 +42,15 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
     id: 'anonymous',
     name: 'anonymous',
     displayName: 'Free (No Signup)',
-    description: '500 operations/month - no signup required!',
+    description: '200 operations/month - no signup required!',
     monthlyPrice: 0,
     limits: {
-      monthlyOperations: 500,
-      maxFileSize: 10 * 1024 * 1024, // 10MB
-      maxOperationsPerDay: 25,
-      maxOperationsPerHour: 5,
-      maxConcurrentUploads: 5,
-      processingTimeout: 30,
+      monthlyOperations: 200,
+      maxFileSize: 7 * 1024 * 1024, // 7MB
+      maxOperationsPerDay: null,
+      maxOperationsPerHour: null,
+      maxConcurrentUploads: 1,
+      processingTimeout: 120,
       allowedFormats: '*', // All image formats supported
       overageRate: 0,
     },
@@ -70,15 +70,15 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
     id: 'free',
     name: 'free',
     displayName: 'Free (With Signup)',
-    description: '500 operations/month with account benefits',
+    description: '200 operations/month with account benefits',
     monthlyPrice: 0,
     limits: {
-      monthlyOperations: 500,
-      maxFileSize: 10 * 1024 * 1024, // 10MB
-      maxOperationsPerDay: 25,
-      maxOperationsPerHour: 5,
-      maxConcurrentUploads: 5,
-      processingTimeout: 30,
+      monthlyOperations: 200,
+      maxFileSize: 7 * 1024 * 1024, // 10MB
+      maxOperationsPerDay: null,
+      maxOperationsPerHour: null,
+      maxConcurrentUploads: 1,
+      processingTimeout: 120,
       allowedFormats: '*', // All image formats supported
       overageRate: 0,
     },
@@ -98,15 +98,15 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
     id: 'test_premium',
     name: 'test_premium',
     displayName: 'Test Premium ($1/month)',
-    description: '300 operations for 1 day',
-    monthlyPrice: 100, // $1.00
+    description: '200 operations for 1 day',
+    monthlyPrice: 200, // $1.00
     limits: {
-      monthlyOperations: 300, // 300 operations for 1 day
+      monthlyOperations: 200, // 300 operations for 1 day
       maxFileSize: 75 * 1024 * 1024, // 75MB
-      maxOperationsPerDay: 300, // all 300 can be used in 1 day
-      maxOperationsPerHour: 20,
-      maxConcurrentUploads: 3,
-      processingTimeout: 60,
+      maxOperationsPerDay: null, // all 300 can be used in 1 day
+      maxOperationsPerHour: null,
+      maxConcurrentUploads: 1,
+      processingTimeout: 120,
       allowedFormats: '*', // All image formats supported
       overageRate: 0,
     },
@@ -115,7 +115,7 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
       'All image formats supported',
       'Max 75MB file size',
       'Max 20 operations/hour',
-      '3 concurrent uploads'
+      '1 concurrent uploads'
     ],
     requiresSignup: true,
     stripePriceId: 'price_test_premium',
@@ -129,12 +129,12 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
     description: '10,000 operations/month with premium features',
     monthlyPrice: 2900, // $29.00
     limits: {
-      monthlyOperations: 10000,
+      monthlyOperations: null,
       maxFileSize: 75 * 1024 * 1024, // 75MB
       maxOperationsPerDay: null, // no daily limit
-      maxOperationsPerHour: 100,
-      maxConcurrentUploads: 3,
-      processingTimeout: 60,
+      maxOperationsPerHour: null,
+      maxConcurrentUploads: 1,
+      processingTimeout: 120,
       allowedFormats: '*', // All image formats supported
       overageRate: 0,
     },
@@ -157,11 +157,11 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
     description: '50,000 operations/month with SLA guarantee',
     monthlyPrice: 9900, // $99.00
     limits: {
-      monthlyOperations: 50000,
+      monthlyOperations: null,
       maxFileSize: 200 * 1024 * 1024, // 200MB
       maxOperationsPerDay: null, // no daily limit
       maxOperationsPerHour: null, // No rate limits
-      maxConcurrentUploads: 5,
+      maxConcurrentUploads: 1,
       processingTimeout: 120,
       allowedFormats: '*', // All image formats supported
       overageRate: 0,
@@ -186,11 +186,11 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
     monthlyPrice: 0,
     limits: {
       monthlyOperations: 100,
-      maxFileSize: 25 * 1024 * 1024, // 25MB
-      maxOperationsPerDay: 10,
-      maxOperationsPerHour: 5, // Max 5 operations/hour as per rules
-      maxConcurrentUploads: 5,
-      processingTimeout: 60,
+      maxFileSize: 15 * 1024 * 1024, // 15MB
+      maxOperationsPerDay: null,
+      maxOperationsPerHour: null, // Unlimited operations/hour as per rules
+      maxConcurrentUploads: 1,
+      processingTimeout: 120,
       allowedFormats: ['cr2'], // Only CR2 to JPG
       overageRate: 0,
     },
