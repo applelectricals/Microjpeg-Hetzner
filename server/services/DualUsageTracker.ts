@@ -26,7 +26,10 @@ const LIMITS = {
       maxFileSize: 15 * 1024 * 1024 // 15MB
     }
   },
-  premium: { // premium29 / starter
+  premium: { // premium29 / starter / test-premium
+    maxFileSize: 75 * 1024 * 1024 // 75MB - unlimited operations
+  },
+  test_premium: { // Alias for test-premium (same as premium)
     maxFileSize: 75 * 1024 * 1024 // 75MB - unlimited operations
   },
   pro: {
@@ -34,24 +37,29 @@ const LIMITS = {
   },
   business: {
     maxFileSize: 200 * 1024 * 1024 // 200MB - unlimited operations
+  },
+  enterprise: {
+    maxFileSize: 200 * 1024 * 1024 // 200MB - unlimited operations
   }
 };
 
 export class DualUsageTracker {
   private userId?: string;
   private sessionId: string;
-  private userType: 'anonymous' | 'free' | 'premium' | 'pro' | 'business' | 'enterprise';
+  private userType: 'anonymous' | 'free' | 'premium' | 'test_premium' | 'pro' | 'business' | 'enterprise';
   private auditContext?: AuditContext;
 
   constructor(
-    userId: string | undefined, 
-    sessionId: string, 
+    userId: string | undefined,
+    sessionId: string,
     userType: string,
     auditContext?: AuditContext
   ) {
     this.userId = userId;
     this.sessionId = sessionId;
-    this.userType = userType as any;
+    // Normalize tier names: test-premium -> test_premium
+    const normalizedType = userType?.replace('-', '_') || 'anonymous';
+    this.userType = normalizedType as any;
     this.auditContext = auditContext;
   }
 
@@ -104,11 +112,11 @@ export class DualUsageTracker {
     // ==================================================
     // PAID USERS - UNLIMITED OPERATIONS
     // ==================================================
-    if (['premium', 'pro', 'business', 'enterprise'].includes(this.userType)) {
+    if (['premium', 'test_premium', 'pro', 'business', 'enterprise'].includes(this.userType)) {
       console.log(`✅ Paid user (${this.userType}) - unlimited operations`);
-      
+
       // Only check file size for paid users
-      const maxSize = LIMITS[this.userType as 'premium' | 'pro' | 'business'].maxFileSize;
+      const maxSize = LIMITS[this.userType as 'premium' | 'test_premium' | 'pro' | 'business' | 'enterprise'].maxFileSize;
       
       if (fileSize > maxSize) {
         return {

@@ -440,8 +440,15 @@ export const conversionValidationMiddleware = async (
   try {
     // Determine user type for DualUsageTracker
     let userType = 'anonymous';
-    if (userId) {
-      // Get user from storage to determine actual subscription tier
+
+    // Priority 1: If user is on a paid page with valid payment, use page tier
+    if (req.pageConfig && req.pageConfig.requiresPayment && req.pageConfig.planName) {
+      // User has passed payment check in planGatingMiddleware, use page tier
+      userType = req.pageConfig.planName; // e.g., 'premium', 'test-premium', 'enterprise'
+      console.log(`📄 Using page tier for paid page: ${userType}`);
+    }
+    // Priority 2: Check user's database subscription tier
+    else if (userId) {
       const user = await storage.getUser(userId);
       userType = user?.subscriptionTier || 'free';
     }
