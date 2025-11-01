@@ -4,6 +4,7 @@ import { Request, Response, NextFunction } from 'express';
 import { getUnifiedPlan } from './unifiedPlanConfig';
 import { DualUsageTracker, type AuditContext } from './services/DualUsageTracker';
 import { hasSuperuserBypass } from './superuser';
+import { storage } from './storage';
 // Removed PageIdentifierOperationCounter - using DualUsageTracker only
 
 // Define page types and their configurations
@@ -441,8 +442,7 @@ export const conversionValidationMiddleware = async (
     let userType = 'anonymous';
     if (userId) {
       // Get user from storage to determine actual subscription tier
-      const storage = (global as any).storage; // Access storage from global
-      const user = await storage?.getUser(userId);
+      const user = await storage.getUser(userId);
       userType = user?.subscriptionTier || 'free';
     }
 
