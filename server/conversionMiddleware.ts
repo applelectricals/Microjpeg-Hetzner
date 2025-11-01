@@ -17,7 +17,7 @@ export const PAGE_CONFIGS = {
     planName: 'free',
     autoOutput: 'jpg',
     limits: {
-      maxFileSize:  *7 1024 * 1024, // 7MB
+      maxFileSize:  7 * 1024 * 1024, // 7MB
       monthlyLimit: 100,
       dailyLimit: null,
       hourlyLimit: null,
