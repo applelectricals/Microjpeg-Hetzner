@@ -3,6 +3,7 @@
 // import userRoutes from './routes/api-user-routes';
 import userTierRoutes from './routes/user-tier-routes';
 import userRoutes from './routes/userRoutes'; // ← NEW: Tier config API
+import sequentialBatchRoutes from './sequentialBatchRoutes'; // ← NEW: Sequential batch processing
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -108,6 +109,9 @@ app.use((req, res, next) => {
   // User tier and usage routes
   app.use('/api/user', userTierRoutes);
   app.use('/api/user', userRoutes); // ← NEW: Add tier config routes
+
+  // Sequential batch processing routes
+  app.use('/api/sequential-batch', sequentialBatchRoutes); // ← NEW: Sequential batch processing
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
