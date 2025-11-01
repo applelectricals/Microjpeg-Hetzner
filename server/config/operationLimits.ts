@@ -13,13 +13,13 @@ export const OPERATION_CONFIG = {
     regular: {
       anonymous: 10 * 1024 * 1024,     // 10MB
       free: 10 * 1024 * 1024,          // 10MB
-      premium: 50 * 1024 * 1024,       // 50MB
+      premium: 75 * 1024 * 1024,       // 75MB
       enterprise: 200 * 1024 * 1024,   // 200MB
     },
     raw: {
       anonymous: 25 * 1024 * 1024,     // 25MB
       free: 50 * 1024 * 1024,          // 50MB
-      premium: 100 * 1024 * 1024,     // 100MB
+      premium: 75 * 1024 * 1024,       // 75MB
       enterprise: 500 * 1024 * 1024,   // 500MB
     }
   },

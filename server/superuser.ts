@@ -148,7 +148,7 @@ export async function getAppSettings(): Promise<{
     const [settings] = await db.select().from(appSettings).limit(1);
     
     const result = {
-      countersEnforcement: settings?.countersEnforcement as { hourly: boolean; daily: boolean; monthly: boolean } || { hourly: true, daily: true, monthly: true },
+      countersEnforcement: settings?.countersEnforcement as { hourly: boolean; daily: boolean; monthly: boolean } || { hourly: false, daily: false, monthly: true },
       adminUiEnabled: settings?.adminUiEnabled || ADMIN_UI_ENABLED,
       superuserBypassEnabled: settings?.superuserBypassEnabled || false,
     };
@@ -161,7 +161,7 @@ export async function getAppSettings(): Promise<{
   } catch (error) {
     console.error("Failed to get app settings:", error);
     return {
-      countersEnforcement: { hourly: true, daily: true, monthly: true },
+      countersEnforcement: { hourly: false, daily: false, monthly: true },
       adminUiEnabled: ADMIN_UI_ENABLED,
       superuserBypassEnabled: false,
     };
