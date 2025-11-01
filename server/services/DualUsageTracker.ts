@@ -14,10 +14,33 @@ export interface AuditContext {
   userAgent?: string;
 }
 
+// Simplified limits configuration
+const LIMITS = {
+  free: {
+    regular: {
+      monthly: 100,
+      maxFileSize: 7 * 1024 * 1024 // 7MB
+    },
+    raw: {
+      monthly: 100,
+      maxFileSize: 15 * 1024 * 1024 // 15MB
+    }
+  },
+  premium: { // premium29 / starter
+    maxFileSize: 75 * 1024 * 1024 // 75MB - unlimited operations
+  },
+  pro: {
+    maxFileSize: 150 * 1024 * 1024 // 150MB - unlimited operations
+  },
+  business: {
+    maxFileSize: 200 * 1024 * 1024 // 200MB - unlimited operations
+  }
+};
+
 export class DualUsageTracker {
   private userId?: string;
   private sessionId: string;
-  private userType: 'anonymous' | 'free' | 'premium' | 'enterprise';
+  private userType: 'anonymous' | 'free' | 'premium' | 'pro' | 'business' | 'enterprise';
   private auditContext?: AuditContext;
 
   constructor(
@@ -32,7 +55,7 @@ export class DualUsageTracker {
     this.auditContext = auditContext;
   }
 
-  // Check if operation is allowed with bypass support
+  // Check if operation is allowed
   async canPerformOperation(
     filename: string, 
     fileSize: number,
@@ -66,12 +89,10 @@ export class DualUsageTracker {
 
     // Check global enforcement settings
     const appSettings = await getAppSettings();
-    const enforceHourly = appSettings.countersEnforcement.hourly;
-    const enforceDaily = appSettings.countersEnforcement.daily;
     const enforceMonthly = appSettings.countersEnforcement.monthly;
 
-    // If all enforcement is disabled, allow operation
-    if (!enforceHourly && !enforceDaily && !enforceMonthly) {
+    // If enforcement is disabled, allow operation
+    if (!enforceMonthly) {
       console.log('⚠️ Global enforcement disabled: Operation allowed');
       return {
         allowed: true,
@@ -80,87 +101,71 @@ export class DualUsageTracker {
       };
     }
 
-    // Check file size limit
-    const maxSize = OPERATION_CONFIG.maxFileSize[fileType][this.userType];
-    if (fileSize > maxSize) {
+    // ==================================================
+    // PAID USERS - UNLIMITED OPERATIONS
+    // ==================================================
+    if (['premium', 'pro', 'business', 'enterprise'].includes(this.userType)) {
+      console.log(`✅ Paid user (${this.userType}) - unlimited operations`);
+      
+      // Only check file size for paid users
+      const maxSize = LIMITS[this.userType as 'premium' | 'pro' | 'business'].maxFileSize;
+      
+      if (fileSize > maxSize) {
+        return {
+          allowed: false,
+          reason: `File too large. Maximum ${Math.round(maxSize / 1024 / 1024)}MB for ${this.userType} plan.`
+        };
+      }
+      
       return {
-        allowed: false,
-        reason: `File too large. Maximum ${Math.round(maxSize / 1024 / 1024)}MB for ${fileType} files.`
+        allowed: true,
+        usage: null, // No usage limits for paid users
+        limits: { unlimited: true }
       };
     }
 
-    // Get current usage
-    const usage = await this.getCurrentUsage();
-    const limits = this.getLimits(fileType, pageIdentifier);
-
-    // Check limits with enforcement settings
-    // For anonymous users, only enforce monthly limit (no hourly/daily)
-    const isAnonymous = this.userType === 'anonymous';
+    // ==================================================
+    // FREE USERS - MONTHLY LIMITS ONLY
+    // ==================================================
     
-    if (fileType === 'raw') {
-      if (!isAnonymous && enforceHourly && usage.rawHourly >= limits.hourly) {
-        return { 
-          allowed: false, 
-          reason: `Hourly RAW limit reached (${limits.hourly})`,
-          usage,
-          limits
-        };
-      }
-      if (!isAnonymous && enforceDaily && usage.rawDaily >= limits.daily) {
-        return { 
-          allowed: false, 
-          reason: `Daily RAW limit reached (${limits.daily})`,
-          usage,
-          limits
-        };
-      }
-      if (enforceMonthly && usage.rawMonthly >= limits.monthly) {
-        const reason = isAnonymous 
-          ? `You've reached your free monthly limit of ${limits.monthly} operations. Upgrade to Premium for unlimited processing!`
-          : `Monthly RAW limit reached (${limits.monthly})`;
-        return { 
-          allowed: false, 
-          reason,
-          usage,
-          limits,
-          upgradeRequired: isAnonymous
-        };
-      }
-    } else {
-      if (!isAnonymous && enforceHourly && usage.regularHourly >= limits.hourly) {
-        return { 
-          allowed: false, 
-          reason: `Hourly limit reached (${limits.hourly})`,
-          usage,
-          limits
-        };
-      }
-      if (!isAnonymous && enforceDaily && usage.regularDaily >= limits.daily) {
-        return { 
-          allowed: false, 
-          reason: `Daily limit reached (${limits.daily})`,
-          usage,
-          limits
-        };
-      }
-      if (enforceMonthly && usage.regularMonthly >= limits.monthly) {
-        const reason = isAnonymous 
-          ? `You've reached your free monthly limit of ${limits.monthly} operations. Upgrade to Premium for unlimited processing!`
-          : `Monthly limit reached (${limits.monthly})`;
-        return { 
-          allowed: false, 
-          reason,
-          usage,
-          limits,
-          upgradeRequired: isAnonymous
-        };
-      }
+    // Check file size limit for free users
+    const maxSize = fileType === 'raw' 
+      ? LIMITS.free.raw.maxFileSize 
+      : LIMITS.free.regular.maxFileSize;
+    
+    if (fileSize > maxSize) {
+      return {
+        allowed: false,
+        reason: `File too large. Maximum ${Math.round(maxSize / 1024 / 1024)}MB for ${fileType} files. Upgrade to Premium for files up to 75MB!`,
+        upgradeRequired: true
+      };
+    }
+
+    // Get current usage for free users
+    const usage = await this.getCurrentUsage();
+    const monthlyLimit = fileType === 'raw' 
+      ? LIMITS.free.raw.monthly 
+      : LIMITS.free.regular.monthly;
+    
+    const currentUsage = fileType === 'raw' 
+      ? usage.rawMonthly 
+      : usage.regularMonthly;
+
+    // Check monthly limit (only limit that exists for free users)
+    if (currentUsage >= monthlyLimit) {
+      return {
+        allowed: false,
+        reason: `You've reached your free monthly limit of ${monthlyLimit} ${fileType} operations. Upgrade to Premium for unlimited processing!`,
+        usage,
+        limits: { monthly: monthlyLimit },
+        upgradeRequired: true
+      };
     }
 
     return { 
       allowed: true,
       usage,
-      limits
+      limits: { monthly: monthlyLimit }
     };
   }
 
@@ -173,14 +178,16 @@ export class DualUsageTracker {
     const fileType = getFileType(filename);
     
     if (fileType === 'unknown') {
-      return; // Don't record unknown file types
+      return;
     }
     
-    // Validate fileSize - if NaN or invalid, default to 0
+    // Validate fileSize
     const validFileSize = isNaN(fileSize) || fileSize < 0 ? 0 : fileSize;
     
-    // Update usage counters
-    await this.incrementUsage(fileType);
+    // Only increment usage for free users
+    if (this.userType === 'free' || this.userType === 'anonymous') {
+      await this.incrementUsage(fileType);
+    }
     
     // Log operation with bypass information
     const wasBypassed = this.auditContext?.superBypass || false;
@@ -198,7 +205,7 @@ export class DualUsageTracker {
     });
 
     if (wasBypassed) {
-      console.log(`📝 Operation logged with bypass: ${fileType} file by ${this.auditContext?.adminUserId || 'system'}`);
+      console.log(`🔓 Operation logged with bypass: ${fileType} file by ${this.auditContext?.adminUserId || 'system'}`);
     }
   }
 
@@ -224,75 +231,48 @@ export class DualUsageTracker {
       
       return {
         regularMonthly: 0,
-        regularDaily: 0,
-        regularHourly: 0,
-        rawMonthly: 0,
-        rawDaily: 0,
-        rawHourly: 0
+        rawMonthly: 0
       };
     }
 
     const usage = usageResult[0];
 
-    // Check and reset counters if needed
-    const hourlyReset = new Date(usage.hourlyResetAt || new Date());
-    const dailyReset = new Date(usage.dailyResetAt || new Date());
+    // Check and reset monthly counter if needed
     const monthlyReset = new Date(usage.monthlyResetAt || new Date());
-
-    let updateData: any = {};
-    let needsUpdate = false;
     
-    // Reset hourly
-    if (now.getTime() - hourlyReset.getTime() > 3600000) { // 1 hour
-      updateData.regularHourly = 0;
-      updateData.rawHourly = 0;
-      updateData.hourlyResetAt = now;
-      usage.regularHourly = 0;
-      usage.rawHourly = 0;
-      needsUpdate = true;
-    }
-
-    // Reset daily
-    if (now.getTime() - dailyReset.getTime() > 86400000) { // 24 hours
-      updateData.regularDaily = 0;
-      updateData.rawDaily = 0;
-      updateData.dailyResetAt = now;
-      usage.regularDaily = 0;
-      usage.rawDaily = 0;
-      needsUpdate = true;
-    }
-
-    // Reset monthly
     if (now.getTime() - monthlyReset.getTime() > 2592000000) { // 30 days
-      updateData.regularMonthly = 0;
-      updateData.rawMonthly = 0;
-      updateData.monthlyBandwidthMb = 0;
-      updateData.monthlyResetAt = now;
-      usage.regularMonthly = 0;
-      usage.rawMonthly = 0;
-      needsUpdate = true;
-    }
-
-    if (needsUpdate) {
       await db.update(userUsage)
-        .set(updateData)
+        .set({
+          regularMonthly: 0,
+          rawMonthly: 0,
+          monthlyBandwidthMb: 0,
+          monthlyResetAt: now,
+          // Set daily/hourly to 0 for cleanliness (not used but kept in DB)
+          regularDaily: 0,
+          rawDaily: 0,
+          regularHourly: 0,
+          rawHourly: 0,
+          hourlyResetAt: now,
+          dailyResetAt: now
+        })
         .where(and(
           eq(userUsage.userId, this.userId || 'anonymous'),
           eq(userUsage.sessionId, this.sessionId)
         ));
+      
+      usage.regularMonthly = 0;
+      usage.rawMonthly = 0;
     }
 
     return usage;
   }
 
-  // Increment usage counters
+  // Increment usage counters (only monthly for free users)
   private async incrementUsage(fileType: 'regular' | 'raw'): Promise<void> {
     if (fileType === 'raw') {
       await db.update(userUsage)
         .set({
           rawMonthly: sql`${userUsage.rawMonthly} + 1`,
-          rawDaily: sql`${userUsage.rawDaily} + 1`,
-          rawHourly: sql`${userUsage.rawHourly} + 1`,
           updatedAt: new Date()
         })
         .where(and(
@@ -303,8 +283,6 @@ export class DualUsageTracker {
       await db.update(userUsage)
         .set({
           regularMonthly: sql`${userUsage.regularMonthly} + 1`,
-          regularDaily: sql`${userUsage.regularDaily} + 1`,
-          regularHourly: sql`${userUsage.regularHourly} + 1`,
           updatedAt: new Date()
         })
         .where(and(
@@ -314,56 +292,51 @@ export class DualUsageTracker {
     }
   }
 
-  // Get limits for file type
-  private getLimits(fileType: 'regular' | 'raw', pageIdentifier?: string): any {
-    const baseLimits = OPERATION_CONFIG.limits[this.userType][fileType];
-    
-    // Check for page-specific overrides
-    if (pageIdentifier && OPERATION_CONFIG.pageOverrides[pageIdentifier as keyof typeof OPERATION_CONFIG.pageOverrides]) {
-      const pageOverride = OPERATION_CONFIG.pageOverrides[pageIdentifier as keyof typeof OPERATION_CONFIG.pageOverrides];
-      const override = pageOverride[this.userType as keyof typeof pageOverride];
-      if (override) {
-        return { ...baseLimits, ...override };
-      }
-    }
-    
-    return baseLimits;
-  }
-
-  // This method is no longer needed as we handle updates inline
-  private async updateResets(usage: any): Promise<void> {
-    // This method is now handled inline in getCurrentUsage()
-  }
-
   // Get usage statistics for display
   async getUsageStats(hasLaunchOffer: boolean = false): Promise<any> {
-    const usage = await this.getCurrentUsage();
-    const regularLimits = OPERATION_CONFIG.limits[this.userType].regular;
-    const rawLimits = OPERATION_CONFIG.limits[this.userType].raw;
-
-    // Add 100 bonus operations to monthly limit for free users who claimed launch offer
-    const adjustedRegularLimits = { ...regularLimits };
-    if (this.userType === 'free' && hasLaunchOffer) {
-      adjustedRegularLimits.monthly = regularLimits.monthly + 100;
+    // Paid users have unlimited operations
+    if (['premium', 'pro', 'business', 'enterprise'].includes(this.userType)) {
+      return {
+        regular: {
+          monthly: { used: 0, limit: null }, // null = unlimited
+          daily: { used: 0, limit: null },
+          hourly: { used: 0, limit: null }
+        },
+        raw: {
+          monthly: { used: 0, limit: null },
+          daily: { used: 0, limit: null },
+          hourly: { used: 0, limit: null }
+        },
+        combined: {
+          monthly: { used: 0, limit: null }
+        },
+        unlimited: true
+      };
     }
+
+    // Free users - only show monthly limits
+    const usage = await this.getCurrentUsage();
+    const regularLimit = LIMITS.free.regular.monthly + (hasLaunchOffer ? 100 : 0);
+    const rawLimit = LIMITS.free.raw.monthly;
 
     return {
       regular: {
-        monthly: { used: usage.regularMonthly, limit: adjustedRegularLimits.monthly },
-        daily: { used: usage.regularDaily, limit: adjustedRegularLimits.daily },
-        hourly: { used: usage.regularHourly, limit: adjustedRegularLimits.hourly }
+        monthly: { used: usage.regularMonthly, limit: regularLimit },
+        daily: { used: 0, limit: null }, // No daily limits
+        hourly: { used: 0, limit: null } // No hourly limits
       },
       raw: {
-        monthly: { used: usage.rawMonthly, limit: rawLimits.monthly },
-        daily: { used: usage.rawDaily, limit: rawLimits.daily },
-        hourly: { used: usage.rawHourly, limit: rawLimits.hourly }
+        monthly: { used: usage.rawMonthly, limit: rawLimit },
+        daily: { used: 0, limit: null },
+        hourly: { used: 0, limit: null }
       },
       combined: {
         monthly: {
           used: usage.regularMonthly + usage.rawMonthly,
-          limit: adjustedRegularLimits.monthly + rawLimits.monthly
+          limit: regularLimit + rawLimit
         }
-      }
+      },
+      unlimited: false
     };
   }
 }

@@ -2303,30 +2303,33 @@ if (successfulJobs.length > 0) {
         monthly: pageLimits.monthly
       };
       
-      // Get page-specific usage using DualUsageTracker
-      const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
-      const userId = isUserAuthenticated && req.user ? req.user.claims?.sub : req.session?.userId || undefined;
-      
-      // Determine user type for DualUsageTracker
-      let userType = 'anonymous';
-      if (userId) {
-        const user = await storage.getUser(userId);
-        userType = user?.subscriptionTier || 'free';
-      }
-      
-      const dualTracker = new DualUsageTracker(userId, sessionId, userType);
-      const statsResult = await dualTracker.getUsageStats();
-      const usage = statsResult.regular; // Get regular usage stats for display
-      
-      return res.json({
-        pageIdentifier,
-        operations: {
-          dailyUsed: usage.regularDaily,
-          dailyLimit: PAGE_LIMITS.daily,
-          used: usage.regularMonthly,
-          limit: PAGE_LIMITS.monthly
-        }
-      });
+ // Get page-specific usage using DualUsageTracker
+const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
+const userId = isUserAuthenticated && req.user ? req.user.claims?.sub : req.session?.userId || undefined;
+
+// Determine user type for DualUsageTracker
+let userType = 'anonymous';
+if (userId) {
+  const user = await storage.getUser(userId);
+  userType = user?.subscriptionTier || 'free';
+}
+
+const dualTracker = new DualUsageTracker(userId, sessionId, userType);
+const statsResult = await dualTracker.getUsageStats();
+
+// Paid users have unlimited operations
+const isPaidUser = ['premium', 'pro', 'business', 'enterprise'].includes(userType);
+
+return res.json({
+  pageIdentifier,
+  operations: {
+    dailyUsed: 0,  // No daily limits anymore
+    dailyLimit: null,  // null = unlimited
+    used: isPaidUser ? 0 : statsResult.combined.monthly.used,
+    limit: isPaidUser ? null : statsResult.combined.monthly.limit,
+    unlimited: isPaidUser
+  }
+});
       
     } catch (error) {
       console.error('Error fetching page-specific usage stats:', error);
@@ -3691,7 +3694,7 @@ if (successfulJobs.length > 0) {
         // Anonymous user limits using unified plan configuration
         const anonPlan = getUnifiedPlan('anonymous');
         
-        // Enforce 5 concurrent upload for anonymous users
+        // Enforce 1 concurrent upload for anonymous users
         if (files.length > anonPlan.limits.maxConcurrentUploads) {
           return res.status(400).json({ 
             error: `Free users can only upload ${anonPlan.limits.maxConcurrentUploads} file at a time. Sign up for batch uploads!`,
@@ -6495,85 +6498,76 @@ export function registerResetEndpoints(app: Express) {
    * POST /api/admin/counters/reset
    */
   app.post('/api/admin/counters/reset', ensureSuperuser, async (req, res) => {
-    try {
-      const { userId, sessionId, resetType } = req.body;
-      
-      if (!userId && !sessionId) {
-        return res.status(400).json({ 
-          error: 'Invalid request',
-          message: 'Either userId or sessionId must be provided'
-        });
-      }
-      
-      if (!['hourly', 'daily', 'monthly', 'all'].includes(resetType)) {
-        return res.status(400).json({ 
-          error: 'Invalid request',
-          message: 'resetType must be one of: hourly, daily, monthly, all'
-        });
-      }
-
-      // Prepare update data based on resetType
-      let updateData: any = { updatedAt: new Date() };
-      
-      if (resetType === 'hourly' || resetType === 'all') {
-        updateData.regularHourly = 0;
-        updateData.rawHourly = 0;
-        updateData.hourlyResetAt = new Date();
-      }
-      
-      if (resetType === 'daily' || resetType === 'all') {
-        updateData.regularDaily = 0;
-        updateData.rawDaily = 0;
-        updateData.dailyResetAt = new Date();
-      }
-      
-      if (resetType === 'monthly' || resetType === 'all') {
-        updateData.regularMonthly = 0;
-        updateData.rawMonthly = 0;
-        updateData.monthlyBandwidthMb = 0;
-        updateData.monthlyResetAt = new Date();
-      }
-
-      // Build where condition
-      let whereCondition;
-      if (userId) {
-        whereCondition = eq(userUsage.userId, userId);
-      } else {
-        whereCondition = eq(userUsage.sessionId, sessionId!);
-      }
-      
-      // Perform the reset
-      await db.update(userUsage)
-        .set(updateData)
-        .where(whereCondition);
-      
-      // Log the action
-      await logAdminAction(
-        req.user!.id,
-        'COUNTERS_RESET',
-        userId,
-        sessionId,
-        { resetType, updateData },
-        req.ip,
-        req.get('User-Agent')
-      );
-      
-      console.log(`🔄 Counters reset (${resetType}) by ${req.user!.email} for ${userId ? 'user ' + userId : 'session ' + sessionId}`);
-      
-      res.json({ 
-        success: true,
-        message: `${resetType} counters reset successfully`,
-        resetType,
-        target: userId ? { userId } : { sessionId }
-      });
-    } catch (error) {
-      console.error('Error resetting counters:', error);
-      res.status(500).json({ 
-        error: 'Internal server error',
-        message: 'Failed to reset counters'
+  try {
+    const { userId, sessionId, resetType } = req.body;
+    
+    if (!userId && !sessionId) {
+      return res.status(400).json({ 
+        error: 'Invalid request',
+        message: 'Either userId or sessionId must be provided'
       });
     }
-  });
+    
+    if (!['monthly', 'all'].includes(resetType)) {
+      return res.status(400).json({ 
+        error: 'Invalid request',
+        message: 'resetType must be one of: monthly, all (hourly/daily removed)'
+      });
+    }
+
+    // Reset all counters (we only use monthly now, but reset all for cleanliness)
+    const updateData: any = { 
+      regularMonthly: 0,
+      rawMonthly: 0,
+      regularDaily: 0,    // Not used but reset for cleanliness
+      rawDaily: 0,        // Not used but reset for cleanliness
+      regularHourly: 0,   // Not used but reset for cleanliness
+      rawHourly: 0,       // Not used but reset for cleanliness
+      monthlyBandwidthMb: 0,
+      monthlyResetAt: new Date(),
+      dailyResetAt: new Date(),
+      hourlyResetAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    // Build where condition
+    let whereCondition;
+    if (userId) {
+      whereCondition = eq(userUsage.userId, userId);
+    } else {
+      whereCondition = eq(userUsage.sessionId, sessionId!);
+    }
+    
+    // Perform the reset
+    await db.update(userUsage)
+      .set(updateData)
+      .where(whereCondition);
+    
+    // Log the action
+    await logAdminAction(
+      req.user!.id,
+      'COUNTERS_RESET',
+      userId,
+      sessionId,
+      { resetType, updateData },
+      req.ip,
+      req.get('User-Agent')
+    );
+    
+    return res.json({
+      success: true,
+      message: 'Counters reset successfully',
+      resetData: updateData
+    });
+    
+  } catch (error) {
+    console.error('Counter reset error:', error);
+    return res.status(500).json({
+      error: 'Failed to reset counters',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    });
+  }
+});
 
   /**
    * Get current superuser status and bypass information
