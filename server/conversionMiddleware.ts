@@ -47,7 +47,7 @@ export const PAGE_CONFIGS = {
     planName: 'test-premium',
     autoOutput: 'jpg',
     limits: {
-      maxFileSize: 50 * 1024 * 1024, // 50MB
+      maxFileSize: 75 * 1024 * 1024, // 75MB
       dailyLimit: 300, // 300 operations for 1 day only
       hourlyLimit: 20,
       concurrent: 3
@@ -62,7 +62,7 @@ export const PAGE_CONFIGS = {
     planName: 'premium',
     autoOutput: 'jpg',
     limits: {
-      maxFileSize: 50 * 1024 * 1024, // 50MB
+      maxFileSize: 75 * 1024 * 1024, // 75MB
       monthlyLimit: 10000,
       hourlyLimit: 100,
       concurrent: 3

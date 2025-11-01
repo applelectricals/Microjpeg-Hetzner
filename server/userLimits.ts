@@ -12,7 +12,7 @@ export const USER_LIMITS = {
     monthly: { total: 10000 },
     daily: { total: 500 },
     hourly: { total: 100 },
-    maxFileSize: 50 * 1024 * 1024, // 50MB
+    maxFileSize: 75 * 1024 * 1024, // 75MB
     concurrent: 3
   },
   enterprise: {

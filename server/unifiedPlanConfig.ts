@@ -102,7 +102,7 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
     monthlyPrice: 100, // $1.00
     limits: {
       monthlyOperations: 300, // 300 operations for 1 day
-      maxFileSize: 50 * 1024 * 1024, // 50MB
+      maxFileSize: 75 * 1024 * 1024, // 75MB
       maxOperationsPerDay: 300, // all 300 can be used in 1 day
       maxOperationsPerHour: 20,
       maxConcurrentUploads: 3,
@@ -113,7 +113,7 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
     features: [
       '300 operations for 1 day',
       'All image formats supported',
-      'Max 50MB file size',
+      'Max 75MB file size',
       'Max 20 operations/hour',
       '3 concurrent uploads'
     ],
@@ -130,7 +130,7 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
     monthlyPrice: 2900, // $29.00
     limits: {
       monthlyOperations: 10000,
-      maxFileSize: 50 * 1024 * 1024, // 50MB
+      maxFileSize: 75 * 1024 * 1024, // 75MB
       maxOperationsPerDay: null, // no daily limit
       maxOperationsPerHour: 100,
       maxConcurrentUploads: 3,
@@ -141,7 +141,7 @@ export const UNIFIED_PLANS: Record<string, UnifiedPlan> = {
     features: [
       '10,000 operations/month',
       'All image formats supported',
-      'Max 50MB file size',
+      'Max 75MB file size',
       'Max 100 operations/hour',
       '3 concurrent uploads'
     ],

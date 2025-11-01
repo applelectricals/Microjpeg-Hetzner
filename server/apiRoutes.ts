@@ -93,7 +93,7 @@ router.get('/status', (req, res) => {
     },
     tierLimits: {
       free: { maxFileSize: '10MB', operations: 500 },
-      premium: { maxFileSize: '50MB', operations: 10000 },
+      premium: { maxFileSize: '75MB', operations: 10000 },
       enterprise: { maxFileSize: '200MB', operations: 50000 }
     }
   });
@@ -132,7 +132,7 @@ router.post('/compress',
           tier: tierConfig.displayName,
           maxFileSize: tierConfig.limits.maxFileSize,
           currentFileSize: fileSize,
-          upgrade: tierConfig.id === 'free' ? 'Upgrade to Premium for 50MB files or Enterprise for 200MB files' : tierConfig.id === 'pro' ? 'Upgrade to Enterprise for 200MB files' : null
+          upgrade: tierConfig.id === 'free' ? 'Upgrade to Premium for 75MB files or Enterprise for 200MB files' : tierConfig.id === 'pro' ? 'Upgrade to Enterprise for 200MB files' : null
         });
       }
 
