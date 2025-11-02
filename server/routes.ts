@@ -5582,12 +5582,40 @@ async function compressImage(
         smartSubsample: true
       });
     } else if (options.outputFormat === "avif") {
-      sharpInstance = sharpInstance.avif({
-        quality,
-        effort: 9, // Maximum compression effort
-        lossless: quality >= 95,
-        chromaSubsampling: quality < 90 ? '4:2:0' : '4:4:4'
-      });
+  // AVIF optimization: Check file size and adjust settings
+  let avifEffort = 6;  // Default effort
+  let avifQuality = quality;
+  
+  try {
+    const fileStats = await fs.stat(file.path);
+    const fileSizeMB = fileStats.size / (1024 * 1024);
+    
+    if (fileSizeMB > 50) {
+      // Very large files: use fastest settings
+      avifEffort = 2;
+      avifQuality = Math.min(quality, 65);
+      console.log(`⚠️ Very large file (${fileSizeMB.toFixed(1)}MB) - AVIF effort:2, quality:${avifQuality}`);
+    } else if (fileSizeMB > 30) {
+      // Large files: use fast settings
+      avifEffort = 3;
+      avifQuality = Math.min(quality, 70);
+      console.log(`⚠️ Large file (${fileSizeMB.toFixed(1)}MB) - AVIF effort:3, quality:${avifQuality}`);
+    } else if (fileSizeMB > 10) {
+      // Medium files: balanced settings
+      avifEffort = 4;
+      console.log(`📊 Medium file (${fileSizeMB.toFixed(1)}MB) - AVIF effort:4`);
+    }
+    // Small files (<10MB) use default effort:6
+  } catch (err) {
+    console.log('⚠️ Could not check file size, using default AVIF settings');
+  }
+  
+  sharpInstance = sharpInstance.avif({
+    quality: avifQuality,
+    effort: avifEffort, // Dynamic effort based on file size
+    lossless: false, // Disable lossless for speed
+    chromaSubsampling: '4:2:0' // Always 4:2:0 for speed
+  });
     } else {
       // JPEG compression options (optimized for fast mode)
       const jpegOptions: any = {
@@ -6055,8 +6083,9 @@ async function processSpecialFormatConversion(
       case 'avif':
         await sharpInstance
           .avif({ 
-            quality: 90,
-            effort: 4
+            quality: 70,  // Slightly lower quality for speed
+            effort: 4,    // 0-9, lower = faster (default is 4)
+            chromaSubsampling: '4:2:0'  // Reduces quality slightly but much faster
           })
           .toFile(outputPath);
         break;
