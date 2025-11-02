@@ -111,7 +111,19 @@ async canPerformOperation(
   // ==================================================
   // PAID USERS - UNLIMITED OPERATIONS
   // ==================================================
-  const isPaidUser = ['premium', 'pro', 'business', 'enterprise'].includes(this.userType);
+  const isPaidUser = [
+  'premium', 
+  'test_premium', 
+  'starter-m',      // Starter Monthly
+  'starter-y',      // Starter Yearly
+  'pro-m',          // Pro Monthly
+  'pro-y',          // Pro Yearly
+  'business-m',     // Business Monthly
+  'business-y',     // Business Yearly
+  'pro', 
+  'business', 
+  'enterprise'
+].includes(this.userType);
   
   if (isPaidUser) {
     console.log(`✅ Paid user (${this.userType}) - unlimited operations`);
@@ -120,16 +132,23 @@ async canPerformOperation(
     let maxSize: number;
     
     switch(this.userType) {
-      case 'premium':
-        maxSize = 75 * 1024 * 1024; // 75MB
-        break;
-      case 'pro':
-        maxSize = 150 * 1024 * 1024; // 150MB
-        break;
-      case 'business':
-      case 'enterprise':
-        maxSize = 200 * 1024 * 1024; // 200MB
-        break;
+  case 'premium':
+  case 'test_premium':
+  case 'starter-m':      // Starter Monthly
+  case 'starter-y':      // Starter Yearly
+    maxSize = 75 * 1024 * 1024; // 75MB
+    break;
+  case 'pro':
+  case 'pro-m':          // Pro Monthly
+  case 'pro-y':          // Pro Yearly
+    maxSize = 150 * 1024 * 1024; // 150MB
+    break;
+  case 'business':
+  case 'business-m':     // Business Monthly
+  case 'business-y':     // Business Yearly
+  case 'enterprise':
+    maxSize = 200 * 1024 * 1024; // 200MB
+    break;
       default:
         maxSize = 75 * 1024 * 1024; // Default to 75MB
     }
@@ -329,7 +348,7 @@ async canPerformOperation(
   // Get usage statistics for display
   async getUsageStats(hasLaunchOffer: boolean = false): Promise<any> {
     // Paid users have unlimited operations
-    if (['premium', 'pro', 'business', 'enterprise'].includes(this.userType)) {
+    if (['premium', 'test_premium', 'starter-m', 'starter-y', 'pro-m', 'pro-y', 'business-m', 'business-y', 'pro', 'business', 'enterprise'].includes(this.userType)) {
       return {
         regular: {
           monthly: { used: 0, limit: null }, // null = unlimited
