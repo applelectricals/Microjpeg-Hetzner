@@ -1140,20 +1140,10 @@ try {
         return res.status(404).json({ error: "No valid jobs found to process" });
       }
       
-      // Check usage limits for compressions
-      for (const job of jobs) {
-        const usageCheck = await UsageTracker.checkLimit(user, req, 1, false);
-        if (!usageCheck.allowed) {
-          
-            return res.status(429).json({
-            error: "Usage limit exceeded",
-            message: usageCheck.message || "You have reached your compression limit",
-            usage: usageCheck.usage
-          });
-        }
-      }
-      
-      const results = [];
+      // Usage limits are now checked by DualUsageTracker earlier in the request
+    // (Removed old UsageTracker.checkLimit call to avoid conflicts)
+
+const results = [];
       
       for (const job of jobs) {
         try {
@@ -1298,153 +1288,139 @@ app.post("/api/compress", upload.array('files', 20), requireScopeFromAuth, async
           allowedPages: ALLOWED_PAGE_IDENTIFIERS
         });
       }
+
+      // ============================================================================
+      // ADD THIS ENTIRE SECTION HERE (AFTER LINE 1295)
+      // ============================================================================
       
-      const pageLimits = getPageLimits(pageIdentifier);
-      if (!pageLimits) {
-        return res.status(400).json({
-          error: 'Invalid page configuration',
-          message: `No limits configured for page identifier: ${pageIdentifier}`,
-          pageIdentifier
-        });
-      }
-      
-      console.log(`🔧 COMPRESSION: pageIdentifier="${pageIdentifier}", sessionId="${sessionId}"`);
-      
-      // ✅ Validate authentication requirements
-      if (pageLimits.requiresAuth && !user) {
-        return res.status(401).json({
-          error: 'Authentication required',
-          message: `${pageLimits.displayName} requires user authentication`,
-          pageIdentifier
-        });
-      }
-      
-      // ✅ CRITICAL: Enforce payment requirements for paid pages
-      if (pageLimits.requiresPayment && user) {
-        const hasActiveSubscription = user.isPremium && user.subscriptionStatus === 'active';
-        const hasValidTestPremium = user.testPremiumExpiresAt && new Date(user.testPremiumExpiresAt) > new Date();
-        
-        // Check specific payment requirements per page
-        if (pageIdentifier === 'test-1-dollar' && !hasValidTestPremium) {
-          return res.status(402).json({
-            error: 'Payment required',
-            message: 'Test Premium ($1) subscription required for this page',
-            pageIdentifier,
-            requiredPayment: pageLimits.paymentAmount,
-            subscriptionType: 'test-premium'
-          });
-        }
-        
-        if ((pageIdentifier === 'premium-29' || pageIdentifier === 'enterprise-99') && !hasActiveSubscription) {
-          return res.status(402).json({
-            error: 'Payment required', 
-            message: `${pageLimits.displayName} subscription required for this page`,
-            pageIdentifier,
-            requiredPayment: pageLimits.paymentAmount,
-            subscriptionType: pageIdentifier === 'premium-29' ? 'premium' : 'enterprise'
-          });
-        }
-        
-        console.log(`✅ Payment verification passed for ${pageIdentifier}: user has required subscription`);
-      }
-      
-      // ✅ Validate file constraints for each file
-      for (const file of files) {
-        // File size validation
-        const sizeValidation = validateFileSize(file, pageIdentifier);
-        if (!sizeValidation.valid) {
-          return res.status(400).json({ 
-            error: "File size limit exceeded", 
-            message: sizeValidation.error,
-            pageIdentifier,
-            fileName: file.originalname
-          });
-        }
-        
-        // File format validation
-        const formatValidation = validateFileFormat(file.originalname, pageIdentifier);
-        if (!formatValidation.valid) {
-          return res.status(400).json({ 
-            error: "File format not supported", 
-            message: formatValidation.error,
-            pageIdentifier,
-            fileName: file.originalname
-          });
-        }
-      }
-      
-      // Check batch limits (max 20 files for all users)
-      if (files.length > 20) {
-        return res.status(400).json({ 
-          error: "Batch size limit exceeded", 
-          message: "Maximum 20 files per batch",
-
-        });
-      }
-
-      // Settings already parsed and validated above ✅
-
-      // Map pageIdentifier to plan configuration (PAGE_LIMITS equivalent)
-      const getPagePlan = (pageId: string) => {
-        switch (pageId) {
-          case 'free-no-auth':
-          case '/':
-            return 'anonymous';
-          case 'free-auth':
-          case '/compress-free':
-            return 'free';
-          case 'test-1-dollar':
-          case '/test-premium':
-            return 'test_premium';
-          case 'premium-29':
-          case '/compress-premium':
-            return 'pro';
-          case 'enterprise-99':
-          case '/compress-enterprise':
-            return 'enterprise';
-          case 'cr2-free':
-          case '/convert/cr2-to-jpg':
-            return 'cr2-free';
-          // Add support for all individual conversion page identifiers
-          default:
-            // Handle dynamic conversion page identifiers (format: from-to-format)
-            if (pageId.match(/^[a-z0-9]+-to-[a-z0-9]+$/)) {
-              return 'anonymous'; // Individual conversion pages are free/anonymous
-            }
-            return null;
-        }
-      };
-
-      const planId = getPagePlan(pageIdentifier);
-      if (!planId) {
-        return res.status(400).json({ 
-          error: 'Invalid page identifier',
-          message: `Unsupported page identifier: ${pageIdentifier}`,
-          pageIdentifier
-        });
-      }
-
-      const limits = getUnifiedPlan(planId);
-      console.log(`🔧 Page-specific limits for ${pageIdentifier} (${planId}):`, limits);
-
-      // Check page-specific usage limits BEFORE processing
-      const finalSessionId = sessionId || getSessionIdFromRequest(req);
-
-      // ✅ Check usage limits using DualUsageTracker (single source of truth)
+      // Determine userType from pageIdentifier for usage tracking
       let userType = 'anonymous';
-      if (user) {
-        const userData = await storage.getUser((user as any)?.claims?.sub);
-        userType = userData?.subscriptionTier || 'free';
+      
+      if (user && user.id) {
+        // Authenticated user - get subscription tier from database
+        try {
+          const userData = await storage.getUser(user.id);
+          userType = userData?.subscriptionTier || 'free';
+          console.log('✅ Authenticated user, userType from DB:', userType);
+        } catch (err) {
+          console.error('⚠️ Failed to get user subscription:', err);
+          userType = 'free';
+        }
+      } else {
+        // Not authenticated - infer from pageIdentifier
+        console.log('🔍 Not authenticated, inferring userType from pageIdentifier:', pageIdentifier);
+        
+        if (pageIdentifier === 'premium-29' || 
+            pageIdentifier.includes('premium') || 
+            pageIdentifier.includes('starter') ||
+            pageIdentifier === 'paid') {
+          userType = 'premium';
+          console.log('✅ SET userType = PREMIUM (75MB limit)');
+        } else if (pageIdentifier.includes('pro')) {
+          userType = 'pro';
+          console.log('✅ SET userType = PRO (150MB limit)');
+        } else if (pageIdentifier.includes('business') || pageIdentifier.includes('enterprise')) {
+          userType = 'business';
+          console.log('✅ SET userType = BUSINESS (200MB limit)');
+        } else {
+          console.log('⚠️ Free/anonymous page, userType = anonymous');
+        }
       }
       
-      // Get client IP address for anonymous user tracking
+      console.log('🎯 FINAL userType:', userType, '| pageIdentifier:', pageIdentifier);
+      
+      // Get client IP for tracking
       const clientIP = req.headers['x-forwarded-for']?.toString().split(',')[0].trim() || 
                        req.headers['x-real-ip']?.toString() || 
                        req.socket.remoteAddress || 
                        'unknown';
       
+      const trackingId = user?.id || `ip_${clientIP}`;
+      const finalSessionId = sessionId || req.sessionID;
+      
+      // Create DualUsageTracker with correct userType
+      const dualTracker = new DualUsageTracker(trackingId, finalSessionId, userType, {
+        ipAddress: clientIP
+      });
+      
+      // Check limits for each file BEFORE processing
+      for (const file of files) {
+        console.log(`📁 Checking: ${file.originalname} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+        
+        const canPerform = await dualTracker.canPerformOperation(
+          file.originalname,
+          file.size,
+          pageIdentifier
+        );
+        
+        if (!canPerform.allowed) {
+          console.log('❌ LIMIT EXCEEDED:', canPerform.reason);
+          return res.status(429).json({
+            error: "Usage limit exceeded",
+            message: canPerform.reason,
+            pageIdentifier,
+            userType,
+            usage: canPerform.usage,
+            limits: canPerform.limits,
+            upgradeRequired: canPerform.upgradeRequired
+          });
+        }
+        
+        console.log('✅ File passed limit check');
+      }
+      
+      console.log('✅ All files passed checks, proceeding with compression\n');
+      
+      // ============================================================================
+      // END OF NEW CODE - Continue with existing compression logic below
+      // ============================================================================
+
+      // Check page-specific usage limits BEFORE processing
+      
+
+    
+
+      // ✅ Check usage limits using DualUsageTracker (single source of truth)
+      
+
+      // First check if user is authenticated
+      if (user) {
+        const userData = await storage.getUser((user as any)?.claims?.sub);
+        userType = userData?.subscriptionTier || 'free';
+        console.log('✅ User authenticated, userType from DB:', userType);
+      }
+      // If not authenticated, infer from pageIdentifier
+      else if (pageIdentifier) {
+        console.log('🔍 User not authenticated, checking pageIdentifier:', pageIdentifier);
+
+        if (pageIdentifier === 'premium-29' || pageIdentifier.includes('premium') || pageIdentifier.includes('starter')) {
+          userType = 'premium';
+          console.log('✅ Set userType to PREMIUM based on pageIdentifier');
+        } else if (pageIdentifier.includes('pro')) {
+          userType = 'pro';
+          console.log('✅ Set userType to PRO based on pageIdentifier');
+        } else if (pageIdentifier.includes('business')) {
+          userType = 'business';
+          console.log('✅ Set userType to BUSINESS based on pageIdentifier');
+        } else {
+          userType = 'anonymous';
+          console.log('⚠️ PageIdentifier does not match any paid plan, defaulting to anonymous');
+        }
+      } else {
+        console.log('⚠️ No user and no pageIdentifier, defaulting to anonymous');
+      }
+
+      console.log('🎯 FINAL userType:', userType);
+      console.log('🎯 pageIdentifier:', pageIdentifier);
+      
+      // Get client IP address for anonymous user tracking
+      
+                       req.headers['x-real-ip']?.toString() || 
+                       req.socket.remoteAddress || 
+                       'unknown';
+      
       // For anonymous users, use IP as session identifier for monthly tracking
-      const trackingId = user ? (user as any)?.claims?.sub : `ip_${clientIP}`;
+      
       
       const dualTracker = new DualUsageTracker(trackingId, finalSessionId, userType, {
         ipAddress: clientIP
