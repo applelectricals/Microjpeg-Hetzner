@@ -14,7 +14,12 @@ import { seedSuperuser } from "./superuser";
 const app = express();
 app.set('etag', false); // Disable ETags to prevent 304 responses
 app.use(express.json({ limit: '200mb' }));
-app.use(express.urlencoded({ extended: false, limit: '200mb' }));
+app.use(express.urlencoded({ extended: true, limit: '200mb' }));
+app.use((req, res, next) => {
+  req.setTimeout(600000); // 10 minutes
+  res.setTimeout(600000);
+  next();
+});
 
 // Force all traffic to serve the React app (prevent external redirects)
 app.use((req, res, next) => {

@@ -483,25 +483,40 @@ const pollJobStatus = async (jobId: string) => {
 };
 
   useEffect(() => {
-    const fetchTier = async () => {
-      try {
-        const response = await fetch('/api/user/tier-info', { credentials: 'include' });
-        if (response.ok) {
-          const data = await response.json();
-          if (data?.tier?.name) setUserTier(data.tier.name);
+  const fetchTier = async () => {
+    try {
+      const response = await fetch('/api/user/tier-info', { credentials: 'include' });
+      if (response.ok) {
+        const data = await response.json();
+        console.log('🔍 Tier info fetched:', data);
+        if (data?.tier?.tierName) {
+          setUserTier(data.tier.tierName);
+          console.log('✅ Set userTier to:', data.tier.tierName);
         }
-      } catch (err) {
-        console.debug('Failed to fetch user tier', err);
       }
-    };
-    if (isAuthenticated) fetchTier();
-  }, [isAuthenticated]);
+    } catch (err) {
+      console.error('Failed to fetch user tier', err);
+    }
+  };
+  fetchTier(); // ALWAYS fetch, not just when authenticated
+}, [isAuthenticated]);
 
-  // ✅ FIXED: Compute tier limits dynamically
-  const tierLimits = getTierLimits(userTier);
-  const MAX_FILE_SIZE = tierLimits.regular * 1024 * 1024;
-  const MAX_RAW_FILE_SIZE = tierLimits.raw * 1024 * 1024;
-  const MAX_BATCH_SIZE = tierLimits.batch;
+// ✅ Use tierInfo from API if available, otherwise use userTier
+const activeTier = tierInfo?.tierName || userTier;
+console.log('🎯 Active tier for validation:', activeTier, 'tierInfo:', tierInfo?.tierName, 'userTier:', userTier);
+
+const tierLimits = getTierLimits(activeTier);
+const MAX_FILE_SIZE = tierLimits.regular * 1024 * 1024;
+const MAX_RAW_FILE_SIZE = tierLimits.raw * 1024 * 1024;
+
+console.log('📏 Computed limits:', {
+  tier: activeTier,
+  regular: tierLimits.regular + 'MB',
+  raw: tierLimits.raw + 'MB',
+  MAX_FILE_SIZE: (MAX_FILE_SIZE / 1024 / 1024).toFixed(0) + 'MB',
+  MAX_RAW_FILE_SIZE: (MAX_RAW_FILE_SIZE / 1024 / 1024).toFixed(0) + 'MB'
+});
+  
 
   const validateFile = useCallback(async (file: File, isUserAuthenticated: boolean = false): Promise<string | null> => {
     const fileExtension = file.name.toLowerCase().split('.').pop();
