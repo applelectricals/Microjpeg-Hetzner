@@ -1419,12 +1419,6 @@ app.post("/api/compress", upload.array('files', 20), requireScopeFromAuth, async
                        req.socket.remoteAddress || 
                        'unknown';
       
-      // For anonymous users, use IP as session identifier for monthly tracking
-      
-      
-      const dualTracker = new DualUsageTracker(trackingId, finalSessionId, userType, {
-        ipAddress: clientIP
-      });
       
       // Check limits for each file
 for (const file of files) {
