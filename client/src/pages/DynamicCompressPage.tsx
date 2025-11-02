@@ -88,13 +88,16 @@ interface TierResponse {
 // ============================================
 const getTierLimits = (tier: string) => {
   const limits: Record<string, { regular: number; raw: number; batch: number }> = {
-    'starter-m': { regular: 75, raw: 75, batch: 5 },
-    'starter-y': { regular: 75, raw: 75, batch: 5 },
-    'pro-m': { regular: 150, raw: 150, batch: 10 },
-    'pro-y': { regular: 150, raw: 150, batch: 10 },
-    'business-m': { regular: 200, raw: 200, batch: 20 },
-    'business-y': { regular: 200, raw: 200, batch: 20 },
+    'starter-m': { regular: 75, raw: 75, batch: 1 },
+    'starter-y': { regular: 75, raw: 75, batch: 1 },
+    'pro-m': { regular: 150, raw: 150, batch: 1 },
+    'pro-y': { regular: 150, raw: 150, batch: 1 },
+    'business-m': { regular: 200, raw: 200, batch: 1 },
+    'business-y': { regular: 200, raw: 200, batch: 1 },
+    'free': { regular: 7, raw: 15, batch: 1 }, // Free tier limits
   };
+  
+  // Return tier limits or default to starter-m (75MB) instead of free
   return limits[tier] || limits['starter-m'];
 };
 
@@ -368,7 +371,7 @@ const isConversionRequest = (originalFormat: string, targetFormat: string): bool
 
 export default function MicroJPEGLanding() {
   const { isAuthenticated, user } = useAuth();
-  const [userTier, setUserTier] = useState<string>('free');
+  const [userTier, setUserTier] = useState<string>('starter-m');
   
   // ✅ FIXED: Redirect free users to landing page
   useEffect(() => {
@@ -400,6 +403,7 @@ export default function MicroJPEGLanding() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
   const [processingStatus, setProcessingStatus] = useState('');
+
   const [processingFileIds, setProcessingFileIds] = useState<Set<string>>(new Set());
   const [formatQueue, setFormatQueue] = useState<string[]>([]);
   const [currentlyProcessingFormat, setCurrentlyProcessingFormat] = useState<string | null>(null);
@@ -415,9 +419,68 @@ export default function MicroJPEGLanding() {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [claimingOffer, setClaimingOffer] = useState(false);
   const [claimResult, setClaimResult] = useState<{ bonusCreditsRemaining?: number; apiTrialExpiresAt?: string } | null>(null);
-  
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+  // Function to poll job status
+const pollJobStatus = async (jobId: string) => {
+  const maxAttempts = 120; // Poll for 10 minutes max (120 * 5 seconds)
+  let attempts = 0;
+  
+  const poll = async () => {
+    try {
+      const response = await fetch(`/api/job-status/${jobId}`);
+      const data = await response.json();
+      
+      console.log('Job status:', data);
+      
+      // Update progress
+      setProgress(data.progress || 0);
+      setStatusMessage(data.message || 'Processing...');
+      
+      if (data.status === 'completed') {
+        console.log('✅ Processing completed!', data.result);
+        setIsProcessing(false);
+        setProgress(100);
+        setStatusMessage('Processing completed!');
+        
+        // Handle the results (same as your current logic)
+        handleCompletedResults(data.result);
+        return;
+      }
+      
+      if (data.status === 'failed') {
+        console.error('❌ Processing failed:', data.error);
+        setIsProcessing(false);
+        setStatusMessage('Processing failed. Please try again.');
+        alert(`Processing failed: ${data.error || 'Unknown error'}`);
+        return;
+      }
+      
+      // Continue polling
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(poll, 5000); // Poll every 5 seconds
+      } else {
+        console.error('⏱️ Polling timeout');
+        setIsProcessing(false);
+        setStatusMessage('Processing timeout. Please refresh and try again.');
+        alert('Processing is taking longer than expected. Please check back in a few minutes.');
+      }
+      
+    } catch (error) {
+      console.error('Polling error:', error);
+      attempts++;
+      if (attempts < maxAttempts) {
+        setTimeout(poll, 5000);
+      } else {
+        setIsProcessing(false);
+        setStatusMessage('Connection error. Please try again.');
+      }
+    }
+  };
+  
+  poll();
+};
 
   useEffect(() => {
     const fetchTier = async () => {
