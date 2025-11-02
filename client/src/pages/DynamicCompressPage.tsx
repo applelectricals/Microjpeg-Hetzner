@@ -876,7 +876,7 @@ console.log('📏 Computed limits:', {
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
         sessionId: sessionManager.getSessionId(), // ← ADD THIS LINE
-  pageIdentifier: getTierPageIdentifier(userTier, isAuthenticated),
+        pageIdentifier: tierInfo?.pageIdentifier || 'premium-29',
       };
 
       // Add settings to FormData
@@ -1131,7 +1131,7 @@ console.log('📏 Computed limits:', {
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
         sessionId: sessionManager.getSessionId(), // ← ADD THIS LINE
-  pageIdentifier: getTierPageIdentifier(userTier, isAuthenticated),
+  pageIdentifier: tierInfo?.pageIdentifier || 'premium-29',
       };
 
       formData.append('settings', JSON.stringify(settings));
