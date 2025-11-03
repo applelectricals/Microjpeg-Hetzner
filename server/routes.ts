@@ -324,7 +324,7 @@ async function processCompressionJob(
     const outputPath = path.join("converted", `${jobId}.${outputExtension}`);
     
     // Get quality from settings
-    const quality = settings.customQuality || 75;
+    const quality = settings.customQuality || 95;
     const outputFormat = normalizedFormat;
     
     console.log(`🖼️ Processing job ${jobId}: rawFormat=${rawOutputFormat}, normalizedFormat=${normalizedFormat}, outputExtension=${outputExtension}, quality=${quality}, originalFile=${originalFilename}`);
@@ -1292,7 +1292,7 @@ app.post("/api/compress", upload.array('files', 20), requireScopeFromAuth, async
       let pageIdentifier = 'free-no-auth'; // Default fallback
       let sessionId = req.sessionID;
       let settings = {
-        quality: 80,
+        quality: 95,
         outputFormat: 'keep-original',
         resizeOption: 'keep-original',
         resizePercentage: 100,
@@ -3754,7 +3754,7 @@ return res.json({
         qualityLevel = "medium", 
         resizeOption = "none", 
         outputFormat = "jpeg",
-        customQuality = 75,
+        customQuality = 95,
         compressionAlgorithm = "standard",
         optimizeForWeb = true,
         progressiveJpeg = false,
@@ -3818,7 +3818,7 @@ return res.json({
           qualityLevel,
           resizeOption,
           outputFormat,
-          customQuality: parseInt(customQuality) || 75,
+          customQuality: parseInt(customQuality) || 95,
           compressionAlgorithm,
           optimizeForWeb: false, // Always disabled for speed
           progressiveJpeg: false, // Always disabled for speed
@@ -4869,7 +4869,7 @@ return res.json({
               totalOriginalSize: 25165824,  // 24MB
               totalCompressedSize: 3145728, // 3MB
               averageCompressionRatio: 87,
-              qualityLevel: 85,
+              qualityLevel: 95,
               processingTime: 12,
               filenames: ['vacation-photo-1.jpg', 'landscape-shot.jpg', 'portrait-selfie.jpg', 'product-image.jpg', 'event-group-photo.jpg'],
               sizeSavings: '21MB (87% reduction)'
@@ -4978,7 +4978,7 @@ return res.json({
       }
       
       // Parse advanced quality settings with proper percentage handling
-      const qualityValue = quality ? parseInt(quality, 10) : 85;
+      const qualityValue = quality ? parseInt(quality, 10) : 95;
       const shouldResize = resize === 'true';
       const resizePercentageValue = resizePercentage ? parseInt(resizePercentage, 10) : 100;
       
@@ -5942,7 +5942,7 @@ async function processSpecialFormatConversion(
     maintainAspect: boolean;
     resizePercentage?: number;
   } = {
-    quality: 85,
+    quality: 95,
     resize: false,
     width: 2560,
     height: 2560,
