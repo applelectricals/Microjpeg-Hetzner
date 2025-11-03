@@ -36,6 +36,41 @@ import paypalWebhook from './routes/paypalWebhook';
 import paypalSubscribe from './routes/paypalSubscribe';
 import paypalCheckout from './routes/paypalCheckout';
 import paypalApprovals from './routes/paypalApprovals';
+import { promises as fs } from 'fs';
+import path from 'path';
+
+// Clean up old files in uploads directory
+async function cleanupOldFiles() {
+  try {
+    const uploadsDir = path.join(process.cwd(), 'uploads');
+    const compressedDir = path.join(process.cwd(), 'compressed');
+    
+    // Clean files older than 1 hour
+    const oneHourAgo = Date.now() - (60 * 60 * 1000);
+    
+    for (const dir of [uploadsDir, compressedDir]) {
+      try {
+        const files = await fs.readdir(dir);
+        for (const file of files) {
+          const filePath = path.join(dir, file);
+          const stats = await fs.stat(filePath);
+          if (stats.mtimeMs < oneHourAgo) {
+            await fs.unlink(filePath);
+            console.log(`🗑️ Cleaned up old file: ${file}`);
+          }
+        }
+      } catch (err) {
+        console.log(`Could not clean ${dir}:`, err.message);
+      }
+    }
+  } catch (err) {
+    console.log('Cleanup error:', err.message);
+  }
+}
+
+// Run cleanup every 30 minutes
+setInterval(cleanupOldFiles, 30 * 60 * 1000);
+cleanupOldFiles(); // Run once on startup
 
 // Create promisified exec for shell commands
 const execAsync = promisify(exec);
@@ -455,9 +490,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 // Configure multer for file uploads with dynamic limits
 const upload = multer({
-  dest: "uploads/",
+  dest: "uploads/",  // Back to disk
   limits: {
-    fileSize: 200 * 1024 * 1024, // 200MB limit (supports Enterprise users)
+    fileSize: 200 * 1024 * 1024,
   },
   fileFilter: (req, file, cb) => {
     // Check format access based on user plan using unified configuration
@@ -476,9 +511,9 @@ const upload = multer({
 
 // Configure multer for special format uploads (RAW, SVG, TIFF)
 const specialUpload = multer({
-  dest: "uploads/",
+  dest: "uploads/",  // Back to disk
   limits: {
-    fileSize: 200 * 1024 * 1024, // 200MB limit for special formats (same as regular upload)
+    fileSize: 200 * 1024 * 1024
   },
   fileFilter: (req, file, cb) => {
     // Special formats: JPG, PNG, RAW (ARW, CR2, DNG, NEF), SVG, TIFF
@@ -1704,7 +1739,16 @@ for (const file of files) {
           results.push(resultData);
           
         } catch (jobError) {
-          console.error(`Error compressing ${file.originalname} to ${outputFormat}:`, jobError);
+  console.error(`Error processing job for ${file.originalname}:`, jobError);
+
+  // Clean up file on job error
+  try {
+    if (file.path) {
+      await fs.unlink(file.path).catch(() => {});
+    }
+  } catch (e) {
+    // Ignore cleanup errors
+  }
           // Update job with error - wrap in try/catch to prevent secondary crashes
           try {
             await storage.updateCompressionJob(job.id, {
@@ -1794,10 +1838,29 @@ if (successfulJobs.length > 0) {
       });
       
     } catch (error) {
-      console.error("Compression error:", error);
-      res.status(500).json({ error: "Compression failed" });
+  console.error('Compression error:', error);
+
+  // Clean up uploaded files on error
+  try {
+    const files = req.files as Express.Multer.File[];
+    if (files && files.length > 0) {
+      for (const file of files) {
+        if (file.path) {
+          await fs.unlink(file.path).catch(() => {});
+          console.log(`🗑️ Cleaned up file after error: ${file.originalname}`);
+        }
+      }
     }
+  } catch (cleanupError) {
+    console.log('Could not clean up files after error:', cleanupError.message);
+  }
+
+  res.status(500).json({
+    error: 'Compression failed',
+    message: error.message
   });
+}  // ← ADD THIS CLOSING BRACE
+});
 
   // Download endpoint for compressed files by job ID
   app.get("/api/download/compressed/:jobId", async (req, res) => {
@@ -4341,7 +4404,7 @@ return res.json({
       // Guest limits
       const GUEST_MAX_FILES = 3;
       const GUEST_FILE_SIZE_LIMIT = 5 * 1024 * 1024; // 5MB
-      const GUEST_QUALITY = 80;
+      const GUEST_QUALITY = 92;
 
       if (files.length > GUEST_MAX_FILES) {
         return res.status(400).json({ error: `Guest mode limited to ${GUEST_MAX_FILES} files` });
@@ -5574,13 +5637,41 @@ async function compressImage(
       
       sharpInstance = sharpInstance.png(pngOptions);
     } else if (options.outputFormat === "webp") {
-      sharpInstance = sharpInstance.webp({
-        quality,
-        effort: 6, // Maximum compression effort
-        lossless: quality >= 95,
-        nearLossless: quality >= 90 && quality < 95,
-        smartSubsample: true
-      });
+  // WebP optimization: Check file size and adjust settings
+  let webpEffort = 6;  // Default effort
+  
+  try {
+    const fileStats = await fs.stat(file.path);
+    const fileSizeMB = fileStats.size / (1024 * 1024);
+    
+    console.log(`📊 WebP processing: ${fileSizeMB.toFixed(1)}MB file`);
+    
+    if (fileSizeMB > 50) {
+      // Very large files: use fastest settings
+      webpEffort = 3;
+      console.log(`⚡ Very large file - WebP effort:3`);
+    } else if (fileSizeMB > 30) {
+      // Large files: use fast settings
+      webpEffort = 4;
+      console.log(`⚡ Large file - WebP effort:4`);
+    } else if (fileSizeMB > 10) {
+      // Medium files: balanced settings
+      webpEffort = 5;
+      console.log(`📊 Medium file - WebP effort:5`);
+    }
+    // Small files (<10MB) use default effort:6
+  } catch (err) {
+    console.error('⚠️ Could not check file size for WebP:', err);
+    webpEffort = 4; // Default to faster setting for safety
+  }
+  
+  sharpInstance = sharpInstance.webp({
+    quality,
+    effort: webpEffort, // Dynamic effort based on file size (was always 6)
+    lossless: quality >= 95,
+    nearLossless: quality >= 90 && quality < 95,
+    smartSubsample: true
+  });
     } else if (options.outputFormat === "avif") {
   // AVIF optimization: Check file size and adjust settings
   let avifEffort = 6;  // Default effort
@@ -6014,7 +6105,7 @@ async function processSpecialFormatConversion(
       
       return { success: true, outputSize: outputSize, previewPath: thumbnailPath || previewPath };
       
-      // Clean up temp file after processing (we'll do this in finally block)
+help      // Clean up temp file after processing (we'll do this in finally block)
     } else if (inputFormat === 'svg') {
       // For SVG files, Sharp handles them natively
       sharpInstance = sharp(inputPath, {
@@ -6110,7 +6201,7 @@ async function processSpecialFormatConversion(
         // Generate preview using Sharp for better quality
         await sharp(outputPath)
           .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
-          .jpeg({ quality: 70, progressive: true })
+          .jpeg({ quality: 95, progressive: true, mozjpeg: true })
           .toFile(previewPath);
         
         console.log(`TIFF preview generated: ${previewPath}`);
