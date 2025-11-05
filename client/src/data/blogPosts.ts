@@ -193,3 +193,4 @@ Email us at **[support@microjpeg.com](mailto:support@microjpeg.com)**
 *MicroJPEG: Built for speed. Trusted by photographers, developers, and creators worldwide.*
 `
 }
+]
