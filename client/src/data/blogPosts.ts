@@ -61,19 +61,21 @@ export const blogPosts: BlogPost[] = [
     content: "# WordPress Image Optimization: Speed Up Your Site\n\nImages often account for 60-80% of a webpage's total size. Optimizing them properly can dramatically improve your WordPress site's performance and SEO.\n\n## Why It Matters\n\n- Page Load Speed: Compressed images load faster\n- SEO Benefits: Page speed is a ranking factor\n- User Experience: Faster sites have lower bounce rates\n- Mobile Performance: Critical for mobile users\n\n## WordPress Image Handling\n\nWordPress automatically creates multiple image sizes:\n- Thumbnail: 150x150px\n- Medium: 300x300px\n- Large: 1024x1024px\n- Full Size: Original uploaded image\n\n## Optimization Strategies\n\n1. Choose the right format (JPEG, PNG, WebP)\n2. Resize before upload\n3. Use compression plugins\n4. Implement lazy loading\n5. Consider CDN integration\n\n## Recommended Plugins\n\n- Smush: User-friendly, good compression\n- ShortPixel: Excellent algorithms\n- Optimole: Real-time optimization\n- EWWW: Local optimization\n\n## Best Practices\n\n- JPEG Quality: 80-85%\n- Enable WebP conversion\n- Use lazy loading\n- Optimize existing images\n\nReady to optimize your WordPress images? Try our WordPress plugin for automatic compression."
   },
   {
+  {
   id: "4",
   slug: 'how-to-use-microjpeg',
   title: 'How to Use MicroJPEG: A Complete Tutorial for Image Processing & Conversion',
-  excerpt: 'Step-by-step guide to convert RAW, TIFF, JPG, PNG, WEBP, AVIF, SVG files with no sign-up required...',
+  excerpt: 'Step-by-step guide to convert RAW, TIFF, JPG, PNG, WEBP, AVIF, SVG files with no sign-up required. Learn batch processing, smart format selection, and download options.',
   seoTitle: 'How to Use MicroJPEG – Free & Paid Image Conversion Guide',
-  seoDescription: 'Learn how to convert and compress images instantly on MicroJPEG.com – no sign-up, up to 75 MB, unlimited on paid plan.',
-  keywords: ['microjpeg tutorial', 'image conversion guide', 'compress RAW to WEBP', 'batch image processing'],
+  seoDescription: 'Learn how to convert and compress images instantly on MicroJPEG.com – no sign-up, up to 75 MB, unlimited on paid plan. Full tutorial with screenshots.',
+  keywords: ['microjpeg tutorial', 'image conversion guide', 'compress RAW to WEBP', 'batch image processing', 'free image converter'],
   author: 'MicroJPEG Team',
   category: 'Tutorials',
   publishDate: '2025-11-05',
   readTime: 5,
   tags: ['Tutorial', 'Image Conversion', 'RAW', 'WEBP', 'AVIF', 'Batch Processing'],
-  content: `# How to Use MicroJPEG: A Complete Tutorial for Image Processing & Conversion
+  content: `
+# How to Use MicroJPEG: A Complete Tutorial for Image Processing & Conversion
 
 Welcome to **MicroJPEG** — the fast, reliable, and developer-friendly image conversion platform...
 
@@ -83,11 +85,74 @@ Welcome to **MicroJPEG** — the fast, reliable, and developer-friendly image co
 > Just go to **[microjpeg.com](https://microjpeg.com)** and start converting instantly.
 
 ### Step 1: Visit MicroJPEG.com
-Open your browser and navigate to **[https://microjpeg.com](https://microjpeg.com)**...
+Open your browser and navigate to **[https://microjpeg.com](https://microjpeg.com)**.  
+The clean, drag-and-drop interface loads immediately — ready for action.
 
-*(…continue with the full article you already have, but in pure markdown – headings `#`, `##`, bullet lists `-`, tables `|`, links `[text](url)`, etc.)*
+### Step 2: Upload Your Image
+![MicroJPEG drag-and-drop upload interface – click or drop files up to 75MB](https://cdn.microjpeg.com/blog/how-to-use-microjpeg/microjpeg-screenshot.webp)
 
-> **Tip:** Use `![Upload screenshot](image-url)` to embed the screenshot you will provide.
+- Select one or more images from your device.
+- Supported input formats:  
+  \`JPG\`, \`PNG\`, \`WEBP\`, \`AVIF\`, \`SVG\`, \`TIFF\`,  
+  \`RAW (ARW, CR2, CRW, DNG, NEF, ORF, RAF, RW2)\`
+- Click **Open**.
+
+> **File Size Limits (Free Plan):**  
+> - **7 MB** for JPG, PNG, WEBP, AVIF, SVG, TIFF  
+> - **15 MB** for RAW files  
+> *Upgrade to Paid for up to **75 MB** per file and **unlimited conversions**.*
+
+### Step 3: Automatic Processing Begins
+As soon as the upload completes:
+
+- Processing starts **automatically** to **JPG** (default format).
+- A sleek **output modal** appears with a **progress indicator**.
+- The drag-and-drop area is temporarily disabled to ensure **fast, uninterrupted processing**.
+
+### Step 4: View Conversion Results
+Once processing is complete, each image appears in the **output gallery** with detailed stats:
+
+#### Left Side (Original Info):
+- Image thumbnail
+- Original filename
+- Original file size
+- Number of formats converted (starts at 1)
+
+#### Right Side (Output Info):
+- Format icon (e.g., JPG, WEBP)
+- Compression percentage (e.g., **68% smaller**)
+- Output file size
+- **Download button** (click the format icon to save)
+
+### Step 5: Convert to Additional Formats (On-Demand)
+Want **PNG, WEBP, AVIF, or TIFF**?
+
+Use the **format selection buttons** at the top of the drag-and-drop area.
+
+> **Smart Batch Processing**:  
+> MicroJPEG only converts what’s needed — **no redundant work**.
+
+#### Example Scenario:
+| Image | Already Converted To |  
+|-------|------------------------|  
+| Image A | JPG, PNG, WEBP |  
+| Image B | JPG, PNG |  
+| Image C | JPG |  
+
+**You select AVIF** → **All 3 images** convert to AVIF instantly.  
+**You select WEBP** → **Only Image B & C** convert (Image A already has WEBP).  
+**You select PNG** → **Only Image C** converts.
+
+> This intelligent system saves time and bandwidth — perfect for batch workflows.
+
+### Step 6: Download Your Files
+
+#### Download Individual Files
+Click any **format icon** in the output gallery to download that specific version.
+
+#### Download All at Once
+Click the **“Download All”** button at the top of the output modal.  
+All processed images are bundled into a **ZIP file** and downloaded instantly.
 
 ## Ready for More? Upgrade to Paid
 
@@ -95,28 +160,38 @@ Open your browser and navigate to **[https://microjpeg.com](https://microjpeg.co
 |--------|-----------|---------------------|
 | File Size Limit | 7–15 MB | **75 MB** |
 | Conversions | Limited | **Unlimited** |
-...
+| RAW Support | Yes (15 MB) | Full (75 MB) |
+| Priority Processing | Standard | **Faster Queue** |
+| API Access | No | Yes |
+| CDN Integration | No | Yes |
 
 [Upgrade Now →](https://microjpeg.com/pricing)
 
+## For Developers & WordPress Users
+
+### WordPress Plugin (Free)
+Automate image optimization directly in your media library.  
+[Download Plugin →](https://microjpeg.com/wordpress-plugin)
+
+### API & CDN Services
+- **API**: Integrate MicroJPEG into your apps, CMS, or automation pipelines.
+- **CDN**: Serve optimized images globally with ultra-low latency via Cloudflare.
+
+[Explore API Docs →](https://microjpeg.com/api)  
+[Learn About CDN →](https://microjpeg.com/cdn)
+
+## Need Help?
+We’re here 24/7.  
+Email us at **[support@microjpeg.com](mailto:support@microjpeg.com)**
+
 ---
+
+**Start converting now — no sign-up, no limits, no excuses.**  
+[Visit MicroJPEG.com →](https://microjpeg.com)
+
+---
+
 *MicroJPEG: Built for speed. Trusted by photographers, developers, and creators worldwide.*
-`
-  }
-];
-
-export function getBlogPost(slug: string): BlogPost | undefined {
-  return blogPosts.find(post => post.slug === slug);
+  `
 }
-
-export function getAllBlogPosts(): BlogPost[] {
-  return blogPosts.sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime());
-}
-
-export function getBlogPostsByCategory(category: string): BlogPost[] {
-  return blogPosts.filter(post => post.category === category);
-}
-
-export function getBlogPostsByTag(tag: string): BlogPost[] {
-  return blogPosts.filter(post => post.tags.includes(tag));
 }
