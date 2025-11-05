@@ -102,7 +102,9 @@ The clean, drag-and-drop interface loads immediately — ready for action.
 
 ### Step 3: Automatic Processing Begins
 As soon as the upload completes:
-<image-card alt="MicroJPEG drag-and-drop interface" src="/client/assets/microjpeg-screenshot.webp" ></image-card>
+![MicroJPEG drag-and-drop upload interface – click or drop files up to 75MB](
+  https://cdn.microjpeg.com/blog/how-to-use-microjpeg/microjpeg-screenshot.webp
+)
 - Processing starts **automatically** to **JPG** (default format).
 - A sleek **output modal** appears with a **progress indicator**.
 - The drag-and-drop area is temporarily disabled to ensure **fast, uninterrupted processing**.
