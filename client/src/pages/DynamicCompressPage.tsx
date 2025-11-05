@@ -131,8 +131,7 @@ const FAQ_DATA = {
   General: [
     {
       question: "How fast is RAW to TIFF conversion for print-ready files?",
-      answer: "Under 60s for 75MB RAWs—faster than Darktable or Lightroom batches, with no quality dips. Photographers get lossless TIFFs for agencies; devs prep assets without editing bloat. Unlimited on paid: scale from 10 to 10,000 files effortlessly.
-"
+      answer: "Under 60s for 75MB RAWs—faster than Darktable or Lightroom batches, with no quality dips. Photographers get lossless TIFFs for agencies; devs prep assets without editing bloat. Unlimited on paid: scale from 10 to 10,000 files effortlessly."
     },
     {
       question: "Can I convert SVG or TIFF to WEBP/AVIF without losing transparency or resolution?",
