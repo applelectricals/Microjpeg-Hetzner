@@ -116,12 +116,12 @@ const getTierPageIdentifier = (tier: string): string => {
 
 const getTierDisplayName = (tier: string) => {
   const names: Record<string, string> = {
-    'starter-m': '$9/month',
-    'starter-y': '$49/year',
-    'pro-m': '$19/month',
-    'pro-y': '$149/year',
-    'business-m': '$49/month',
-    'business-y': '$399/year',
+    'starter-m': '75MB Unlimited',
+    'starter-y': '75MB Unlimited',
+    'pro-m': '150 MB Unlimited',
+    'pro-y': '150MB Unlimited',
+    'business-m': '200MB Unlimited',
+    'business-y': '200MB Unlimited',
   };
   return names[tier] || 'Free Forever';
 };
@@ -1560,12 +1560,12 @@ console.log('📏 Computed limits:', {
                       </Badge>
                     )}
                     <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight">
-                      <span className="text-white">Professional Image</span>{' '}
+                      <span className="text-white">Professional Conversions </span>{' '}
                       <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-yellow-400">
-                        Compression
+                        RAW, JPG, PNG WEBP, AVIF & more...
                       </span>
                       <br />
-                      <span className="text-white">For Photographers & Developers</span>
+                      <span className="text-white">Fast and Large</span>
                       <br />
                       <span className="text-3xl sm:text-4xl lg:text-5xl text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400">
                         {userTier === 'free' ? 'Free Forever' : getTierDisplayName(userTier)}
@@ -1627,8 +1627,8 @@ console.log('📏 Computed limits:', {
       </svg>
     </div>
     <div>
-      <div className="text-gray-300 font-semibold text-sm">Free Operations</div>
-      <div className="text-gray-500 text-xs">No Sign In, No credit card needed.</div>
+      <div className="text-gray-300 font-semibold text-sm">Unlimited Operations</div>
+      <div className="text-gray-500 text-xs">Only for Paid Subscriptions</div>
     </div>
   </div>
 
@@ -1666,8 +1666,8 @@ console.log('📏 Computed limits:', {
       </svg>
     </div>
     <div>
-      <div className="text-gray-300 font-semibold text-sm">Batch Processing</div>
-      <div className="text-gray-500 text-xs">Upload multiple files at once</div>
+      <div className="text-gray-300 font-semibold text-sm">Fast Processing</div>
+      <div className="text-gray-500 text-xs">70MB under 60 seconds</div>
     </div>
   </div>
 </div>
@@ -1712,14 +1712,14 @@ console.log('📏 Computed limits:', {
             <>
               Each image up to {tierInfo.maxRawFileSize}MB for RAW & {tierInfo.maxFileSize}MB for Regular
               <br />
-              (CR2, RAW, JPEG, PNG, WEBP, AVIF, SVG, TIFF | Max {tierInfo.maxBatchSize} files)
+              JPG, PNG, WEBP, AVIF, SVG, TIFF, RAW (ARW, CR2, CRW, DNG, NEF, ORF, RAF, RW2)
             </>
           ) : (
             'Loading tier information...'
           )}
         </p>
         <p className="text-xs text-gray-500">
-          JPG, PNG, WEBP, AVIF, SVG, TIFF, RAW (CR2, ARW, DNG, NEF, ORF, RAF, RW2)
+          Enjoy High Speed Unlimited Conversions
         </p>
       </div>
 
