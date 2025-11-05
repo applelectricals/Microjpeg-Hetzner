@@ -61,7 +61,6 @@ export const blogPosts: BlogPost[] = [
     content: "# WordPress Image Optimization: Speed Up Your Site\n\nImages often account for 60-80% of a webpage's total size. Optimizing them properly can dramatically improve your WordPress site's performance and SEO.\n\n## Why It Matters\n\n- Page Load Speed: Compressed images load faster\n- SEO Benefits: Page speed is a ranking factor\n- User Experience: Faster sites have lower bounce rates\n- Mobile Performance: Critical for mobile users\n\n## WordPress Image Handling\n\nWordPress automatically creates multiple image sizes:\n- Thumbnail: 150x150px\n- Medium: 300x300px\n- Large: 1024x1024px\n- Full Size: Original uploaded image\n\n## Optimization Strategies\n\n1. Choose the right format (JPEG, PNG, WebP)\n2. Resize before upload\n3. Use compression plugins\n4. Implement lazy loading\n5. Consider CDN integration\n\n## Recommended Plugins\n\n- Smush: User-friendly, good compression\n- ShortPixel: Excellent algorithms\n- Optimole: Real-time optimization\n- EWWW: Local optimization\n\n## Best Practices\n\n- JPEG Quality: 80-85%\n- Enable WebP conversion\n- Use lazy loading\n- Optimize existing images\n\nReady to optimize your WordPress images? Try our WordPress plugin for automatic compression."
   },
   {
-  {
   id: "4",
   slug: 'how-to-use-microjpeg',
   title: 'How to Use MicroJPEG: A Complete Tutorial for Image Processing & Conversion',
@@ -192,6 +191,5 @@ Email us at **[support@microjpeg.com](mailto:support@microjpeg.com)**
 ---
 
 *MicroJPEG: Built for speed. Trusted by photographers, developers, and creators worldwide.*
-  `
-}
+`
 }
