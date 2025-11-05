@@ -171,8 +171,7 @@ const FAQ_DATA = {
     {
       question: "Do you support RAW image formats?",
       answer: "Yes, we support popular RAW formats including CR2 (Canon), NEF (Nikon), ARW (Sony), DNG (Adobe), and others. RAW files are converted to web-optimized formats like JPEG or PNG with professional-grade processing to maintain the highest possible quality."
-    }
-
+    },
     {
       question: "What about AVIF support—will it work on all devices for my client deliverables?",
       answer: "Yes, we support popular RAW fAVIF shines for 50% smaller files than WEBP with HDR for pro photography, but fallback to JPG/PNG for iOS <16 or IE. Our conversions auto-generate fallbacks, ensuring 99% compatibility. Unlimited paid processing means no worries for cross-device portfolios."
