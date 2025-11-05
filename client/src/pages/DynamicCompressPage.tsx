@@ -155,7 +155,7 @@ const FAQ_DATA = {
     }
 
   ],
-  Photography & RAW formats: [
+  Photography: [
     {
       question: "WEBP vs. AVIF: Which should photographers choose for social media exports?",
       answer: "WEBP for broad support (96% browsers) and 30% faster loads on Instagram/Facebook; AVIF for 20% extra compression on HDR shots, but with PNG fallback. Both beat JPG for SEO—our paid plan converts unlimited RAWs to either, stripping EXIF for privacy if needed."
