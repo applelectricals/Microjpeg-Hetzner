@@ -1627,7 +1627,7 @@ console.log('📏 Computed limits:', {
       </svg>
     </div>
     <div>
-      <div className="text-gray-300 font-semibold text-sm">Unlimited Operations</div>
+      <div className="text-gray-300 font-semibold text-sm">Fast Processing</div>
       <div className="text-gray-500 text-xs">Only for Paid Subscriptions</div>
     </div>
   </div>
@@ -1666,7 +1666,7 @@ console.log('📏 Computed limits:', {
       </svg>
     </div>
     <div>
-      <div className="text-gray-300 font-semibold text-sm">Fast Processing</div>
+      <div className="text-gray-300 font-semibold text-sm">Unlimited Operations</div>
       <div className="text-gray-500 text-xs">70MB under 60 seconds</div>
     </div>
   </div>
@@ -2639,206 +2639,7 @@ console.log('📏 Computed limits:', {
         </div>
       </section>
 
-  {/* Loyalty Program: Earn Free Operations */}
-      <section className="py-16 bg-gradient-to-br from-gray-800 to-gray-900">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold font-poppins text-brand-dark mb-4">
-              🎯 <span className="text-white">Loyalty Program:</span> <span className="text-brand-gold">Earn Free Operations</span>
-            </h2>
-            <p className="text-lg text-gray-600 font-opensans max-w-2xl mx-auto">
-              Share your MicroJPEG success stories and earn bonus operations! Help us grow and get rewarded.
-            </p>
-          </div>
 
-          <div className="grid md:grid-cols-2 gap-8 mb-12">
-            {/* How it Works */}
-            <div className="bg-white p-8 rounded-xl shadow-lg">
-              <h3 className="text-2xl font-bold text-brand-dark mb-6 font-poppins">How It Works</h3>
-              <div className="space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-brand-teal rounded-full flex items-center justify-center text-white font-bold text-sm">1</div>
-                  <div>
-                    <h4 className="font-semibold text-brand-dark">Compress Your Images</h4>
-                    <p className="text-gray-600 text-sm">Use MicroJPEG to compress your images and see amazing results</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-brand-teal rounded-full flex items-center justify-center text-white font-bold text-sm">2</div>
-                  <div>
-                    <h4 className="font-semibold text-brand-dark">Share Your Success</h4>
-                    <p className="text-gray-600 text-sm">Post about your compression results or feature highlights on social media</p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 bg-brand-gold rounded-full flex items-center justify-center text-white font-bold text-sm">3</div>
-                  <div>
-                    <h4 className="font-semibold text-brand-dark">Earn Bonus Operations</h4>
-                    <p className="text-gray-600 text-sm">Get free operations added to your account automatically</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Rewards Structure */}
-            <div className="bg-white p-8 rounded-xl shadow-lg">
-              <h3 className="text-2xl font-bold text-brand-dark mb-6 font-poppins">Earn Rewards</h3>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="font-medium">X (Twitter) Post</span>
-                  <span className="font-bold text-brand-teal">+10 Operations</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="font-medium">LinkedIn Post</span>
-                  <span className="font-bold text-brand-teal">+15 Operations</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="font-medium">Facebook Post</span>
-                  <span className="font-bold text-brand-teal">+10 Operations</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="font-medium">Instagram Story/Post</span>
-                  <span className="font-bold text-brand-teal">+12 Operations</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="font-medium">Pinterest Pin</span>
-                  <span className="font-bold text-brand-teal">+8 Operations</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                  <span className="font-medium">Reddit Post</span>
-                  <span className="font-bold text-brand-teal">+15 Operations</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Share Now & Earn Instantly */}
-          <div className="bg-white p-8 rounded-xl shadow-lg text-center">
-            <h3 className="text-2xl font-bold text-brand-dark mb-4 font-poppins">Share Now & Earn Instantly</h3>
-            <p className="text-gray-600 mb-6">Click any platform below to share and earn bonus operations!</p>
-            
-            <div className="flex justify-center items-center gap-3 flex-wrap max-w-2xl mx-auto">
-              <button
-                onClick={() => shareLoyaltyContent('twitter')}
-                className="inline-flex items-center gap-2 px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-medium"
-                data-testid="loyalty-share-twitter"
-              >
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" className="text-white">
-                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                </svg>
-                <span>Twitter</span>
-                <span className="text-xs bg-white/20 px-2 py-1 rounded-full">+10</span>
-              </button>
-              
-              <button
-                onClick={() => shareLoyaltyContent('linkedin')}
-                className="inline-flex items-center gap-2 px-4 py-3 bg-blue-700 text-white rounded-lg hover:bg-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-medium"
-                data-testid="loyalty-share-linkedin"
-              >
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" className="text-white">
-                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                </svg>
-                <span>LinkedIn</span>
-                <span className="text-xs bg-white/20 px-2 py-1 rounded-full">+15</span>
-              </button>
-              
-              <button
-                onClick={() => shareLoyaltyContent('facebook')}
-                className="inline-flex items-center gap-2 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-medium"
-                data-testid="loyalty-share-facebook"
-              >
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" className="text-white">
-                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                </svg>
-                <span>Facebook</span>
-                <span className="text-xs bg-white/20 px-2 py-1 rounded-full">+10</span>
-              </button>
-              
-              <button
-                onClick={() => shareLoyaltyContent('instagram')}
-                className="inline-flex items-center gap-2 px-4 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-medium"
-                data-testid="loyalty-share-instagram"
-              >
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" className="text-white">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-                <span>Instagram</span>
-                <span className="text-xs bg-white/20 px-2 py-1 rounded-full">+12</span>
-              </button>
-              
-              <button
-                onClick={() => shareLoyaltyContent('pinterest')}
-                className="inline-flex items-center gap-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-medium"
-                data-testid="loyalty-share-pinterest"
-              >
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" className="text-white">
-                  <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.347-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.758-1.378l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.624 0 11.99-5.367 11.99-11.987C24.007 5.367 18.641.001.017.001z"/>
-                </svg>
-                <span>Pinterest</span>
-                <span className="text-xs bg-white/20 px-2 py-1 rounded-full">+8</span>
-              </button>
-              
-              <button
-                onClick={() => shareLoyaltyContent('reddit')}
-                className="inline-flex items-center gap-2 px-4 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 font-medium"
-                data-testid="loyalty-share-reddit"
-              >
-                <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" className="text-white">
-                  <path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/>
-                </svg>
-                <span>Reddit</span>
-                <span className="text-xs bg-white/20 px-2 py-1 rounded-full">+15</span>
-              </button>
-            </div>
-
-            {/* URL Verification Form */}
-            <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="text-sm font-semibold text-blue-800 mb-2">🔗 Optional: Submit Post URL for Verification</h4>
-              <p className="text-xs text-blue-600 mb-3">Increase your credibility by providing a link to your actual post</p>
-              <form onSubmit={(e) => {
-                e.preventDefault();
-                const formData = new FormData(e.target as HTMLFormElement);
-                const url = formData.get('postUrl') as string;
-                if (url) {
-                  toast({
-                    title: "URL Submitted!",
-                    description: "Thanks for providing verification. Your post will be reviewed.",
-                  });
-                  (e.target as HTMLFormElement).reset();
-                }
-              }} className="flex gap-2">
-                <input
-                  type="url"
-                  name="postUrl"
-                  placeholder="https://twitter.com/yourpost or https://linkedin.com/post/..."
-                  className="flex-1 px-3 py-2 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors"
-                >
-                  Submit
-                </button>
-              </form>
-            </div>
-
-            {/* Community Guidelines & Reporting */}
-            <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-              <div className="flex items-start gap-3">
-                <div className="flex-1">
-                  <p className="text-sm text-gray-600 mb-2">
-                    💡 <strong>Pro tip:</strong> Tag @MicroJPEG and use #MicroJPEGCompress for faster verification!
-                  </p>
-                  <div className="text-xs text-gray-500">
-                    <strong>Community Guidelines:</strong> Please share authentic posts about your experience. 
-                    One reward per platform per day. <a href="mailto:report@microjpeg.com" className="text-blue-600 hover:underline">Report fake shares</a>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
 
   {/* Premium Features & API Access */}
       <section className="py-16 bg-gray-800">
