@@ -130,12 +130,13 @@ const getTierDisplayName = (tier: string) => {
 const FAQ_DATA = {
   General: [
     {
-      question: "Why should I compress my images for my website?",
-      answer: "Optimizing your images with Micro JPEG brings several benefits to your website. Micro JPEG reduces file sizes by up to 80% without sacrificing quality, leading to faster page loads. This optimization is essential for keeping user attention and ensuring an enjoyable user experience. Additionally, it minimizes bandwidth usage, making your website more efficient and cost-effective. Image compression also plays a role in SEO, as efficiently compressed images contribute to faster page speeds and improve your website's search engine ranking."
+      question: "How fast is RAW to TIFF conversion for print-ready files?",
+      answer: "Under 60s for 75MB RAWs—faster than Darktable or Lightroom batches, with no quality dips. Photographers get lossless TIFFs for agencies; devs prep assets without editing bloat. Unlimited on paid: scale from 10 to 10,000 files effortlessly.
+"
     },
     {
-      question: "What file formats does Micro JPEG support for image compression?",
-      answer: "Micro JPEG supports over 13 input formats including JPEG, PNG, WebP, AVIF, TIFF, SVG, BMP, GIF, ICO, and RAW formats (CR2, NEF, ARW, DNG, ORF, RW2, PEF, SRW, RAF). You can compress to popular web formats like JPEG, PNG, WebP, and AVIF for optimal web performance."
+      question: "Can I convert SVG or TIFF to WEBP/AVIF without losing transparency or resolution?",
+      answer: "Yes—TIFF (lossless for prints) and SVG (vector scalability) convert seamlessly to WEBP/AVIF, retaining transparency and up to 16K resolution (WEBP's cap). Photographers avoid blocky artifacts by using our high-quality settings; developers get crisp icons for apps. Process 75MB files in <60s, unlimited on paid—no more Photoshop friction. Micro JPEG supports over 13 input formats including JPEG, PNG, WebP, AVIF, TIFF, SVG, BMP, GIF, ICO, and RAW formats (CR2, NEF, ARW, DNG, ORF, RW2, PEF, SRW, RAF). You can compress to popular web formats like JPEG, PNG, WebP, and AVIF for optimal web performance."
     },
     {
       question: "Is the privacy of my images ensured?",
@@ -149,23 +150,33 @@ const FAQ_DATA = {
       question: "Why did you create Micro JPEG?",
       answer: "We created Micro JPEG to solve the growing problem of slow-loading websites caused by large image files. With the increasing importance of page speed for SEO and user experience, we wanted to provide the most advanced compression technology that maintains visual quality while dramatically reducing file sizes. Our goal is to make the web faster, one image at a time."
     }
-  ],
-  Compression: [
+
     {
-      question: "How much compression can I expect?",
-      answer: "Micro JPEG typically achieves 60-80% file size reduction while maintaining excellent visual quality. The exact compression ratio depends on your original image format, quality settings, and content type. Our advanced algorithms are specifically optimized for web images and often outperform other compression services."
-    },
+      question: "What's the best format for web images: WEBP, AVIF, or JPG?",
+      answer: "We created Micro For photographers and developers, WEBP strikes the balance—25-34% smaller than JPG with transparency support, loading 26% faster on sites. AVIF edges it out for superior compression (up to 50% smaller than JPG) and HDR for pro photos, but use JPG as fallback for older browsers. Our unlimited plan handles conversions to all three, ensuring compatibility and Core Web Vitals compliance for better Google rankings."
+    }
+
+  ],
+  Photography & RAW formats: [
+    {
+      question: "WEBP vs. AVIF: Which should photographers choose for social media exports?",
+      answer: "WEBP for broad support (96% browsers) and 30% faster loads on Instagram/Facebook; AVIF for 20% extra compression on HDR shots, but with PNG fallback. Both beat JPG for SEO—our paid plan converts unlimited RAWs to either, stripping EXIF for privacy if needed."
     {
       question: "What's the difference between lossy and lossless compression?",
       answer: "Lossy compression removes some image data to achieve smaller file sizes, which may slightly reduce quality but is often imperceptible. Lossless compression reduces file size without any quality loss by optimizing how the data is stored. Micro JPEG offers both options, allowing you to choose based on your specific needs."
     },
     {
-      question: "Can I compress images in bulk?",
-      answer: "Yes! Premium users can upload and compress multiple images simultaneously with our batch processing feature. You can also download all compressed images as a single ZIP file. Free users can compress one image at a time, while Premium users can process up to 5 images concurrently."
+      question: "How does image conversion improve SEO for photography sites or developer portfolios?",
+      answer: "Slower images kill rankings—Google penalizes sites over 2.5s load times. Converting RAW/TIFF to WEBP/AVIF cuts sizes 40-70%, passing PageSpeed tests and boosting mobile traffic by 20%. Photographers see more gallery views; devs get higher engagement. Our tool's unlimited access ensures ongoing optimization without quotas."
     },
     {
       question: "Do you support RAW image formats?",
       answer: "Yes, we support popular RAW formats including CR2 (Canon), NEF (Nikon), ARW (Sony), DNG (Adobe), and others. RAW files are converted to web-optimized formats like JPEG or PNG with professional-grade processing to maintain the highest possible quality."
+    }
+
+    {
+      question: "What about AVIF support—will it work on all devices for my client deliverables?",
+      answer: "Yes, we support popular RAW fAVIF shines for 50% smaller files than WEBP with HDR for pro photography, but fallback to JPG/PNG for iOS <16 or IE. Our conversions auto-generate fallbacks, ensuring 99% compatibility. Unlimited paid processing means no worries for cross-device portfolios."
     }
   ],
   API: [
