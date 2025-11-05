@@ -73,8 +73,7 @@ export const blogPosts: BlogPost[] = [
   publishDate: '2025-11-05',
   readTime: 5,
   tags: ['Tutorial', 'Image Conversion', 'RAW', 'WEBP', 'AVIF', 'Batch Processing'],
-  content: `
-# How to Use MicroJPEG: A Complete Tutorial for Image Processing & Conversion
+  content: `# How to Use MicroJPEG: A Complete Tutorial for Image Processing & Conversion'
 
 Welcome to **MicroJPEG** — the fast, reliable, and developer-friendly image conversion platform...
 
@@ -194,3 +193,11 @@ Email us at **[support@microjpeg.com](mailto:support@microjpeg.com)**
 `
 }
 ]
+// Helper functions (these MUST be exported)
+export function getAllBlogPosts() {
+  return blogPosts; // Return a copy if you want immutability: [...blogPosts]
+}
+
+export function getBlogPost(slug: string) {
+  return blogPosts.find(post => post.slug === slug) || null;
+}
