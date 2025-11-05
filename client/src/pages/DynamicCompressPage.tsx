@@ -2474,7 +2474,7 @@ console.log('📏 Computed limits:', {
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
-            <p className="text-gray-400 text-lg">Everything you need to know about Micro JPEG</p>
+            <p className="text-gray-400 text-lg">Unlock unlimited conversions from RAW (ARW, CR2, CRW, DNG, NEF, ORF, RAF, RW2), TIFF, JPG, PNG, WEBP, AVIF, and SVG to JPG, PNG, WEBP, AVIF, or TIFF—up to 75MB per file, processed in under 60 seconds. Our paid plan eliminates limits, ensuring fast, high-quality results for professional workflows. Below are answers to common questions, drawn from real pains shared by photographers and developers.</p>
           </div>
           
           <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto">
