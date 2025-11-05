@@ -159,7 +159,7 @@ const FAQ_DATA = {
     {
       question: "WEBP vs. AVIF: Which should photographers choose for social media exports?",
       answer: "WEBP for broad support (96% browsers) and 30% faster loads on Instagram/Facebook; AVIF for 20% extra compression on HDR shots, but with PNG fallback. Both beat JPG for SEO—our paid plan converts unlimited RAWs to either, stripping EXIF for privacy if needed."
-    }
+    },
     {
       question: "What's the difference between lossy and lossless compression?",
       answer: "Lossy compression removes some image data to achieve smaller file sizes, which may slightly reduce quality but is often imperceptible. Lossless compression reduces file size without any quality loss by optimizing how the data is stored. Micro JPEG offers both options, allowing you to choose based on your specific needs."
