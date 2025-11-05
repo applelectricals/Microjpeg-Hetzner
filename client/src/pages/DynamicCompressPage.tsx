@@ -148,8 +148,7 @@ const FAQ_DATA = {
     {
       question: "Why did you create Micro JPEG?",
       answer: "We created Micro JPEG to solve the growing problem of slow-loading websites caused by large image files. With the increasing importance of page speed for SEO and user experience, we wanted to provide the most advanced compression technology that maintains visual quality while dramatically reducing file sizes. Our goal is to make the web faster, one image at a time."
-    }
-
+    },
     {
       question: "What's the best format for web images: WEBP, AVIF, or JPG?",
       answer: "We created Micro For photographers and developers, WEBP strikes the balance—25-34% smaller than JPG with transparency support, loading 26% faster on sites. AVIF edges it out for superior compression (up to 50% smaller than JPG) and HDR for pro photos, but use JPG as fallback for older browsers. Our unlimited plan handles conversions to all three, ensuring compatibility and Core Web Vitals compliance for better Google rankings."
