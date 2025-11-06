@@ -232,7 +232,7 @@ Supported formats: **JPG, PNG, WebP, TIFF, RAW (CR2, NEF, ARW, etc.)**
 
 #### 2. API Integration (For Developers)
 Automate your conversion pipeline using the [MicroJPEG API](https://microjpeg.com/api-docs#overview).  
-Example `curl` usage:
+Example  usage:
 
 \`\`\`bash
 curl -X POST "https://api.microjpeg.com/convert" \\
