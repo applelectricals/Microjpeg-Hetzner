@@ -1188,7 +1188,7 @@ With MicroJPEG, you can:
 Start today — your users (and Google PageSpeed) will thank you.
 
 ---
-`
+  `,
 },
 {
   id: 12,
