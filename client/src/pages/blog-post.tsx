@@ -152,16 +152,17 @@ export default function BlogPost() {
                   ul: ({ children }) => <ul className="mb-4 pl-6 list-disc">{children}</ul>,
                   ol: ({ children }) => <ol className="mb-4 pl-6 list-decimal">{children}</ol>,
                   li: ({ children }) => <li className="mb-2 text-gray-700">{children}</li>,
-                  code: ({ children }) => (
-                    <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono">
-                      {children}
-                    </code>
-                  ),
-                  pre: ({ children }) => (
-                    <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-4">
-                      {children}
-                    </pre>
-                  ),
+                  code: ({ inline, children }) => {
+                  return inline ? (
+                  <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono text-gray-800">
+                  {children}
+                  </code>
+                  ) : (
+                  <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-6 text-sm leading-relaxed font-mono">
+                  <code>{children}</code>
+                  </pre>
+                  );
+                  },
                   blockquote: ({ children }) => (
                     <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4">
                       {children}
