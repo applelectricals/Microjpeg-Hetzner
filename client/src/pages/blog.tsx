@@ -9,7 +9,7 @@ import { Link } from 'wouter';
 
 export default function Blog() {
   const allPosts = getAllBlogPosts();
-  const featuredPost = allPosts[0];
+  const featuredPost = allPosts.find(p => p.slug === 'how-to-use-microjpeg') ?? allPosts[0];
   const recentPosts = allPosts.slice(1);
   const categories = ['Tutorials', 'Photography', 'WordPress', 'API', 'SEO'];
 
@@ -63,7 +63,20 @@ export default function Blog() {
               <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Featured Article</h2>
               
               <Card className="overflow-hidden shadow-lg">
-                <div className="lg:flex">
+                <div className="lg:w-1/3 bg-gradient-to-br from-blue-100 to-purple-100 p-8 flex items-center justify-center">
+                 {featuredPost.image ? (
+                 <img 
+                 src={featuredPost.image} 
+                 alt={`${featuredPost.title} thumbnail`}
+                 className="w-24 h-24 object-cover rounded-full mx-auto"  // Matches the badge size/shape
+                 />
+                ) : (
+                <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl font-bold text-white">#{featuredPost.id}</span>
+                </div>
+                )}
+                <p className="text-gray-700 font-medium">Featured Guide</p>
+                </div>
                   <div className="lg:w-2/3 p-4 sm:p-6 lg:p-8">
                     <Badge className="mb-4 bg-blue-100 text-blue-800 border-blue-200">
                       {featuredPost.category}
