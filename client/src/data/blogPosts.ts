@@ -392,7 +392,7 @@ Average savings: **AVIF reduced total image payload from 1.4 GB → 720 MB.**
 ---
 
 ### Developer Integration via MicroJPEG API
-For automation enthusiasts, here’s a sample `curl` request to convert to AVIF:
+For automation enthusiasts, here’s a sample request to convert to AVIF:
 
 \`\`\`bash
 curl -X POST "https://api.microjpeg.com/convert" \\
