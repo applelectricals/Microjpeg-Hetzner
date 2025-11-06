@@ -135,15 +135,20 @@ export default function Blog() {
               {filteredPosts.map(post => (
                 <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                   {post.image ? (
-                    <img
-                      src={post.image}
-                      alt={post.title}
-                      className="w-full h-48 object-cover"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-gray-200 border-2 border-dashed rounded-t-xl" />
-                  )}
+                    {post.image ? (
+  <img
+      src={post.image}
+      alt={post.title}
+      width={400}
+      height={300}
+      className="w-full h-48 object-cover"
+      loading="lazy"
+      decoding="async"
+  />
+) : (
+  <div className="w-full h-48 bg-gray-200 border-2 border-dashed rounded-t-xl flex items-center justify-center">
+  <span className="text-gray-500 text-sm">No Image</span>
+)}
                   <div className="p-6">
                     <Badge className="mb-3 bg-gray-100 text-gray-800">{post.category}</Badge>
                     <h3 className="font-bold text-xl mb-3 line-clamp-2">
