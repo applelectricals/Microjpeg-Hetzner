@@ -128,19 +128,18 @@ export default function Blog() {
                   </div>
 
                   {/* Right: Image / Badge */}
-                  <div className="lg:w-1/3 bg-gradient-to-br from-blue-100 to-purple-100 p-8 flex flex-col items-center justify-center order-1 lg:order-2">
-                    {featuredPost.image ? (
-                      <img 
-                        src={featuredPost.image}
-                        alt={`${featuredPost.title} - featured tutorial`}
-                        className="w-32 h-32 object-cover rounded-full shadow-md mx-auto mb-4"
-                        loading="lazy"
-                      />
-                    ) : (
-                      <div className="w-32 h-32 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
-                        <span className="text-3xl font-bold text-white">#{featuredPost.id}</span>
-                      </div>
-                    )}
+                  {featuredPost.image ? (
+                  <img 
+                  src={featuredPost.image}
+                  alt={`${featuredPost.title} - featured tutorial`}
+                  className="w-32 h-32 object-cover rounded-full shadow-md mx-auto mb-4"
+                  loading="lazy"
+                  />
+                  ) : (
+                  <div className="w-32 h-32 bg-blue-600 rounded-full ...">
+                  <span>#{featuredPost.id}</span>
+                  </div>
+                  )}
                     <p className="text-gray-700 font-semibold text-center">Featured Guide</p>
                   </div>
                 </div>
