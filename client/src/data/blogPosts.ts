@@ -87,7 +87,7 @@ Open your browser and navigate to **[https://microjpeg.com](https://microjpeg.co
 The clean, drag-and-drop interface loads immediately — ready for action.
 
 ### Step 2: Upload Your Image
-![MicroJPEG drag-and-drop upload interface – click or drop files up to 75MB](/client/src/assets/microjpeg-screenshot.webp)
+![MicroJPEG drag-and-drop upload interface – click or drop files up to 75MB](https://cdn.microjpeg.com/blog/how-to-use-microjpeg/microjpeg-screenshot.webp)
 
 - Select one or more images from your device.
 - Supported input formats:  
