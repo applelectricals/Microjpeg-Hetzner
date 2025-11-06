@@ -427,7 +427,7 @@ Whether you’re a developer building an automated pipeline or a photographer op
 - 1.5× faster page load speeds  
 - Equal or better quality than WebP  
 
-🚀 **Start optimizing today at [microjpeg.com/compress](https://microjpeg.com/compress)** or check out the [Pricing Page](https://microjpeg.com/pricing) for Pro plans that support higher upload limits and full automation.
+🚀 **Start optimizing today at [microjpeg.com/compress](https://microjpeg.com)** or check out the [Pricing Page](https://microjpeg.com/pricing) for Pro plans that support higher upload limits and full automation.
 
 ---
   `,
@@ -455,7 +455,124 @@ Whether you’re a developer building an automated pipeline or a photographer op
   readTime: 5,
   tags: ['WordPress', 'PNG', 'TIFF', 'Lossless'],
   image: 'https://cdn.microjpeg.com/blog/03.webp',
-  content: `...`
+  content: `### Introduction: Why PNG & TIFF Need Optimization
+If your WordPress site is growing, your **Media Library** is probably filled with large PNG or TIFF images.  
+While these formats are great for design and print, they are often **overkill for the web**, slowing down page loads and hurting your SEO scores.
+
+The good news? You can **convert PNG and TIFF files to WebP or AVIF** without any visible quality loss — directly from the browser, using [MicroJPEG](https://microjpeg.com).
+
+---
+
+### Why Lossless Optimization Matters
+Lossless conversion means **no degradation in pixel data or sharpness**, even after compression.  
+This is especially important for:
+- Transparent graphics and icons (common in PNG)
+- High-detail textures or scanned TIFF documents
+- Brand assets like logos that must remain pixel-perfect
+
+When you upload unoptimized PNG/TIFF files to WordPress, they’re stored as-is, consuming large amounts of storage and slowing backups.  
+MicroJPEG solves this at the **source** — before you upload.
+
+---
+
+### Step-by-Step: Optimize PNG & TIFF Before Uploading
+
+#### 1. Visit MicroJPEG
+Go to [microjpeg.com](https://microjpeg.com).  
+No sign-in or payment information is required.
+
+- **Free users** can upload up to **7 MB per regular image**  
+- **RAW formats** up to **15 MB per image**  
+- All major conversions are allowed, including **PNG → WebP**, **TIFF → AVIF**, and more  
+
+You’ll see instant previews and compression ratios in real time.
+
+---
+
+#### 2. Choose Conversion Format
+- For best compression with transparent images → choose **WebP (lossless)**  
+- For best performance and smallest size → choose **AVIF**  
+
+MicroJPEG automatically detects image metadata, color profiles, and transparency to ensure full fidelity.
+
+> 💡 Tip: AVIF offers up to **40–50% smaller sizes** than PNG at identical quality, making it ideal for web backgrounds and UI assets.
+
+---
+
+#### 3. Download and Upload to WordPress
+Once optimized, simply download your new images and upload them into your WordPress Media Library as usual.  
+They’ll retain full transparency and pixel precision, but your site will load much faster.
+
+---
+
+### Automate the Process with the MicroJPEG WordPress Plugin
+If you manage multiple uploads daily, install the [MicroJPEG WordPress Plugin](https://microjpeg.com/wordpress-plugin).  
+It automatically:
+- Converts your PNG, TIFF, and JPG uploads to WebP or AVIF  
+- Keeps a lossless backup of the original file  
+- Reduces storage usage by up to **70%**  
+- Integrates seamlessly with your existing media workflows  
+
+No coding or API setup is required — once activated, optimization happens automatically on upload.
+
+---
+
+### Recommended Plugin Settings
+To ensure full quality retention:
+1. Enable **Lossless Compression Mode** in the plugin settings.  
+2. Check **“Preserve Transparency”** for logos and icons.  
+3. Set **Output Priority: AVIF > WebP > Original**.  
+
+This ensures your visitors always see the lightest possible image their browser supports.
+
+---
+
+### Example API Workflow (For Developers)
+If you prefer automating conversions before upload, you can also use the MicroJPEG API.
+
+\`\`\`python
+import requests
+
+with open("banner.tiff", "rb") as f:
+    res = requests.post(
+        "https://api.microjpeg.com/convert",
+        headers={"Authorization": "Bearer YOUR_API_KEY"},
+        files={"file": f},
+        data={"output_format": "avif"},
+    )
+with open("banner.avif", "wb") as out:
+    out.write(res.content)
+\`\`\`
+
+This is ideal for photographers, agencies, or developers managing large image libraries.
+
+---
+
+### Benefits of Using MicroJPEG for PNG/TIFF Optimization
+- 🔒 100% lossless compression  
+- 🧠 Smart format detection and transparency support  
+- 🌐 Browser-only tool (no installs or sign-ups)  
+- 🧩 WordPress plugin with one-click automation  
+- ⚙️ API option for bulk processing  
+
+---
+
+### Final Thoughts
+Losslessly optimizing PNG and TIFF files before uploading to WordPress is no longer optional — it’s the **simplest way to boost site speed, save hosting space, and improve SEO**.
+
+Try it today at [microjpeg.com](https://microjpeg.com) and make your website lighter, faster, and sharper.
+
+---
+  `,
+  category: "Image Optimization",
+  author: "MicroJPEG Team",
+  readTime: 6,
+  publishDate: "2025-11-08",
+  tags: ["PNG", "TIFF", "WebP", "AVIF", "WordPress", "Lossless Compression", "MicroJPEG"],
+  seoTitle: "How to Losslessly Optimize PNG & TIFF Before Uploading to WordPress | MicroJPEG Guide 2025",
+  seoDescription: "Reduce your WordPress media library size by converting PNG and TIFF files to WebP or AVIF with zero quality loss. Free browser-based optimization using MicroJPEG.",
+  keywords: "optimize PNG, optimize TIFF, WebP WordPress plugin, AVIF conversion, lossless compression, MicroJPEG"
+  
 },
 {
   id: 8,
