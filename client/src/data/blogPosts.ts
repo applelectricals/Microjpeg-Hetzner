@@ -579,17 +579,18 @@ Try it today at [microjpeg.com](https://microjpeg.com) and make your website lig
   slug: 'raw-to-webp-photographer-workflow',
   title: 'RAW to WebP: Pro Photographer Workflow for Faster Portfolio Sites',
   excerpt: 'Export CR2/NEF RAWs to WebP without editing. Batch 70% smaller files with color accuracy.',
-  seoTitle: 'RAW to WebP: Pro Photographer Workflow for Faster Portfolio Sites | MicroJPEG Guide 2025',
-  seoDescription: 'Convert CR2, NEF, or ARW RAW files to WebP with color accuracy and up to 70% smaller sizes. Learn how photographers use MicroJPEG tools and plugins for faster portfolios.',
+  seoTitle: 'RAW to WebP Photographer Guide',
+  seoDescription: 'Pro workflow: Convert RAW to WebP for 70% smaller portfolio images.',
   keywords: ['raw to webp', 'photographer webp', 'portfolio optimization'],
   author: 'Sarah Chen',
   category: 'Photography',
   publishDate: '2025-11-01',
   readTime: 6,
-  tags: ['RAW', 'WebP', 'Photography', 'Portfolio', 'WordPress', 'MicroJPEG', 'Optimization'],
+  tags: ['RAW', 'WebP', 'Photography', 'Portfolio'],
   image: 'https://cdn.microjpeg.com/blog/04.webp',
-  content: `### Introduction: The New Standard for Online Photography
-  Professional photographers invest hours perfecting exposure, tones, and highlights — but often lose visitors due to **slow-loading galleries**.  
+  content: `
+### Introduction: The New Standard for Online Photography
+Professional photographers invest hours perfecting exposure, tones, and highlights — but often lose visitors due to **slow-loading galleries**.  
 
 In 2025, delivering **lightweight, color-accurate WebP images** from RAW files is no longer a luxury — it’s essential.  
 This guide shows how to export and batch-convert RAW files like **CR2**, **NEF**, and **ARW** to **WebP**, preserving every hue while slashing file sizes by up to 70%.
@@ -679,8 +680,8 @@ When combined with caching plugins, you can expect a **2× faster page load time
 ### Step 5: Serve Optimized Files via CDN
 To maximize performance:
 - Use a CDN such as Cloudflare or Bunny.net  
-- Cache WebP files and enable “Serve Best Format” for AVIF/WebP support  
-- Always provide responsive `<picture>` markup so browsers pick the optimal format
+- Cache WebP files and enable "Serve Best Format" for AVIF/WebP support  
+- Always provide responsive \`<picture>\` markup so browsers pick the optimal format
 
 Example markup:
 \`\`\`html
@@ -710,22 +711,18 @@ These improvements make WebP the new default for professional online presentatio
 - 🌐 Works entirely online, with **no Lightroom export step needed**  
 - 🔁 Offers batch tools, API automation, and WordPress sync  
 
-Whether you’re delivering high-end editorial content or personal portfolios, MicroJPEG keeps your images fast and flawless.
+Whether you're delivering high-end editorial content or personal portfolios, MicroJPEG keeps your images fast and flawless.
 
 ---
 
 ### Final Thoughts
 RAW to WebP conversion has never been easier.  
-With MicroJPEG’s browser tools, API, and WordPress plugin, photographers can reduce upload sizes by 70% — **without touching Photoshop or Lightroom**.
+With MicroJPEG's browser tools, API, and WordPress plugin, photographers can reduce upload sizes by 70% — **without touching Photoshop or Lightroom**.
 
 Start optimizing today at [microjpeg.com](https://microjpeg.com) and experience the difference in speed, color, and clarity your portfolio deserves.
 
 ---
   `,
- 
-  
-
-
 },
 {
   id: 9,
