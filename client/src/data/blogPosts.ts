@@ -1102,7 +1102,7 @@ Go to **[microjpeg.com](https://microjpeg.com)** — no sign-up, no limits for i
 
 Want to convert **every SVG in your project** automatically?
 
-Save this script as `convert-icons.js`:
+Save this script as convert-icons.js:
 
 \`\`\`javascript
 // Run with Node.js (save as convert-icons.js)
