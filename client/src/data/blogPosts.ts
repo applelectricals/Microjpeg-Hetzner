@@ -73,6 +73,7 @@ export const blogPosts: BlogPost[] = [
   publishDate: '2025-11-05',
   readTime: 5,
   tags: ['Tutorial', 'Image Conversion', 'RAW', 'WEBP', 'AVIF', 'Batch Processing'],
+  image: 'https://cdn.microjpeg.com/blog/how-to-use-microjpeg/howto/featured-thumbnail.webp',
   content: `# How to Use MicroJPEG: A Complete Tutorial for Image Processing & Conversion'
 
 Welcome to **MicroJPEG** — the fast, reliable, and developer-friendly image conversion platform...
