@@ -152,84 +152,86 @@ export default function Blog() {
 )}
 
         {/* Recent Posts */}
-        <section className="py-12 sm:py-16 bg-gray-50">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 sm:mb-12 gap-4">
-              <h2 className="text-2xl sm:text-3xl font-bold">Recent Articles</h2>
-              
-              {/* Category Filter */}
-              <div className="flex flex-wrap gap-2">
-                <Badge variant="outline" className="cursor-pointer hover:bg-blue-50 h-8 px-3">
-                  All
+<section className="py-12 sm:py-16 bg-gray-50">
+  <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-8 sm:mb-12 gap-4">
+      <h2 className="text-2xl sm:text-3xl font-bold">Recent Articles</h2>
+      
+      {/* Category Filter */}
+      <div className="flex flex-wrap gap-2">
+        {['All', ...categories].map((cat) => (
+          <Badge
+            key={cat}
+            variant={selectedCategory === cat ? 'default' : 'outline'}
+            className="cursor-pointer hover:bg-blue-50 h-8 px-3"
+            onClick={() => setSelectedCategory(cat)}
+          >
+            {cat}
+          </Badge>
+        ))}
+      </div>
+    </div>
+    
+    <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
+      {filteredPosts.map((post) => (
+        <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
+          {post.image ? (
+            <img
+              src={post.image}
+              alt={post.title}
+              className="w-full h-48 object-cover"
+              loading="lazy"
+            />
+          ) : (
+            <div className="w-full h-48 bg-gray-200 border-2 border-dashed rounded-t-xl" />
+          )}
+          <div className="p-6">
+            <Badge className="mb-3 bg-gray-100 text-gray-800">
+              {post.category}
+            </Badge>
+            
+            <h3 className="font-bold text-xl mb-3 line-clamp-2">
+              <Link 
+                href={`/blog/${post.slug}`}
+                className="hover:text-blue-600 transition-colors"
+              >
+                {post.title}
+              </Link>
+            </h3>
+            
+            <p className="text-gray-600 mb-4 line-clamp-3 text-sm">
+              {post.excerpt}
+            </p>
+            
+            <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+              <span>{post.readTime} min read</span>
+              <span>{new Date(post.publishDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+            </div>
+
+            <div className="flex flex-wrap gap-1 mb-4">
+              {post.tags.slice(0, 2).map((tag) => (
+                <Badge key={tag} variant="outline" className="text-xs">
+                  {tag}
                 </Badge>
-                {categories.map((category) => (
-                  <Badge 
-                    key={category}
-                    variant="outline" 
-                    className="cursor-pointer hover:bg-blue-50 h-8 px-3"
-                  >
-                    {category}
-                  </Badge>
-                ))}
-              </div>
+              ))}
+              {post.tags.length > 2 && (
+                <Badge variant="outline" className="text-xs">
+                  +{post.tags.length - 2}
+                </Badge>
+              )}
             </div>
             
-            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
-              {recentPosts.map((post) => (
-                <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
-                  <div className="p-6">
-                    <Badge className="mb-3 bg-gray-100 text-gray-800">
-                      {post.category}
-                    </Badge>
-                    
-                    <h3 className="font-bold text-xl mb-3 line-clamp-2">
-                      <Link 
-                        href={`/blog/${post.slug}`}
-                        className="hover:text-blue-600 transition-colors"
-                        data-testid={`link-post-${post.id}`}
-                      >
-                        {post.title}
-                      </Link>
-                    </h3>
-                    
-                    <p className="text-gray-600 mb-4 line-clamp-3 text-sm">
-                      {post.excerpt}
-                    </p>
-                    
-                    <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                      <span>{post.readTime} min read</span>
-                      <span>
-                        {new Date(post.publishDate).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric'
-                        })}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {post.tags.slice(0, 2).map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                      {post.tags.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{post.tags.length - 2}
-                        </Badge>
-                      )}
-                    </div>
-                    
-                    <Link href={`/blog/${post.slug}`}>
-                      <Button variant="outline" size="sm" className="w-full" data-testid={`button-read-${post.id}`}>
-                        Read Article
-                      </Button>
-                    </Link>
-                  </div>
-                </Card>
-              ))}
-            </div>
+            <Link href={`/blog/${post.slug}`}>
+              <Button variant="outline" size="sm" className="w-full">
+                Read Article
+              </Button>
+            </Link>
           </div>
-        </section>
+        </Card>
+      ))}
+    </div>
+  </div>
+</section>
 
         {/* Newsletter Signup */}
         <section className="py-12 sm:py-16 bg-white">
