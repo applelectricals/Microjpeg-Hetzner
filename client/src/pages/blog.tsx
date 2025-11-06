@@ -1,3 +1,4 @@
+// client/src/pages/blog.tsx
 import { SEOHead } from '@/components/SEOHead';
 import { getAllBlogPosts } from '@/data/blogPosts';
 import { Button } from "@/components/ui/button";
@@ -9,8 +10,16 @@ import { Link } from 'wouter';
 
 export default function Blog() {
   const allPosts = getAllBlogPosts();
+  
+  // Feature "How to Use MicroJPEG" — fallback to first post
   const featuredPost = allPosts.find(p => p.slug === 'how-to-use-microjpeg') ?? allPosts[0];
-  const recentPosts = allPosts.slice(1);
+  
+  // Exclude featured post from recent list
+  const recentPosts = allPosts
+    .filter(p => p.id !== featuredPost.id)
+    .sort((a, b) => new Date(b.publishDate).getTime() - new Date(a.publishDate).getTime())
+    .slice(0, 6);
+
   const categories = ['Tutorials', 'Photography', 'WordPress', 'API', 'SEO'];
 
   const seoData = {
@@ -63,21 +72,9 @@ export default function Blog() {
               <h2 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8">Featured Article</h2>
               
               <Card className="overflow-hidden shadow-lg">
-                <div className="lg:w-1/3 bg-gradient-to-br from-blue-100 to-purple-100 p-8 flex items-center justify-center">
-                 {featuredPost.image ? (
-                 <img 
-                 src={featuredPost.image} 
-                 alt={`${featuredPost.title} thumbnail`}
-                 className="w-24 h-24 object-cover rounded-full mx-auto"  // Matches the badge size/shape
-                 />
-                ) : (
-                <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl font-bold text-white">#{featuredPost.id}</span>
-                </div>
-                )}
-                <p className="text-gray-700 font-medium">Featured Guide</p>
-                </div>
-                  <div className="lg:w-2/3 p-4 sm:p-6 lg:p-8">
+                <div className="lg:flex">
+                  {/* Left: Content */}
+                  <div className="lg:w-2/3 p-4 sm:p-6 lg:p-8 order-2 lg:order-1">
                     <Badge className="mb-4 bg-blue-100 text-blue-800 border-blue-200">
                       {featuredPost.category}
                     </Badge>
@@ -85,14 +82,14 @@ export default function Blog() {
                     <h3 className="text-3xl font-bold mb-4">
                       <Link 
                         href={`/blog/${featuredPost.slug}`}
-                        className="hover:text-blue-600"
+                        className="hover:text-blue-600 transition-colors"
                         data-testid={`link-featured-post-${featuredPost.id}`}
                       >
                         {featuredPost.title}
                       </Link>
                     </h3>
                     
-                    <p className="text-gray-600 mb-6 text-lg">
+                    <p className="text-gray-600 mb-6 text-lg leading-relaxed">
                       {featuredPost.excerpt}
                     </p>
                     
@@ -107,13 +104,17 @@ export default function Blog() {
                       </div>
                       <div className="flex items-center">
                         <Calendar className="w-4 h-4 mr-2" />
-                        {new Date(featuredPost.publishDate).toLocaleDateString()}
+                        {new Date(featuredPost.publishDate).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
                       </div>
                     </div>
 
                     <div className="flex flex-wrap gap-2 mb-6">
                       {featuredPost.tags.map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-gray-600">
+                        <Badge key={tag} variant="outline" className="text-gray-600 text-xs">
                           {tag}
                         </Badge>
                       ))}
@@ -125,14 +126,22 @@ export default function Blog() {
                       </Button>
                     </Link>
                   </div>
-                  
-                  <div className="lg:w-1/3 bg-gradient-to-br from-blue-100 to-purple-100 p-8 flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span className="text-2xl font-bold text-white">#{featuredPost.id}</span>
+
+                  {/* Right: Image / Badge */}
+                  <div className="lg:w-1/3 bg-gradient-to-br from-blue-100 to-purple-100 p-8 flex flex-col items-center justify-center order-1 lg:order-2">
+                    {featuredPost.image ? (
+                      <img 
+                        src={featuredPost.image}
+                        alt={`${featuredPost.title} - featured tutorial`}
+                        className="w-32 h-32 object-cover rounded-full shadow-md mx-auto mb-4"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-32 h-32 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
+                        <span className="text-3xl font-bold text-white">#{featuredPost.id}</span>
                       </div>
-                      <p className="text-gray-700 font-medium">Featured Guide</p>
-                    </div>
+                    )}
+                    <p className="text-gray-700 font-semibold text-center">Featured Guide</p>
                   </div>
                 </div>
               </Card>
@@ -165,7 +174,7 @@ export default function Blog() {
             
             <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8">
               {recentPosts.map((post) => (
-                <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow hover-lift">
+                <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
                   <div className="p-6">
                     <Badge className="mb-3 bg-gray-100 text-gray-800">
                       {post.category}
@@ -174,21 +183,24 @@ export default function Blog() {
                     <h3 className="font-bold text-xl mb-3 line-clamp-2">
                       <Link 
                         href={`/blog/${post.slug}`}
-                        className="hover:text-blue-600"
+                        className="hover:text-blue-600 transition-colors"
                         data-testid={`link-post-${post.id}`}
                       >
                         {post.title}
                       </Link>
                     </h3>
                     
-                    <p className="text-gray-600 mb-4 line-clamp-3">
+                    <p className="text-gray-600 mb-4 line-clamp-3 text-sm">
                       {post.excerpt}
                     </p>
                     
                     <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
                       <span>{post.readTime} min read</span>
                       <span>
-                        {new Date(post.publishDate).toLocaleDateString()}
+                        {new Date(post.publishDate).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric'
+                        })}
                       </span>
                     </div>
 
