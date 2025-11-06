@@ -1042,7 +1042,7 @@ Try it today at [microjpeg.com](https://microjpeg.com) and see real-world result
   publishDate: '2025-10-29',
   readTime: 5,
   tags: ['SVG', 'AVIF', 'Icons', 'Automation', 'Web Performance'],
-  image: 'https://cdn.microjpeg.com/blog/svg-to-avif-icons/thumb.webp',
+  image: 'https://cdn.microjpeg.com/blog/07.webp',
   content: `
 # Automate SVG to AVIF Conversion for Icons: Speed Up Your Site in 2025
 
