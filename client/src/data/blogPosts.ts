@@ -156,14 +156,14 @@ All processed images are bundled into a **ZIP file** and downloaded instantly.
 
 ## Ready for More? Upgrade to Paid
 
-| Feature | Free Plan | Paid Plan ($9+/mo) |
-|--------|-----------|---------------------|
-| File Size Limit | 7–15 MB | **75 MB** |
-| Conversions | Limited | **Unlimited** |
-| RAW Support | Yes (15 MB) | Full (75 MB) |
-| Priority Processing | Standard | **Faster Queue** |
-| API Access | No | Yes |
-| CDN Integration | No | Yes |
+| Feature              | Free Plan   | Paid Plan ($9+/mo) |
+|----------------------|-------------|--------------------|
+| File Size Limit      | 7–15 MB     | **75 MB**          |
+| Conversions          | Limited     | **Unlimited**      |
+| RAW Support          | Yes (15 MB) | Full (75 MB)       |
+| Priority Processing  | Standard    | **Faster Queue**   |
+| API Access           | No          | Yes                |
+| CDN Integration      | No          | Yes                |
 
 [Upgrade Now →](https://microjpeg.com/pricing)
 
