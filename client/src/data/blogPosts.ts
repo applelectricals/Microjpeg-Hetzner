@@ -1048,10 +1048,10 @@ Try it today at [microjpeg.com](https://microjpeg.com) and see real-world result
 
 SVG icons are **perfect for scalability**, but they’re not always the fastest to load — especially when used in large sets across navigation, buttons, and UI elements.
 
-In 2025, **AVIF is the new gold standard for icons**:  
-- **60–80% smaller** than SVG  
-- **Lossless quality** at low file sizes  
-- **Full browser support** (Chrome, Firefox, Safari, Edge)  
+In 2025, **AVIF is the new gold standard for icons**:
+- **60–80% smaller** than SVG
+- **Lossless quality** at low file sizes
+- **Full browser support** (Chrome, Firefox, Safari, Edge)
 - **Perfect for dark mode and HDR displays**
 
 This guide shows you how to **automatically convert SVG icons to AVIF** using free tools — **no code required** — and deploy them instantly.
@@ -1086,7 +1086,7 @@ Keep your SVGs clean:
 
 Go to **[microjpeg.com](https://microjpeg.com)** — no sign-up, no limits for icons.
 
-1. Drag and drop your `.svg` files  
+1. Drag and drop your \`.svg\` files  
 2. Select **AVIF** as output  
 3. Choose **Quality: 80–90** (visually lossless)  
 4. Download instantly
@@ -1102,7 +1102,7 @@ Go to **[microjpeg.com](https://microjpeg.com)** — no sign-up, no limits for i
 
 Want to convert **every SVG in your project** automatically?
 
-Save this script as convert-icons.js:
+Save this script as \`convert-icons.js\`:
 
 \`\`\`javascript
 // Run with Node.js (save as convert-icons.js)
@@ -1117,7 +1117,7 @@ fs.mkdirSync(outputDir, { recursive: true });
 fs.readdirSync(inputDir).forEach(file => {
   if (file.endsWith('.svg')) {
     const name = file.replace('.svg', '.avif');
-    console.log(\`Convert: \${file} → \${name}\`);
+    console.log('Convert: ' + file + ' → ' + name);
     // In production: use MicroJPEG API or sharp
   }
 });
@@ -1129,7 +1129,7 @@ fs.readdirSync(inputDir).forEach(file => {
 
 ## Step 4: Serve AVIF with Fallback
 
-Use modern `<picture>` syntax:
+Use modern \`<picture>\` syntax:
 
 \`\`\`html
 <picture>
