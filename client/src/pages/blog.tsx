@@ -129,17 +129,19 @@ export default function Blog() {
 
                   {/* Right: Image / Badge */}
                   {featuredPost.image ? (
-                  <img 
-                  src={featuredPost.image}
-                  alt={`${featuredPost.title} - featured tutorial`}
-                  className="w-32 h-32 object-cover rounded-full shadow-md mx-auto mb-4"
-                  loading="lazy"
-                  />
-                  ) : (
-                  <div className="w-32 h-32 bg-blue-600 rounded-full ...">
-                  <span>#{featuredPost.id}</span>
-                  </div>
-                  )}
+  <div className="relative w-full max-w-sm mx-auto">
+    <img 
+      src={featuredPost.image}
+      alt={`${featuredPost.title} - featured tutorial`}
+      className="w-full h-auto rounded-lg shadow-lg border border-gray-200"
+      loading="lazy"
+    />
+  </div>
+) : (
+  <div className="w-32 h-32 bg-blue-600 rounded-xl flex items-center justify-center mx-auto mb-4 shadow-md">
+    <span className="text-3xl font-bold text-white">#{featuredPost.id}</span>
+  </div>
+)}
                     <p className="text-gray-700 font-semibold text-center">Featured Guide</p>
                   </div>
                 </div>
