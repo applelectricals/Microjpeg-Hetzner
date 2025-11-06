@@ -197,7 +197,7 @@ Email us at **[support@microjpeg.com](mailto:support@microjpeg.com)**
 },
 // --- NEW POSTS START ---
 {
-  id: "5",
+  id: 5,
   slug: 'batch-convert-avif-2025',
   title: 'Batch Convert 1000+ Images to AVIF: Fast Tools & Scripts for 2025',
   excerpt: 'Struggling with slow bulk conversions? Step-by-step CLI guide using ImageMagick and MicroJPEG API to process RAW/JPG/PNG folders in minutes.',
@@ -210,95 +210,92 @@ Email us at **[support@microjpeg.com](mailto:support@microjpeg.com)**
   readTime: 6,
   tags: ['AVIF', 'Batch Processing', 'CLI', 'ImageMagick'],
   image: 'https://cdn.microjpeg.com/blog/01.webp',
-  content: `{
-  
-# Batch Convert 1000+ Images to AVIF: Fast Tools & Scripts for 2025
+  content: `### Why Batch Conversion Matters in 2025
+If you're handling thousands of product photos, blog assets, or RAW shots, **batch conversion** isn't optional — it's essential. Modern websites demand lightning-fast loading, and formats like **AVIF** outperform JPG and WebP in both compression and visual fidelity.
 
-AVIF delivers **50–70% smaller files** than WebP. But converting thousands of images manually is painful.
+### AVIF: The 2025 Standard
+AVIF offers up to **40–50% smaller file sizes** than WebP at equivalent quality. This makes it a preferred choice for:
+- eCommerce stores with hundreds of product images  
+- Photography portfolios  
+- Developers optimizing content-heavy sites  
 
-Here are **three simple methods** to batch convert **JPG, PNG, RAW, and more** to AVIF — all under 60 seconds for 1000 files.
+> ⚡ Tip: [MicroJPEG](https://microjpeg.com) supports instant drag-and-drop conversion to AVIF — no sign-up, no payment info required, and up to **7 MB (regular)** or **15 MB (RAW)** per image for free users.
 
----
+### Batch Converting to AVIF — 3 Approaches
 
-## 1. ImageMagick (Free & Local)
+#### 1. Web Interface (Free)
+For small-to-medium batches, visit [microjpeg.com](https://microjpeg.com) and upload your images directly.  
+Supported formats: **JPG, PNG, WebP, TIFF, RAW (CR2, NEF, ARW, etc.)**
 
-Install once, run anywhere:
+✅ Converts up to 1000+ images seamlessly using browser-based compression.  
+✅ Perfect for non-technical users or quick jobs.
 
-\`\`\`bash
-# Ubuntu/Debian
-sudo apt install imagemagick
-
-# Convert all JPGs in folder
-magick mogrify -path output_avif/ -format avif -quality 50 *.jpg
-\`\`\`
-
-> Use \`-define avif:lossless=true\` for perfect quality (larger files).
-
----
-
-## 2. MicroJPEG API (Cloud + Free Tier)
-
-No install. Just upload:
+#### 2. API Integration (For Developers)
+Automate your conversion pipeline using the [MicroJPEG API](https://microjpeg.com/api-docs#overview).  
+Example `curl` usage:
 
 \`\`\`bash
-curl -F "files=@photo1.jpg" -F "files=@photo2.png" \\
-     https://api.microjpeg.com/v1/convert?format=avif&quality=80
+curl -X POST "https://api.microjpeg.com/convert" \\
+     -H "Authorization: Bearer YOUR_API_KEY" \\
+     -F "file=@image.jpg" \\
+     -F "output_format=avif"
 \`\`\`
 
-Get a ZIP download link instantly.
+Great for Node.js, Python, or PHP workflows where you want continuous delivery of optimized media.
 
-[Try free (7MB limit) →](https://microjpeg.com)  
-[Unlimited with Pro →](https://microjpeg.com/pricing)
+#### 3. WordPress Plugin (For Bloggers)
+If you’re managing a WordPress site, install the [MicroJPEG WordPress Plugin](https://microjpeg.com/wordpress-plugin).  
+It automatically compresses and converts all your uploads to AVIF or WebP in the background.
 
----
+> 💡 Combine the plugin with a CDN and caching to reduce page weight by up to 70%.
 
-## 3. Node.js Script (Full Automation)
+### Why Use MicroJPEG for Batch AVIF Conversion
+- 🌐 Converts all major formats — JPG, PNG, RAW, TIFF, WebP  
+- ⚙️ Free tier for casual users, with **Starter**, **Pro**, and **Business** plans via [Pricing Page](https://microjpeg.com/pricing)  
+- 🚀 Developer-ready API for bulk automation  
+- 🧠 AI-powered compression that preserves detail  
 
-\`\`\`js
-// batch-avif.js
-import fs from 'fs';
-import path from 'path';
+### Example Script for Bulk Conversion
+Developers can use a simple Python script for automation via MicroJPEG’s API:
 
-const input = './input';
-const output = './output_avif';
+\`\`\`python
+import requests, os
 
-fs.readdirSync(input).forEach(file => {
-  const ext = file.split('.').pop();
-  const name = file.replace('.' + ext, '');
-  const cmd = `magick convert "${file}" -quality 75 "${output}/${name}.avif"`;
-  console.log(cmd);
-  // Run via child_process.execSync(cmd)
-});
+API_KEY = "YOUR_API_KEY"
+INPUT_FOLDER = "input_images"
+OUTPUT_FOLDER = "output_avif"
+
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+
+for filename in os.listdir(INPUT_FOLDER):
+    if filename.lower().endswith((".jpg", ".jpeg", ".png", ".webp", ".tiff")):
+        with open(os.path.join(INPUT_FOLDER, filename), "rb") as f:
+            response = requests.post(
+                "https://api.microjpeg.com/convert",
+                headers={"Authorization": f"Bearer {API_KEY}"},
+                files={"file": f},
+                data={"output_format": "avif"},
+            )
+        out_path = os.path.join(OUTPUT_FOLDER, filename.rsplit(".", 1)[0] + ".avif")
+        with open(out_path, "wb") as out_file:
+            out_file.write(response.content)
 \`\`\`
 
----
+This automates conversion for entire directories, perfect for photographers or media agencies.
 
-## Real Results (1000 Images)
+### Conclusion
+AVIF is no longer the future — it's the **present**. Whether you’re compressing 10 or 10,000 images, MicroJPEG offers the most accessible way to do it online, via API, or directly in WordPress.
 
-| Format | Size   | Time |
-|--------|--------|------|
-| JPG    | 180 MB | -    |
-| WebP   | 68 MB  | 45s  |
-| **AVIF** | **42 MB** | **38s** |
-
----
-
-## Serve AVIF with Fallback
-
-\`\`\`html
-<picture>
-  <source srcset="image.avif" type="image/avif">
-  <source srcset="image.webp" type="image/webp">
-  <img src="image.jpg" alt="Photo" loading="lazy">
-</picture>
-\`\`\`
-
----
-
-**Start converting now** → [microjpeg.com](https://microjpeg.com)
-
----
-`
+👉 Start now at [microjpeg.com/compress](https://microjpeg.com/compress) to unlock faster loading times and better visual performance.
+  `,
+  category: "Image Optimization",
+  author: "MicroJPEG Team",
+  readTime: 7,
+  publishDate: "2025-11-06",
+  tags: ["AVIF", "Batch Conversion", "Image Compression", "MicroJPEG", "Automation", "API"],
+  seoTitle: "Batch Convert 1000+ Images to AVIF | MicroJPEG Tools & Scripts 2025",
+  seoDescription: "Learn how to batch convert thousands of images to AVIF format using MicroJPEG tools, scripts, and API. Fast, lossless, and developer-friendly workflow for 2025.",
+  keywords: "AVIF batch conversion, image compression, MicroJPEG API, convert images online, WordPress AVIF plugin"
 },
 {
   id: 6,
