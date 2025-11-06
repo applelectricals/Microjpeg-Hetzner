@@ -571,7 +571,7 @@ Try it today at [microjpeg.com](https://microjpeg.com) and make your website lig
   tags: ["PNG", "TIFF", "WebP", "AVIF", "WordPress", "Lossless Compression", "MicroJPEG"],
   seoTitle: "How to Losslessly Optimize PNG & TIFF Before Uploading to WordPress | MicroJPEG Guide 2025",
   seoDescription: "Reduce your WordPress media library size by converting PNG and TIFF files to WebP or AVIF with zero quality loss. Free browser-based optimization using MicroJPEG.",
-  keywords: "optimize PNG, optimize TIFF, WebP WordPress plugin, AVIF conversion, lossless compression, MicroJPEG"
+  keywords: "RAW to WebP, CR2 to WebP, NEF to WebP, MicroJPEG photography, WordPress image optimization, portfolio speed, optimize PNG, optimize TIFF, WebP WordPress plugin, AVIF conversion, lossless compression, MicroJPEG"
 
 },
 {
@@ -579,14 +579,14 @@ Try it today at [microjpeg.com](https://microjpeg.com) and make your website lig
   slug: 'raw-to-webp-photographer-workflow',
   title: 'RAW to WebP: Pro Photographer Workflow for Faster Portfolio Sites',
   excerpt: 'Export CR2/NEF RAWs to WebP without editing. Batch 70% smaller files with color accuracy.',
-  seoTitle: 'RAW to WebP Photographer Guide',
-  seoDescription: 'Pro workflow: Convert RAW to WebP for 70% smaller portfolio images.',
+  seoTitle: 'RAW to WebP: Pro Photographer Workflow for Faster Portfolio Sites | MicroJPEG Guide 2025',
+  seoDescription: 'Convert CR2, NEF, or ARW RAW files to WebP with color accuracy and up to 70% smaller sizes. Learn how photographers use MicroJPEG tools and plugins for faster portfolios.',
   keywords: ['raw to webp', 'photographer webp', 'portfolio optimization'],
   author: 'Sarah Chen',
   category: 'Photography',
   publishDate: '2025-11-01',
   readTime: 6,
-  tags: ['RAW', 'WebP', 'Photography', 'Portfolio'],
+  tags: ['RAW', 'WebP', 'Photography', 'Portfolio', 'WordPress', 'MicroJPEG', 'Optimization'],
   image: 'https://cdn.microjpeg.com/blog/04.webp',
   content: `### Introduction: The New Standard for Online Photography
   Professional photographers invest hours perfecting exposure, tones, and highlights — but often lose visitors due to **slow-loading galleries**.  
@@ -722,14 +722,9 @@ Start optimizing today at [microjpeg.com](https://microjpeg.com) and experience 
 
 ---
   `,
-  category: "Photography Workflow",
-  author: "MicroJPEG Team",
-  readTime: 8,
-  publishDate: "2025-11-09",
-  tags: ["RAW", "WebP", "Photography", "Portfolio", "WordPress", "MicroJPEG", "Optimization"],
-  seoTitle: "RAW to WebP: Pro Photographer Workflow for Faster Portfolio Sites | MicroJPEG Guide 2025",
-  seoDescription: "Convert CR2, NEF, or ARW RAW files to WebP with color accuracy and up to 70% smaller sizes. Learn how photographers use MicroJPEG tools and plugins for faster portfolios.",
-  keywords: "RAW to WebP, CR2 to WebP, NEF to WebP, MicroJPEG photography, WordPress image optimization, portfolio speed"
+ 
+  
+
 
 },
 {
