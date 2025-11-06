@@ -87,7 +87,7 @@ Open your browser and navigate to **[https://microjpeg.com](https://microjpeg.co
 The clean, drag-and-drop interface loads immediately — ready for action.
 
 ### Step 2: Upload Your Image
-![MicroJPEG drag-and-drop upload interface – click or drop files up to 75MB](https://cdn.microjpeg.com/blog/how-to-use-microjpeg/microjpeg-screenshot.webp)
+![MicroJPEG drag-and-drop upload interface – click or drop files up to 75MB](https://cdn.microjpeg.com/blog/how-to-use-microjpeg/howto/howtomicrojpeg02.webp)
 
 - Select one or more images from your device.
 - Supported input formats:  
@@ -103,14 +103,14 @@ The clean, drag-and-drop interface loads immediately — ready for action.
 ### Step 3: Automatic Processing Begins
 As soon as the upload completes:
 ![MicroJPEG drag-and-drop upload interface – click or drop files up to 75MB](
-  https://cdn.microjpeg.com/blog/how-to-use-microjpeg/microjpeg-screenshot.webp
-)
+ https://cdn.microjpeg.com/blog/how-to-use-microjpeg/howto/howtomicrojpeg03.webp
+  )
 - Processing starts **automatically** to **JPG** (default format).
 - A sleek **output modal** appears with a **progress indicator**.
 - The drag-and-drop area is temporarily disabled to ensure **fast, uninterrupted processing**.
 
 ### Step 4: View Conversion Results
-Once processing is complete, each image appears in the **output gallery** with detailed stats:
+![Once processing is complete, each image appears in the **output gallery** with detailed stats:](https://cdn.microjpeg.com/blog/how-to-use-microjpeg/howto/howtomicrojpeg04.webp)
 
 #### Left Side (Original Info):
 - Image thumbnail
@@ -125,9 +125,9 @@ Once processing is complete, each image appears in the **output gallery** with d
 - **Download button** (click the format icon to save)
 
 ### Step 5: Convert to Additional Formats (On-Demand)
-Want **PNG, WEBP, AVIF, or TIFF**?
+Want **PNG, WEBP, AVIF, or TIFF**? 
 
-Use the **format selection buttons** at the top of the drag-and-drop area.
+![Use the **format selection buttons** at the top of the drag-and-drop area.](https://cdn.microjpeg.com/blog/how-to-use-microjpeg/howto/howtomicrojpeg05.webp)
 
 > **Smart Batch Processing**:  
 > MicroJPEG only converts what’s needed — **no redundant work**.
@@ -148,10 +148,10 @@ Use the **format selection buttons** at the top of the drag-and-drop area.
 ### Step 6: Download Your Files
 
 #### Download Individual Files
-Click any **format icon** in the output gallery to download that specific version.
+![Click any **format icon** in the output gallery to download that specific version.](https://cdn.microjpeg.com/blog/how-to-use-microjpeg/howto/howtomicrojpeg06A.webp)
 
 #### Download All at Once
-Click the **“Download All”** button at the top of the output modal.  
+![Click the **“Download All”** button at the top of the output modal.](https://cdn.microjpeg.com/blog/how-to-use-microjpeg/howto/howtomicrojpeg06B.webp)  
 All processed images are bundled into a **ZIP file** and downloaded instantly.
 
 ## Ready for More? Upgrade to Paid
