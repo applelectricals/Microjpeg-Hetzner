@@ -91,9 +91,18 @@ The clean, drag-and-drop interface loads immediately — ready for action.
 ![MicroJPEG drag-and-drop upload interface – click or drop files up to 75MB](https://cdn.microjpeg.com/blog/how-to-use-microjpeg/howto/howtomicrojpeg02.webp)
 
 - Select one or more images from your device.
-- Supported input formats:  
-  \`JPG\`, \`PNG\`, \`WEBP\`, \`AVIF\`, \`SVG\`, \`TIFF\`,  
-  \`RAW (ARW, CR2, CRW, DNG, NEF, ORF, RAF, RW2)\`
+<p className="text-gray-600">
+  Supported input formats:
+  <code className="bg-gray-900 text-white px-2 py-1 rounded text-sm mx-1">JPG</code>,
+  <code className="bg-gray-900 text-white px-2 py-1 rounded text-sm mx-1">PNG</code>,
+  <code className="bg-gray-900 text-white px-2 py-1 rounded text-sm mx-1">WEBP</code>,
+  <code className="bg-gray-900 text-white px-2 py-1 rounded text-sm mx-1">AVIF</code>,
+  <code className="bg-gray-900 text-white px-2 py-1 rounded text-sm mx-1">SVG</code>,
+  <code className="bg-gray-900 text-white px-2 py-1 rounded text-sm mx-1">TIFF</code>,
+  <code className="bg-gray-900 text-white px-2 py-1 rounded text-sm mx-1">
+    RAW (ARW, CR2, CRW, DNG, NEF, ORF, RAF, RW2)
+  </code>
+</p>
 - Click **Open**.
 
 > **File Size Limits (Free Plan):**  
@@ -1203,7 +1212,7 @@ Start today — your users (and Google PageSpeed) will thank you.
   publishDate: '2025-10-28',
   readTime: 6,
   tags: ['JPG', 'Re-Compression', 'Myths', 'DataHoarder'],
-  image: 'https://cdn.microjpeg.com/blog/08.webp',
+  image: 'https://cdn.microjpeg.com/blog/08.png',
   content: `
 # Why Your JPGs Aren\'t Shrinking: Fix Common Compression Myths (Reddit Edition)
 
