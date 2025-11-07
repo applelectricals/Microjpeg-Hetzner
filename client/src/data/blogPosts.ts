@@ -91,17 +91,10 @@ The clean, drag-and-drop interface loads immediately — ready for action.
 ![MicroJPEG drag-and-drop upload interface – click or drop files up to 75MB](https://cdn.microjpeg.com/blog/how-to-use-microjpeg/howto/howtomicrojpeg02.webp)
 
 - Select one or more images from your device.
-<p className="text-gray-600">
+<p>
   Supported input formats:
-  <code className="bg-gray-900 text-white px-2 py-1 rounded text-sm mx-1">JPG</code>,
-  <code className="bg-gray-900 text-white px-2 py-1 rounded text-sm mx-1">PNG</code>,
-  <code className="bg-gray-900 text-white px-2 py-1 rounded text-sm mx-1">WEBP</code>,
-  <code className="bg-gray-900 text-white px-2 py-1 rounded text-sm mx-1">AVIF</code>,
-  <code className="bg-gray-900 text-white px-2 py-1 rounded text-sm mx-1">SVG</code>,
-  <code className="bg-gray-900 text-white px-2 py-1 rounded text-sm mx-1">TIFF</code>,
-  <code className="bg-gray-900 text-white px-2 py-1 rounded text-sm mx-1">
-    RAW (ARW, CR2, CRW, DNG, NEF, ORF, RAF, RW2)
-  </code>
+  &#96;JPG&#96;, &#96;PNG&#96;, &#96;WEBP&#96;, &#96;AVIF&#96;, &#96;SVG&#96;, &#96;TIFF&#96;,
+  &#96;RAW (ARW, CR2, CRW, DNG, NEF, ORF, RAF, RW2)&#96;
 </p>
 - Click **Open**.
 
