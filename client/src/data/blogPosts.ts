@@ -91,7 +91,7 @@ The clean, drag-and-drop interface loads immediately — ready for action.
 ![MicroJPEG drag-and-drop upload interface – click or drop files up to 75MB](https://cdn.microjpeg.com/blog/how-to-use-microjpeg/howto/howtomicrojpeg02.webp)
 
 - Select one or more images from your device.
-<p>
+
   Supported input formats:
   JPG, PNG, WEBP, AVIF, SVG, TIFF, RAW (ARW, CR2, CRW, DNG, NEF, ORF, RAF, RW2)
 

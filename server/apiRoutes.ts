@@ -91,11 +91,46 @@ router.get('/status', (req, res) => {
       input: ['JPEG', 'JPG', 'PNG', 'WEBP', 'AVIF', 'SVG', 'TIFF', 'TIF', 'ARW', 'CR2', 'DNG', 'NEF', 'ORF', 'RAF', 'RW2'],
       output: ['JPEG', 'PNG', 'WEBP', 'AVIF', 'TIFF']
     },
+    // UPDATED STATUS ENDPOINT - Replace lines 94-99 in apiRoutes.ts
+
+    pricing: {
+      payAsYouGo: {
+        first500: 'FREE per month',
+        tier1: '$0.005 per operation (501-5,000)',
+        tier2: '$0.003 per operation (5,001-50,000)',
+        tier3: '$0.002 per operation (50,000+)'
+      },
+      prepaidPackages: [
+        { name: '10K Operations', operations: 10000, price: 35, savings: 'Save 30%' },
+        { name: '50K Operations', operations: 50000, price: 125, savings: 'Save 50%' },
+        { name: '100K Operations', operations: 100000, price: 200, savings: 'Save 60%' }
+      ]
+    },
     tierLimits: {
-      free: { maxFileSize: '10MB', operations: 500 },
-      premium: { maxFileSize: '75MB', operations: 10000 },
-      enterprise: { maxFileSize: '200MB', operations: 50000 }
-    }
+      free: { 
+        maxFileSize: '10MB regular, 50MB RAW', 
+        freeOps: 500,
+        rateLimit: '100 requests/hour',
+        features: ['All formats', 'Basic support']
+      },
+      starter: { 
+        maxFileSize: '30MB regular, 75MB RAW', 
+        freeOps: 500,
+        rateLimit: '500 requests/hour',
+        features: ['All formats', 'Batch processing', 'Email support']
+      },
+      pro: { 
+        maxFileSize: '50MB regular, 100MB RAW', 
+        freeOps: 500,
+        rateLimit: '2000 requests/hour',
+        features: ['All formats', 'Batch', 'Webhooks', 'Priority', 'Advanced analytics']
+      },
+      business: { 
+        maxFileSize: '100MB regular, 200MB RAW', 
+        freeOps: 500,
+        rateLimit: '10000 requests/hour',
+        features: ['All formats', 'Batch', 'Webhooks', 'Priority', 'White-label', 'Dedicated support']
+      }
   });
 });
 
@@ -443,10 +478,11 @@ router.get('/special/formats', authenticateApiKey, rateLimitMiddleware, async (r
       },
       output: ['JPEG', 'PNG', 'WebP', 'AVIF', 'TIFF'],
       pricing: {
-        perConversion: '$0.10',
-        monthlyPlan: '$29.99/month for 500 conversions',
-        enterprisePlan: 'Custom pricing for 1000+ conversions/month'
-      }
+  note: 'Special format conversions (RAW, SVG, TIFF) use the same pay-as-you-go pricing as regular compressions',
+  payAsYouGo: 'See /api/v1/status for pricing tiers',
+  first500Free: 'First 500 operations per month are free',
+  additionalInfo: 'RAW files may count as 2 operations due to processing complexity'
+}
     }
   });
 });
