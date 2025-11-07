@@ -59,8 +59,12 @@ router.post('/keys', isAuthenticated, async (req: any, res) => {
   try {
     const userId = req.user.id;
 
-    // Validate input
-    const parseResult = createApiKeySchema.safeParse(req.body);
+    // Validate input (only name is required from user)
+    const inputSchema = z.object({
+      name: z.string().min(1).max(50)
+    });
+
+    const parseResult = inputSchema.safeParse(req.body);
     if (!parseResult.success) {
       return res.status(400).json({
         error: 'Invalid input',
@@ -69,7 +73,7 @@ router.post('/keys', isAuthenticated, async (req: any, res) => {
       });
     }
 
-    const { name, permissions, rateLimit, expiresAt } = parseResult.data;
+    const { name } = parseResult.data;
 
     // Check if user already has too many API keys (limit to 5 per user)
     const existingKeys = await db
@@ -87,18 +91,37 @@ router.post('/keys', isAuthenticated, async (req: any, res) => {
       });
     }
 
-    // Create the API key
+    // ✅ FIX: Get user's subscription tier to determine limits
+    const { users } = await import('@shared/schema');
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, userId))
+      .limit(1);
+
+    if (!user) {
+      return res.status(404).json({
+        error: 'User not found',
+        message: 'Could not find user account'
+      });
+    }
+
+    // Get tier-based configuration
+    const { getUserApiTier } = await import('./apiSubscriptions');
+    const tierConfig = getUserApiTier(user.subscriptionPlan);
+
+    // Create the API key with tier-based limits
     const result = await ApiKeyManager.createApiKey(
       userId,
       name,
-      permissions,
-      rateLimit,
-      expiresAt
+      tierConfig.permissions,  // Use tier permissions
+      tierConfig.rateLimit,    // Use tier rate limit (100/500/2000/10000)
+      undefined // No expiration for now
     );
 
-    res.status(201).json({
+      res.status(201).json({
       success: true,
-      message: 'API key created successfully',
+      message: 'API key created successfully. Save this key - it will only be shown once!',
       apiKey: {
         id: result.apiKey.id,
         name: result.apiKey.name,
@@ -108,7 +131,14 @@ router.post('/keys', isAuthenticated, async (req: any, res) => {
         expiresAt: result.apiKey.expiresAt,
         createdAt: result.apiKey.createdAt,
       },
-      fullKey: result.fullKey // Only shown once!
+      fullKey: result.fullKey, // Only shown once!
+      tierInfo: {
+        tier: tierConfig.displayName,
+        monthlyFreeOps: tierConfig.monthlyFreeOps,
+        rateLimit: `${tierConfig.rateLimit} requests/hour`,
+        maxFileSize: `${tierConfig.maxFileSize.regular}MB regular, ${tierConfig.maxFileSize.raw}MB RAW`,
+        features: tierConfig.features
+      }
     });
 
   } catch (error: any) {
