@@ -93,9 +93,8 @@ The clean, drag-and-drop interface loads immediately — ready for action.
 - Select one or more images from your device.
 <p>
   Supported input formats:
-  &#96;JPG&#96;, &#96;PNG&#96;, &#96;WEBP&#96;, &#96;AVIF&#96;, &#96;SVG&#96;, &#96;TIFF&#96;,
-  &#96;RAW (ARW, CR2, CRW, DNG, NEF, ORF, RAF, RW2)&#96;
-</p>
+  JPG, PNG, WEBP, AVIF, SVG, TIFF, RAW (ARW, CR2, CRW, DNG, NEF, ORF, RAF, RW2)
+
 - Click **Open**.
 
 > **File Size Limits (Free Plan):**  
