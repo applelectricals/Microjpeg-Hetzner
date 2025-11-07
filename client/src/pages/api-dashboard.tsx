@@ -61,31 +61,46 @@ export default function ApiDashboard() {
 
     const tier = user.subscriptionTier || 'free';
     
-    switch (tier) {
-      case 'pro':
+    switch (tier.toLowerCase()) {
+      case 'starter':
+      case 'starter-monthly':
+      case 'starter-yearly':
         return {
-          tier: 'Pro',
-          monthlyLimit: 10000,
-          rateLimit: 100,
-          maxFileSize: '75MB',
+          tier: 'Starter',
+          monthlyLimit: 500,
+          rateLimit: 500,
+          maxFileSize: '30MB regular, 75MB RAW',
           permissions: ['compress', 'convert', 'batch'],
           color: 'blue'
         };
-      case 'enterprise':
+      case 'pro':
+      case 'pro-monthly':
+      case 'pro-yearly':
         return {
-          tier: 'Enterprise', 
-          monthlyLimit: 50000,
-          rateLimit: 10000, // Unlimited (represented as high limit for API creation)
-          maxFileSize: '200MB',
-          permissions: ['compress', 'convert', 'batch', 'webhook'],
+          tier: 'Pro',
+          monthlyLimit: 500,
+          rateLimit: 2000,
+          maxFileSize: '50MB regular, 100MB RAW',
+          permissions: ['compress', 'convert', 'batch', 'webhook', 'priority'],
           color: 'purple'
+        };
+      case 'business':
+      case 'business-monthly':
+      case 'business-yearly':
+        return {
+          tier: 'Business', 
+          monthlyLimit: 500,
+          rateLimit: 10000,
+          maxFileSize: '100MB regular, 200MB RAW',
+          permissions: ['compress', 'convert', 'batch', 'webhook', 'priority', 'whitelabel'],
+          color: 'indigo'
         };
       default: // free
         return {
           tier: 'Free',
           monthlyLimit: 500,
-          rateLimit: 5,
-          maxFileSize: '10MB',
+          rateLimit: 100,  // ✅ FIXED: Was 5, now 100
+          maxFileSize: '10MB regular, 50MB RAW',
           permissions: ['compress', 'convert'],
           color: 'green'
         };
@@ -103,22 +118,25 @@ export default function ApiDashboard() {
   // Create API key mutation
   const createKeyMutation = useMutation({
     mutationFn: async (keyData: { name: string }) => {
-      // All settings are automatically determined by user's subscription tier
+      // ✅ FIX: Only send name - backend determines permissions and rateLimit based on subscription
       const response = await apiRequest('POST', '/api/keys', {
-        name: keyData.name,
-        permissions: tierInfo.permissions,
-        rateLimit: tierInfo.rateLimit
+        name: keyData.name
       });
       return response;
     },
     onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ['/api/keys'] });
-      setCreatedKey(data.fullKey);
+      setCreatedKey(data.fullKey);  // ✅ This is already correct!
+      setShowCreatedKey(true);  // ✅ ADD THIS - Show key immediately
       setIsCreateDialogOpen(false);
       setNewKeyName("");
+      
+      // Show tier info from backend response
+      const tierInfoFromBackend = data.tierInfo || {};
+      
       toast({
-        title: "API Key Created",
-        description: `Your new ${tierInfo.tier} API key has been created with ${tierInfo.rateLimit}/hour rate limit.`,
+        title: "✅ API Key Created Successfully!",
+        description: `Your ${tierInfoFromBackend.tier || tierInfo.tier} API key has been created. Rate limit: ${tierInfoFromBackend.rateLimit || 'Check dashboard'}`,
       });
     },
     onError: (error: any) => {
