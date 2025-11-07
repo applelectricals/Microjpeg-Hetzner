@@ -131,7 +131,6 @@ router.get('/status', (req, res) => {
         rateLimit: '10000 requests/hour',
         features: ['All formats', 'Batch', 'Webhooks', 'Priority', 'White-label', 'Dedicated support']
       }
-  });
 });
 
 /**
