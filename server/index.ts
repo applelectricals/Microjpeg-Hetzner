@@ -10,9 +10,12 @@ import { setupVite, serveStatic, log } from "./vite";
 import { TestPremiumExpiryManager } from "./testPremiumExpiry";
 import { initializeQueueService, shutdownQueueService } from "./queueService";
 import { seedSuperuser } from "./superuser";
+import { paymentRouter } from './paymentRoutes';
 
 const app = express();
+
 app.set('etag', false); // Disable ETags to prevent 304 responses
+app.use('/api/payment', paymentRouter);
 app.use(express.json({ limit: '200mb' }));
 app.use(express.urlencoded({ extended: true, limit: '200mb' }));
 app.use((req, res, next) => {

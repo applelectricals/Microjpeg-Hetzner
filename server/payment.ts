@@ -1,147 +1,323 @@
 import { Request, Response } from 'express';
-import Razorpay from 'razorpay';
 import { db } from './db';
 import { users, subscriptions, paymentTransactions } from '@shared/schema';
 import { eq } from 'drizzle-orm';
-// Use simplified email approach for now
 import crypto from 'crypto';
 
-// Initialize Razorpay
-const razorpayInstance = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID!,
-  key_secret: process.env.RAZORPAY_KEY_SECRET!,
-});
-
-// Plan configuration
+// ==================== NEW PLAN CONFIGURATION ====================
 export const PLANS = {
+  // WEB PLANS
   free: {
     id: 'free',
     name: 'Free',
-    price: 0,
-    operations: 500,
-    features: ['500 operations/month', '10MB file limit', 'API access', 'Community support']
+    type: 'web',
+    priceMonthly: 0,
+    priceYearly: 0,
+    operations: 200, // 100 regular + 100 RAW
+    maxFileSize: 7, // MB for regular
+    maxFileSizeRAW: 15, // MB for RAW
+    features: [
+      '200 operations/month (100 regular + 100 RAW)',
+      '7MB max per regular file',
+      '15MB max per RAW file',
+      'All formats (JPEG, PNG, WebP, AVIF, RAW)',
+      'Standard processing speed',
+      '1 concurrent upload'
+    ]
   },
-  'test-premium': {
-    id: 'test-premium',
-    name: 'Test Premium',
-    price: 1,
-    operations: 300,
-    features: ['300 operations (24-hour access)', '75MB file limit', 'All Premium features', 'Priority support']
+  'starter-monthly': {
+    id: 'starter-monthly',
+    name: 'Starter',
+    type: 'web',
+    priceMonthly: 9,
+    priceYearly: 0,
+    billingCycle: 'monthly',
+    operations: -1, // Unlimited
+    maxFileSize: 75,
+    maxFileSizeRAW: 75,
+    features: [
+      'Unlimited compressions',
+      '75MB max file size',
+      'All formats including RAW',
+      'Unlimited conversions',
+      'Standard processing',
+      '1 concurrent upload'
+    ]
   },
-  premium: {
-    id: 'premium',
-    name: 'Premium',
-    price: 29,
+  'starter-yearly': {
+    id: 'starter-yearly',
+    name: 'Starter',
+    type: 'web',
+    priceMonthly: 0,
+    priceYearly: 49,
+    billingCycle: 'yearly',
+    operations: -1, // Unlimited
+    maxFileSize: 75,
+    maxFileSizeRAW: 75,
+    features: [
+      'Unlimited compressions',
+      '75MB max file size',
+      'All formats including RAW',
+      'Unlimited conversions',
+      'Standard processing',
+      '1 concurrent upload',
+      'Save $59/year'
+    ]
+  },
+  'pro-monthly': {
+    id: 'pro-monthly',
+    name: 'Pro',
+    type: 'web',
+    priceMonthly: 19,
+    priceYearly: 0,
+    billingCycle: 'monthly',
+    operations: -1, // Unlimited
+    maxFileSize: 150,
+    maxFileSizeRAW: 150,
+    features: [
+      'Unlimited compressions',
+      '150MB max file size',
+      'All formats including RAW',
+      'Unlimited conversions',
+      'Standard processing',
+      '1 concurrent upload'
+    ]
+  },
+  'pro-yearly': {
+    id: 'pro-yearly',
+    name: 'Pro',
+    type: 'web',
+    priceYearly: 149,
+    priceMonthly: 0,
+    billingCycle: 'yearly',
+    operations: -1, // Unlimited
+    maxFileSize: 150,
+    maxFileSizeRAW: 150,
+    features: [
+      'Unlimited compressions',
+      '150MB max file size',
+      'All formats including RAW',
+      'Unlimited conversions',
+      'Standard processing',
+      '1 concurrent upload',
+      'Save $79/year'
+    ]
+  },
+  'business-monthly': {
+    id: 'business-monthly',
+    name: 'Business',
+    type: 'web',
+    priceMonthly: 49,
+    priceYearly: 0,
+    billingCycle: 'monthly',
+    operations: -1, // Unlimited
+    maxFileSize: 200,
+    maxFileSizeRAW: 200,
+    features: [
+      'Unlimited compressions',
+      '200MB max file size',
+      'All formats including RAW',
+      'Unlimited conversions',
+      'Standard processing',
+      '1 concurrent upload'
+    ]
+  },
+  'business-yearly': {
+    id: 'business-yearly',
+    name: 'Business',
+    type: 'web',
+    priceYearly: 349,
+    priceMonthly: 0,
+    billingCycle: 'yearly',
+    operations: -1, // Unlimited
+    maxFileSize: 200,
+    maxFileSizeRAW: 200,
+    features: [
+      'Unlimited compressions',
+      '200MB max file size',
+      'All formats including RAW',
+      'Unlimited conversions',
+      'Standard processing',
+      '1 concurrent upload',
+      'Save $239/year'
+    ]
+  },
+
+  // API PREPAID PACKAGES (One-time purchases)
+  'api-10k': {
+    id: 'api-10k',
+    name: 'API 10K Package',
+    type: 'api-prepaid',
+    priceMonthly: 35,
+    priceYearly: 0,
     operations: 10000,
-    features: ['10,000 operations/month', '75MB file limit', 'Priority processing', 'API access', 'Email support']
+    features: [
+      '10,000 API operations',
+      'Never expires',
+      'All formats supported',
+      'Save 30% vs pay-as-you-go'
+    ]
   },
-  enterprise: {
-    id: 'enterprise',
-    name: 'Enterprise',
-    price: 99,
+  'api-50k': {
+    id: 'api-50k',
+    name: 'API 50K Package',
+    type: 'api-prepaid',
+    priceMonthly: 125,
+    priceYearly: 0,
     operations: 50000,
-    features: ['50,000 operations/month', '200MB file limit', 'Custom integrations', 'SLA guarantee', 'Priority support']
+    features: [
+      '50,000 API operations',
+      'Never expires',
+      'All formats supported',
+      'Save 50% vs pay-as-you-go'
+    ]
+  },
+  'api-100k': {
+    id: 'api-100k',
+    name: 'API 100K Package',
+    type: 'api-prepaid',
+    priceMonthly: 200,
+    priceYearly: 0,
+    operations: 100000,
+    features: [
+      '100,000 API operations',
+      'Never expires',
+      'All formats supported',
+      'Save 60% vs pay-as-you-go'
+    ]
+  },
+
+  // CDN PLANS
+  'cdn-starter': {
+    id: 'cdn-starter',
+    name: 'CDN Starter',
+    type: 'cdn',
+    priceMonthly: 19,
+    priceYearly: 0,
+    bandwidth: 100, // GB
+    domains: 1,
+    features: [
+      '100 GB bandwidth',
+      '1 custom domain',
+      'Auto WebP/AVIF conversion',
+      'Image transformations',
+      'Edge caching (global)',
+      'Basic analytics',
+      '$0.20/GB overage'
+    ]
+  },
+  'cdn-business': {
+    id: 'cdn-business',
+    name: 'CDN Business',
+    type: 'cdn',
+    priceMonthly: 69,
+    priceYearly: 0,
+    bandwidth: 1000, // GB
+    domains: 3,
+    features: [
+      '1000 GB bandwidth',
+      '3 custom domains',
+      'RAW format support',
+      'Auto WebP/AVIF conversion',
+      'Advanced image transformations',
+      'Priority edge caching',
+      'Advanced analytics',
+      '$0.10/GB overage'
+    ]
+  },
+  'cdn-enterprise': {
+    id: 'cdn-enterprise',
+    name: 'CDN Enterprise',
+    type: 'cdn',
+    priceMonthly: 199,
+    priceYearly: 0,
+    bandwidth: 3000, // GB
+    domains: 10,
+    features: [
+      '3000 GB bandwidth',
+      '10 custom domains',
+      'RAW format support',
+      'White-label option',
+      'Custom integration',
+      'Dedicated support',
+      'SLA guarantee',
+      '$0.05/GB overage'
+    ]
   }
 };
 
-export interface PaymentData {
-  plan: 'free' | 'test-premium' | 'premium' | 'enterprise';
-  paymentMethod: 'razorpay' | 'paypal';
-  billing: {
-    name: string;
-    address: string;
-    city: string;
-    state: string;
-    zipCode: string;
-    country: string;
-  };
-  razorpay_payment_id?: string;
-  razorpay_order_id?: string;
-  razorpay_signature?: string;
-  paypal_payment_id?: string;
+// Helper to get plan price
+export function getPlanPrice(planId: string): number {
+  const plan = PLANS[planId as keyof typeof PLANS];
+  if (!plan) return 0;
+  
+  // Return the appropriate price based on billing cycle
+  if (plan.priceYearly > 0) return plan.priceYearly;
+  if (plan.priceMonthly > 0) return plan.priceMonthly;
+  return 0;
 }
 
-// Create Razorpay order
-export async function createRazorpayOrder(req: Request, res: Response) {
+// Helper to get plan duration
+export function getPlanDuration(planId: string): number {
+  const plan = PLANS[planId as keyof typeof PLANS];
+  if (!plan) return 30; // Default 30 days
+  
+  // API prepaid packages don't expire
+  if (plan.type === 'api-prepaid') return 36500; // 100 years = never expires
+  
+  // Yearly plans
+  if (plan.billingCycle === 'yearly') return 365;
+  
+  // Monthly plans (default)
+  return 30;
+}
+
+// ==================== PAYPAL PAYMENT PROCESSING ====================
+
+export interface PaymentData {
+  plan: string;
+  paymentMethod: 'paypal';
+  billing: {
+    name: string;
+    email: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    zipCode?: string;
+    country?: string;
+  };
+  paypal_subscription_id?: string;
+  paypal_order_id?: string;
+}
+
+// Process PayPal subscription payment
+export async function processPayPalSubscription(req: Request, res: Response) {
   try {
-    const { plan, amount } = req.body;
+    const { plan, paypal_subscription_id, billing } = req.body;
     
     if (!plan || !PLANS[plan as keyof typeof PLANS]) {
       return res.status(400).json({ error: 'Invalid plan selected' });
     }
     
-    const planConfig = PLANS[plan as keyof typeof PLANS];
-    const orderAmount = amount || planConfig.price * 100; // Convert to paise
-    
-    const options = {
-      amount: orderAmount,
-      currency: 'USD',
-      receipt: `order_${Date.now()}_${plan}`,
-      notes: {
-        plan,
-        user_id: req.user?.id || 'anonymous'
-      }
-    };
-    
-    const order = await razorpayInstance.orders.create(options);
-    
-    res.json({
-      success: true,
-      order_id: order.id,
-      amount: order.amount,
-      currency: order.currency,
-      key: process.env.VITE_RAZORPAY_KEY_ID
-    });
-    
-  } catch (error) {
-    console.error('Razorpay order creation failed:', error);
-    res.status(500).json({ 
-      error: 'Failed to create payment order',
-      message: error.message 
-    });
-  }
-}
-
-// Verify Razorpay payment
-export async function verifyRazorpayPayment(req: Request, res: Response) {
-  try {
-    const { 
-      razorpay_order_id, 
-      razorpay_payment_id, 
-      razorpay_signature,
-      plan,
-      billing
-    } = req.body;
-    
-    // Verify signature
-    const body = razorpay_order_id + '|' + razorpay_payment_id;
-    const expectedSignature = crypto
-      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!)
-      .update(body.toString())
-      .digest('hex');
-    
-    if (expectedSignature !== razorpay_signature) {
-      return res.status(400).json({ error: 'Payment verification failed' });
-    }
-    
-    // Payment verified - update user subscription
     const userId = req.user?.id;
     if (!userId) {
       return res.status(401).json({ error: 'User not authenticated' });
     }
     
     const planConfig = PLANS[plan as keyof typeof PLANS];
+    const duration = getPlanDuration(plan);
     const subscriptionEndDate = new Date();
-    subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1); // 1 month subscription
+    subscriptionEndDate.setDate(subscriptionEndDate.getDate() + duration);
     
     // Update user subscription
     await db.update(users)
       .set({
-        subscriptionTier: plan,
+        subscriptionPlan: plan, // Use subscriptionPlan instead of subscriptionTier
         subscriptionStatus: 'active',
         subscriptionStartDate: new Date(),
         subscriptionEndDate,
         monthlyOperations: 0, // Reset operations count
+        stripeSubscriptionId: paypal_subscription_id, // Store PayPal subscription ID
         updatedAt: new Date()
       })
       .where(eq(users.id, userId));
@@ -149,47 +325,46 @@ export async function verifyRazorpayPayment(req: Request, res: Response) {
     // Record payment transaction
     await db.insert(paymentTransactions).values({
       userId,
-      amount: planConfig.price,
+      amount: getPlanPrice(plan),
       currency: 'USD',
-      paymentMethod: 'razorpay',
-      paymentId: razorpay_payment_id,
-      orderId: razorpay_order_id,
+      paymentMethod: 'paypal',
+      paymentId: paypal_subscription_id,
       status: 'completed',
       plan,
       billingDetails: JSON.stringify(billing),
     });
     
-    // Send confirmation emails (simplified for now)
+    // Get user info for confirmation
     const [user] = await db.select().from(users).where(eq(users.id, userId));
     
     if (user?.email) {
-      console.log(`Payment confirmed for ${user.email} - Plan: ${planConfig.name}, Amount: $${planConfig.price}`);
-      // Email sending will be enhanced later
+      console.log(`✅ PayPal subscription activated for ${user.email} - Plan: ${planConfig.name}, Amount: $${getPlanPrice(plan)}`);
     }
     
     res.json({ 
       success: true, 
-      message: 'Payment verified and subscription updated',
+      message: 'PayPal subscription activated successfully',
       subscription: {
         plan: planConfig.name,
         operations: planConfig.operations,
-        features: planConfig.features
+        features: planConfig.features,
+        endDate: subscriptionEndDate
       }
     });
     
-  } catch (error) {
-    console.error('Payment verification failed:', error);
+  } catch (error: any) {
+    console.error('PayPal subscription processing failed:', error);
     res.status(500).json({ 
-      error: 'Payment verification failed',
+      error: 'PayPal subscription processing failed',
       message: error.message 
     });
   }
 }
 
-// Process PayPal payment
-export async function processPayPalPayment(req: Request, res: Response) {
+// Process PayPal one-time payment (for API prepaid packages)
+export async function processPayPalOneTime(req: Request, res: Response) {
   try {
-    const { plan, paypal_payment_id, billing } = req.body;
+    const { plan, paypal_order_id, billing } = req.body;
     
     if (!plan || !PLANS[plan as keyof typeof PLANS]) {
       return res.status(400).json({ error: 'Invalid plan selected' });
@@ -201,55 +376,50 @@ export async function processPayPalPayment(req: Request, res: Response) {
     }
     
     const planConfig = PLANS[plan as keyof typeof PLANS];
-    const subscriptionEndDate = new Date();
-    subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
     
-    // Update user subscription
-    await db.update(users)
-      .set({
-        subscriptionTier: plan,
-        subscriptionStatus: 'active',
-        subscriptionStartDate: new Date(),
-        subscriptionEndDate,
-        monthlyOperations: 0,
-        updatedAt: new Date()
-      })
-      .where(eq(users.id, userId));
+    // For API prepaid packages, add credits to user account
+    if (planConfig.type === 'api-prepaid') {
+      await db.update(users)
+        .set({
+          purchasedCredits: planConfig.operations, // Add operations to prepaid balance
+          updatedAt: new Date()
+        })
+        .where(eq(users.id, userId));
+    }
     
     // Record payment transaction
     await db.insert(paymentTransactions).values({
       userId,
-      amount: planConfig.price,
+      amount: getPlanPrice(plan),
       currency: 'USD',
       paymentMethod: 'paypal',
-      paymentId: paypal_payment_id,
+      paymentId: paypal_order_id,
+      orderId: paypal_order_id,
       status: 'completed',
       plan,
       billingDetails: JSON.stringify(billing),
     });
     
-    // Send confirmation emails (simplified for now)
     const [user] = await db.select().from(users).where(eq(users.id, userId));
     
     if (user?.email) {
-      console.log(`PayPal payment confirmed for ${user.email} - Plan: ${planConfig.name}, Amount: $${planConfig.price}`);
-      // Email sending will be enhanced later
+      console.log(`✅ PayPal one-time payment for ${user.email} - Package: ${planConfig.name}, Amount: $${getPlanPrice(plan)}`);
     }
     
     res.json({ 
       success: true, 
-      message: 'PayPal payment processed and subscription updated',
-      subscription: {
-        plan: planConfig.name,
+      message: 'Payment processed successfully',
+      package: {
+        name: planConfig.name,
         operations: planConfig.operations,
         features: planConfig.features
       }
     });
     
-  } catch (error) {
-    console.error('PayPal payment processing failed:', error);
+  } catch (error: any) {
+    console.error('PayPal one-time payment processing failed:', error);
     res.status(500).json({ 
-      error: 'PayPal payment processing failed',
+      error: 'Payment processing failed',
       message: error.message 
     });
   }
@@ -269,8 +439,8 @@ export async function getSubscriptionStatus(req: Request, res: Response) {
       return res.status(404).json({ error: 'User not found' });
     }
     
-    const plan = user.subscriptionTier || 'free';
-    const planConfig = PLANS[plan as keyof typeof PLANS];
+    const plan = user.subscriptionPlan || 'free';
+    const planConfig = PLANS[plan as keyof typeof PLANS] || PLANS.free;
     
     res.json({
       success: true,
@@ -281,11 +451,12 @@ export async function getSubscriptionStatus(req: Request, res: Response) {
         operationsUsed: user.monthlyOperations || 0,
         startDate: user.subscriptionStartDate,
         endDate: user.subscriptionEndDate,
-        features: planConfig.features
+        features: planConfig.features,
+        prepaidCredits: user.purchasedCredits || 0
       }
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to get subscription status:', error);
     res.status(500).json({ 
       error: 'Failed to get subscription status',
@@ -305,7 +476,7 @@ export async function cancelSubscription(req: Request, res: Response) {
     // Update user to free tier
     await db.update(users)
       .set({
-        subscriptionTier: 'free',
+        subscriptionPlan: 'free',
         subscriptionStatus: 'cancelled',
         updatedAt: new Date()
       })
@@ -316,7 +487,7 @@ export async function cancelSubscription(req: Request, res: Response) {
       message: 'Subscription cancelled successfully. You will retain access until the end of your current billing period.' 
     });
     
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failed to cancel subscription:', error);
     res.status(500).json({ 
       error: 'Failed to cancel subscription',

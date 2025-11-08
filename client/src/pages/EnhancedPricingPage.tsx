@@ -7,6 +7,7 @@ import { Slider } from '@/components/ui/slider';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { useAuth } from '@/hooks/useAuth';
+import { SubscribeButton, BuyPackageButton } from '@/components/PayPalPaymentButton';
 
 // Dark mode hook
 function useDarkMode() {
@@ -251,13 +252,28 @@ function WebPricing({ billingCycle, setBillingCycle }: {
                 ))}
               </ul>
               
-              <Button
-                className="w-full"
-                disabled={plan.disabled}
-                variant={plan.popular ? 'default' : 'outline'}
-              >
-                {plan.cta}
-              </Button>
+              {plan.disabled ? (
+                <Button
+                  className="w-full"
+                  disabled={true}
+                  variant="outline"
+                >
+                  {plan.cta}
+                </Button>
+              ) : (
+                <SubscribeButton
+                  planId={`${plan.name.toLowerCase()}-${billingCycle}`}
+                  planName={`${plan.name} ${billingCycle === 'monthly' ? 'Monthly' : 'Yearly'}`}
+                  amount={
+                    billingCycle === 'monthly' 
+                      ? parseInt(plan.priceMonthly?.replace('$', '') || '0')
+                      : parseInt(plan.priceYearly?.replace('$', '') || '0')
+                  }
+                  variant={plan.popular ? 'default' : 'outline'}
+                >
+                  {plan.cta}
+                </SubscribeButton>
+              )}
             </CardContent>
           </Card>
         ))}
@@ -426,7 +442,13 @@ function APIPricing() {
                     <span className="text-sm">All formats supported</span>
                   </div>
                 </div>
-                <Button className="w-full">Buy Package</Button>
+                <BuyPackageButton
+                  planId={`api-${pkg.ops / 1000}k`}
+                  planName={`${(pkg.ops / 1000).toFixed(0)}K API Operations`}
+                  amount={pkg.price}
+                >
+                  Buy Package
+                </BuyPackageButton>
               </CardContent>
             </Card>
           ))}
@@ -530,7 +552,11 @@ function WordPressPricing({ billingCycle, setBillingCycle }: {
       </Card>
 
       <div className="text-center">
-        <Button size="lg" className="gap-2">
+        <Button 
+          size="lg" 
+          className="gap-2"
+          onClick={() => window.open('https://wordpress.org/plugins/microjpeg/', '_blank')}
+        >
           Download Plugin
           <ArrowRight className="w-4 h-4" />
         </Button>
@@ -650,12 +676,24 @@ function CDNPricing() {
                 ))}
               </ul>
               
-              <Button
-                className="w-full"
-                variant={plan.popular ? 'default' : 'outline'}
-              >
-                {plan.cta}
-              </Button>
+              {plan.name === 'Enterprise' ? (
+                <Button
+                  className="w-full"
+                  variant="outline"
+                  onClick={() => window.location.href = 'mailto:support@microjpeg.com?subject=CDN%20Enterprise%20Inquiry'}
+                >
+                  {plan.cta}
+                </Button>
+              ) : (
+                <SubscribeButton
+                  planId={`cdn-${plan.name.toLowerCase()}`}
+                  planName={`CDN ${plan.name}`}
+                  amount={parseInt(plan.price.replace('$', ''))}
+                  variant={plan.popular ? 'default' : 'outline'}
+                >
+                  {plan.cta}
+                </SubscribeButton>
+              )}
             </CardContent>
           </Card>
         ))}
