@@ -1,21 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Card } from '@/components/ui/card';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Check, Crown } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Crown, User, Building, Mail, MapPin, CreditCard, Moon, Sun } from 'lucide-react';
 import Header from '@/components/header';
+import Footer from '@/components/footer';
 import { useAuth } from '@/hooks/useAuth';
-import PayPalButton from '@/components/PayPalButton';
-import logoUrl from '@assets/mascot-logo-optimized.png';
 
-// Add dark mode hook (same code as above)
+// Dark mode hook
 function useDarkMode() {
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('darkMode');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      return saved ? saved === 'true' : prefersDark;
+      return saved ? saved === 'true' : true;
     }
-    return false;
+    return true;
   });
 
   useEffect(() => {
@@ -31,429 +30,370 @@ function useDarkMode() {
   return { isDark, setIsDark };
 }
 
-interface Plan {
-  tier: string;
-  name: string;
-  description: string;
-  pricing: { monthly: number; yearly: number };
-  planIds: { monthly: string; yearly: string };
-}
+// Plan configuration
+const PLANS = {
+  starter: {
+    id: 'starter',
+    name: 'Starter',
+    description: 'For freelancers',
+    monthly: { price: 9, planId: import.meta.env.VITE_PAYPAL_PLAN_STARTER_MONTHLY },
+    yearly: { price: 49, planId: import.meta.env.VITE_PAYPAL_PLAN_STARTER_YEARLY, savings: 59 },
+    features: [
+      'Unlimited compressions',
+      '75MB max file size',
+      'All formats including RAW',
+      'Unlimited conversions',
+      'Standard processing',
+      '1 concurrent upload',
+    ],
+  },
+  pro: {
+    id: 'pro',
+    name: 'Pro',
+    description: 'For professionals',
+    monthly: { price: 19, planId: import.meta.env.VITE_PAYPAL_PLAN_PRO_MONTHLY },
+    yearly: { price: 149, planId: import.meta.env.VITE_PAYPAL_PLAN_PRO_YEARLY, savings: 79 },
+    features: [
+      'Unlimited compressions',
+      '150MB max file size',
+      'All formats including RAW',
+      'Unlimited conversions',
+      'Priority processing',
+      '1 concurrent upload',
+    ],
+    popular: true,
+  },
+  business: {
+    id: 'business',
+    name: 'Business',
+    description: 'For teams',
+    monthly: { price: 49, planId: import.meta.env.VITE_PAYPAL_PLAN_BUSINESS_MONTHLY },
+    yearly: { price: 349, planId: import.meta.env.VITE_PAYPAL_PLAN_BUSINESS_YEARLY, savings: 239 },
+    features: [
+      'Unlimited compressions',
+      '200MB max file size',
+      'All formats including RAW',
+      'Unlimited conversions',
+      'Priority processing',
+      '1 concurrent upload',
+    ],
+  },
+};
 
 export default function CheckoutPage() {
   const { isDark, setIsDark } = useDarkMode();
-  const { user } = useAuth();
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [selectedTier, setSelectedTier] = useState('');
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
-  const [seats, setSeats] = useState(1);
-  const [paymentMethod, setPaymentMethod] = useState<'card' | 'paypal'>('card');
-  const [showInvoice, setShowInvoice] = useState(false);
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   
-  // Form data
-  const [formData, setFormData] = useState({
-    fullName: user?.firstName && user?.lastName ? `${user.firstName} ${user.lastName}` : '',
-    email: user?.email || '',
-    country: 'United States',
-    companyName: '',
-    companyAddress: '',
-    billingEmail: ''
-  });
+  const preSelectedPlan = searchParams.get('plan') || 'pro';
+  const [selectedPlan, setSelectedPlan] = useState<keyof typeof PLANS>(
+    (preSelectedPlan as keyof typeof PLANS) || 'pro'
+  );
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+  const [paypalLoaded, setPaypalLoaded] = useState(false);
 
+  // Redirect if not authenticated
   useEffect(() => {
-    // Get tier and cycle from URL
-    const params = new URLSearchParams(window.location.search);
-    const tier = params.get('tier') || 'pro';
-    const cycle = params.get('cycle') as 'monthly' | 'yearly' || 'yearly';
-    
-    setSelectedTier(tier);
-    setBillingCycle(cycle);
-    
-    // Fetch plans
-    fetchPlans();
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/checkout?plan=' + selectedPlan);
+    }
+  }, [isAuthenticated, navigate, selectedPlan]);
+
+  // Load PayPal SDK
+  useEffect(() => {
+    if (document.getElementById('paypal-sdk')) {
+      setPaypalLoaded(true);
+      return;
+    }
+
+    const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+    if (!clientId) {
+      console.error('PayPal Client ID not configured');
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.id = 'paypal-sdk';
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&vault=true&intent=subscription`;
+    script.async = true;
+    script.onload = () => setPaypalLoaded(true);
+    script.onerror = () => console.error('Failed to load PayPal SDK');
+    document.body.appendChild(script);
   }, []);
 
-  const fetchPlans = async () => {
-    try {
-      const response = await fetch('/api/subscriptions/plans');
-      const data = await response.json();
-      setPlans(data.plans);
-    } catch (error) {
-      console.error('Failed to fetch plans:', error);
+  // Render PayPal button when plan or cycle changes
+  useEffect(() => {
+    if (!paypalLoaded) return;
+
+    const plan = PLANS[selectedPlan];
+    const planId = billingCycle === 'monthly' ? plan.monthly.planId : plan.yearly.planId;
+
+    if (!planId) {
+      console.error('Plan ID not configured for', selectedPlan, billingCycle);
+      return;
     }
-  };
 
-  const selectedPlan = plans.find(p => p.tier === selectedTier);
-  const basePrice = selectedPlan 
-    ? (billingCycle === 'monthly' ? selectedPlan.pricing.monthly : selectedPlan.pricing.yearly)
-    : 0;
-  const totalPrice = basePrice * seats;
+    // Clear previous button
+    const container = document.getElementById('paypal-button-container');
+    if (container) {
+      container.innerHTML = '';
+    }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
+    // @ts-ignore
+    if (window.paypal) {
+      // @ts-ignore
+      window.paypal.Buttons({
+        style: {
+          shape: 'rect',
+          color: 'gold',
+          layout: 'vertical',
+          label: 'subscribe',
+          height: 55,
+        },
+        createSubscription: function(data: any, actions: any) {
+          return actions.subscription.create({
+            plan_id: planId,
+            application_context: {
+              brand_name: 'MicroJPEG',
+              shipping_preference: 'NO_SHIPPING',
+              user_action: 'SUBSCRIBE_NOW',
+            }
+          });
+        },
+        onApprove: async function(data: any, actions: any) {
+          console.log('Subscription approved:', data.subscriptionID);
+          
+          // Send to backend
+          try {
+            const response = await fetch('/api/payment/paypal/subscription', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                plan: `${selectedPlan}-${billingCycle}`,
+                paypal_subscription_id: data.subscriptionID,
+                billing: {
+                  name: user?.email || '',
+                  email: user?.email || ''
+                }
+              })
+            });
 
-  if (!selectedPlan) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-900">
-        <Header isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
-        <div className="flex items-center justify-center h-screen">
-          <p className="text-xl dark:text-white">Loading...</p>
-        </div>
-      </div>
-    );
+            const result = await response.json();
+
+            if (result.success) {
+              window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&subscription_id=${data.subscriptionID}`;
+            } else {
+              alert('Failed to activate subscription. Please contact support.');
+            }
+          } catch (error) {
+            console.error('Backend error:', error);
+            alert('Failed to activate subscription. Please contact support.');
+          }
+        },
+        onError: function(err: any) {
+          console.error('PayPal error:', err);
+          alert('Payment failed. Please try again.');
+        },
+        onCancel: function() {
+          console.log('Payment cancelled');
+        }
+      }).render('#paypal-button-container');
+    }
+  }, [paypalLoaded, selectedPlan, billingCycle, user]);
+
+  if (!isAuthenticated) {
+    return null; // Will redirect
   }
 
+  const currentPlan = PLANS[selectedPlan];
+  const currentPrice = billingCycle === 'monthly' 
+    ? currentPlan.monthly.price 
+    : currentPlan.yearly.price;
+  const savings = billingCycle === 'yearly' ? currentPlan.yearly.savings : 0;
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Header isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
+      
+      <div className="container mx-auto px-4 py-16">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold mb-4 dark:text-white">
+            Complete Your Subscription
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            Choose your plan and billing cycle
+          </p>
+        </div>
 
-      <div className="pt-24 pb-12 px-4">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8 dark:text-white">Complete your purchase</h1>
-
-          <div className="grid lg:grid-cols-3 gap-8">
-            {/* Left Column - Form */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Subscription Type */}
-              <Card className="p-6 dark:bg-gray-800">
-                <h2 className="text-xl font-bold mb-4 dark:text-white">Subscription type</h2>
-                
-                <div className="grid md:grid-cols-2 gap-4 mb-6">
-                  {plans.map((plan) => (
-                    <button
-                      key={plan.tier}
-                      onClick={() => setSelectedTier(plan.tier)}
-                      className={`p-4 border-2 rounded-lg text-left transition-all ${
-                        selectedTier === plan.tier
-                          ? 'border-brand-gold bg-brand-gold/5'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        <Crown className="w-5 h-5 text-brand-gold" />
-                        <span className="font-bold dark:text-white">{plan.name}</span>
-                      </div>
-                      <div className="text-sm text-brand-teal font-medium mb-1">
-                        {plan.tier === 'starter' ? 'COMPRESS' : 'COMPRESS & CONVERT'}
-                      </div>
-                      <div className="text-xs text-gray-600 dark:text-gray-400">
-                        {plan.description}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-
-                {/* Billing Cycle and Seats */}
-                <div className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className="font-semibold dark:text-white">
-                      ${basePrice} per {selectedPlan.name} user
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => setBillingCycle('monthly')}
-                        className={`px-3 py-1 rounded text-sm ${
-                          billingCycle === 'monthly' 
-                            ? 'bg-brand-gold text-white' 
-                            : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                        }`}
-                      >
-                        Monthly
-                      </button>
-                      <button
-                        onClick={() => setBillingCycle('yearly')}
-                        className={`px-3 py-1 rounded text-sm ${
-                          billingCycle === 'yearly' 
-                            ? 'bg-brand-gold text-white' 
-                            : 'bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300'
-                        }`}
-                      >
-                        Yearly
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Seats Selector */}
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600 dark:text-gray-400">
-                      {billingCycle === 'yearly' ? 'Yearly' : 'Monthly'} subscription
-                    </span>
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => setSeats(Math.max(1, seats - 1))}
-                        className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center hover:bg-green-600"
-                      >
-                        −
-                      </button>
-                      <span className="font-bold w-8 text-center dark:text-white">{seats}</span>
-                      <button
-                        onClick={() => setSeats(seats + 1)}
-                        className="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center hover:bg-green-600"
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Personal Information */}
-              <Card className="p-6 dark:bg-gray-800">
-                <h2 className="text-xl font-bold mb-4 dark:text-white">Personal information</h2>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2 dark:text-gray-300">
-                      <User className="inline w-4 h-4 mr-1" />
-                      Full name
-                    </label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      placeholder="John Doe"
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2 dark:text-gray-300">
-                      <Mail className="inline w-4 h-4 mr-1" />
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="john@example.com"
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-2 dark:text-gray-300">
-                      <MapPin className="inline w-4 h-4 mr-1" />
-                      Country
-                    </label>
-                    <select
-                      name="country"
-                      value={formData.country}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-                    >
-                      <option>United States</option>
-                      <option>India</option>
-                      <option>United Kingdom</option>
-                      <option>Canada</option>
-                      <option>Australia</option>
-                    </select>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Invoice Details (Optional) */}
-              <Card className="p-6 dark:bg-gray-800">
-                <button
-                  onClick={() => setShowInvoice(!showInvoice)}
-                  className="flex items-center justify-between w-full text-left"
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8">
+          {/* LEFT SIDE - Plan Selection */}
+          <div>
+            <h2 className="text-2xl font-bold mb-6 dark:text-white">Subscription Type</h2>
+            
+            {/* Plan Cards */}
+            <div className="space-y-4 mb-6">
+              {Object.entries(PLANS).map(([key, plan]) => (
+                <Card
+                  key={key}
+                  onClick={() => setSelectedPlan(key as keyof typeof PLANS)}
+                  className={`cursor-pointer transition-all ${
+                    selectedPlan === key
+                      ? 'border-2 border-blue-500 dark:border-blue-400 shadow-lg'
+                      : 'border border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                  }`}
                 >
-                  <h2 className="text-xl font-bold dark:text-white">
-                    <Building className="inline w-5 h-5 mr-2" />
-                    Add invoice details (optional)
-                  </h2>
-                  <span className="text-2xl dark:text-white">{showInvoice ? '−' : '+'}</span>
-                </button>
-
-                {showInvoice && (
-                  <div className="mt-4 space-y-4">
-                    <input
-                      type="text"
-                      name="companyName"
-                      value={formData.companyName}
-                      onChange={handleInputChange}
-                      placeholder="Company name"
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-                    />
-                    <input
-                      type="text"
-                      name="companyAddress"
-                      value={formData.companyAddress}
-                      onChange={handleInputChange}
-                      placeholder="Company address"
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-                    />
-                    <input
-                      type="email"
-                      name="billingEmail"
-                      value={formData.billingEmail}
-                      onChange={handleInputChange}
-                      placeholder="Billing email address"
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-700 dark:text-white"
-                    />
-                  </div>
-                )}
-              </Card>
-
-              {/* Payment Method */}
-              <Card className="p-6 dark:bg-gray-800">
-                <h2 className="text-xl font-bold mb-4 dark:text-white">
-                  <CreditCard className="inline w-5 h-5 mr-2" />
-                  Payment method
-                </h2>
-
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <button
-                    onClick={() => setPaymentMethod('card')}
-                    className={`p-4 border-2 rounded-lg ${
-                      paymentMethod === 'card'
-                        ? 'border-brand-gold bg-brand-gold/5'
-                        : 'border-gray-200 dark:border-gray-700'
-                    }`}
-                  >
-                    <CreditCard className="w-8 h-8 mx-auto mb-2 dark:text-white" />
-                    <div className="font-semibold text-sm dark:text-white">Credit card</div>
-                  </button>
-                  <button
-                    onClick={() => setPaymentMethod('paypal')}
-                    className={`p-4 border-2 rounded-lg ${
-                      paymentMethod === 'paypal'
-                        ? 'border-brand-gold bg-brand-gold/5'
-                        : 'border-gray-200 dark:border-gray-700'
-                    }`}
-                  >
-                    <div className="text-2xl mb-2">💳</div>
-                    <div className="font-semibold text-sm dark:text-white">PayPal</div>
-                  </button>
-                </div>
-
-                {/* PayPal Buttons */}
-                <PayPalButton
-                  type="order"
-                  amount={totalPrice}
-                  description={`MicroJPEG ${selectedPlan.name} - ${billingCycle} (${seats} seat${seats > 1 ? 's' : ''})`}
-                  userId={user?.id || ''}
-                  tier={selectedTier}
-                  cycle={billingCycle}
-                  onSuccess={() => {
-                    window.location.href = '/subscription/success';
-                  }}
-                  onError={(error) => {
-                    console.error('Payment error:', error);
-                    alert('Payment failed. Please try again.');
-                  }}
-                />
-              </Card>
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        selectedPlan === key 
+                          ? 'border-blue-500 bg-blue-500' 
+                          : 'border-gray-300 dark:border-gray-600'
+                      }`}>
+                        {selectedPlan === key && (
+                          <div className="w-2 h-2 bg-white rounded-full" />
+                        )}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold dark:text-white">{plan.name}</h3>
+                          {plan.popular && <Crown className="w-4 h-4 text-yellow-500" />}
+                        </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                          {plan.description}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {billingCycle === 'monthly' ? 'per month' : 'per year'}
+                      </div>
+                      <div className="text-2xl font-bold dark:text-white">
+                        ${billingCycle === 'monthly' ? plan.monthly.price : plan.yearly.price}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
 
-            {/* Right Column - Order Summary */}
-            <div className="lg:col-span-1">
-              <Card className="p-6 dark:bg-gray-800 sticky top-24">
-                <h2 className="text-xl font-bold mb-4 dark:text-white">Order summary</h2>
+            {/* Billing Cycle Toggle */}
+            <Card className="p-4 bg-gray-50 dark:bg-gray-800">
+              <div className="flex items-center justify-between mb-3">
+                <div>
+                  <h3 className="font-bold dark:text-white">
+                    ${currentPrice} per {currentPlan.name} user
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {billingCycle === 'yearly' ? 'Yearly' : 'Monthly'} subscription
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}
+                    className="w-12 h-6 bg-gray-300 dark:bg-gray-600 rounded-full relative transition-colors"
+                  >
+                    <div className={`absolute top-1 ${
+                      billingCycle === 'yearly' ? 'right-1' : 'left-1'
+                    } w-4 h-4 bg-white rounded-full transition-all`} />
+                  </button>
+                  <span className="text-sm font-medium dark:text-white">
+                    {billingCycle === 'yearly' ? 'Yearly' : 'Monthly'}
+                  </span>
+                </div>
+              </div>
+              {savings > 0 && (
+                <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+                  💰 Save ${savings}/year with yearly billing
+                </p>
+              )}
+            </Card>
 
-                <div className="space-y-3 mb-4">
+            {/* Features */}
+            <div className="mt-6">
+              <h3 className="font-bold mb-3 dark:text-white">What's included:</h3>
+              <ul className="space-y-2">
+                {currentPlan.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-center gap-2 text-sm">
+                    <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
+                    <span className="dark:text-gray-300">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* RIGHT SIDE - Order Summary */}
+          <div>
+            <Card className="sticky top-4">
+              <CardHeader>
+                <CardTitle>Order Summary</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Summary Details */}
+                <div className="space-y-3 pb-4 border-b dark:border-gray-700">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      1x {currentPlan.name} subscription
+                    </span>
+                    <span className="font-medium dark:text-white">${currentPrice}</span>
+                  </div>
+                  <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                    <span>Includes sales tax (if applicable)</span>
+                  </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600 dark:text-gray-400">
-                      {seats}x {selectedPlan.name} subscription
+                      You'll be a {currentPlan.name} member until
                     </span>
-                    <span className="font-semibold dark:text-white">${basePrice * seats}</span>
-                  </div>
-                  
-                  {billingCycle === 'yearly' && (
-                    <div className="flex justify-between text-sm text-green-600 dark:text-green-400">
-                      <span>Yearly discount</span>
-                      <span>−${((basePrice * 12 * seats) - totalPrice).toFixed(0)}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mb-4">
-                  <div className="flex justify-between text-lg font-bold">
-                    <span className="dark:text-white">Total</span>
-                    <span className="text-brand-gold">${totalPrice}</span>
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    Includes sales tax (if applicable)
+                    <span className="font-medium dark:text-white">
+                      {new Date(Date.now() + (billingCycle === 'yearly' ? 365 : 30) * 24 * 60 * 60 * 1000)
+                        .toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </span>
                   </div>
                 </div>
 
-                <div className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
+                {/* Total */}
+                <div className="flex justify-between items-center text-xl font-bold pb-4 border-b dark:border-gray-700">
+                  <span className="dark:text-white">Total</span>
+                  <span className="dark:text-white">${currentPrice}</span>
+                </div>
+
+                {/* Payment Method */}
+                <div className="pb-4 border-b dark:border-gray-700">
+                  <p className="text-sm font-medium mb-2 dark:text-white">Payment method</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">PayPal</p>
+                </div>
+
+                {/* Terms */}
+                <p className="text-xs text-gray-600 dark:text-gray-400">
                   By purchasing you agree to the{' '}
-                  <a href="/terms" className="text-brand-teal hover:underline">
+                  <a href="/terms" className="text-blue-600 hover:underline">
                     terms of use
                   </a>
                   .
-                </div>
-              </Card>
-            </div>
+                </p>
+
+                {/* PayPal Button */}
+                <div id="paypal-button-container" className="mt-4"></div>
+
+                {/* Loading state */}
+                {!paypalLoaded && (
+                  <div className="text-center py-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+                      Loading payment options...
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-gray-100 text-black py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            {/* Brand */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <img src={logoUrl} alt="MicroJPEG Logo" className="w-10 h-10" />
-                <span className="text-xl font-bold font-poppins">MicroJPEG</span>
-              </div>
-              <p className="text-gray-600 font-opensans">
-                The smartest way to compress and optimize your images for the web.
-              </p>
-            </div>
-
-            {/* Product */}
-            <div>
-              <h4 className="font-semibold font-poppins mb-4">Product</h4>
-              <ul className="space-y-2 text-gray-600 font-opensans">
-                <li><a href="/features" className="hover:text-black">Features</a></li>
-                <li><a href="/pricing" className="hover:text-black">Pricing</a></li>
-                <li><a href="/api-docs" className="hover:text-black">API</a></li>
-                <li><a href="/api-docs" className="hover:text-black">Documentation</a></li>
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h4 className="font-semibold font-poppins mb-4">Company</h4>
-              <ul className="space-y-2 text-gray-600 font-opensans">
-                <li><a href="/about" className="hover:text-black">About</a></li>
-                <li><a href="/blog" className="hover:text-black">Blog</a></li>
-                <li><a href="/contact" className="hover:text-black">Contact</a></li>
-                <li><a href="/support" className="hover:text-black">Support</a></li>
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <h4 className="font-semibold font-poppins mb-4">Legal</h4>
-              <ul className="space-y-2 text-gray-600 font-opensans">
-                <li><a href="/privacy-policy" className="hover:text-black">Privacy Policy</a></li>
-                <li><a href="/terms-of-service" className="hover:text-black">Terms of Service</a></li>
-                <li><a href="/cookie-policy" className="hover:text-black">Cookie Policy</a></li>
-                <li><a href="/cancellation-policy" className="hover:text-black">Cancellation Policy</a></li>
-                <li><a href="/privacy-policy" className="hover:text-black">GDPR</a></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-300 pt-8 text-center text-gray-500 font-opensans">
-            <p>© 2025 MicroJPEG. All rights reserved. Making the web faster, one image at a time.</p>
-            <p className="text-xs mt-2 opacity-75">
-              Background photo by <a href="https://www.pexels.com/photo/selective-focus-photo-of-white-petaled-flowers-96627/" target="_blank" rel="noopener noreferrer" className="hover:underline">AS Photography</a>
-            </p>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

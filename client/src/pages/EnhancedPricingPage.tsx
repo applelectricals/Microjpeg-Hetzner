@@ -7,7 +7,7 @@ import { Slider } from '@/components/ui/slider';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { useAuth } from '@/hooks/useAuth';
-import { SubscribeButton, BuyPackageButton } from '@/components/PayPalPaymentButton';
+
 
 // Dark mode hook
 function useDarkMode() {
@@ -255,27 +255,22 @@ function WebPricing({ billingCycle, setBillingCycle }: {
               </ul>
               
               {plan.disabled ? (
-                <Button
-                  className="w-full"
-                  disabled={true}
-                  variant="outline"
-                >
-                  {plan.cta}
-                </Button>
-              ) : (
-                <SubscribeButton
-                  planId={`${plan.name.toLowerCase()}-${billingCycle}`}
-                  planName={`${plan.name} ${billingCycle === 'monthly' ? 'Monthly' : 'Yearly'}`}
-                  amount={
-                    billingCycle === 'monthly' 
-                      ? parseInt(plan.priceMonthly?.replace('$', '') || '0')
-                      : parseInt(plan.priceYearly?.replace('$', '') || '0')
-                  }
-                  variant={plan.popular ? 'default' : 'outline'}
-                >
-                  {plan.cta}
-                </SubscribeButton>
-              )}
+  <Button
+    className="w-full"
+    disabled={true}
+    variant="outline"
+  >
+    {plan.cta}
+  </Button>
+) : (
+  <Button
+    onClick={() => window.location.href = `/checkout?plan=${plan.name.toLowerCase()}`}
+    className="w-full"
+    variant={plan.popular ? 'default' : 'outline'}
+  >
+    {plan.cta}
+  </Button>
+)}
             </CardContent>
           </Card>
         ))}
@@ -444,13 +439,12 @@ function APIPricing() {
                     <span className="text-sm">All formats supported</span>
                   </div>
                 </div>
-                <BuyPackageButton
-                  planId={`api-${pkg.ops / 1000}k`}
-                  planName={`${(pkg.ops / 1000).toFixed(0)}K API Operations`}
-                  amount={pkg.price}
-                >
-                  Buy Package
-                </BuyPackageButton>
+                <Button
+  onClick={() => window.location.href = `/checkout?plan=api-${pkg.ops / 1000}k&amount=${pkg.price}`}
+  className="w-full"
+>
+  Buy Package
+</Button>
               </CardContent>
             </Card>
           ))}
@@ -679,23 +673,22 @@ function CDNPricing() {
               </ul>
               
               {plan.name === 'Enterprise' ? (
-                <Button
-                  className="w-full"
-                  variant="outline"
-                  onClick={() => window.location.href = 'mailto:support@microjpeg.com?subject=CDN%20Enterprise%20Inquiry'}
-                >
-                  {plan.cta}
-                </Button>
-              ) : (
-                <SubscribeButton
-                  planId={`cdn-${plan.name.toLowerCase()}`}
-                  planName={`CDN ${plan.name}`}
-                  amount={parseInt(plan.price.replace('$', ''))}
-                  variant={plan.popular ? 'default' : 'outline'}
-                >
-                  {plan.cta}
-                </SubscribeButton>
-              )}
+  <Button
+    className="w-full"
+    variant="outline"
+    onClick={() => window.location.href = 'mailto:support@microjpeg.com?subject=CDN%20Enterprise%20Inquiry'}
+  >
+    {plan.cta}
+  </Button>
+) : (
+  <Button
+    onClick={() => window.location.href = `/checkout?plan=cdn-${plan.name.toLowerCase()}`}
+    className="w-full"
+    variant={plan.popular ? 'default' : 'outline'}
+  >
+    {plan.cta}
+  </Button>
+)}
             </CardContent>
           </Card>
         ))}
