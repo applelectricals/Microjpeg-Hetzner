@@ -125,16 +125,25 @@ export default function ApiDashboard() {
       });
       return response;
     },
-    onSuccess: (data: any) => {
-      // ✅ DEBUG: Log the entire response
-      console.log('🔍 Full API Response:', data);
+    onSuccess: async (response: any) => {
+      // ✅ FIX: Parse the Response object to get JSON
+      let data;
+      
+      if (response instanceof Response) {
+        data = await response.json();
+      } else {
+        data = response;
+      }
+      
+      // Debug: Log the parsed data
+      console.log('🔍 Parsed API Response:', data);
       console.log('🔍 data.fullKey:', data.fullKey);
       console.log('🔍 data.apiKey:', data.apiKey);
       console.log('🔍 data.tierInfo:', data.tierInfo);
       
       queryClient.invalidateQueries({ queryKey: ['/api/keys'] });
       
-      // Try different property paths
+      // Get the full key from the parsed data
       const fullKey = data.fullKey || data.apiKey?.fullKey || data.key;
       
       if (fullKey) {
@@ -143,6 +152,7 @@ export default function ApiDashboard() {
         setShowCreatedKey(true);
       } else {
         console.error('❌ No full key found in response!');
+        console.error('Full response data:', data);
         toast({
           title: "Warning",
           description: "API key created but full key not returned. Check console.",
@@ -157,9 +167,10 @@ export default function ApiDashboard() {
       
       toast({
         title: "✅ API Key Created Successfully!",
-        description: `Your ${tierInfoFromBackend.tier || tierInfo.tier} API key has been created. ${fullKey ? 'Full key displayed below.' : 'Check console for key.'}`,
+        description: `Your ${tierInfoFromBackend.tier || tierInfo.tier} API key has been created.`,
       });
     },
+    
     onError: (error: any) => {
       console.error('❌ API Key Creation Error:', error);
       toast({
@@ -190,7 +201,7 @@ export default function ApiDashboard() {
       });
     },
   });
-  
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
