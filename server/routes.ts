@@ -21,7 +21,7 @@ import { db } from "./db";
 import { and, eq, gt, sql } from "drizzle-orm";
 import { compressToTargetSize, generateOptimizationInsights } from "./compressionUtils";
 import { calculateQualityMetrics } from "./qualityAssessment";
-import paymentRoutes from "./paymentRoutes";
+import { paymentRouter } from "./paymentRoutes";
 import { r2Service, R2_FOLDERS } from './r2Service';
 import { pageIdentifierMiddleware } from './pageIdentifierMiddleware';
 import { DualUsageTracker } from './services/DualUsageTracker';
@@ -813,7 +813,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   
   // Register payment routes (Razorpay + PayPal)
-  app.use('/api', paymentRoutes);
+  app.use('/api/payment', paymentRouter);
   
   // Register subscription routes
   app.use('/api/subscriptions', subscriptionRoutes);
