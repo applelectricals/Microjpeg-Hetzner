@@ -9,18 +9,24 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 
-// PayPal Plan IDs from environment
+// PayPal Plan IDs from environment - FIXED: Use import.meta.env instead of process.env
 const PAYPAL_PLANS = {
-  'starter-monthly': process.env.VITE_PAYPAL_PLAN_STARTER_MONTHLY || '',
-  'starter-yearly': process.env.VITE_PAYPAL_PLAN_STARTER_YEARLY || '',
-  'pro-monthly': process.env.VITE_PAYPAL_PLAN_PRO_MONTHLY || '',
-  'pro-yearly': process.env.VITE_PAYPAL_PLAN_PRO_YEARLY || '',
-  'business-monthly': process.env.VITE_PAYPAL_PLAN_BUSINESS_MONTHLY || '',
-  'business-yearly': process.env.VITE_PAYPAL_PLAN_BUSINESS_YEARLY || '',
-  'cdn-starter': process.env.VITE_PAYPAL_PLAN_CDN_STARTER || '',
-  'cdn-business': process.env.VITE_PAYPAL_PLAN_CDN_BUSINESS || '',
-  'cdn-enterprise': process.env.VITE_PAYPAL_PLAN_CDN_ENTERPRISE || '',
+  'starter-monthly': import.meta.env.VITE_PAYPAL_PLAN_STARTER_MONTHLY || '',
+  'starter-yearly': import.meta.env.VITE_PAYPAL_PLAN_STARTER_YEARLY || '',
+  'pro-monthly': import.meta.env.VITE_PAYPAL_PLAN_PRO_MONTHLY || '',
+  'pro-yearly': import.meta.env.VITE_PAYPAL_PLAN_PRO_YEARLY || '',
+  'business-monthly': import.meta.env.VITE_PAYPAL_PLAN_BUSINESS_MONTHLY || '',
+  'business-yearly': import.meta.env.VITE_PAYPAL_PLAN_BUSINESS_YEARLY || '',
+  'cdn-starter': import.meta.env.VITE_PAYPAL_PLAN_CDN_STARTER || '',
+  'cdn-business': import.meta.env.VITE_PAYPAL_PLAN_CDN_BUSINESS || '',
+  'cdn-enterprise': import.meta.env.VITE_PAYPAL_PLAN_CDN_ENTERPRISE || '',
 };
+
+// Debug log on load
+console.log('🔍 PayPal Plans Configuration:');
+console.log('  Available plans:', Object.keys(PAYPAL_PLANS));
+console.log('  Configured plans:', Object.entries(PAYPAL_PLANS).filter(([_, id]) => id).map(([key]) => key));
+console.log('  Missing plans:', Object.entries(PAYPAL_PLANS).filter(([_, id]) => !id).map(([key]) => key));
 
 interface PayPalButtonProps {
   planId: string; // e.g., 'starter-monthly', 'pro-yearly'
@@ -57,13 +63,30 @@ export function PayPalPaymentButton({
       return;
     }
 
+    const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+
+    if (!clientId) {
+      console.error('❌ VITE_PAYPAL_CLIENT_ID is not set!');
+      toast({
+        title: 'Configuration Error',
+        description: 'PayPal Client ID is missing. Please contact support.',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    console.log('✅ PayPal Client ID found:', clientId.substring(0, 10) + '...');
+
     const script = document.createElement('script');
     script.id = 'paypal-sdk';
-    script.src = `https://www.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID}&vault=true&intent=${type === 'subscription' ? 'subscription' : 'capture'}`;
+    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&vault=true&intent=${type === 'subscription' ? 'subscription' : 'capture'}`;
     script.async = true;
-    script.onload = () => setPaypalLoaded(true);
+    script.onload = () => {
+      console.log('✅ PayPal SDK loaded successfully');
+      setPaypalLoaded(true);
+    };
     script.onerror = () => {
-      console.error('Failed to load PayPal SDK');
+      console.error('❌ Failed to load PayPal SDK');
       toast({
         title: 'Payment Error',
         description: 'Failed to load payment system. Please refresh the page.',
@@ -75,9 +98,11 @@ export function PayPalPaymentButton({
     return () => {
       // Cleanup if needed
     };
-  }, []);
+  }, [type, toast]);
 
   const handlePayment = async () => {
+    console.log('🔍 Payment initiated:', { planId, planName, amount, type });
+
     if (!isAuthenticated) {
       toast({
         title: 'Login Required',
@@ -105,7 +130,7 @@ export function PayPalPaymentButton({
         await handleOneTimePayment();
       }
     } catch (error: any) {
-      console.error('Payment error:', error);
+      console.error('❌ Payment error:', error);
       toast({
         title: 'Payment Failed',
         description: error.message || 'Something went wrong',
@@ -118,10 +143,24 @@ export function PayPalPaymentButton({
   };
 
   const handleSubscription = async () => {
+    console.log('🔍 Looking up PayPal Plan ID for:', planId);
+    console.log('🔍 Available plans:', Object.keys(PAYPAL_PLANS));
+    
     const paypalPlanId = PAYPAL_PLANS[planId as keyof typeof PAYPAL_PLANS];
     
+    console.log('🔍 Found Plan ID:', paypalPlanId || 'NOT FOUND');
+    
     if (!paypalPlanId) {
-      throw new Error(`PayPal plan ID not configured for ${planId}`);
+      console.error('❌ Plan ID not configured:', planId);
+      console.error('Available plan IDs:', Object.entries(PAYPAL_PLANS).filter(([_, id]) => id));
+      throw new Error(`PayPal plan ID not configured for ${planId}. Please check environment variables.`);
+    }
+
+    console.log('✅ Using PayPal Plan ID:', paypalPlanId);
+
+    // @ts-ignore - PayPal SDK types
+    if (!window.paypal) {
+      throw new Error('PayPal SDK not loaded');
     }
 
     // @ts-ignore - PayPal SDK types
@@ -133,13 +172,14 @@ export function PayPalPaymentButton({
         label: 'subscribe'
       },
       createSubscription: function(data: any, actions: any) {
+        console.log('📝 Creating subscription with plan:', paypalPlanId);
         return actions.subscription.create({
           plan_id: paypalPlanId,
           application_context: {
             brand_name: 'MicroJPEG',
             shipping_preference: 'NO_SHIPPING',
             user_action: 'SUBSCRIBE_NOW',
-            return_url: `${window.location.origin}/payment/success?plan=${planId}`,
+            return_url: `${window.location.origin}/payment-success?plan=${planId}`,
             cancel_url: `${window.location.origin}/pricing?cancelled=true`
           }
         });
@@ -173,12 +213,12 @@ export function PayPalPaymentButton({
             onSuccess?.();
             
             // Redirect to success page
-            window.location.href = `/payment/success?plan=${planId}&subscription_id=${data.subscriptionID}`;
+            window.location.href = `/payment-success?plan=${planId}&subscription_id=${data.subscriptionID}`;
           } else {
             throw new Error(result.error || 'Failed to activate subscription');
           }
         } catch (error: any) {
-          console.error('Backend subscription activation failed:', error);
+          console.error('❌ Backend subscription activation failed:', error);
           toast({
             title: 'Activation Failed',
             description: 'Payment received but subscription activation failed. Please contact support.',
@@ -187,7 +227,7 @@ export function PayPalPaymentButton({
         }
       },
       onError: function(err: any) {
-        console.error('PayPal error:', err);
+        console.error('❌ PayPal error:', err);
         toast({
           title: 'Payment Error',
           description: 'Payment failed. Please try again.',
@@ -196,7 +236,7 @@ export function PayPalPaymentButton({
         onError?.(err.message);
       },
       onCancel: function(data: any) {
-        console.log('PayPal payment cancelled:', data);
+        console.log('⚠️ PayPal payment cancelled:', data);
         toast({
           title: 'Payment Cancelled',
           description: 'You cancelled the payment.',
@@ -206,6 +246,13 @@ export function PayPalPaymentButton({
   };
 
   const handleOneTimePayment = async () => {
+    console.log('💳 Creating one-time payment for:', planName);
+    
+    // @ts-ignore - PayPal SDK types
+    if (!window.paypal) {
+      throw new Error('PayPal SDK not loaded');
+    }
+
     // @ts-ignore - PayPal SDK types
     window.paypal.Buttons({
       style: {
@@ -259,12 +306,12 @@ export function PayPalPaymentButton({
             onSuccess?.();
             
             // Redirect to success page
-            window.location.href = `/payment/success?plan=${planId}&order_id=${order.id}`;
+            window.location.href = `/payment-success?plan=${planId}&order_id=${order.id}`;
           } else {
             throw new Error(result.error || 'Failed to process payment');
           }
         } catch (error: any) {
-          console.error('Backend payment processing failed:', error);
+          console.error('❌ Backend payment processing failed:', error);
           toast({
             title: 'Processing Failed',
             description: 'Payment received but processing failed. Please contact support.',
@@ -273,7 +320,7 @@ export function PayPalPaymentButton({
         }
       },
       onError: function(err: any) {
-        console.error('PayPal error:', err);
+        console.error('❌ PayPal error:', err);
         toast({
           title: 'Payment Error',
           description: 'Payment failed. Please try again.',
@@ -282,7 +329,7 @@ export function PayPalPaymentButton({
         onError?.(err.message);
       },
       onCancel: function(data: any) {
-        console.log('PayPal payment cancelled:', data);
+        console.log('⚠️ PayPal payment cancelled:', data);
         toast({
           title: 'Payment Cancelled',
           description: 'You cancelled the payment.',
