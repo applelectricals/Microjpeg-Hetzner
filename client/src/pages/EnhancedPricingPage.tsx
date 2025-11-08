@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Check, X, Crown, ChevronDown, Moon, Sun } from 'lucide-react';
+import { Check, X, Crown, Zap, Code, Globe, Boxes, Calculator, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Slider } from '@/components/ui/slider';
 import Header from '@/components/header';
+import Footer from '@/components/footer';
 import { useAuth } from '@/hooks/useAuth';
-import logoUrl from '@assets/mascot-logo-optimized.png';
 
-// Add dark mode hook (same as other pages)
+// Dark mode hook
 function useDarkMode() {
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -14,7 +16,7 @@ function useDarkMode() {
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       return saved ? saved === 'true' : prefersDark;
     }
-    return false;
+    return true; // Default to dark
   });
 
   useEffect(() => {
@@ -30,390 +32,727 @@ function useDarkMode() {
   return { isDark, setIsDark };
 }
 
-interface Plan {
-  tier: string;
-  name: string;
-  description: string;
-  monthlyOps: number;
-  pricing: { monthly: number; yearly: number };
-  planIds: { monthly: string; yearly: string };
-  features: {
-    fileSize: string;
-    concurrent: number;
-    priority: boolean;
-    analytics: boolean;
-    api: boolean;
-  };
-}
-
-// Feature comparison data
-const featureComparison = [
-  {
-    name: 'Supported formats',
-    free: 'JPEG, PNG, WebP, AVIF, RAW',
-    starter: 'All formats',
-    pro: 'All formats',
-    business: 'All formats'
-  },
-  {
-    name: 'Compress images',
-    free: '250 per month',
-    starter: '3,000 per month',
-    pro: '15,000 per month',
-    business: '50,000 per month'
-  },
-  {
-    name: 'Upload file size',
-    free: '10MB (25MB RAW)',
-    starter: '75MB',
-    pro: '100MB',
-    business: '500MB'
-  },
-  {
-    name: 'Convert format',
-    free: '250 per month',
-    starter: '3,000 per month',
-    pro: '15,000 per month',
-    business: 'Unlimited'
-  },
-  {
-    name: 'Priority processing',
-    free: false,
-    starter: true,
-    pro: true,
-    business: true
-  },
-  {
-    name: 'Usage analytics',
-    free: false,
-    starter: true,
-    pro: true,
-    business: true
-  },
-  {
-    name: 'API access',
-    free: false,
-    starter: true,
-    pro: true,
-    business: true
-  },
-  {
-    name: 'Team seats',
-    free: '1',
-    starter: '1',
-    pro: '3',
-    business: '10'
-  }
-];
-
-// FAQ data
-const faqs = [
-  {
-    question: 'What payment methods do you accept?',
-    answer: 'We accept credit cards and PayPal for everyone. Automatic renewals are currently only enabled for PayPal payments. You can also pay with debit/credit card as a guest without a PayPal account.'
-  },
-  {
-    question: 'What are the differences between the paid subscriptions?',
-    answer: 'The main differences are in monthly operation limits, file size limits, and advanced features. Starter is perfect for freelancers with 3,000 operations/month. Pro suits agencies with 15,000 operations and team features. Business is for enterprises with 50,000 operations and white-label options.'
-  },
-  {
-    question: 'Is there a free trial available?',
-    answer: 'Yes! You can use our Free tier with 250 operations per month without signing up. No credit card required. This lets you test the service before upgrading.'
-  },
-  {
-    question: 'Will my subscription renew automatically?',
-    answer: 'If you choose the PayPal subscription option, yes - it will renew automatically. If you choose the one-time payment option, you will need to renew manually when it expires.'
-  },
-  {
-    question: 'Can I upgrade my plan at any time?',
-    answer: 'Yes! You can upgrade to a higher tier at any time. The price difference will be prorated for the remaining period of your current subscription.'
-  },
-  {
-    question: 'Do you offer team licenses? If so, how to set it up?',
-    answer: 'Yes, Pro and Business plans include team seats (3 and 10 respectively). After subscribing, you can invite team members from your dashboard. Each member gets their own account with shared operation limits.'
-  }
-];
-
-export default function EnhancedPricingPage() {
+export default function CompletePricingPage() {
   const { isDark, setIsDark } = useDarkMode();
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
-  const [loading, setLoading] = useState(true);
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
   const { user } = useAuth();
-
-  useEffect(() => {
-    fetchPlans();
-  }, []);
-
-  const fetchPlans = async () => {
-    try {
-      const response = await fetch('/api/subscriptions/plans');
-      const data = await response.json();
-      setPlans(data.plans);
-    } catch (error) {
-      console.error('Failed to fetch plans:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleChoosePlan = (plan: Plan) => {
-    if (!user) {
-      window.location.href = '/login?redirect=/pricing';
-      return;
-    }
-    
-    // Go to checkout page with plan details
-    window.location.href = `/checkout?tier=${plan.tier}&cycle=${billingCycle}`;
-  };
-
-  const getYearlySavings = (monthly: number, yearly: number) => {
-    const savings = (monthly * 12) - yearly;
-    const percent = Math.round((savings / (monthly * 12)) * 100);
-    return { amount: savings, percent };
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-900">
-        <Header isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
-        <div className="flex items-center justify-center h-screen">
-          <p className="text-xl dark:text-white">Loading plans...</p>
-        </div>
-      </div>
-    );
-  }
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+  const [activeTab, setActiveTab] = useState('web');
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900">
+    <div className="min-h-screen bg-white dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Header isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
-
-      {/* Hero */}
-      <section className="pt-24 pb-12 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 dark:text-white">
+      
+      <div className="container mx-auto px-4 py-16">
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             Choose the right plan for your needs
           </h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400 mb-8">
-            Whether you compress a few images or thousands, find a subscription that fits your needs
+          <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
+            Professional image compression with RAW support. From individuals to enterprises.
           </p>
-
-          {/* Billing Toggle */}
-          <div className="inline-flex items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-            <button
-              onClick={() => setBillingCycle('monthly')}
-              className={`px-6 py-2 rounded-md font-medium transition-all ${
-                billingCycle === 'monthly'
-                  ? 'bg-white dark:bg-gray-700 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => setBillingCycle('yearly')}
-              className={`px-6 py-2 rounded-md font-medium transition-all ${
-                billingCycle === 'yearly'
-                  ? 'bg-white dark:bg-gray-700 shadow-sm'
-                  : 'text-gray-600 dark:text-gray-400'
-              }`}
-            >
-              Yearly
-              <span className="ml-2 text-xs bg-green-500 text-white px-2 py-1 rounded-full">
-                Save up to 35%
-              </span>
-            </button>
-          </div>
         </div>
-      </section>
 
-      {/* Comparison Table */}
-      <section className="pb-12 px-4">
-        <div className="max-w-7xl mx-auto overflow-x-auto">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="border-b-2 border-gray-200 dark:border-gray-700">
-                <th className="text-left p-4 font-semibold dark:text-white">Features</th>
-                <th className="p-4 w-48">
-                  <div className="text-center">
-                    <div className="text-sm text-gray-500 dark:text-gray-400 mb-1">Current subscription</div>
-                    <div className="font-bold text-xl dark:text-white">Free</div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white mt-2">$0</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">Forever</div>
-                  </div>
-                </th>
-                {plans.map((plan, idx) => {
-                  const savings = getYearlySavings(plan.pricing.monthly, plan.pricing.yearly);
-                  const price = billingCycle === 'monthly' ? plan.pricing.monthly : plan.pricing.yearly;
-                  const isPro = plan.tier === 'pro';
+        {/* Main Tabs */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+          <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 bg-gray-100 dark:bg-gray-800">
+            <TabsTrigger value="web" className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              Web
+            </TabsTrigger>
+            <TabsTrigger value="api" className="flex items-center gap-2">
+              <Code className="w-4 h-4" />
+              API
+            </TabsTrigger>
+            <TabsTrigger value="wordpress" className="flex items-center gap-2">
+              <Boxes className="w-4 h-4" />
+              WordPress
+            </TabsTrigger>
+            <TabsTrigger value="cdn" className="flex items-center gap-2">
+              <Zap className="w-4 h-4" />
+              CDN
+            </TabsTrigger>
+          </TabsList>
 
-                  return (
-                    <th key={plan.tier} className="p-4 w-48 relative">
-                      {isPro && (
-                        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-                          <span className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-bold">
-                            Recommended
-                          </span>
-                        </div>
-                      )}
-                      <div className="text-center">
-                        <div className="flex items-center justify-center gap-2 mb-1">
-                          <Crown className="w-5 h-5 text-brand-gold" />
-                          <span className="font-bold text-xl dark:text-white">{plan.name}</span>
-                        </div>
-                        <div className="text-2xl font-bold text-gray-900 dark:text-white mt-2">${price}</div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
-                          {billingCycle === 'yearly' ? 'per year' : 'per month'}
-                        </div>
-                        {billingCycle === 'yearly' && (
-                          <div className="text-xs text-green-600 dark:text-green-400 mt-1">
-                            Save ${savings.amount}/year
-                          </div>
-                        )}
-                      </div>
-                    </th>
-                  );
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {featureComparison.map((feature, idx) => (
-                <tr key={idx} className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50">
-                  <td className="p-4 font-medium dark:text-gray-300">{feature.name}</td>
-                  <td className="p-4 text-center text-gray-600 dark:text-gray-400">
-                    {typeof feature.free === 'boolean' ? (
-                      feature.free ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-5 h-5 text-gray-300 mx-auto" />
-                    ) : (
-                      feature.free
-                    )}
-                  </td>
-                  {plans.map((plan) => {
-                    const value = (feature as any)[plan.tier];
-                    return (
-                      <td key={plan.tier} className="p-4 text-center text-gray-600 dark:text-gray-400">
-                        {typeof value === 'boolean' ? (
-                          value ? <Check className="w-5 h-5 text-green-500 mx-auto" /> : <X className="w-5 h-5 text-gray-300 mx-auto" />
-                        ) : (
-                          value
-                        )}
-                      </td>
-                    );
-                  })}
-                </tr>
-              ))}
-              <tr>
-                <td className="p-4"></td>
-                <td className="p-4 text-center">
-                  <div className="text-sm text-gray-500 dark:text-gray-400">Current plan</div>
-                </td>
-                {plans.map((plan) => (
-                  <td key={plan.tier} className="p-4 text-center">
-                    <Button
-                      onClick={() => handleChoosePlan(plan)}
-                      className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold"
-                    >
-                      Get {plan.name}
-                    </Button>
-                  </td>
-                ))}
-              </tr>
-            </tbody>
-          </table>
+          {/* WEB TAB */}
+          <TabsContent value="web">
+            <WebPricing billingCycle={billingCycle} setBillingCycle={setBillingCycle} />
+          </TabsContent>
+
+          {/* API TAB */}
+          <TabsContent value="api">
+            <APIPricing />
+          </TabsContent>
+
+          {/* WORDPRESS TAB */}
+          <TabsContent value="wordpress">
+            <WordPressPricing billingCycle={billingCycle} setBillingCycle={setBillingCycle} />
+          </TabsContent>
+
+          {/* CDN TAB */}
+          <TabsContent value="cdn">
+            <CDNPricing />
+          </TabsContent>
+        </Tabs>
+
+        {/* FAQ Section */}
+        <FAQSection />
+      </div>
+
+      <Footer />
+    </div>
+  );
+}
+
+// ==================== WEB PRICING ====================
+function WebPricing({ billingCycle, setBillingCycle }: { 
+  billingCycle: 'monthly' | 'yearly', 
+  setBillingCycle: (cycle: 'monthly' | 'yearly') => void 
+}) {
+  const plans = [
+    {
+      name: 'Free',
+      price: '$0',
+      period: 'forever',
+      description: 'Perfect for trying out',
+      features: [
+        '200 operations/month (100 regular + 100 RAW)',
+        '7MB max per regular file',
+        '15MB max per RAW file',
+        'All formats (JPEG, PNG, WebP, AVIF, RAW)',
+        'Standard processing speed',
+        '1 concurrent upload',
+      ],
+      cta: 'Current Plan',
+      popular: false,
+      disabled: true,
+    },
+    {
+      name: 'Starter',
+      priceMonthly: '$9',
+      priceYearly: '$49',
+      period: billingCycle === 'monthly' ? '/month' : '/year',
+      savings: billingCycle === 'yearly' ? 'Save $59/year' : null,
+      description: 'For freelancers',
+      features: [
+        'Unlimited compressions',
+        '75MB max file size',
+        'All formats including RAW',
+        'Unlimited conversions',
+        'Standard processing',
+        '1 concurrent upload',
+      ],
+      cta: 'Get Starter',
+      popular: false,
+    },
+    {
+      name: 'Pro',
+      priceMonthly: '$19',
+      priceYearly: '$149',
+      period: billingCycle === 'monthly' ? '/month' : '/year',
+      savings: billingCycle === 'yearly' ? 'Save $79/year' : null,
+      description: 'For professionals',
+      features: [
+        'Unlimited compressions',
+        '150MB max file size',
+        'All formats including RAW',
+        'Unlimited conversions',
+        'Standard processing',
+        '1 concurrent upload',
+      ],
+      cta: 'Get Pro',
+      popular: true,
+    },
+    {
+      name: 'Business',
+      priceMonthly: '$49',
+      priceYearly: '$349',
+      period: billingCycle === 'monthly' ? '/month' : '/year',
+      savings: billingCycle === 'yearly' ? 'Save $239/year' : null,
+      description: 'For teams',
+      features: [
+        'Unlimited compressions',
+        '200MB max file size',
+        'All formats including RAW',
+        'Unlimited conversions',
+        'Standard processing',
+        '1 concurrent upload',
+      ],
+      cta: 'Get Business',
+      popular: false,
+    },
+  ];
+
+  return (
+    <div>
+      {/* Billing Toggle */}
+      <div className="flex justify-center mb-8">
+        <div className="inline-flex items-center gap-4 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
+          <Button
+            variant={billingCycle === 'monthly' ? 'default' : 'ghost'}
+            onClick={() => setBillingCycle('monthly')}
+            className="rounded-md"
+          >
+            Monthly
+          </Button>
+          <Button
+            variant={billingCycle === 'yearly' ? 'default' : 'ghost'}
+            onClick={() => setBillingCycle('yearly')}
+            className="rounded-md relative"
+          >
+            Yearly
+            <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">
+              Save 25%
+            </span>
+          </Button>
         </div>
-      </section>
+      </div>
 
-      {/* FAQ */}
-      <section className="py-16 px-4 bg-gray-50 dark:bg-gray-800/50">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-8 text-center dark:text-white">
-            Frequently asked questions
-          </h2>
-          <div className="space-y-4">
-            {faqs.map((faq, idx) => (
-              <Card key={idx} className="p-4 dark:bg-gray-800 dark:border-gray-700">
-                <button
-                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                  className="w-full flex items-center justify-between text-left"
-                >
-                  <span className="font-semibold text-gray-900 dark:text-white">
-                    {idx + 1 < 10 ? '0' : ''}{idx + 1}. {faq.question}
-                  </span>
-                  <ChevronDown
-                    className={`w-5 h-5 text-gray-500 transition-transform ${
-                      openFaq === idx ? 'transform rotate-180' : ''
-                    }`}
-                  />
-                </button>
-                {openFaq === idx && (
-                  <div className="mt-4 text-gray-600 dark:text-gray-400 leading-relaxed">
-                    {faq.answer}
-                  </div>
-                )}
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-100 text-black py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            {/* Brand */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <img src={logoUrl} alt="MicroJPEG Logo" className="w-10 h-10" />
-                <span className="text-xl font-bold font-poppins">MicroJPEG</span>
+      {/* Pricing Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        {plans.map((plan) => (
+          <Card
+            key={plan.name}
+            className={`relative ${
+              plan.popular
+                ? 'border-2 border-blue-500 dark:border-blue-400 shadow-xl scale-105'
+                : 'border border-gray-200 dark:border-gray-700'
+            }`}
+          >
+            {plan.popular && (
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-bold">
+                  Most Popular
+                </span>
               </div>
-              <p className="text-gray-600 font-opensans">
-                The smartest way to compress and optimize your images for the web.
-              </p>
-            </div>
-
-            {/* Product */}
-            <div>
-              <h4 className="font-semibold font-poppins mb-4">Product</h4>
-              <ul className="space-y-2 text-gray-600 font-opensans">
-                <li><a href="/features" className="hover:text-black">Features</a></li>
-                <li><a href="/pricing" className="hover:text-black">Pricing</a></li>
-                <li><a href="/api-docs" className="hover:text-black">API</a></li>
-                <li><a href="/api-docs" className="hover:text-black">Documentation</a></li>
+            )}
+            
+            <CardHeader>
+              <CardTitle className="text-2xl">{plan.name}</CardTitle>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{plan.description}</p>
+              <div className="mt-4">
+                <span className="text-4xl font-bold">
+                  {plan.priceMonthly && billingCycle === 'monthly' ? plan.priceMonthly : plan.priceYearly || plan.price}
+                </span>
+                <span className="text-gray-600 dark:text-gray-400 ml-2">{plan.period}</span>
+                {plan.savings && (
+                  <p className="text-green-500 text-sm mt-1">{plan.savings}</p>
+                )}
+              </div>
+            </CardHeader>
+            
+            <CardContent>
+              <ul className="space-y-3 mb-6">
+                {plan.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">{feature}</span>
+                  </li>
+                ))}
               </ul>
-            </div>
+              
+              <Button
+                className="w-full"
+                disabled={plan.disabled}
+                variant={plan.popular ? 'default' : 'outline'}
+              >
+                {plan.cta}
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  );
+}
 
-            {/* Company */}
-            <div>
-              <h4 className="font-semibold font-poppins mb-4">Company</h4>
-              <ul className="space-y-2 text-gray-600 font-opensans">
-                <li><a href="/about" className="hover:text-black">About</a></li>
-                <li><a href="/blog" className="hover:text-black">Blog</a></li>
-                <li><a href="/contact" className="hover:text-black">Contact</a></li>
-                <li><a href="/support" className="hover:text-black">Support</a></li>
-              </ul>
-            </div>
+// ==================== API PRICING ====================
+function APIPricing() {
+  const [operations, setOperations] = useState([5000]);
+  
+  const calculateCost = (ops: number) => {
+    if (ops <= 500) return 0;
+    
+    let cost = 0;
+    let remaining = ops;
+    
+    // First 500 free
+    remaining -= 500;
+    
+    // Next 4,500 at $0.005
+    if (remaining > 0) {
+      const tier1 = Math.min(remaining, 4500);
+      cost += tier1 * 0.005;
+      remaining -= tier1;
+    }
+    
+    // Next 45,000 at $0.003
+    if (remaining > 0) {
+      const tier2 = Math.min(remaining, 45000);
+      cost += tier2 * 0.003;
+      remaining -= tier2;
+    }
+    
+    // Over 50,000 at $0.002
+    if (remaining > 0) {
+      cost += remaining * 0.002;
+    }
+    
+    return cost;
+  };
 
-            {/* Legal */}
+  const prepaidPackages = [
+    { ops: 10000, price: 35, perOp: 0.0035, savings: '30%' },
+    { ops: 50000, price: 125, perOp: 0.0025, savings: '50%' },
+    { ops: 100000, price: 200, perOp: 0.002, savings: '60%' },
+  ];
+
+  return (
+    <div className="max-w-5xl mx-auto">
+      {/* Hero */}
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-bold mb-4">Developer API Pricing</h2>
+        <p className="text-xl text-gray-600 dark:text-gray-400">
+          Pay only for what you use. No monthly fees. 500 free operations every month.
+        </p>
+      </div>
+
+      {/* Pricing Calculator */}
+      <Card className="mb-12 border-2 border-blue-500 dark:border-blue-400">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Calculator className="w-6 h-6" />
+            Pay-as-you-go Calculator
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
             <div>
-              <h4 className="font-semibold font-poppins mb-4">Legal</h4>
-              <ul className="space-y-2 text-gray-600 font-opensans">
-                <li><a href="/privacy-policy" className="hover:text-black">Privacy Policy</a></li>
-                <li><a href="/terms-of-service" className="hover:text-black">Terms of Service</a></li>
-                <li><a href="/cookie-policy" className="hover:text-black">Cookie Policy</a></li>
-                <li><a href="/cancellation-policy" className="hover:text-black">Cancellation Policy</a></li>
-                <li><a href="/privacy-policy" className="hover:text-black">GDPR</a></li>
-              </ul>
+              <label className="block text-sm font-medium mb-4">Operations per month</label>
+              <Slider
+                value={operations}
+                onValueChange={setOperations}
+                min={500}
+                max={100000}
+                step={500}
+                className="mb-4"
+              />
+              <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
+                <span>500</span>
+                <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                  {operations[0].toLocaleString()}
+                </span>
+                <span>100,000</span>
+              </div>
+            </div>
+            
+            <div className="flex justify-between items-center p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
+              <span className="text-gray-600 dark:text-gray-400">Estimated monthly cost</span>
+              <span className="text-4xl font-bold text-green-500">
+                ${calculateCost(operations[0]).toFixed(2)}
+              </span>
             </div>
           </div>
+        </CardContent>
+      </Card>
 
-          <div className="border-t border-gray-300 pt-8 text-center text-gray-500 font-opensans">
-            <p>© 2025 MicroJPEG. All rights reserved. Making the web faster, one image at a time.</p>
-            <p className="text-xs mt-2 opacity-75">
-              Background photo by <a href="https://www.pexels.com/photo/selective-focus-photo-of-white-petaled-flowers-96627/" target="_blank" rel="noopener noreferrer" className="hover:underline">AS Photography</a>
-            </p>
+      {/* Pricing Tiers */}
+      <Card className="mb-12">
+        <CardHeader>
+          <CardTitle>Pay-as-you-go Pricing</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
+              <div>
+                <p className="font-medium">First 500 operations</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Every month</p>
+              </div>
+              <span className="text-2xl font-bold text-green-500">FREE</span>
+            </div>
+            
+            <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
+              <div>
+                <p className="font-medium">Operations 501 - 5,000</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Per operation</p>
+              </div>
+              <span className="text-2xl font-bold">$0.005</span>
+            </div>
+            
+            <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
+              <div>
+                <p className="font-medium">Operations 5,001 - 50,000</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Per operation</p>
+              </div>
+              <span className="text-2xl font-bold">$0.003</span>
+            </div>
+            
+            <div className="flex justify-between items-center p-4">
+              <div>
+                <p className="font-medium">Over 50,000 operations</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">Per operation</p>
+              </div>
+              <span className="text-2xl font-bold">$0.002</span>
+            </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Prepaid Packages */}
+      <div>
+        <h3 className="text-2xl font-bold mb-6 text-center">Prepaid Packages (Best Value)</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {prepaidPackages.map((pkg) => (
+            <Card key={pkg.ops} className="border-2 dark:border-gray-700">
+              <CardHeader>
+                <CardTitle>{(pkg.ops / 1000).toFixed(0)}K Operations</CardTitle>
+                <div className="text-3xl font-bold mt-2">${pkg.price}</div>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  ${pkg.perOp.toFixed(4)} per operation
+                </p>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 mb-6">
+                  <div className="flex items-center gap-2 text-green-500">
+                    <Check className="w-5 h-5" />
+                    <span className="font-medium">Save {pkg.savings}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span className="text-sm">Never expires</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Check className="w-5 h-5 text-green-500" />
+                    <span className="text-sm">All formats supported</span>
+                  </div>
+                </div>
+                <Button className="w-full">Buy Package</Button>
+              </CardContent>
+            </Card>
+          ))}
         </div>
-      </footer>
+      </div>
+
+      {/* Features */}
+      <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <Zap className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h4 className="font-bold">Pay per use</h4>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Only pay for successful operations. No monthly fees or hidden charges.
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <Code className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h4 className="font-bold">RESTful API</h4>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Simple HTTP API with libraries for Node.js, Python, Ruby, PHP, and more.
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                <Check className="w-6 h-6 text-green-600 dark:text-green-400" />
+              </div>
+              <h4 className="font-bold">99.9% Uptime</h4>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Enterprise-grade reliability with global CDN delivery and automatic failover.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+// ==================== WORDPRESS PRICING ====================
+function WordPressPricing({ billingCycle, setBillingCycle }: { 
+  billingCycle: 'monthly' | 'yearly', 
+  setBillingCycle: (cycle: 'monthly' | 'yearly') => void 
+}) {
+  return (
+    <div className="max-w-5xl mx-auto">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-bold mb-4">WordPress Plugin Pricing</h2>
+        <p className="text-xl text-gray-600 dark:text-gray-400">
+          Automatically compress and optimize images in your WordPress media library
+        </p>
+      </div>
+
+      <Card className="mb-8 border-2 border-purple-500 dark:border-purple-400">
+        <CardContent className="pt-6">
+          <div className="flex items-start gap-4">
+            <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
+              <Boxes className="w-8 h-8 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-xl font-bold mb-2">Same Pricing as Web Plans</h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-4">
+                The WordPress plugin uses your Web subscription. Choose any Web plan above and use the plugin automatically!
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center gap-2">
+                  <Check className="w-5 h-5 text-green-500" />
+                  <span>Automatic compression on upload</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-5 h-5 text-green-500" />
+                  <span>Bulk optimize existing images</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-5 h-5 text-green-500" />
+                  <span>RAW file support (DNG, CR2, NEF, ARW)</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Check className="w-5 h-5 text-green-500" />
+                  <span>Auto WebP & AVIF conversion</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="text-center">
+        <Button size="lg" className="gap-2">
+          Download Plugin
+          <ArrowRight className="w-4 h-4" />
+        </Button>
+        <p className="text-sm text-gray-600 dark:text-gray-400 mt-4">
+          Compatible with WordPress 5.0+
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ==================== CDN PRICING ====================
+function CDNPricing() {
+  const plans = [
+    {
+      name: 'Starter',
+      price: '$19',
+      period: '/month',
+      description: 'For small websites',
+      bandwidth: '100 GB',
+      features: [
+        '100 GB bandwidth included',
+        '1 custom domain',
+        'Auto WebP/AVIF conversion',
+        'Image transformations',
+        'Edge caching (global)',
+        'Basic analytics',
+        '$0.20/GB overage',
+      ],
+      cta: 'Get Started',
+    },
+    {
+      name: 'Business',
+      price: '$69',
+      period: '/month',
+      description: 'For growing businesses',
+      bandwidth: '1000 GB',
+      popular: true,
+      features: [
+        '1000 GB bandwidth included',
+        '3 custom domains',
+        'RAW format support',
+        'Auto WebP/AVIF conversion',
+        'Advanced image transformations',
+        'Priority edge caching',
+        'Advanced analytics',
+        '$0.10/GB overage',
+      ],
+      cta: 'Get Business',
+    },
+    {
+      name: 'Enterprise',
+      price: '$199',
+      period: '/month',
+      description: 'For high-traffic sites',
+      bandwidth: '3000 GB',
+      features: [
+        '3000 GB bandwidth included',
+        '10 custom domains',
+        'RAW format support',
+        'White-label option',
+        'Custom integration',
+        'Dedicated support',
+        'SLA guarantee',
+        '$0.05/GB overage',
+      ],
+      cta: 'Contact Sales',
+    },
+  ];
+
+  return (
+    <div className="max-w-6xl mx-auto">
+      <div className="text-center mb-12">
+        <h2 className="text-3xl font-bold mb-4">CDN Pricing</h2>
+        <p className="text-xl text-gray-600 dark:text-gray-400">
+          Lightning-fast global image delivery with automatic optimization
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+        {plans.map((plan) => (
+          <Card
+            key={plan.name}
+            className={`relative ${
+              plan.popular
+                ? 'border-2 border-blue-500 dark:border-blue-400 shadow-xl scale-105'
+                : 'border border-gray-200 dark:border-gray-700'
+            }`}
+          >
+            {plan.popular && (
+              <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-bold">
+                  Most Popular
+                </span>
+              </div>
+            )}
+            
+            <CardHeader>
+              <CardTitle className="text-2xl">{plan.name}</CardTitle>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{plan.description}</p>
+              <div className="mt-4">
+                <span className="text-4xl font-bold">{plan.price}</span>
+                <span className="text-gray-600 dark:text-gray-400 ml-2">{plan.period}</span>
+              </div>
+              <p className="text-sm font-medium text-blue-600 dark:text-blue-400 mt-2">
+                {plan.bandwidth} bandwidth
+              </p>
+            </CardHeader>
+            
+            <CardContent>
+              <ul className="space-y-3 mb-6">
+                {plan.features.map((feature, idx) => (
+                  <li key={idx} className="flex items-start gap-2">
+                    <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              
+              <Button
+                className="w-full"
+                variant={plan.popular ? 'default' : 'outline'}
+              >
+                {plan.cta}
+              </Button>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* CDN Features */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                <Globe className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <h4 className="font-bold">Global Edge Network</h4>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Deliver images from 200+ edge locations worldwide for maximum speed.
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
+                <Zap className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              </div>
+              <h4 className="font-bold">Auto Optimization</h4>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Automatic WebP/AVIF conversion based on browser support.
+            </p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
+                <Crown className="w-6 h-6 text-green-600 dark:text-green-400" />
+              </div>
+              <h4 className="font-bold">RAW Support</h4>
+            </div>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Serve RAW files as optimized JPEG/WebP/AVIF on-the-fly.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+// ==================== FAQ SECTION ====================
+function FAQSection() {
+  const faqs = [
+    {
+      question: 'What payment methods do you accept?',
+      answer: 'We accept all major credit cards (Visa, Mastercard, Amex) and PayPal. All payments are processed securely through Stripe.',
+    },
+    {
+      question: 'Can I upgrade or downgrade my plan?',
+      answer: 'Yes! You can upgrade or downgrade at any time. When upgrading, you\'ll be charged the prorated difference. When downgrading, the change takes effect at the end of your billing cycle.',
+    },
+    {
+      question: 'What RAW formats do you support?',
+      answer: 'We support all major RAW formats: Canon (CR2, CR3), Nikon (NEF), Sony (ARW), Adobe (DNG), Olympus (ORF), Fujifilm (RAF), and more.',
+    },
+    {
+      question: 'Is there a free trial?',
+      answer: 'Yes! The Free plan is completely free forever with 200 operations per month. No credit card required. Perfect for testing the service.',
+    },
+    {
+      question: 'Do you offer refunds?',
+      answer: 'We offer a 14-day money-back guarantee on all paid plans. If you\'re not satisfied within the first 14 days, contact us for a full refund.',
+    },
+    {
+      question: 'How does the API pricing work?',
+      answer: 'API pricing is pay-as-you-go with 500 free operations per month. After that, you pay per operation ($0.005-$0.002 depending on volume) or buy prepaid packages for better rates.',
+    },
+  ];
+
+  return (
+    <div className="max-w-3xl mx-auto mt-20">
+      <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+      <div className="space-y-6">
+        {faqs.map((faq, idx) => (
+          <Card key={idx}>
+            <CardHeader>
+              <CardTitle className="text-lg">{faq.question}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 dark:text-gray-400">{faq.answer}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
