@@ -495,3 +495,19 @@ export async function cancelSubscription(req: Request, res: Response) {
     });
   }
 }
+// ==================== BACKWARD COMPATIBILITY ====================
+export async function createRazorpayOrder(req: Request, res: Response) {
+  res.status(400).json({ 
+    success: false,
+    error: 'Razorpay is not available. Please use PayPal.' 
+  });
+}
+
+export async function verifyRazorpayPayment(req: Request, res: Response) {
+  res.status(400).json({ 
+    success: false,
+    error: 'Razorpay is not available. Please use PayPal.' 
+  });
+}
+
+export const processPayPalPayment = processPayPalSubscription;
