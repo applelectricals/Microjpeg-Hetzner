@@ -44,7 +44,9 @@ export default function ApiDashboard() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
   const [createdKey, setCreatedKey] = useState<string | null>(null);
-  const [showCreatedKey, setShowCreatedKey] = useState(false);
+  const [showCreatedKey, setShowCreatedKey] = useState(true);
+  
+
 
   // Get tier-based limits and permissions
   const getTierInfo = () => {
