@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useLocation, useRoute } from 'wouter';
 import { Check, Crown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -83,10 +83,12 @@ const PLANS = {
 export default function CheckoutPage() {
   const { isDark, setIsDark } = useDarkMode();
   const { user, isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  
-  const preSelectedPlan = searchParams.get('plan') || 'pro';
+  const [location, setLocation] = useLocation();
+const [match, params] = useRoute('/checkout');
+
+// Get query params from URL
+const urlParams = new URLSearchParams(window.location.search);
+const preSelectedPlan = urlParams.get('plan') || 'pro';
   const [selectedPlan, setSelectedPlan] = useState<keyof typeof PLANS>(
     (preSelectedPlan as keyof typeof PLANS) || 'pro'
   );
@@ -95,11 +97,10 @@ export default function CheckoutPage() {
 
   // Redirect if not authenticated
   useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login?redirect=/checkout?plan=' + selectedPlan);
-    }
-  }, [isAuthenticated, navigate, selectedPlan]);
-
+  if (!isAuthenticated) {
+    setLocation('/login?redirect=/checkout?plan=' + selectedPlan);
+  }
+}, [isAuthenticated, setLocation, selectedPlan]);
   // Load PayPal SDK
   useEffect(() => {
     if (document.getElementById('paypal-sdk')) {
