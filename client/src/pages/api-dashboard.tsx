@@ -45,7 +45,7 @@ export default function ApiDashboard() {
   const [newKeyName, setNewKeyName] = useState("");
   const [createdKey, setCreatedKey] = useState<string | null>(null);
   const [showCreatedKey, setShowCreatedKey] = useState(true);
-  
+
 
 
   // Get tier-based limits and permissions
@@ -120,28 +120,48 @@ export default function ApiDashboard() {
   // Create API key mutation
   const createKeyMutation = useMutation({
     mutationFn: async (keyData: { name: string }) => {
-      // ✅ FIX: Only send name - backend determines permissions and rateLimit based on subscription
       const response = await apiRequest('POST', '/api/keys', {
         name: keyData.name
       });
       return response;
     },
     onSuccess: (data: any) => {
+      // ✅ DEBUG: Log the entire response
+      console.log('🔍 Full API Response:', data);
+      console.log('🔍 data.fullKey:', data.fullKey);
+      console.log('🔍 data.apiKey:', data.apiKey);
+      console.log('🔍 data.tierInfo:', data.tierInfo);
+      
       queryClient.invalidateQueries({ queryKey: ['/api/keys'] });
-      setCreatedKey(data.fullKey);  // ✅ This is already correct!
-      setShowCreatedKey(true);  // ✅ ADD THIS - Show key immediately
+      
+      // Try different property paths
+      const fullKey = data.fullKey || data.apiKey?.fullKey || data.key;
+      
+      if (fullKey) {
+        console.log('✅ Found full key:', fullKey);
+        setCreatedKey(fullKey);
+        setShowCreatedKey(true);
+      } else {
+        console.error('❌ No full key found in response!');
+        toast({
+          title: "Warning",
+          description: "API key created but full key not returned. Check console.",
+          variant: "destructive"
+        });
+      }
+      
       setIsCreateDialogOpen(false);
       setNewKeyName("");
       
-      // Show tier info from backend response
       const tierInfoFromBackend = data.tierInfo || {};
       
       toast({
         title: "✅ API Key Created Successfully!",
-        description: `Your ${tierInfoFromBackend.tier || tierInfo.tier} API key has been created. Rate limit: ${tierInfoFromBackend.rateLimit || 'Check dashboard'}`,
+        description: `Your ${tierInfoFromBackend.tier || tierInfo.tier} API key has been created. ${fullKey ? 'Full key displayed below.' : 'Check console for key.'}`,
       });
     },
     onError: (error: any) => {
+      console.error('❌ API Key Creation Error:', error);
       toast({
         title: "Error",
         description: error.message || "Failed to create API key",
@@ -149,28 +169,6 @@ export default function ApiDashboard() {
       });
     },
   });
-
-  // Delete API key mutation
-  const deleteKeyMutation = useMutation({
-    mutationFn: async (keyId: string) => {
-      await apiRequest('DELETE', `/api/keys/${keyId}`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/keys'] });
-      toast({
-        title: "API Key Deactivated",
-        description: "The API key has been deactivated successfully.",
-      });
-    },
-    onError: (error: any) => {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to deactivate API key",
-        variant: "destructive",
-      });
-    },
-  });
-
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
