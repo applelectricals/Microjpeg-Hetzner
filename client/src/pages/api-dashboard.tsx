@@ -170,6 +170,27 @@ export default function ApiDashboard() {
     },
   });
 
+  // Delete API key mutation
+  const deleteKeyMutation = useMutation({
+    mutationFn: async (keyId: string) => {
+      await apiRequest('DELETE', `/api/keys/${keyId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/keys'] });
+      toast({
+        title: "API Key Deactivated",
+        description: "The API key has been deactivated successfully.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to deactivate API key",
+        variant: "destructive",
+      });
+    },
+  });
+  
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({
