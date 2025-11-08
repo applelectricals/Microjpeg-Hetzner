@@ -59,7 +59,7 @@ export function PayPalPaymentButton({
 
     const script = document.createElement('script');
     script.id = 'paypal-sdk';
-    script.src = `https://www.paypal.com/sdk/js?client-id=${process.env.VITE_PAYPAL_CLIENT_ID}&vault=true&intent=${type === 'subscription' ? 'subscription' : 'capture'}`;
+    script.src = `https://www.paypal.com/sdk/js?client-id=${import.meta.env.VITE_PAYPAL_CLIENT_ID}&vault=true&intent=${type === 'subscription' ? 'subscription' : 'capture'}`;
     script.async = true;
     script.onload = () => setPaypalLoaded(true);
     script.onerror = () => {
