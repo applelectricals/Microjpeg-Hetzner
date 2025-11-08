@@ -33,17 +33,7 @@ function useDarkMode() {
   return { isDark, setIsDark };
 }
 
-useEffect(() => {
-  console.log('🔍 DEBUG: Environment Variables Check');
-  console.log('STARTER_MONTHLY:', import.meta.env.VITE_PAYPAL_PLAN_STARTER_MONTHLY);
-  console.log('STARTER_YEARLY:', import.meta.env.VITE_PAYPAL_PLAN_STARTER_YEARLY);
-  console.log('PRO_MONTHLY:', import.meta.env.VITE_PAYPAL_PLAN_PRO_MONTHLY);
-  console.log('PRO_YEARLY:', import.meta.env.VITE_PAYPAL_PLAN_PRO_YEARLY);
-  console.log('BUSINESS_MONTHLY:', import.meta.env.VITE_PAYPAL_PLAN_BUSINESS_MONTHLY);
-  console.log('BUSINESS_YEARLY:', import.meta.env.VITE_PAYPAL_PLAN_BUSINESS_YEARLY);
-  console.log('CDN_STARTER:', import.meta.env.VITE_PAYPAL_PLAN_CDN_STARTER);
-  console.log('CDN_BUSINESS:', import.meta.env.VITE_PAYPAL_PLAN_CDN_BUSINESS);
-}, []);
+
 
 export default function CompletePricingPage() {
   const { isDark, setIsDark } = useDarkMode();

@@ -50,13 +50,7 @@ export function PayPalPaymentButton({
   const [isLoading, setIsLoading] = useState(false);
   const [paypalLoaded, setPaypalLoaded] = useState(false);
 
-  // Debug log - runs once on mount
-  useEffect(() => {
-    console.log('🔍 PayPal Plans Configuration:');
-    console.log('  Available plans:', Object.keys(PAYPAL_PLANS));
-    console.log('  Configured plans:', Object.entries(PAYPAL_PLANS).filter(([_, id]) => id).map(([key]) => key));
-    console.log('  Missing plans:', Object.entries(PAYPAL_PLANS).filter(([_, id]) => !id).map(([key]) => key));
-  }, []);
+
 
   // Load PayPal SDK
   useEffect(() => {
