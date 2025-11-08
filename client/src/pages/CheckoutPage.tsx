@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useRoute } from 'wouter';
+import { useLocation } from 'wouter';
 import { Check, Crown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -84,23 +84,18 @@ export default function CheckoutPage() {
   const { isDark, setIsDark } = useDarkMode();
   const { user, isAuthenticated } = useAuth();
   const [location, setLocation] = useLocation();
-const [match, params] = useRoute('/checkout');
-
-// Get query params from URL
-const urlParams = new URLSearchParams(window.location.search);
-const preSelectedPlan = urlParams.get('plan') || 'pro';
+  
+  // Get query params from URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const preSelectedPlan = urlParams.get('plan') || 'pro';
+  
   const [selectedPlan, setSelectedPlan] = useState<keyof typeof PLANS>(
     (preSelectedPlan as keyof typeof PLANS) || 'pro'
   );
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [paypalLoaded, setPaypalLoaded] = useState(false);
 
-  // Redirect if not authenticated
-  useEffect(() => {
-  if (!isAuthenticated) {
-    setLocation('/login?redirect=/checkout?plan=' + selectedPlan);
-  }
-}, [isAuthenticated, setLocation, selectedPlan]);
+
   // Load PayPal SDK
   useEffect(() => {
     if (document.getElementById('paypal-sdk')) {
@@ -135,13 +130,15 @@ const preSelectedPlan = urlParams.get('plan') || 'pro';
       return;
     }
 
+    console.log('🔍 Rendering PayPal button for plan:', planId);
+
     // Clear previous button
     const container = document.getElementById('paypal-button-container');
     if (container) {
       container.innerHTML = '';
     }
 
-    // @ts-ignore
+    // @ts-ignore - PayPal SDK
     if (window.paypal) {
       // @ts-ignore
       window.paypal.Buttons({
@@ -153,19 +150,15 @@ const preSelectedPlan = urlParams.get('plan') || 'pro';
           height: 55,
         },
         createSubscription: function(data: any, actions: any) {
+          // Use PayPal's official subscription creation
           return actions.subscription.create({
-            plan_id: planId,
-            application_context: {
-              brand_name: 'MicroJPEG',
-              shipping_preference: 'NO_SHIPPING',
-              user_action: 'SUBSCRIBE_NOW',
-            }
+            plan_id: planId
           });
         },
         onApprove: async function(data: any, actions: any) {
-          console.log('Subscription approved:', data.subscriptionID);
+          console.log('✅ Subscription approved:', data.subscriptionID);
           
-          // Send to backend
+          // Send to backend for activation
           try {
             const response = await fetch('/api/payment/paypal/subscription', {
               method: 'POST',
@@ -184,21 +177,25 @@ const preSelectedPlan = urlParams.get('plan') || 'pro';
             const result = await response.json();
 
             if (result.success) {
+              // Success! Show message and redirect
+              alert('Subscription activated successfully!');
               window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&subscription_id=${data.subscriptionID}`;
             } else {
-              alert('Failed to activate subscription. Please contact support.');
+              throw new Error(result.error || 'Activation failed');
             }
-          } catch (error) {
-            console.error('Backend error:', error);
-            alert('Failed to activate subscription. Please contact support.');
+          } catch (error: any) {
+            console.error('❌ Backend activation error:', error);
+            // Even if backend fails, subscription was created
+            alert('Subscription created! Please contact support if you don\'t see it in your account.');
+            window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&subscription_id=${data.subscriptionID}`;
           }
         },
         onError: function(err: any) {
-          console.error('PayPal error:', err);
-          alert('Payment failed. Please try again.');
+          console.error('❌ PayPal error:', err);
+          alert('Payment failed. Please try again or contact support.');
         },
         onCancel: function() {
-          console.log('Payment cancelled');
+          console.log('⚠️ Payment cancelled by user');
         }
       }).render('#paypal-button-container');
     }
