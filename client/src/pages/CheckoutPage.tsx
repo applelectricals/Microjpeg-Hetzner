@@ -378,7 +378,7 @@ export default function CheckoutPage() {
               <CardContent className="space-y-6">
                 
                 {/* PayPal Subscription */}
-                <div className="border-2 border-blue-500 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
+                <div className="border rounded-lg p-4 dark:border-gray-700">
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <h3 className="font-bold dark:text-white">PayPal Subscription</h3>
@@ -386,13 +386,17 @@ export default function CheckoutPage() {
                         Auto-renews {billingCycle === 'monthly' ? 'monthly' : 'yearly'}
                       </p>
                     </div>
-                    <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded">RECOMMENDED</span>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                     ✓ Automatic renewal<br/>
                     ✓ Cancel anytime<br/>
                     ✓ For PayPal accounts
                   </p>
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded p-2 mb-3">
+                    <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                      ⚠️ Country specific - May not work if paying from India
+                    </p>
+                  </div>
                   
                   {/* Main container that will be cleared and repopulated */}
                   <div id="paypal-subscription-container"></div>
@@ -406,18 +410,26 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Pay with Card */}
-                <div className="border rounded-lg p-4 dark:border-gray-700">
-                  <div className="mb-3">
-                    <h3 className="font-bold dark:text-white">Pay with Card</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      One-time for {billingCycle === 'monthly' ? '1 month' : '1 year'}
-                    </p>
+                <div className="border-2 border-blue-500 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="font-bold dark:text-white">Pay with Card (One-time)</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        One-time payment for {billingCycle === 'monthly' ? '1 month' : '1 year'}
+                      </p>
+                    </div>
+                    <span className="bg-green-500 text-white text-xs px-2 py-1 rounded">RECOMMENDED</span>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
                     ✓ No auto-renewal<br/>
                     ✓ Renew manually<br/>
-                    ✓ Visa, Mastercard, Amex
+                    ✓ Works worldwide
                   </p>
+                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded p-2 mb-3">
+                    <p className="text-xs text-green-800 dark:text-green-200">
+                      ✓ Best option for India - Pay with Visa, Mastercard, Amex
+                    </p>
+                  </div>
                   
                   {/* Main container that will be cleared and repopulated */}
                   <div id="paypal-onetime-container"></div>
