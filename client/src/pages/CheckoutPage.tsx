@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
 import { Check, Crown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -72,6 +72,10 @@ export default function CheckoutPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [subscriptionLoaded, setSubscriptionLoaded] = useState(false);
   const [onetimeLoaded, setOnetimeLoaded] = useState(false);
+  
+  // Use refs to track if buttons are currently rendered
+  const subscriptionRendered = useRef(false);
+  const onetimeRendered = useRef(false);
 
   // Load PayPal SDK for subscriptions
   useEffect(() => {
@@ -85,7 +89,11 @@ export default function CheckoutPage() {
     script.id = 'paypal-subscription-sdk';
     script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription`;
     script.async = true;
-    script.onload = () => setSubscriptionLoaded(true);
+    script.onload = () => {
+      console.log('✅ Subscription SDK loaded');
+      setSubscriptionLoaded(true);
+    };
+    script.onerror = () => console.error('❌ Failed to load subscription SDK');
     document.body.appendChild(script);
   }, []);
 
@@ -101,35 +109,42 @@ export default function CheckoutPage() {
     script.id = 'paypal-onetime-sdk';
     script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&intent=capture&disable-funding=credit`;
     script.async = true;
-    script.onload = () => setOnetimeLoaded(true);
+    script.onload = () => {
+      console.log('✅ One-time SDK loaded');
+      setOnetimeLoaded(true);
+    };
+    script.onerror = () => console.error('❌ Failed to load one-time SDK');
     document.body.appendChild(script);
   }, []);
 
-// Render subscription button
+  // Render subscription button with proper cleanup
   useEffect(() => {
     if (!subscriptionLoaded) return;
 
     const plan = PLANS[selectedPlan];
     const planId = billingCycle === 'monthly' ? plan.monthly.subscriptionPlanId : plan.yearly.subscriptionPlanId;
-    const containerId = 'paypal-subscription-button';
     
-    // Clear container and force re-mount
-    const container = document.getElementById(containerId);
-    if (container) {
-      container.innerHTML = '';
-      // Add small delay to ensure clean unmount
-      setTimeout(() => {
-        if (!container.querySelector('iframe')) {
-          renderSubscriptionButton(container, planId);
-        }
-      }, 100);
-    }
-  }, [subscriptionLoaded, selectedPlan, billingCycle, user]);
-
-  const renderSubscriptionButton = (container: HTMLElement, planId: string) => {
+    // Create unique container ID based on plan and cycle
+    const containerId = `paypal-sub-${selectedPlan}-${billingCycle}`;
+    
+    // Get the main container
+    const mainContainer = document.getElementById('paypal-subscription-container');
+    if (!mainContainer) return;
+    
+    // Clear all previous buttons
+    mainContainer.innerHTML = '';
+    
+    // Create new container for this specific plan/cycle
+    const buttonContainer = document.createElement('div');
+    buttonContainer.id = containerId;
+    mainContainer.appendChild(buttonContainer);
+    
+    subscriptionRendered.current = false;
 
     // @ts-ignore
-    if (window.paypal) {
+    if (window.paypal && !subscriptionRendered.current) {
+      console.log('🔄 Rendering subscription button for:', selectedPlan, billingCycle);
+      
       // @ts-ignore
       window.paypal.Buttons({
         style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
@@ -137,6 +152,7 @@ export default function CheckoutPage() {
           return actions.subscription.create({ plan_id: planId });
         },
         onApprove: async function(data: any) {
+          console.log('✅ Subscription approved:', data.subscriptionID);
           try {
             await fetch('/api/payment/paypal/subscription', {
               method: 'POST',
@@ -148,31 +164,60 @@ export default function CheckoutPage() {
                 billing: { name: user?.email || 'guest', email: user?.email || 'guest' }
               })
             });
-          } catch (e) {}
+          } catch (e) {
+            console.error('Backend error:', e);
+          }
           window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&subscription_id=${data.subscriptionID}`;
+        },
+        onError: function(err: any) {
+          console.error('PayPal subscription error:', err);
         }
-      }).render(`#${containerId}`);
+      }).render(`#${containerId}`).then(() => {
+        subscriptionRendered.current = true;
+        console.log('✅ Subscription button rendered');
+      }).catch((err: any) => {
+        console.error('Failed to render subscription button:', err);
+      });
     }
 
     // Cleanup function
     return () => {
-      const container = document.getElementById(containerId);
-      if (container) container.innerHTML = '';
+      console.log('🧹 Cleaning up subscription button');
+      if (mainContainer) {
+        mainContainer.innerHTML = '';
+      }
+      subscriptionRendered.current = false;
     };
   }, [subscriptionLoaded, selectedPlan, billingCycle, user]);
 
-  // Render one-time button
+  // Render one-time button with proper cleanup
   useEffect(() => {
     if (!onetimeLoaded) return;
 
     const plan = PLANS[selectedPlan];
     const price = billingCycle === 'monthly' ? plan.monthly.price : plan.yearly.price;
-    const containerId = 'paypal-onetime-button';
-    const container = document.getElementById(containerId);
-    if (container) container.innerHTML = '';
+    
+    // Create unique container ID based on plan and cycle
+    const containerId = `paypal-onetime-${selectedPlan}-${billingCycle}`;
+    
+    // Get the main container
+    const mainContainer = document.getElementById('paypal-onetime-container');
+    if (!mainContainer) return;
+    
+    // Clear all previous buttons
+    mainContainer.innerHTML = '';
+    
+    // Create new container for this specific plan/cycle
+    const buttonContainer = document.createElement('div');
+    buttonContainer.id = containerId;
+    mainContainer.appendChild(buttonContainer);
+    
+    onetimeRendered.current = false;
 
     // @ts-ignore
-    if (window.paypal) {
+    if (window.paypal && !onetimeRendered.current) {
+      console.log('🔄 Rendering one-time button for:', selectedPlan, billingCycle, price);
+      
       // @ts-ignore
       window.paypal.Buttons({
         style: { shape: 'rect', color: 'blue', layout: 'vertical', label: 'pay' },
@@ -186,6 +231,7 @@ export default function CheckoutPage() {
         },
         onApprove: async function(data: any, actions: any) {
           const order = await actions.order.capture();
+          console.log('✅ One-time payment captured:', order.id);
           try {
             await fetch('/api/payment/paypal/onetime', {
               method: 'POST',
@@ -199,16 +245,29 @@ export default function CheckoutPage() {
                 billing: { name: user?.email || 'guest', email: user?.email || 'guest' }
               })
             });
-          } catch (e) {}
+          } catch (e) {
+            console.error('Backend error:', e);
+          }
           window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&order_id=${order.id}`;
+        },
+        onError: function(err: any) {
+          console.error('PayPal one-time error:', err);
         }
-      }).render(`#${containerId}`);
+      }).render(`#${containerId}`).then(() => {
+        onetimeRendered.current = true;
+        console.log('✅ One-time button rendered');
+      }).catch((err: any) => {
+        console.error('Failed to render one-time button:', err);
+      });
     }
 
     // Cleanup function
     return () => {
-      const container = document.getElementById(containerId);
-      if (container) container.innerHTML = '';
+      console.log('🧹 Cleaning up one-time button');
+      if (mainContainer) {
+        mainContainer.innerHTML = '';
+      }
+      onetimeRendered.current = false;
     };
   }, [onetimeLoaded, selectedPlan, billingCycle, user]);
 
@@ -232,11 +291,20 @@ export default function CheckoutPage() {
             
             <div className="space-y-4 mb-6">
               {Object.entries(PLANS).map(([key, plan]) => (
-                <Card key={key} onClick={() => setSelectedPlan(key as keyof typeof PLANS)}
-                  className={`cursor-pointer transition-all ${selectedPlan === key ? 'border-2 border-blue-500 shadow-lg' : 'border border-gray-200 hover:border-gray-300'}`}>
+                <Card 
+                  key={key} 
+                  onClick={() => setSelectedPlan(key as keyof typeof PLANS)}
+                  className={`cursor-pointer transition-all ${
+                    selectedPlan === key 
+                      ? 'border-2 border-blue-500 shadow-lg' 
+                      : 'border border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                  }`}
+                >
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedPlan === key ? 'border-blue-500 bg-blue-500' : 'border-gray-300'}`}>
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        selectedPlan === key ? 'border-blue-500 bg-blue-500' : 'border-gray-300 dark:border-gray-600'
+                      }`}>
                         {selectedPlan === key && <div className="w-2 h-2 bg-white rounded-full" />}
                       </div>
                       <div>
@@ -248,8 +316,12 @@ export default function CheckoutPage() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm text-gray-600 dark:text-gray-400">{billingCycle === 'monthly' ? 'per month' : 'per year'}</div>
-                      <div className="text-2xl font-bold dark:text-white">${billingCycle === 'monthly' ? plan.monthly.price : plan.yearly.price}</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        {billingCycle === 'monthly' ? 'per month' : 'per year'}
+                      </div>
+                      <div className="text-2xl font-bold dark:text-white">
+                        ${billingCycle === 'monthly' ? plan.monthly.price : plan.yearly.price}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -260,17 +332,31 @@ export default function CheckoutPage() {
               <div className="flex items-center justify-between mb-3">
                 <div>
                   <h3 className="font-bold dark:text-white">${currentPrice} per {currentPlan.name} user</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{billingCycle === 'yearly' ? 'Yearly' : 'Monthly'} subscription</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {billingCycle === 'yearly' ? 'Yearly' : 'Monthly'} subscription
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <button onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}
-                    className={`w-12 h-6 rounded-full relative transition-colors ${billingCycle === 'yearly' ? 'bg-blue-500' : 'bg-gray-300'}`}>
-                    <div className={`absolute top-1 ${billingCycle === 'yearly' ? 'right-1' : 'left-1'} w-4 h-4 bg-white rounded-full transition-all`} />
+                  <button
+                    onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}
+                    className={`w-12 h-6 rounded-full relative transition-colors ${
+                      billingCycle === 'yearly' ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
+                    }`}
+                  >
+                    <div className={`absolute top-1 ${
+                      billingCycle === 'yearly' ? 'right-1' : 'left-1'
+                    } w-4 h-4 bg-white rounded-full transition-all`} />
                   </button>
-                  <span className="text-sm font-medium dark:text-white">{billingCycle === 'yearly' ? 'Yearly' : 'Monthly'}</span>
+                  <span className="text-sm font-medium dark:text-white">
+                    {billingCycle === 'yearly' ? 'Yearly' : 'Monthly'}
+                  </span>
                 </div>
               </div>
-              {savings > 0 && <p className="text-sm text-green-600 dark:text-green-400 font-medium">💰 Save ${savings}/year</p>}
+              {savings > 0 && (
+                <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+                  💰 Save ${savings}/year with yearly billing
+                </p>
+              )}
             </Card>
 
             <div>
@@ -291,27 +377,57 @@ export default function CheckoutPage() {
               <CardHeader><CardTitle>Choose Payment Method</CardTitle></CardHeader>
               <CardContent className="space-y-6">
                 
+                {/* PayPal Subscription */}
                 <div className="border-2 border-blue-500 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <h3 className="font-bold dark:text-white">PayPal Subscription</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">Auto-renews {billingCycle === 'monthly' ? 'monthly' : 'yearly'}</p>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Auto-renews {billingCycle === 'monthly' ? 'monthly' : 'yearly'}
+                      </p>
                     </div>
                     <span className="bg-blue-500 text-white text-xs px-2 py-1 rounded">RECOMMENDED</span>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">✓ Automatic renewal<br/>✓ Cancel anytime<br/>✓ For PayPal accounts</p>
-                  <div id="paypal-subscription-button"></div>
-                  {!subscriptionLoaded && <div className="text-center py-4"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div></div>}
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                    ✓ Automatic renewal<br/>
+                    ✓ Cancel anytime<br/>
+                    ✓ For PayPal accounts
+                  </p>
+                  
+                  {/* Main container that will be cleared and repopulated */}
+                  <div id="paypal-subscription-container"></div>
+                  
+                  {!subscriptionLoaded && (
+                    <div className="text-center py-4">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                      <p className="text-xs text-gray-500 mt-2">Loading PayPal...</p>
+                    </div>
+                  )}
                 </div>
 
-                <div className="border rounded-lg p-4">
+                {/* Pay with Card */}
+                <div className="border rounded-lg p-4 dark:border-gray-700">
                   <div className="mb-3">
                     <h3 className="font-bold dark:text-white">Pay with Card</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">One-time for {billingCycle === 'monthly' ? '1 month' : '1 year'}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      One-time for {billingCycle === 'monthly' ? '1 month' : '1 year'}
+                    </p>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">✓ No auto-renewal<br/>✓ Renew manually<br/>✓ Visa, Mastercard, Amex</p>
-                  <div id="paypal-onetime-button"></div>
-                  {!onetimeLoaded && <div className="text-center py-4"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div></div>}
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+                    ✓ No auto-renewal<br/>
+                    ✓ Renew manually<br/>
+                    ✓ Visa, Mastercard, Amex
+                  </p>
+                  
+                  {/* Main container that will be cleared and repopulated */}
+                  <div id="paypal-onetime-container"></div>
+                  
+                  {!onetimeLoaded && (
+                    <div className="text-center py-4">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
+                      <p className="text-xs text-gray-500 mt-2">Loading payment...</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
