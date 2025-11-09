@@ -70,6 +70,7 @@ export default function CheckoutPage() {
     (preSelectedPlan as keyof typeof PLANS) || 'pro'
   );
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+  const [quantity, setQuantity] = useState(1);
   const [subscriptionLoaded, setSubscriptionLoaded] = useState(false);
   const [onetimeLoaded, setOnetimeLoaded] = useState(false);
   
@@ -196,6 +197,7 @@ export default function CheckoutPage() {
 
     const plan = PLANS[selectedPlan];
     const price = billingCycle === 'monthly' ? plan.monthly.price : plan.yearly.price;
+    const totalAmount = price * quantity;
     
     // Create unique container ID based on plan and cycle
     const containerId = `paypal-onetime-${selectedPlan}-${billingCycle}`;
@@ -224,8 +226,8 @@ export default function CheckoutPage() {
         createOrder: function(data: any, actions: any) {
           return actions.order.create({
             purchase_units: [{
-              amount: { value: price.toFixed(2), currency_code: 'USD' },
-              description: `${plan.name} - ${billingCycle === 'monthly' ? '1 Month' : '1 Year'}`
+              amount: { value: totalAmount.toFixed(2), currency_code: 'USD' },
+              description: `${plan.name} - ${billingCycle === 'monthly' ? '1 Month' : '1 Year'} - ${quantity} user${quantity > 1 ? 's' : ''}`
             }]
           });
         },
@@ -240,7 +242,8 @@ export default function CheckoutPage() {
               body: JSON.stringify({
                 plan: `${selectedPlan}-${billingCycle}`,
                 paypal_order_id: order.id,
-                amount: price,
+                amount: totalAmount,
+                quantity: quantity,
                 duration: billingCycle === 'monthly' ? 30 : 365,
                 billing: { name: user?.email || 'guest', email: user?.email || 'guest' }
               })
@@ -248,7 +251,7 @@ export default function CheckoutPage() {
           } catch (e) {
             console.error('Backend error:', e);
           }
-          window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&order_id=${order.id}`;
+          window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&order_id=${order.id}&quantity=${quantity}`;
         },
         onError: function(err: any) {
           console.error('PayPal one-time error:', err);
@@ -269,10 +272,11 @@ export default function CheckoutPage() {
       }
       onetimeRendered.current = false;
     };
-  }, [onetimeLoaded, selectedPlan, billingCycle, user]);
+  }, [onetimeLoaded, selectedPlan, billingCycle, quantity, user]);
 
   const currentPlan = PLANS[selectedPlan];
   const currentPrice = billingCycle === 'monthly' ? currentPlan.monthly.price : currentPlan.yearly.price;
+  const totalPrice = currentPrice * quantity;
   const savings = billingCycle === 'yearly' ? currentPlan.yearly.savings : 0;
 
   return (
@@ -354,9 +358,39 @@ export default function CheckoutPage() {
               </div>
               {savings > 0 && (
                 <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                  💰 Save ${savings}/year with yearly billing
+                  💰 Save ${savings * quantity}/year with yearly billing
                 </p>
               )}
+            </Card>
+
+            {/* Quantity Selector */}
+            <Card className="p-4 bg-yellow-50 dark:bg-yellow-900/10 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold dark:text-white">Number of Users</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {billingCycle === 'yearly' ? 'Yearly' : 'Monthly'} subscription
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                    className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center font-bold text-gray-700 dark:text-gray-300 hover:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    −
+                  </button>
+                  <span className="text-2xl font-bold dark:text-white min-w-[3ch] text-center">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center font-bold text-gray-700 dark:text-gray-300 hover:border-blue-500 transition-colors"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
             </Card>
 
             <div>
@@ -373,6 +407,35 @@ export default function CheckoutPage() {
           </div>
 
           <div>
+            <Card className="mb-6">
+              <CardHeader><CardTitle>Order Summary</CardTitle></CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3 pb-4 border-b dark:border-gray-700">
+                  <div className="flex justify-between items-center">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      {quantity}x {currentPlan.name} subscription
+                    </span>
+                    <span className="font-medium dark:text-white">${totalPrice}</span>
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                    ${currentPrice} × {quantity} user{quantity > 1 ? 's' : ''}
+                  </div>
+                  {savings > 0 && (
+                    <div className="text-sm text-green-600 dark:text-green-400">
+                      💰 Total savings: ${savings * quantity}/year
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-between items-center text-xl font-bold">
+                  <span className="dark:text-white">Total</span>
+                  <span className="dark:text-white">${totalPrice}</span>
+                </div>
+                <p className="text-xs text-gray-500 dark:text-gray-400">
+                  Includes sales tax (if applicable)
+                </p>
+              </CardContent>
+            </Card>
+            
             <Card>
               <CardHeader><CardTitle>Choose Payment Method</CardTitle></CardHeader>
               <CardContent className="space-y-6">
