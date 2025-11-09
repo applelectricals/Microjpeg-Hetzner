@@ -105,15 +105,28 @@ export default function CheckoutPage() {
     document.body.appendChild(script);
   }, []);
 
-  // Render subscription button
+// Render subscription button
   useEffect(() => {
     if (!subscriptionLoaded) return;
 
     const plan = PLANS[selectedPlan];
     const planId = billingCycle === 'monthly' ? plan.monthly.subscriptionPlanId : plan.yearly.subscriptionPlanId;
     const containerId = 'paypal-subscription-button';
+    
+    // Clear container and force re-mount
     const container = document.getElementById(containerId);
-    if (container) container.innerHTML = '';
+    if (container) {
+      container.innerHTML = '';
+      // Add small delay to ensure clean unmount
+      setTimeout(() => {
+        if (!container.querySelector('iframe')) {
+          renderSubscriptionButton(container, planId);
+        }
+      }, 100);
+    }
+  }, [subscriptionLoaded, selectedPlan, billingCycle, user]);
+
+  const renderSubscriptionButton = (container: HTMLElement, planId: string) => {
 
     // @ts-ignore
     if (window.paypal) {
