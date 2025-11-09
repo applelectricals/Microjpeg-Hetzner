@@ -140,6 +140,12 @@ export default function CheckoutPage() {
         }
       }).render(`#${containerId}`);
     }
+
+    // Cleanup function
+    return () => {
+      const container = document.getElementById(containerId);
+      if (container) container.innerHTML = '';
+    };
   }, [subscriptionLoaded, selectedPlan, billingCycle, user]);
 
   // Render one-time button
@@ -185,6 +191,12 @@ export default function CheckoutPage() {
         }
       }).render(`#${containerId}`);
     }
+
+    // Cleanup function
+    return () => {
+      const container = document.getElementById(containerId);
+      if (container) container.innerHTML = '';
+    };
   }, [onetimeLoaded, selectedPlan, billingCycle, user]);
 
   const currentPlan = PLANS[selectedPlan];
