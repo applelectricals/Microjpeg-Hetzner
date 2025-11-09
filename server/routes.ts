@@ -5369,7 +5369,7 @@ return res.json({
         'enterprise': 'enterprise',
         'free': 'free'
       };
-
+  
       const plan = planMapping[planId] || 'free';
       const subscriptionEndDate = new Date();
       
@@ -5406,6 +5406,43 @@ return res.json({
         message: 'Failed to create subscription',
         error: error.message 
       });
+    }
+  });
+
+   // ✅ ADD THE NEW ENDPOINT HERE (AFTER the closing bracket above):
+  app.post('/api/payment/paypal/onetime', isAuthenticated, async (req, res) => {
+    const { plan, paypal_order_id, amount, duration, billing } = req.body;
+    
+    try {
+      const userId = req.user?.id;
+      
+      if (!userId) {
+        return res.status(401).json({ success: false, error: 'Not authenticated' });
+      }
+      
+      // Calculate expiry date
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + (duration || 30));
+      
+      // Update user subscription
+      await storage.updateUser(userId, {
+        subscriptionTier: plan.includes('starter') ? 'starter' : plan.includes('pro') ? 'premium' : 'enterprise',
+        subscriptionStatus: 'active',
+        subscriptionEndDate: expiryDate,
+        stripeSubscriptionId: paypal_order_id
+      });
+      
+      console.log(`One-time payment processed: User ${userId}, Plan ${plan}, Order ${paypal_order_id}`);
+      
+      res.json({ 
+        success: true, 
+        message: 'Subscription activated',
+        expiry: expiryDate 
+      });
+      
+    } catch (error) {
+      console.error('One-time payment error:', error);
+      res.status(500).json({ success: false, error: 'Failed to process payment' });
     }
   });
 
