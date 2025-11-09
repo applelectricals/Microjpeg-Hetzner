@@ -1,5 +1,4 @@
 import DynamicCompressPage from './pages/DynamicCompressPage';
-import CheckoutPage from './pages/CheckoutPage';  // ← ADD THIS
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
