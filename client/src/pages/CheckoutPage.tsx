@@ -117,7 +117,7 @@ export default function CheckoutPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [paypalLoaded, setPaypalLoaded] = useState(false);
 
-  // Load PayPal SDK (with both subscription and capture intents)
+  // Load PayPal SDK (single load for both intents)
   useEffect(() => {
     if (document.getElementById('paypal-sdk')) {
       setPaypalLoaded(true);
@@ -126,10 +126,9 @@ export default function CheckoutPage() {
 
     const script = document.createElement('script');
     script.id = 'paypal-sdk';
-    // Load with both intents
-    script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription`;
+    // Load with BOTH intents separated by comma
+    script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription,capture`;
     script.async = true;
-    script.setAttribute('data-sdk-integration-source', 'button-factory');
     
     script.onload = () => {
       console.log('✅ PayPal SDK loaded');
@@ -200,61 +199,49 @@ export default function CheckoutPage() {
     const container = document.getElementById(containerId);
     if (container) container.innerHTML = '';
 
-    // Load second SDK instance for one-time payments
-    const script2 = document.createElement('script');
-    script2.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&intent=capture`;
-    script2.async = true;
-    
-    script2.onload = () => {
+    // @ts-ignore
+    if (window.paypal) {
       // @ts-ignore
-      if (window.paypal) {
-        // @ts-ignore
-        window.paypal.Buttons({
-          style: {
-            shape: 'rect',
-            color: 'blue',
-            layout: 'vertical',
-            label: 'pay'
-          },
-          createOrder: function(data: any, actions: any) {
-            return actions.order.create({
-              purchase_units: [{
-                amount: {
-                  value: price.toFixed(2),
-                  currency_code: 'USD'
-                },
-                description: `${plan.name} - ${billingCycle === 'monthly' ? '1 Month' : '1 Year'}`
-              }]
+      window.paypal.Buttons({
+        style: {
+          shape: 'rect',
+          color: 'blue',
+          layout: 'vertical',
+          label: 'pay'
+        },
+        createOrder: function(data: any, actions: any) {
+          return actions.order.create({
+            purchase_units: [{
+              amount: {
+                value: price.toFixed(2),
+                currency_code: 'USD'
+              },
+              description: `${plan.name} - ${billingCycle === 'monthly' ? '1 Month' : '1 Year'}`
+            }]
+          });
+        },
+        onApprove: async function(data: any, actions: any) {
+          const order = await actions.order.capture();
+          console.log('✅ One-time payment:', order.id);
+          
+          try {
+            await fetch('/api/payment/paypal/onetime', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                plan: `${selectedPlan}-${billingCycle}`,
+                paypal_order_id: order.id,
+                amount: price,
+                duration: billingCycle === 'monthly' ? 30 : 365,
+                billing: { name: user?.email || 'guest', email: user?.email || 'guest' }
+              })
             });
-          },
-          onApprove: async function(data: any, actions: any) {
-            const order = await actions.order.capture();
-            console.log('✅ One-time payment:', order.id);
-            
-            try {
-              await fetch('/api/payment/paypal/onetime', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include',
-                body: JSON.stringify({
-                  plan: `${selectedPlan}-${billingCycle}`,
-                  paypal_order_id: order.id,
-                  amount: price,
-                  duration: billingCycle === 'monthly' ? 30 : 365,
-                  billing: { name: user?.email || 'guest', email: user?.email || 'guest' }
-                })
-              });
-            } catch (e) {}
-            
-            window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&order_id=${order.id}&onetime=true`;
-          }
-        }).render(`#${containerId}`);
-      }
-    };
-    
-    if (!document.getElementById('paypal-sdk-capture')) {
-      script2.id = 'paypal-sdk-capture';
-      document.body.appendChild(script2);
+          } catch (e) {}
+          
+          window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&order_id=${order.id}&onetime=true`;
+        }
+      }).render(`#${containerId}`);
     }
   }, [paypalLoaded, selectedPlan, billingCycle, user]);
 
