@@ -1404,7 +1404,7 @@ export default function MicroJPEGLanding() {
                     size="lg"
                     variant="outline"
                     className="border-2 border-teal-400 text-teal-400 hover:bg-teal-400/10 px-8 py-6 text-lg rounded-xl backdrop-blur-sm"
-                    onClick={() => window.location.href = '/subscribe?plan=test-premium'}
+                    onClick={() => window.location.href = '/checkout?plan=starter'}
                   >
                     Try Now
                   </Button>
@@ -1775,7 +1775,7 @@ export default function MicroJPEGLanding() {
                         {/* CTA Button */}
                         <Button 
                           className="w-full bg-brand-teal hover:bg-brand-teal/90 text-white font-medium py-3 rounded-lg"
-                          onClick={() => window.location.href = '/subscribe?plan=starter'}
+                          onClick={() => window.location.href = '/checkout?plan=starter'}
                         >
                           Get STARTER
                         </Button>
@@ -1853,7 +1853,7 @@ export default function MicroJPEGLanding() {
                         {/* CTA Button */}
                         <Button 
                           className="w-full bg-brand-gold hover:bg-brand-gold-dark text-white font-medium py-3 rounded-lg"
-                          onClick={() => window.location.href = '/subscribe?plan=pro'}
+                          onClick={() => window.location.href = '/checkout?plan=pro'}
                         >
                           Get PRO
                         </Button>
@@ -2408,7 +2408,7 @@ export default function MicroJPEGLanding() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Button 
                   size="lg"
-                  onClick={() => window.location.href = '/subscribe?plan=test-premium'}
+                  onClick={() => window.location.href = '/checkout?plan=starter'}
                   className="bg-gradient-to-r from-brand-teal to-brand-teal-dark hover:from-brand-teal-dark hover:to-brand-teal text-[#AD0000] font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                   data-testid="button-test-premium"
                 >

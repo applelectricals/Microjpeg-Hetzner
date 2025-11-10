@@ -753,7 +753,7 @@ export default function ConversionPage() {
                 <Button 
                   size="lg" 
                   variant="outline"
-                  onClick={() => window.location.href = '/subscribe?plan=test-premium'}
+                  onClick={() => window.location.href = '/checkout?plan=starter'}
                   className="w-full sm:w-auto px-8 py-4 text-lg border-2 border-brand-gold text-brand-dark hover:bg-brand-gold/10 min-h-[48px]"
                   data-testid="button-try-now"
                 >
@@ -925,7 +925,7 @@ export default function ConversionPage() {
                 size="sm"
                 variant="outline"
                 className="flex-1 text-xs"
-                onClick={() => window.location.href = '/subscribe?plan=test-premium'}
+                onClick={() => window.location.href = '/checkout?plan=starter'}
               >
                 Try $1
               </Button>
