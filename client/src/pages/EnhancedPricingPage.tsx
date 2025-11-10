@@ -509,7 +509,7 @@ function APIPricing() {
                   🔑 Get Your Free API Key
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400">
-                  Start with 1,000 free operations • No credit card required
+                  Start with 500 free operations • No credit card required
                 </p>
               </div>
               <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>

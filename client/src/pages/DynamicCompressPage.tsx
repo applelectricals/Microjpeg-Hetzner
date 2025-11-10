@@ -411,6 +411,8 @@ export default function MicroJPEGLanding() {
   const [fileObjectUrls, setFileObjectUrls] = useState<Map<string, string>>(new Map());
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
+  const [processingProgress, setProcessingProgress] = useState(0);
+  const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState(0); // in seconds
   const [processingStatus, setProcessingStatus] = useState('');
 
   const [processingFileIds, setProcessingFileIds] = useState<Set<string>>(new Set());
@@ -893,18 +895,53 @@ console.log('📏 Computed limits:', {
 
       // Estimate processing duration based on file count and sizes
       const totalSize = filesToProcess.reduce((sum, file) => sum + file.size, 0);
-      const estimatedDuration = Math.max(1000, Math.min(5000, filesToProcess.length * 800 + totalSize / 1024 / 1024 * 100));
+      const totalSizeMB = totalSize / (1024 * 1024);
+
+      // ============================================
+      // ✅ DYNAMIC PROGRESS SPEED BASED ON FILE SIZE
+      // ============================================
+       // Dynamic progress speed based on file size
+      let targetDuration: number;
+      
+      if (totalSizeMB <= 15) {
+        targetDuration = 3000; // 3 seconds
+      } else if (totalSizeMB <= 30) {
+        targetDuration = 30000; // 30 seconds
+      } else if (totalSizeMB <= 50) {
+        targetDuration = 45000; // 45 seconds
+      } else {
+        targetDuration = 60000; // 60 seconds
+      }
+      
+      console.log(`📊 File size: ${totalSizeMB.toFixed(2)}MB, Progress duration: ${targetDuration/1000}s`);
       
       setProcessingProgress(15);
       setProcessingStatus('Compressing images...');
       
-      // Start progress simulation
+      // Set initial estimated time
+      const initialTimeRemaining = Math.ceil(targetDuration / 1000);
+      setEstimatedTimeRemaining(initialTimeRemaining);
+      
+      // Start progress simulation with dynamic speed
       let currentProgress = 15;
+      const targetProgress = 90;
+      const progressRange = targetProgress - currentProgress;
+      const updateIntervalMs = 200;
+      const totalUpdates = targetDuration / updateIntervalMs;
+      const incrementPerUpdate = progressRange / totalUpdates;
+      
+      let elapsedUpdates = 0;
+      
       progressInterval = setInterval(() => {
-        const increment = Math.random() * 8 + 2; // 2-10% increments
-        currentProgress = Math.min(currentProgress + increment, 85); // Cap at 85% until completion
+        currentProgress = Math.min(currentProgress + incrementPerUpdate, targetProgress);
         setProcessingProgress(Math.floor(currentProgress));
-      }, Math.max(estimatedDuration / 20, 200)); // Update every 200ms minimum
+        
+        // Update time remaining
+        elapsedUpdates++;
+        const elapsedTime = elapsedUpdates * updateIntervalMs;
+        const remainingTime = Math.max(0, Math.ceil((targetDuration - elapsedTime) / 1000));
+        setEstimatedTimeRemaining(remainingTime);
+      }, updateIntervalMs);
 
       const response = await fetch('/api/compress', {
         method: 'POST',
@@ -920,6 +957,7 @@ console.log('📏 Computed limits:', {
       // Clear progress interval and set to completion
       clearInterval(progressInterval);
       setProcessingProgress(100);
+      setEstimatedTimeRemaining(0);
 
       if (data.error) {
         throw new Error(data.error);
@@ -976,9 +1014,11 @@ console.log('📏 Computed limits:', {
     } catch (error) {
       console.error('Compression error:', error);
       // Clear progress interval on error
-      if (progressInterval) {
+       if (progressInterval) {
         clearInterval(progressInterval);
       }
+      setEstimatedTimeRemaining(0);
+      
       toast({
         title: "Compression failed",
         description: error instanceof Error ? error.message : "An error occurred during compression",
@@ -1809,11 +1849,14 @@ console.log('📏 Computed limits:', {
                   <div className="text-lg font-semibold text-white">
                     {isProcessing ? processingStatus : 'Your optimized images are ready!'}
                   </div>
-                  {isProcessing && (
+                    {isProcessing && (
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
                       <Badge variant="secondary" className="bg-white/20 text-white">
                         {processingProgress}%
+                      </Badge>
+                      <Badge variant="secondary" className="bg-blue-500/80 text-white">
+                        ~{estimatedTimeRemaining}s
                       </Badge>
                     </div>
                   )}
