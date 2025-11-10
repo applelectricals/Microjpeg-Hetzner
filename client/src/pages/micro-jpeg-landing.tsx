@@ -689,7 +689,7 @@ export default function MicroJPEGLanding() {
 
       // Prepare compression settings
       const settings = {
-        quality: 80, // Balanced quality for good compression ratios
+        quality: 95, // Balanced quality for good compression ratios
         outputFormat: conversionEnabled && selectedFormats.length > 0 ? selectedFormats : 'keep-original',
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
@@ -944,7 +944,7 @@ export default function MicroJPEGLanding() {
 
       // Prepare compression settings for specific format
       const settings = {
-        quality: 80,
+        quality: 95,
         outputFormat: [format], // Only process this specific format
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
@@ -1704,7 +1704,7 @@ export default function MicroJPEGLanding() {
                   </div>
                   
                   <div className="grid md:grid-cols-2 gap-4">
-                    {/* Test Premium Card - xxx Style */}
+                    {/* Starter Card - xxx Style */}
                     <div className="relative bg-white border-2 border-brand-teal rounded-xl overflow-hidden shadow-sm">
                       {/* Recommended Badge */}
                       <div className="bg-brand-teal text-white text-center py-2 text-xs font-semibold uppercase tracking-wide">
@@ -1736,19 +1736,19 @@ export default function MicroJPEGLanding() {
                             <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
                               <Check className="w-3 h-3 text-brand-teal" />
                             </div>
-                            <span className="text-sm text-gray-700"><span className="font-semibold">3000</span> Monthly Operations</span>
+                            <span className="text-sm text-gray-700"><span className="font-semibold">Unlimited</span> Conversions</span>
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
                               <Check className="w-3 h-3 text-brand-teal" />
                             </div>
-                            <span className="text-sm text-gray-700"><span className="font-semibold">Upto 50 MB</span> file size for RAW & Regular</span>
+                            <span className="text-sm text-gray-700"><span className="font-semibold">Upto 75 MB</span> file size for RAW & Regular</span>
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
                               <Check className="w-3 h-3 text-brand-teal" />
                             </div>
-                            <span className="text-sm text-gray-700">Batch processing (max 20 files)</span>
+                            <span className="text-sm text-gray-700">Unlimited Compressions</span>
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
@@ -1760,7 +1760,7 @@ export default function MicroJPEGLanding() {
                             <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
                               <Check className="w-3 h-3 text-brand-teal" />
                             </div>
-                            <span className="text-sm text-gray-700">Basic API (1,000 calls/month)</span>
+                            <span className="text-sm text-gray-700">All formats including RAW</span>
                           </div>
                         </div>
 
@@ -1768,7 +1768,7 @@ export default function MicroJPEGLanding() {
                         <div className="flex items-baseline justify-between mb-4">
                           <div>
                             <span className="text-3xl font-bold text-gray-900">$9</span>
-                            <span className="text-sm text-gray-600 ml-1">Monthly or $79 Yearly (save $29 = 27% off)</span>
+                            <span className="text-sm text-gray-600 ml-1">Monthly or $49 Yearly (save $59 = 54% off)</span>
                           </div>
                         </div>
 
@@ -1782,7 +1782,7 @@ export default function MicroJPEGLanding() {
                       </div>
                     </div>
 
-                    {/* Premium Plan Card - xxx Style */}
+                    {/* PRO Card - xxx Style */}
                     <div className="relative bg-white border-2 border-brand-gold rounded-xl overflow-hidden shadow-sm">
                       {/* Gold Top Banner */}
                       <div className="bg-brand-gold text-white text-center py-4 text-xs font-semibold uppercase tracking-wide"></div>
@@ -1814,31 +1814,31 @@ export default function MicroJPEGLanding() {
                             <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
                               <Check className="w-3 h-3 text-brand-teal" />
                             </div>
-                            <span className="text-sm text-gray-700"><span className="font-semibold">15000</span> Monthly Operations</span>
+                            <span className="text-sm text-gray-700"><span className="font-semibold">Unlimited</span> Conversions</span>
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
                               <Check className="w-3 h-3 text-brand-teal" />
                             </div>
-                            <span className="text-sm text-gray-700"><span className="font-semibold">Upto 100 MB</span> file size for RAW & Regular</span>
+                            <span className="text-sm text-gray-700"><span className="font-semibold">Upto 150 MB</span> file size for RAW & Regular</span>
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
                               <Check className="w-3 h-3 text-brand-teal" />
                             </div>
-                            <span className="text-sm text-gray-700">Batch processing (max 200 files)</span>
+                            <span className="text-sm text-gray-700">Unlimited Compressions</span>
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
                               <Check className="w-3 h-3 text-brand-teal" />
                             </div>
-                            <span className="text-sm text-gray-700">Team access (3 seats)</span>
+                            <span className="text-sm text-gray-700">Priority processing (4x faster queue)</span>
                           </div>
                           <div className="flex items-center gap-3">
                             <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
                               <Check className="w-3 h-3 text-brand-teal" />
                             </div>
-                            <span className="text-sm text-gray-700">API: 15,000 calls/month</span>
+                            <span className="text-sm text-gray-700">All Formats including RAW</span>
                           </div>
                         </div>
 
