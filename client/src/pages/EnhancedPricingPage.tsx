@@ -11,8 +11,8 @@ import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/api';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { queryClient, apiRequest } from '@/lib/queryClient';
 
 
 // Dark mode hook
@@ -289,13 +289,75 @@ function WebPricing({ billingCycle, setBillingCycle }: {
 function APIPricing() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
   const [operations, setOperations] = useState([5000]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [createdKey, setCreatedKey] = useState<string | null>(null);
   const [showCreatedKey, setShowCreatedKey] = useState(true);
+
+  // Get tier-based limits and permissions
+  const getTierInfo = () => {
+    if (!user) {
+      return {
+        tier: 'Guest',
+        monthlyLimit: 0,
+        rateLimit: 0,
+        maxFileSize: '0MB',
+        permissions: [],
+        color: 'gray'
+      };
+    }
+
+    const tier = user.subscriptionTier || 'free';
+
+    switch (tier.toLowerCase()) {
+      case 'starter':
+      case 'starter-monthly':
+      case 'starter-yearly':
+        return {
+          tier: 'Starter',
+          monthlyLimit: 500,
+          rateLimit: 500,
+          maxFileSize: '30MB regular, 75MB RAW',
+          permissions: ['compress', 'convert', 'batch'],
+          color: 'blue'
+        };
+      case 'pro':
+      case 'pro-monthly':
+      case 'pro-yearly':
+        return {
+          tier: 'Pro',
+          monthlyLimit: 500,
+          rateLimit: 2000,
+          maxFileSize: '50MB regular, 100MB RAW',
+          permissions: ['compress', 'convert', 'batch', 'webhook', 'priority'],
+          color: 'purple'
+        };
+      case 'business':
+      case 'business-monthly':
+      case 'business-yearly':
+        return {
+          tier: 'Business',
+          monthlyLimit: 500,
+          rateLimit: 10000,
+          maxFileSize: '100MB regular, 200MB RAW',
+          permissions: ['compress', 'convert', 'batch', 'webhook', 'priority', 'whitelabel'],
+          color: 'indigo'
+        };
+      default: // free
+        return {
+          tier: 'Free',
+          monthlyLimit: 500,
+          rateLimit: 100,
+          maxFileSize: '10MB regular, 50MB RAW',
+          permissions: ['compress', 'convert'],
+          color: 'green'
+        };
+    }
+  };
+
+  const tierInfo = getTierInfo();
 
   // Fetch API keys
   const { data: apiKeys } = useQuery({
@@ -469,11 +531,34 @@ function APIPricing() {
                 <DialogContent>
                   <DialogHeader>
                     <DialogTitle>Create New API Key</DialogTitle>
-                    <p className="text-sm text-gray-600">
-                      Generate a new API key for your applications
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      API keys automatically inherit your {tierInfo.tier} plan limits
                     </p>
                   </DialogHeader>
                   <div className="space-y-4">
+                    {/* Tier Info Display */}
+                    <div className="p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
+                      <h4 className="font-medium mb-2 dark:text-white">{tierInfo.tier} Plan Limits</h4>
+                      <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 dark:text-gray-400">
+                        <div><span className="font-medium">Monthly:</span> {tierInfo.monthlyLimit.toLocaleString()} ops</div>
+                        <div><span className="font-medium">Rate:</span> {tierInfo.rateLimit.toLocaleString()}/hour</div>
+                        <div><span className="font-medium">File Size:</span> {tierInfo.maxFileSize}</div>
+                        <div><span className="font-medium">Formats:</span> All formats</div>
+                      </div>
+                      <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <span className="font-medium">API Permissions:</span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {tierInfo.permissions.map((permission) => (
+                              <span key={permission} className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded">
+                                {permission}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
                     <div>
                       <Label htmlFor="keyName">Key Name</Label>
                       <Input
@@ -482,16 +567,13 @@ function APIPricing() {
                         value={newKeyName}
                         onChange={(e) => setNewKeyName(e.target.value)}
                       />
-                      <p className="text-sm text-gray-500 mt-2">
-                        Choose a descriptive name to identify this key
-                      </p>
                     </div>
                     <Button
-                      onClick={() => createKeyMutation.mutate({ name: newKeyName || 'API Key' })}
+                      onClick={() => createKeyMutation.mutate({ name: newKeyName || `${tierInfo.tier} API Key` })}
                       disabled={createKeyMutation.isPending}
-                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      className="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-medium"
                     >
-                      {createKeyMutation.isPending ? 'Creating...' : 'Create API Key'}
+                      {createKeyMutation.isPending ? 'Creating...' : `Create ${tierInfo.tier} API Key`}
                     </Button>
                   </div>
                 </DialogContent>
