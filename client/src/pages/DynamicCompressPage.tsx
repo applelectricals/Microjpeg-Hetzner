@@ -411,7 +411,6 @@ export default function MicroJPEGLanding() {
   const [fileObjectUrls, setFileObjectUrls] = useState<Map<string, string>>(new Map());
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingProgress, setProcessingProgress] = useState(0);
-  const [processingProgress, setProcessingProgress] = useState(0);
   const [estimatedTimeRemaining, setEstimatedTimeRemaining] = useState(0); // in seconds
   const [processingStatus, setProcessingStatus] = useState('');
 
@@ -1018,7 +1017,7 @@ console.log('📏 Computed limits:', {
         clearInterval(progressInterval);
       }
       setEstimatedTimeRemaining(0);
-      
+
       toast({
         title: "Compression failed",
         description: error instanceof Error ? error.message : "An error occurred during compression",
