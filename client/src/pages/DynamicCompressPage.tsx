@@ -872,7 +872,7 @@ console.log('📏 Computed limits:', {
 
       // Prepare compression settings
       const settings = {
-        quality: 80, // Balanced quality for good compression ratios
+        quality: 95, // Balanced quality for good compression ratios
         outputFormat: conversionEnabled && selectedFormats.length > 0 ? selectedFormats : 'keep-original',
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
@@ -1159,7 +1159,7 @@ console.log('📏 Computed limits:', {
 
       // Prepare compression settings for specific format
       const settings = {
-        quality: 80,
+        quality: 95,
         outputFormat: [format], // Only process this specific format
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
