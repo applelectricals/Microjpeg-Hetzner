@@ -47,15 +47,6 @@ interface CompressionResult {
   wasConverted: boolean;
 }
 
-interface SessionData {
-  compressions: number;
-  conversions: number;
-  uploadedFiles: FileWithPreview[];
-  results: CompressionResult[];
-  showPricingProbability: number;
-  activityScore: number;
-  batchDownloadUrl?: string;
-}
 
 interface TierInfo {
   tierName: string;
@@ -420,7 +411,6 @@ export default function MicroJPEGLanding() {
   const [conversionEnabled, setConversionEnabled] = useState(true);
   const [selectedFormats, setSelectedFormats] = useState<string[]>(['jpeg']);
   const [showModal, setShowModal] = useState(false);
-  const [showPricing, setShowPricing] = useState(false);
   const [modalState, setModalState] = useState<'processing' | 'complete'>('processing');
   const [dragActive, setDragActive] = useState(false);
   const [showAllFormats, setShowAllFormats] = useState(false);
@@ -1002,14 +992,8 @@ console.log('📏 Computed limits:', {
       // Clear newly added files to prevent reprocessing
       setNewlyAddedFiles([]);
 
-      // Show pricing cards after 3 or more files have been processed
-      const uniqueFiles = new Set(newSession.results.map(r => r.originalName));
-      if (uniqueFiles.size >= 3 && !showPricing) {
-        setTimeout(() => {
-          setShowPricing(true);
-        }, 1000); // Show pricing modal 1 second after processing completes
-      }
-
+    
+      
     } catch (error) {
       console.error('Compression error:', error);
       // Clear progress interval on error
@@ -1962,172 +1946,7 @@ console.log('📏 Computed limits:', {
                 </div>
               </div>
 
-              {/* Professional Upgrade Plans - xxx-inspired design */}
-              {(session.results.length >= 3 || showPricing) && (
-                <div className="w-full my-6 px-2">
-                  <div className="text-center mb-6">
-                    <h3 className="text-lg font-semibold text-white mb-2">Want to compress larger files? Get <span className="font-bold">STARTER PLAN !</span></h3>
-                  </div>
-                  
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {/* Test Premium Card - xxx Style */}
-                    <div className="relative bg-white border-2 border-brand-teal rounded-xl overflow-hidden shadow-sm">
-                      {/* Recommended Badge */}
-                      <div className="bg-brand-teal text-white text-center py-2 text-xs font-semibold uppercase tracking-wide">
-                        RECOMMENDED FOR YOU
-                      </div>
-                      
-                      <div className="p-6">
-                        {/* Header with Icon */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-brand-teal/10 rounded-lg flex items-center justify-center">
-                              <Crown className="w-5 h-5 text-brand-teal" />
-                            </div>
-                            <div>
-                              <h4 className="text-lg font-bold text-gray-900">STARTER</h4>
-                              <p className="text-xs text-blue-600 font-medium uppercase tracking-wide">COMPRESS & CONVERT</p>
-                            </div>
-                          </div>
-                          <div className="w-10 h-8 bg-blue-100 rounded flex items-center justify-center">
-                            <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                            </svg>
-                          </div>
-                        </div>
-
-                        {/* Features List */}
-                        <div className="space-y-2 mb-6">
-                          <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
-                              <Check className="w-3 h-3 text-brand-teal" />
-                            </div>
-                            <span className="text-sm text-gray-700"><span className="font-semibold">3000</span> Monthly Operations</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
-                              <Check className="w-3 h-3 text-brand-teal" />
-                            </div>
-                            <span className="text-sm text-gray-700"><span className="font-semibold">Upto 50 MB</span> file size for RAW & Regular</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
-                              <Check className="w-3 h-3 text-brand-teal" />
-                            </div>
-                            <span className="text-sm text-gray-700">Batch processing (max 20 files)</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
-                              <Check className="w-3 h-3 text-brand-teal" />
-                            </div>
-                            <span className="text-sm text-gray-700">Priority processing (2x faster queue)</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
-                              <Check className="w-3 h-3 text-brand-teal" />
-                            </div>
-                            <span className="text-sm text-gray-700">Basic API (1,000 calls/month)</span>
-                          </div>
-                        </div>
-
-                        {/* Pricing */}
-                        <div className="flex items-baseline justify-between mb-4">
-                          <div>
-                            <span className="text-3xl font-bold text-gray-900">$9</span>
-                            <span className="text-sm text-gray-600 ml-1">Monthly or $79 Yearly (save $29 = 27% off)</span>
-                          </div>
-                        </div>
-
-                        {/* CTA Button */}
-                        <Button 
-                          className="w-full bg-brand-teal hover:bg-brand-teal/90 text-white font-medium py-3 rounded-lg"
-                          onClick={() => window.location.href = '/subscribe?plan=starter'}
-                        >
-                          Get STARTER
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Premium Plan Card - xxx Style */}
-                    <div className="relative bg-white border-2 border-brand-gold rounded-xl overflow-hidden shadow-sm">
-                      {/* Gold Top Banner */}
-                      <div className="bg-brand-gold text-white text-center py-4 text-xs font-semibold uppercase tracking-wide"></div>
-                      
-                      <div className="p-6">
-                        {/* Header with Icon */}
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 bg-brand-gold/10 rounded-lg flex items-center justify-center">
-                              <svg className="w-6 h-6 text-brand-gold" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M5 16L3 4l5.5 4L12 4l3.5 4L21 4l-2 12H5zm0 0h14v2H5v-2z"/>
-                              </svg>
-                            </div>
-                            <div>
-                              <h4 className="text-lg font-bold text-gray-900">PRO ⭐ (Most Popular)</h4>
-                              <p className="text-xs text-blue-600 font-medium uppercase tracking-wide">COMPRESS & CONVERT</p>
-                            </div>
-                          </div>
-                          <div className="w-10 h-8 bg-blue-100 rounded flex items-center justify-center">
-                            <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
-                            </svg>
-                          </div>
-                        </div>
-
-                        {/* Features List */}
-                        <div className="space-y-2 mb-6">
-                          <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
-                              <Check className="w-3 h-3 text-brand-teal" />
-                            </div>
-                            <span className="text-sm text-gray-700"><span className="font-semibold">15000</span> Monthly Operations</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
-                              <Check className="w-3 h-3 text-brand-teal" />
-                            </div>
-                            <span className="text-sm text-gray-700"><span className="font-semibold">Upto 100 MB</span> file size for RAW & Regular</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
-                              <Check className="w-3 h-3 text-brand-teal" />
-                            </div>
-                            <span className="text-sm text-gray-700">Batch processing (max 200 files)</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
-                              <Check className="w-3 h-3 text-brand-teal" />
-                            </div>
-                            <span className="text-sm text-gray-700">Team access (3 seats)</span>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 bg-brand-teal/10 rounded-full flex items-center justify-center flex-shrink-0">
-                              <Check className="w-3 h-3 text-brand-teal" />
-                            </div>
-                            <span className="text-sm text-gray-700">API: 15,000 calls/month</span>
-                          </div>
-                        </div>
-
-                        {/* Pricing */}
-                        <div className="flex items-baseline justify-between mb-4">
-                          <div>
-                            <span className="text-3xl font-bold text-gray-900">$19</span>
-                            <span className="text-sm text-gray-600 ml-1">Monthly or $149 Yearly (save $79 = 35% off)</span>
-                          </div>
-                        </div>
-
-                        {/* CTA Button */}
-                        <Button 
-                          className="w-full bg-brand-gold hover:bg-brand-gold-dark text-white font-medium py-3 rounded-lg"
-                          onClick={() => window.location.href = '/subscribe?plan=pro'}
-                        >
-                          Get PRO
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              
 
               {/* Image Section - Show immediately with thumbnails and progress */}
               {selectedFiles.length > 0 && (
