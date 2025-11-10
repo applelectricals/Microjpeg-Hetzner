@@ -451,6 +451,28 @@ function APIPricing() {
         </div>
       </div>
 
+      {/* API Key Section */}
+      <Card className="mt-8 bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-500">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold mb-2 dark:text-white">
+                🔑 Get Your Free API Key
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Start with 1,000 free operations • No credit card required
+              </p>
+            </div>
+            <Button
+              onClick={() => window.location.href = '/api'}
+              size="lg"
+            >
+              Get API Key →
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Features */}
       <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card>

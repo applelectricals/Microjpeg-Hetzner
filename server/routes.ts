@@ -39,6 +39,76 @@ import paypalApprovals from './routes/paypalApprovals';
 import { promises as fs } from 'fs';
 import path from 'path';
 
+// ============================================================================
+// CONCURRENT SESSION TRACKING
+// ============================================================================
+
+// In-memory session tracking (use Redis in production)
+const activeSessions = new Map<number, Set<string>>(); // userId -> Set of IPs
+
+// Middleware to check concurrent sessions based on seat count
+const checkConcurrentSessions = async (req: any, res: any, next: any) => {
+  if (!req.isAuthenticated()) {
+    return next();
+  }
+
+  const userId = req.user.id;
+  const userIP = req.ip || req.connection.remoteAddress || 'unknown';
+
+  try {
+    // Get user's seat count
+    const user = await storage.getUser(userId);
+    const allowedSeats = user.seats || 1;
+
+    // Get or create session set for this user
+    if (!activeSessions.has(userId)) {
+      activeSessions.set(userId, new Set());
+    }
+
+    const userSessions = activeSessions.get(userId)!;
+
+    // Add current IP to active sessions
+    userSessions.add(userIP);
+
+    // Check if exceeded seat limit
+    if (userSessions.size > allowedSeats) {
+      console.log(`⚠️ Concurrent session limit exceeded for user ${userId}: ${userSessions.size}/${allowedSeats} sessions`);
+
+      return res.status(429).json({
+        success: false,
+        error: `Concurrent session limit exceeded. Your plan allows ${allowedSeats} concurrent session${allowedSeats > 1 ? 's' : ''}.`,
+        allowedSeats: allowedSeats,
+        activeSessions: userSessions.size
+      });
+    }
+
+    // Log session info
+    console.log(`✅ Session allowed for user ${userId}: ${userSessions.size}/${allowedSeats} active sessions`);
+
+    // Store session info in request
+    req.user.activeIP = userIP;
+    req.user.allowedSeats = allowedSeats;
+
+    next();
+  } catch (error) {
+    console.error('Session check error:', error);
+    next(); // Don't block on error
+  }
+};
+
+// Clean up stale sessions every 30 minutes
+setInterval(() => {
+  const now = Date.now();
+  activeSessions.forEach((ips, userId) => {
+    if (ips.size === 0) {
+      activeSessions.delete(userId);
+    }
+  });
+  console.log(`🧹 Session cleanup: ${activeSessions.size} active users`);
+}, 30 * 60 * 1000);
+
+// ============================================================================
+
 // Clean up old files in uploads directory
 async function cleanupOldFiles() {
   try {
@@ -1221,8 +1291,8 @@ const results = [];
   });
 
 
-// Compression endpoint for both guest and authenticated users  
-app.post("/api/compress", upload.array('files', 20), requireScopeFromAuth, async (req, res) => {
+// Compression endpoint for both guest and authenticated users
+app.post("/api/compress", checkConcurrentSessions, upload.array('files', 20), requireScopeFromAuth, async (req, res) => {
   console.log('=== COMPRESS REQUEST STARTED ===');
   console.log('Timestamp:', new Date().toISOString());
   console.log('User:', req.user?.email || 'anonymous');
@@ -3680,7 +3750,7 @@ return res.json({
   });
 
   // Upload and compress images (now supports guest users) - SECURE VERSION
-  app.post("/api/compress-legacy", requireScopeFromAuth, upload.array("images", 20), async (req, res) => {
+  app.post("/api/compress-legacy", checkConcurrentSessions, requireScopeFromAuth, upload.array("images", 20), async (req, res) => {
     // Set timeout based on user plan - 30 seconds for anonymous, longer for paid users
     const user = req.user;
     const planLimits = user ? getUnifiedPlan('free') : getUnifiedPlan('anonymous');
@@ -4345,7 +4415,7 @@ return res.json({
   });
 
   // Compress with target file size - SECURE VERSION
-  app.post("/api/compress-target-size", requireScopeFromAuth, upload.array("images", 10), async (req, res) => {
+  app.post("/api/compress-target-size", checkConcurrentSessions, requireScopeFromAuth, upload.array("images", 10), async (req, res) => {
     try {
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
@@ -4738,6 +4808,45 @@ return res.json({
       console.error("Trial status check error:", error);
       res.status(500).json({ error: "Failed to check trial status" });
     }
+  });
+
+  // Session cleanup endpoint (called when user logs out or closes browser)
+  app.post('/api/session/cleanup', isAuthenticated, (req, res) => {
+    const userId = req.user?.id;
+    const userIP = req.ip || req.connection.remoteAddress || 'unknown';
+
+    if (userId && activeSessions.has(userId)) {
+      const userSessions = activeSessions.get(userId)!;
+      userSessions.delete(userIP);
+
+      console.log(`🧹 Session cleanup for user ${userId}, IP ${userIP}`);
+
+      // Remove map entry if no sessions left
+      if (userSessions.size === 0) {
+        activeSessions.delete(userId);
+      }
+    }
+
+    res.json({ success: true });
+  });
+
+  // Get active sessions info
+  app.get('/api/session/info', isAuthenticated, (req, res) => {
+    const userId = req.user?.id;
+    const user = req.user;
+
+    const activeSessionCount = activeSessions.has(userId)
+      ? activeSessions.get(userId)!.size
+      : 0;
+
+    res.json({
+      allowedSeats: user.seats || 1,
+      activeSessions: activeSessionCount,
+      currentIP: req.ip || req.connection.remoteAddress || 'unknown',
+      activeIPs: activeSessions.has(userId)
+        ? Array.from(activeSessions.get(userId)!)
+        : []
+    });
   });
 
   // Lead magnet email endpoint with abuse prevention and credit tracking
