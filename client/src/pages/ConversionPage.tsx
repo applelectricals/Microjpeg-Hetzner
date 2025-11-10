@@ -744,7 +744,7 @@ export default function ConversionPage() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Button 
                   size="lg" 
-                  onClick={() => window.location.href = '/simple-pricing'}
+                  onClick={() => window.location.href = '/pricing'}
                   className="w-full sm:w-auto bg-brand-gold hover:bg-brand-gold-dark text-white font-semibold px-8 py-4 text-lg rounded-lg animate-pulse-glow min-h-[48px]"
                   data-testid="button-plans-pricing"
                 >
@@ -917,7 +917,7 @@ export default function ConversionPage() {
               <Button
                 size="sm"
                 className="flex-1 bg-brand-gold hover:bg-brand-gold-dark text-white text-xs"
-                onClick={() => window.location.href = '/simple-pricing'}
+                onClick={() => window.location.href = '/pricing'}
               >
                 View Plans
               </Button>
