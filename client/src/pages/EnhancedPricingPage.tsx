@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Check, X, Crown, Zap, Code, Globe, Boxes, Calculator, ArrowRight } from 'lucide-react';
+import { Check, X, Crown, Zap, Code, Globe, Boxes, Calculator, ArrowRight, Plus, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Slider } from '@/components/ui/slider';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/use-toast';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/api';
 
 
 // Dark mode hook
@@ -281,8 +287,63 @@ function WebPricing({ billingCycle, setBillingCycle }: {
 
 // ==================== API PRICING ====================
 function APIPricing() {
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
   const [operations, setOperations] = useState([5000]);
-  
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [newKeyName, setNewKeyName] = useState('');
+  const [createdKey, setCreatedKey] = useState<string | null>(null);
+  const [showCreatedKey, setShowCreatedKey] = useState(true);
+
+  // Fetch API keys
+  const { data: apiKeys } = useQuery({
+    queryKey: ['/api/keys'],
+    refetchInterval: 30000,
+  }) as { data: { apiKeys: any[] } | undefined };
+
+  // Create API key mutation
+  const createKeyMutation = useMutation({
+    mutationFn: async (keyData: { name: string }) => {
+      const response = await apiRequest('POST', '/api/keys', {
+        name: keyData.name
+      });
+      return response;
+    },
+    onSuccess: async (response: any) => {
+      let data;
+      if (response instanceof Response) {
+        data = await response.json();
+      } else {
+        data = response;
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['/api/keys'] });
+
+      const fullKey = data.fullKey || data.apiKey?.fullKey || data.key;
+      if (fullKey) {
+        setCreatedKey(fullKey);
+        setShowCreatedKey(true);
+      }
+
+      setIsCreateDialogOpen(false);
+      setNewKeyName('');
+
+      toast({
+        title: '✅ API Key Created Successfully!',
+        description: 'Your API key is ready to use.',
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to create API key',
+        variant: 'destructive',
+      });
+    },
+  });
+
   const calculateCost = (ops: number) => {
     if (ops <= 500) return 0;
     
@@ -329,6 +390,116 @@ function APIPricing() {
           Pay only for what you use. No monthly fees. 500 free operations every month.
         </p>
       </div>
+
+      {/* Get API Key Section */}
+      {createdKey ? (
+        <Card className="mb-12 bg-green-50 dark:bg-green-900/10 border-2 border-green-500">
+          <CardContent className="p-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-xl font-bold mb-2 dark:text-white">
+                  ✅ API Key Created Successfully!
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Save your API key securely. You won't be able to see it again.
+                </p>
+              </div>
+              <div className="p-4 bg-gray-900 dark:bg-black rounded-lg font-mono text-sm">
+                <div className="flex items-center justify-between">
+                  <span className="text-green-400 break-all">
+                    {showCreatedKey ? createdKey : createdKey.replace(/(?<=sk_test_).+/, '••••••••••••••••')}
+                  </span>
+                  <Button
+                    onClick={() => {
+                      navigator.clipboard.writeText(createdKey);
+                      toast({
+                        title: 'Copied!',
+                        description: 'API key copied to clipboard',
+                      });
+                    }}
+                    variant="outline"
+                    size="sm"
+                    className="ml-2"
+                  >
+                    Copy
+                  </Button>
+                </div>
+                <button
+                  onClick={() => setShowCreatedKey(!showCreatedKey)}
+                  className="mt-2 text-gray-400 hover:text-gray-300 flex items-center gap-1"
+                >
+                  {showCreatedKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showCreatedKey ? 'Hide' : 'Show'}
+                </button>
+              </div>
+              <Button onClick={() => setCreatedKey(null)} variant="outline" className="w-full">
+                Create Another Key
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="mb-12 bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-500">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-xl font-bold mb-2 dark:text-white">
+                  🔑 Get Your Free API Key
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Start with 1,000 free operations • No credit card required
+                </p>
+              </div>
+              <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button
+                    size="lg"
+                    className="ml-4"
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        window.location.href = '/login?redirect=/pricing';
+                        return;
+                      }
+                    }}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Get API Key
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New API Key</DialogTitle>
+                    <p className="text-sm text-gray-600">
+                      Generate a new API key for your applications
+                    </p>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="keyName">Key Name</Label>
+                      <Input
+                        id="keyName"
+                        placeholder="e.g., Production API, Mobile App"
+                        value={newKeyName}
+                        onChange={(e) => setNewKeyName(e.target.value)}
+                      />
+                      <p className="text-sm text-gray-500 mt-2">
+                        Choose a descriptive name to identify this key
+                      </p>
+                    </div>
+                    <Button
+                      onClick={() => createKeyMutation.mutate({ name: newKeyName || 'API Key' })}
+                      disabled={createKeyMutation.isPending}
+                      className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    >
+                      {createKeyMutation.isPending ? 'Creating...' : 'Create API Key'}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Pricing Calculator */}
       <Card className="mb-12 border-2 border-blue-500 dark:border-blue-400">
@@ -450,28 +621,6 @@ function APIPricing() {
           ))}
         </div>
       </div>
-
-      {/* API Key Section */}
-      <Card className="mt-8 bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-500">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-xl font-bold mb-2 dark:text-white">
-                🔑 Get Your Free API Key
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Start with 1,000 free operations • No credit card required
-              </p>
-            </div>
-            <Button
-              onClick={() => window.location.href = '/api'}
-              size="lg"
-            >
-              Get API Key →
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Features */}
       <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
