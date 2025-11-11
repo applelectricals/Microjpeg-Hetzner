@@ -33,8 +33,8 @@ const PLANS = {
     id: 'starter',
     name: 'Starter',
     description: 'For freelancers',
-    monthly: { price: 9, subscriptionPlanId: 'P-5H209695PC6961949NEHOG2Q' },
-    yearly: { price: 49, subscriptionPlanId: 'P-8RD90370JE5056234NEHPDGA', savings: 59 },
+    monthly: { price: 9, subscriptionPlanId: 'P-5H209209695PC6961949NEHOG2Q' },
+    yearly: { price: 49, subscriptionPlanId: 'P-8RD90370JE5050614NEHPDGA', savings: 59 },
     features: ['Unlimited compressions', '75MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Standard processing', '1 concurrent upload'],
   },
   pro: {
@@ -69,389 +69,232 @@ export default function CheckoutPage() {
   const [selectedPlan, setSelectedPlan] = useState<keyof typeof PLANS>(
     (preSelectedPlan as keyof typeof PLANS) || 'pro'
   );
-  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+  const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');  // Changed default to 'monthly'
   const [quantity, setQuantity] = useState(1);
   const [subscriptionLoaded, setSubscriptionLoaded] = useState(false);
   const [onetimeLoaded, setOnetimeLoaded] = useState(false);
-  
-  // Use refs to track if buttons are currently rendered
-  const subscriptionRendered = useRef(false);
-  const onetimeRendered = useRef(false);
 
-  // Load PayPal SDK for subscriptions
+  const subscriptionContainerRef = useRef<HTMLDivElement>(null);
+  const onetimeContainerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
-    const existingScript = document.getElementById('paypal-subscription-sdk');
-    if (existingScript) {
-      setSubscriptionLoaded(true);
-      return;
-    }
-
-    const script = document.createElement('script');
-    script.id = 'paypal-subscription-sdk';
-    script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&vault=true&intent=subscription`;
-    script.async = true;
-    script.onload = () => {
-      console.log('✅ Subscription SDK loaded');
-      setSubscriptionLoaded(true);
+    const loadPayPalSDK = () => {
+      const script = document.createElement('script');
+      script.src = \`https://www.paypal.com/sdk/js?client-id=\${PAYPAL_CLIENT_ID}&components=buttons&intent=subscription\`;
+      script.async = true;
+      script.onload = () => {
+        initializePayPalButtons();
+      };
+      script.onerror = () => {
+        console.error('Failed to load PayPal SDK');
+      };
+      document.body.appendChild(script);
     };
-    script.onerror = () => console.error('❌ Failed to load subscription SDK');
-    document.body.appendChild(script);
-  }, []);
 
-  // Load separate SDK for one-time payments
-  useEffect(() => {
-    const existingScript = document.getElementById('paypal-onetime-sdk');
-    if (existingScript) {
-      setOnetimeLoaded(true);
-      return;
-    }
+    const initializePayPalButtons = () => {
+      if (window.PayPal) {
+        const plan = PLANS[selectedPlan];
+        const selectedPricing = plan[billingCycle];
 
-    const script = document.createElement('script');
-    script.id = 'paypal-onetime-sdk';
-    script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&intent=capture&disable-funding=credit`;
-    script.async = true;
-    script.onload = () => {
-      console.log('✅ One-time SDK loaded');
-      setOnetimeLoaded(true);
-    };
-    script.onerror = () => console.error('❌ Failed to load one-time SDK');
-    document.body.appendChild(script);
-  }, []);
-
-  // Render subscription button with proper cleanup
-  useEffect(() => {
-    if (!subscriptionLoaded) return;
-
-    const plan = PLANS[selectedPlan];
-    const planId = billingCycle === 'monthly' ? plan.monthly.subscriptionPlanId : plan.yearly.subscriptionPlanId;
-    
-    // Create unique container ID based on plan and cycle
-    const containerId = `paypal-sub-${selectedPlan}-${billingCycle}`;
-    
-    // Get the main container
-    const mainContainer = document.getElementById('paypal-subscription-container');
-    if (!mainContainer) return;
-    
-    // Clear all previous buttons
-    mainContainer.innerHTML = '';
-    
-    // Create new container for this specific plan/cycle
-    const buttonContainer = document.createElement('div');
-    buttonContainer.id = containerId;
-    mainContainer.appendChild(buttonContainer);
-    
-    subscriptionRendered.current = false;
-
-    // @ts-ignore
-    if (window.paypal && !subscriptionRendered.current) {
-      console.log('🔄 Rendering subscription button for:', selectedPlan, billingCycle);
-      
-      // @ts-ignore
-      window.paypal.Buttons({
-        style: { shape: 'rect', color: 'gold', layout: 'vertical', label: 'subscribe' },
-        createSubscription: function(data: any, actions: any) {
-          return actions.subscription.create({ plan_id: planId });
-        },
-        onApprove: async function(data: any) {
-          console.log('✅ Subscription approved:', data.subscriptionID);
-          try {
-            await fetch('/api/payment/paypal/subscription', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({
-                plan: `${selectedPlan}-${billingCycle}`,
-                paypal_subscription_id: data.subscriptionID,
-                billing: { name: user?.email || 'guest', email: user?.email || 'guest' }
-              })
-            });
-          } catch (e) {
-            console.error('Backend error:', e);
-          }
-          window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&subscription_id=${data.subscriptionID}`;
-        },
-        onError: function(err: any) {
-          console.error('PayPal subscription error:', err);
+        // Clear containers
+        if (subscriptionContainerRef.current) {
+          subscriptionContainerRef.current.innerHTML = '';
         }
-      }).render(`#${containerId}`).then(() => {
-        subscriptionRendered.current = true;
-        console.log('✅ Subscription button rendered');
-      }).catch((err: any) => {
-        console.error('Failed to render subscription button:', err);
-      });
-    }
-
-    // Cleanup function
-    return () => {
-      console.log('🧹 Cleaning up subscription button');
-      if (mainContainer) {
-        mainContainer.innerHTML = '';
-      }
-      subscriptionRendered.current = false;
-    };
-  }, [subscriptionLoaded, selectedPlan, billingCycle, user]);
-
-  // Render one-time button with proper cleanup
-  useEffect(() => {
-    if (!onetimeLoaded) return;
-
-    const plan = PLANS[selectedPlan];
-    const price = billingCycle === 'monthly' ? plan.monthly.price : plan.yearly.price;
-    const totalAmount = price * quantity;
-    
-    // Create unique container ID based on plan and cycle
-    const containerId = `paypal-onetime-${selectedPlan}-${billingCycle}`;
-    
-    // Get the main container
-    const mainContainer = document.getElementById('paypal-onetime-container');
-    if (!mainContainer) return;
-    
-    // Clear all previous buttons
-    mainContainer.innerHTML = '';
-    
-    // Create new container for this specific plan/cycle
-    const buttonContainer = document.createElement('div');
-    buttonContainer.id = containerId;
-    mainContainer.appendChild(buttonContainer);
-    
-    onetimeRendered.current = false;
-
-    // @ts-ignore
-    if (window.paypal && !onetimeRendered.current) {
-      console.log('🔄 Rendering one-time button for:', selectedPlan, billingCycle, price);
-      
-      // @ts-ignore
-      window.paypal.Buttons({
-        style: { shape: 'rect', color: 'blue', layout: 'vertical', label: 'pay' },
-        createOrder: function(data: any, actions: any) {
-          return actions.order.create({
-            purchase_units: [{
-              amount: { value: totalAmount.toFixed(2), currency_code: 'USD' },
-              description: `${plan.name} - ${billingCycle === 'monthly' ? '1 Month' : '1 Year'} - ${quantity} user${quantity > 1 ? 's' : ''}`
-            }]
-          });
-        },
-        onApprove: async function(data: any, actions: any) {
-          const order = await actions.order.capture();
-          console.log('✅ One-time payment captured:', order.id);
-          try {
-            await fetch('/api/payment/paypal/onetime', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({
-                plan: `${selectedPlan}-${billingCycle}`,
-                paypal_order_id: order.id,
-                amount: totalAmount,
-                quantity: quantity,
-                duration: billingCycle === 'monthly' ? 30 : 365,
-                billing: { name: user?.email || 'guest', email: user?.email || 'guest' }
-              })
-            });
-          } catch (e) {
-            console.error('Backend error:', e);
-          }
-          window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&order_id=${order.id}&quantity=${quantity}`;
-        },
-        onError: function(err: any) {
-          console.error('PayPal one-time error:', err);
+        if (onetimeContainerRef.current) {
+          onetimeContainerRef.current.innerHTML = '';
         }
-      }).render(`#${containerId}`).then(() => {
-        onetimeRendered.current = true;
-        console.log('✅ One-time button rendered');
-      }).catch((err: any) => {
-        console.error('Failed to render one-time button:', err);
-      });
-    }
 
-    // Cleanup function
-    return () => {
-      console.log('🧹 Cleaning up one-time button');
-      if (mainContainer) {
-        mainContainer.innerHTML = '';
+        // Subscription button
+        window.PayPal.Buttons({
+          style: {
+            layout: 'horizontal',
+            color: 'gold',
+            shape: 'rect',
+            label: 'subscribe',
+            tagline: false,
+          },
+          createSubscription: function(data, actions) {
+            return actions.subscription.create({
+              plan_id: selectedPricing.subscriptionPlanId,
+              quantity: quantity.toString(),
+            });
+          },
+          onApprove: function(data, actions) {
+            console.log('Subscription created:', data.subscriptionID);
+            // Handle successful subscription
+          },
+          onError: function(err) {
+            console.error('Subscription error:', err);
+          },
+        }).render(subscriptionContainerRef.current!);
+
+        setSubscriptionLoaded(true);
+
+        // One-time payment button
+        window.PayPal.Buttons({
+          style: {
+            layout: 'horizontal',
+            color: 'blue',
+            shape: 'rect',
+            label: 'pay',
+            tagline: false,
+          },
+          createOrder: function(data, actions) {
+            return actions.order.create({
+              purchase_units: [{
+                amount: {
+                  value: (selectedPricing.price * quantity).toFixed(2),
+                },
+              }],
+            });
+          },
+          onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+              console.log('One-time payment captured:', details);
+              // Handle successful payment
+            });
+          },
+          onError: function(err) {
+            console.error('One-time payment error:', err);
+          },
+        }).render(onetimeContainerRef.current!);
+
+        setOnetimeLoaded(true);
       }
-      onetimeRendered.current = false;
     };
-  }, [onetimeLoaded, selectedPlan, billingCycle, quantity, user]);
 
-  const currentPlan = PLANS[selectedPlan];
-  const currentPrice = billingCycle === 'monthly' ? currentPlan.monthly.price : currentPlan.yearly.price;
-  const totalPrice = currentPrice * quantity;
-  const savings = billingCycle === 'yearly' ? currentPlan.yearly.savings : 0;
+    loadPayPalSDK();
+
+    return () => {
+      // Cleanup
+      if (subscriptionContainerRef.current) {
+        subscriptionContainerRef.current.innerHTML = '';
+      }
+      if (onetimeContainerRef.current) {
+        onetimeContainerRef.current.innerHTML = '';
+      }
+    };
+  }, [selectedPlan, billingCycle, quantity]);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      <Header isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
-      
-      <div className="container mx-auto px-4 py-16">
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4 dark:text-white">Complete Your Subscription</h1>
-          <p className="text-gray-600 dark:text-gray-400">Choose your plan and payment method</p>
-        </div>
+    <div className={isDark ? 'dark' : ''}>
+      <Header />
 
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8">
-          <div>
-            <h2 className="text-2xl font-bold mb-6 dark:text-white">Subscription Type</h2>
-            
-            <div className="space-y-4 mb-6">
-              {Object.entries(PLANS).map(([key, plan]) => (
-                <Card 
-                  key={key} 
-                  onClick={() => setSelectedPlan(key as keyof typeof PLANS)}
-                  className={`cursor-pointer transition-all ${
-                    selectedPlan === key 
-                      ? 'border-2 border-blue-500 shadow-lg' 
-                      : 'border border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                  }`}
-                >
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        selectedPlan === key ? 'border-blue-500 bg-blue-500' : 'border-gray-300 dark:border-gray-600'
-                      }`}>
-                        {selectedPlan === key && <div className="w-2 h-2 bg-white rounded-full" />}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold dark:text-white">{plan.name}</h3>
-                          {plan.popular && <Crown className="w-4 h-4 text-yellow-500" />}
-                        </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{plan.description}</p>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        {billingCycle === 'monthly' ? 'per month' : 'per year'}
-                      </div>
-                      <div className="text-2xl font-bold dark:text-white">
-                        ${billingCycle === 'monthly' ? plan.monthly.price : plan.yearly.price}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-16">
+        <div className="max-w-4xl mx-auto px-4">
+          <Card className="shadow-xl border-0 bg-white dark:bg-gray-800">
+            <CardHeader className="text-center pb-8">
+              <CardTitle className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+                Choose Your Plan
+              </CardTitle>
+              <p className="text-gray-600 dark:text-gray-300">
+                Select the perfect plan for your image compression needs.
+              </p>
+            </CardHeader>
+
+            {/* Plan Toggle */}
+            <div className="flex justify-center mb-8">
+              <Button
+                variant={billingCycle === 'monthly' ? 'default' : 'outline'}
+                onClick={() => setBillingCycle('monthly')}
+                className="rounded-r-none"
+              >
+                Monthly
+              </Button>
+              <Button
+                variant={billingCycle === 'yearly' ? 'default' : 'outline'}
+                onClick={() => setBillingCycle('yearly')}
+                className="rounded-l-none"
+              >
+                Yearly (Save up to 50%)
+              </Button>
             </div>
 
-            <Card className="p-4 bg-gray-50 dark:bg-gray-800 mb-6">
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <h3 className="font-bold dark:text-white">${currentPrice} per {currentPlan.name} user</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {billingCycle === 'yearly' ? 'Yearly' : 'Monthly'} subscription
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}
-                    className={`w-12 h-6 rounded-full relative transition-colors ${
-                      billingCycle === 'yearly' ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
-                    }`}
+            {/* Plan Cards */}
+            <div className="grid md:grid-cols-3 gap-6 px-6 pb-8">
+              {Object.entries(PLANS).map(([key, plan]) => {
+                const pricing = plan[billingCycle];
+                return (
+                  <Card
+                    key={key}
+                    className={`cursor-pointer transition-shadow ${
+                      selectedPlan === key
+                        ? 'shadow-xl border-blue-500'
+                        : 'shadow-md hover:shadow-lg'
+                    } ${plan.popular ? 'border-2 border-blue-500 relative' : ''}`}
+                    onClick={() => setSelectedPlan(key as keyof typeof PLANS)}
                   >
-                    <div className={`absolute top-1 ${
-                      billingCycle === 'yearly' ? 'right-1' : 'left-1'
-                    } w-4 h-4 bg-white rounded-full transition-all`} />
-                  </button>
-                  <span className="text-sm font-medium dark:text-white">
-                    {billingCycle === 'yearly' ? 'Yearly' : 'Monthly'}
-                  </span>
-                </div>
-              </div>
-              {savings > 0 && (
-                <p className="text-sm text-green-600 dark:text-green-400 font-medium">
-                  💰 Save ${savings * quantity}/year with yearly billing
-                </p>
-              )}
-            </Card>
+                    {plan.popular && (
+                      <Badge className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-500">
+                        Most Popular
+                      </Badge>
+                    )}
+                    <CardHeader>
+                      <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
+                      <p className="text-sm text-gray-500">{plan.description}</p>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-4xl font-bold mb-2">
+                        ${pricing.price}
+                        <span className="text-sm font-normal text-gray-500">
+                          /{billingCycle}
+                        </span>
+                      </div>
+                      {billingCycle === 'yearly' && (
+                        <p className="text-sm text-green-600 mb-4">
+                          Save ${pricing.savings}
+                        </p>
+                      )}
+                      <ul className="space-y-2">
+                        {plan.features.map((feature) => (
+                          <li key={feature} className="flex items-center text-sm">
+                            <Check className="w-4 h-4 mr-2 text-green-500" />
+                            {feature}
+                          </li>
+                        ))}
+                      </ul>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
 
-            {/* Quantity Selector */}
-            <Card className="p-4 bg-yellow-50 dark:bg-yellow-900/10 mb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold dark:text-white">Number of Users</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {billingCycle === 'yearly' ? 'Yearly' : 'Monthly'} subscription
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
+            {/* Checkout */}
+            <CardContent className="border-t border-gray-200 dark:border-gray-700 p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-2xl font-bold">Quantity</h3>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    disabled={quantity <= 1}
-                    className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center font-bold text-gray-700 dark:text-gray-300 hover:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    −
-                  </button>
-                  <span className="text-2xl font-bold dark:text-white min-w-[3ch] text-center">
-                    {quantity}
-                  </span>
-                  <button
+                    <Minus className="w-4 h-4" />
+                  </Button>
+                  <span className="w-8 text-center font-bold">{quantity}</span>
+                  <Button
+                    variant="outline"
+                    size="icon"
                     onClick={() => setQuantity(quantity + 1)}
-                    className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center font-bold text-gray-700 dark:text-gray-300 hover:border-blue-500 transition-colors"
                   >
-                    +
-                  </button>
+                    <Plus className="w-4 h-4" />
+                  </Button>
                 </div>
               </div>
-            </Card>
 
-            <div>
-              <h3 className="font-bold mb-3 dark:text-white">What's included:</h3>
-              <ul className="space-y-2">
-                {currentPlan.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-center gap-2 text-sm">
-                    <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    <span className="dark:text-gray-300">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+              <div className="text-xl font-bold mb-6">
+                Total: $
+                {PLANS[selectedPlan][billingCycle].price * quantity}
+              </div>
 
-          <div>
-            <Card className="mb-6">
-              <CardHeader><CardTitle>Order Summary</CardTitle></CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3 pb-4 border-b dark:border-gray-700">
-                  <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {quantity}x {currentPlan.name} subscription
-                    </span>
-                    <span className="font-medium dark:text-white">${totalPrice}</span>
-                  </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
-                    ${currentPrice} × {quantity} user{quantity > 1 ? 's' : ''}
-                  </div>
-                  {savings > 0 && (
-                    <div className="text-sm text-green-600 dark:text-green-400">
-                      💰 Total savings: ${savings * quantity}/year
-                    </div>
-                  )}
-                </div>
-                <div className="flex justify-between items-center text-xl font-bold">
-                  <span className="dark:text-white">Total</span>
-                  <span className="dark:text-white">${totalPrice}</span>
-                </div>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  Includes sales tax (if applicable)
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader><CardTitle>Choose Payment Method</CardTitle></CardHeader>
-              <CardContent className="space-y-6">
-                
-                {/* PayPal Subscription */}
-                <div className="border rounded-lg p-4 dark:border-gray-700">
+              <div className="space-y-6">
+                {/* Pay with PayPal Subscription */}
+                <div className="border-2 border-yellow-500 rounded-lg p-4 bg-yellow-50 dark:bg-yellow-900/20">
                   <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h3 className="font-bold dark:text-white">PayPal Subscription</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Auto-renews {billingCycle === 'monthly' ? 'monthly' : 'yearly'}
-                      </p>
-                    </div>
+                    <h3 className="font-bold dark:text-white">Pay with PayPal (Subscription)</h3>
+                    <span className="bg-yellow-500 text-white text-xs px-2 py-1 rounded">AUTO-RENEW</span>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                    ✓ Automatic renewal<br/>
                     ✓ Cancel anytime<br/>
                     ✓ For PayPal accounts
                   </p>
@@ -475,12 +318,7 @@ export default function CheckoutPage() {
                 {/* Pay with Card */}
                 <div className="border-2 border-blue-500 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
                   <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <h3 className="font-bold dark:text-white">Pay with Card (One-time)</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        One-time payment for {billingCycle === 'monthly' ? '1 month' : '1 year'}
-                      </p>
-                    </div>
+                    <h3 className="font-bold dark:text-white">Pay with Card (One-time)</h3>
                     <span className="bg-green-500 text-white text-xs px-2 py-1 rounded">RECOMMENDED</span>
                   </div>
                   <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
@@ -504,9 +342,9 @@ export default function CheckoutPage() {
                     </div>
                   )}
                 </div>
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
