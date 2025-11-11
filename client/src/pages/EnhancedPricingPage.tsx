@@ -106,6 +106,18 @@ export default function CompletePricingPage() {
 
         {/* FAQ Section */}
         <FAQSection />
+        {/* Floating Dark Mode Toggle */}
+      <button
+        onClick={() => setIsDark(!isDark)}
+        className="fixed bottom-8 right-8 p-4 rounded-full bg-gray-200 dark:bg-gray-700 shadow-lg hover:shadow-xl transition-all z-50"
+        aria-label="Toggle dark mode"
+      >
+        {isDark ? (
+          <Sun className="h-6 w-6 text-yellow-500" />
+        ) : (
+          <Moon className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+        )}
+      </button>
       </div>
 
       <Footer />
