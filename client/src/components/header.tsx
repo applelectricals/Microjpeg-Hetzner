@@ -5,8 +5,15 @@ import { Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import logoUrl from '@assets/mascot-logo-optimized.png';
+import { Moon, Sun } from 'lucide-react';
 
-export default function Header() {
+
+interface HeaderProps {
+  isDark?: boolean;
+  onToggleDark?: () => void;
+}
+
+export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
   const { user, isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [usageStats, setUsageStats] = useState<any>(null);
@@ -54,11 +61,28 @@ export default function Header() {
         <div className="flex items-center justify-between h-16 px-4">
           <div className="flex items-center gap-2">
             <img src={logoUrl} alt="MicroJPEG Logo" className="w-8 h-8 object-contain" />
+            
             <div className="flex flex-col">
               <span className="text-lg font-bold font-poppins text-brand-dark dark:text-white">MicroJPEG</span>
               <span className="text-xs font-opensans text-brand-dark dark:text-gray-300 opacity-70 tracking-wider">PICTURE PERFECT</span>
             </div>
           </div>
+{/* Dark Mode Toggle - Mobile */}
+          {onToggleDark && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onToggleDark}
+              className="rounded-full mr-2"
+            >
+              {isDark ? (
+                <Sun className="h-5 w-5 text-yellow-500" />
+              ) : (
+                <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              )}
+            </Button>
+          )}
+
           
           {/* Mobile: No counter display - silent tracking only */}
           
@@ -104,6 +128,21 @@ export default function Header() {
                 Pricing
               </button>
             </nav>
+{/* Dark Mode Toggle - Desktop */}
+            {onToggleDark && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onToggleDark}
+                className="rounded-full"
+              >
+                {isDark ? (
+                  <Sun className="h-5 w-5 text-yellow-500" />
+                ) : (
+                  <Moon className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+                )}
+              </Button>
+            )}
 
             {/* Desktop: No counter display - silent tracking only */}
 
@@ -202,6 +241,28 @@ export default function Header() {
                   Pricing
                 </button>
               </div>
+
+                            {/* Dark Mode Toggle in Menu */}
+              {onToggleDark && (
+                <button 
+                  onClick={() => { 
+                    onToggleDark(); 
+                  }} 
+                  className="flex items-center gap-2 w-full text-left py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2 bg-transparent border-none cursor-pointer"
+                >
+                  {isDark ? (
+                    <>
+                      <Sun className="h-4 w-4 text-yellow-500" />
+                      <span>Light Mode</span>
+                    </>
+                  ) : (
+                    <>
+                      <Moon className="h-4 w-4" />
+                      <span>Dark Mode</span>
+                    </>
+                  )}
+                </button>
+              )}
 
               <hr className="border-gray-200 dark:border-gray-600" />
 

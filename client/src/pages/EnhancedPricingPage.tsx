@@ -1,3 +1,4 @@
+import { useDarkMode } from '@/hooks/useDarkMode';
 import { useState, useEffect } from 'react';
 import { Check, X, Crown, Zap, Code, Globe, Boxes, Calculator, ArrowRight, Plus, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -15,29 +16,8 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 
 
-// Dark mode hook
-function useDarkMode() {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('darkMode');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      return saved ? saved === 'true' : prefersDark;
-    }
-    return true; // Default to dark
-  });
 
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('darkMode', 'true');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('darkMode', 'false');
-    }
-  }, [isDark]);
 
-  return { isDark, setIsDark };
-}
 
 
 
@@ -106,18 +86,6 @@ export default function CompletePricingPage() {
 
         {/* FAQ Section */}
         <FAQSection />
-        {/* Floating Dark Mode Toggle */}
-      <button
-        onClick={() => setIsDark(!isDark)}
-        className="fixed bottom-8 right-8 p-4 rounded-full bg-gray-200 dark:bg-gray-700 shadow-lg hover:shadow-xl transition-all z-50"
-        aria-label="Toggle dark mode"
-      >
-        {isDark ? (
-          <Sun className="h-6 w-6 text-yellow-500" />
-        ) : (
-          <Moon className="h-6 w-6 text-gray-700 dark:text-gray-300" />
-        )}
-      </button>
       </div>
 
       <Footer />
