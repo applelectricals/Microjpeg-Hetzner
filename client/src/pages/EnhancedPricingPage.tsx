@@ -48,7 +48,6 @@ export default function CompletePricingPage() {
   const [activeTab, setActiveTab] = useState('web');
 
   return (
-    <div className={isDark ? 'dark' : ''}>       // ← ADDED WRAPPER
     <div className="min-h-screen bg-white dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       <Header isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
       
@@ -109,9 +108,8 @@ export default function CompletePricingPage() {
         <FAQSection />
       </div>
 
-<Footer />
-      </div>
-    </div>                                      // ← CLOSE WRAPPER
+      <Footer />
+    </div>
   );
 }
 
