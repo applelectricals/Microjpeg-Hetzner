@@ -14,6 +14,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { queryClient, apiRequest } from '@/lib/queryClient';
 
+const { isDark, setIsDark } = useDarkMode();
+
 
 // Dark mode hook
 function useDarkMode() {
