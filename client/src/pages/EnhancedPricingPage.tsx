@@ -54,7 +54,7 @@ export default function CompletePricingPage() {
       <div className="container mx-auto px-4 py-16">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent dark:from-blue-300 dark:to-purple-300">
             Choose the right plan for your needs
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-400 max-w-3xl mx-auto">
@@ -221,13 +221,13 @@ function WebPricing({ billingCycle, setBillingCycle }: {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
         {plans.map((plan) => (
           <Card
-            key={plan.name}
-            className={`relative ${
-              plan.popular
-                ? 'border-2 border-blue-500 dark:border-blue-400 shadow-xl scale-105'
-                : 'border border-gray-200 dark:border-gray-700'
-            }`}
-          >
+  key={plan.name}
+  className={`relative dark:bg-gray-800 ${
+    plan.popular
+      ? 'border-2 border-blue-500 dark:border-blue-400 shadow-xl scale-105'
+      : 'border border-gray-200 dark:border-gray-700'
+  }`}
+>
             {plan.popular && (
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-bold">
@@ -237,10 +237,10 @@ function WebPricing({ billingCycle, setBillingCycle }: {
             )}
             
             <CardHeader>
-              <CardTitle className="text-2xl">{plan.name}</CardTitle>
+              <CardTitle className="text-2xl dark:text-white">{plan.name}</CardTitle>
               <p className="text-sm text-gray-600 dark:text-gray-400">{plan.description}</p>
               <div className="mt-4">
-                <span className="text-4xl font-bold">
+                <span className="text-4xl font-bold dark:text-white">
                   {plan.priceMonthly && billingCycle === 'monthly' ? plan.priceMonthly : plan.priceYearly || plan.price}
                 </span>
                 <span className="text-gray-600 dark:text-gray-400 ml-2">{plan.period}</span>
@@ -255,7 +255,7 @@ function WebPricing({ billingCycle, setBillingCycle }: {
                 {plan.features.map((feature, idx) => (
                   <li key={idx} className="flex items-start gap-2">
                     <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm">{feature}</span>
+                    <span className="text-sm dark:text-gray-300">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -584,7 +584,7 @@ function APIPricing() {
       )}
 
       {/* Pricing Calculator */}
-      <Card className="mb-12 border-2 border-blue-500 dark:border-blue-400">
+      <Card className="mb-12 border-2 border-blue-500 dark:border-blue-400 dark:bg-gray-800">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calculator className="w-6 h-6" />
@@ -604,11 +604,11 @@ function APIPricing() {
                 className="mb-4"
               />
               <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                <span>500</span>
+                <span className="dark:text-gray-300">500</span>
                 <span className="text-2xl font-bold text-gray-900 dark:text-white">
                   {operations[0].toLocaleString()}
                 </span>
-                <span>100,000</span>
+                <span className="dark:text-gray-300">100,000</span>
               </div>
             </div>
             
@@ -623,7 +623,7 @@ function APIPricing() {
       </Card>
 
       {/* Pricing Tiers */}
-      <Card className="mb-12">
+      <Card className="mb-12 dark:bg-gray-800">
         <CardHeader>
           <CardTitle>Pay-as-you-go Pricing</CardTitle>
         </CardHeader>
@@ -631,7 +631,7 @@ function APIPricing() {
           <div className="space-y-4">
             <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
               <div>
-                <p className="font-medium">First 500 operations</p>
+                <p className="font-medium dark:text-white">First 500 operations</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Every month</p>
               </div>
               <span className="text-2xl font-bold text-green-500">FREE</span>
@@ -639,18 +639,18 @@ function APIPricing() {
             
             <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
               <div>
-                <p className="font-medium">Operations 501 - 5,000</p>
+                <p className="font-medium dark:text-white">Operations 501 - 5,000</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Per operation</p>
               </div>
-              <span className="text-2xl font-bold">$0.005</span>
+              <span className="text-2xl font-bold dark:text-white">$0.005</span>
             </div>
             
             <div className="flex justify-between items-center p-4 border-b dark:border-gray-700">
               <div>
-                <p className="font-medium">Operations 5,001 - 50,000</p>
+                <p className="font-medium dark:text-white">Operations 5001 - 50,000</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Per operation</p>
               </div>
-              <span className="text-2xl font-bold">$0.003</span>
+              <span className="text-2xl font-bold dark:text-white">$0.003</span>
             </div>
             
             <div className="flex justify-between items-center p-4">
@@ -658,7 +658,7 @@ function APIPricing() {
                 <p className="font-medium">Over 50,000 operations</p>
                 <p className="text-sm text-gray-600 dark:text-gray-400">Per operation</p>
               </div>
-              <span className="text-2xl font-bold">$0.002</span>
+              <span className="text-2xl font-bold dark:text-white">$0.005</span>
             </div>
           </div>
         </CardContent>
@@ -669,10 +669,10 @@ function APIPricing() {
         <h3 className="text-2xl font-bold mb-6 text-center">Prepaid Packages (Best Value)</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {prepaidPackages.map((pkg) => (
-            <Card key={pkg.ops} className="border-2 dark:border-gray-700">
+            <Card key={pkg.ops} className="border-2 dark:border-gray-700 dark:bg-gray-800">
               <CardHeader>
-                <CardTitle>{(pkg.ops / 1000).toFixed(0)}K Operations</CardTitle>
-                <div className="text-3xl font-bold mt-2">${pkg.price}</div>
+                <CardTitle className="dark:text-white">{(pkg.ops / 1000).toFixed(0)}K Operations</CardTitle>
+                 <div className="text-3xl font-bold mt-2 dark:text-white">${pkg.price}</div>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   ${pkg.perOp.toFixed(4)} per operation
                 </p>
@@ -706,13 +706,13 @@ function APIPricing() {
 
       {/* Features */}
       <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card className="dark:bg-gray-800">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
                 <Zap className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <h4 className="font-bold">Pay per use</h4>
+              <h4 className="font-bold dark:text-white">Pay per use</h4>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Only pay for successful operations. No monthly fees or hidden charges.
@@ -720,13 +720,13 @@ function APIPricing() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="dark:bg-gray-800">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
                 <Code className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <h4 className="font-bold">RESTful API</h4>
+              <h4 className="font-bold dark:text-white">RESTful API</h4>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Simple HTTP API with libraries for Node.js, Python, Ruby, PHP, and more.
@@ -734,13 +734,13 @@ function APIPricing() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="dark:bg-gray-800">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
                 <Check className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
-              <h4 className="font-bold">99.9% Uptime</h4>
+              <h4 className="font-bold dark:text-white">99.9% Uptime</h4>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Enterprise-grade reliability with global CDN delivery and automatic failover.
@@ -766,33 +766,33 @@ function WordPressPricing({ billingCycle, setBillingCycle }: {
         </p>
       </div>
 
-      <Card className="mb-8 border-2 border-purple-500 dark:border-purple-400">
+      <Card className="mb-8 border-2 border-purple-500 dark:border-purple-400 dark:bg-gray-800">
         <CardContent className="pt-6">
           <div className="flex items-start gap-4">
             <div className="p-3 bg-purple-100 dark:bg-purple-900 rounded-lg">
               <Boxes className="w-8 h-8 text-purple-600 dark:text-purple-400" />
             </div>
             <div className="flex-1">
-              <h3 className="text-xl font-bold mb-2">Same Pricing as Web Plans</h3>
+              <h3 className="text-xl font-bold mb-2 dark:text-white">Same Pricing as Web Plans</h3>
               <p className="text-gray-600 dark:text-gray-400 mb-4">
                 The WordPress plugin uses your Web subscription. Choose any Web plan above and use the plugin automatically!
               </p>
               <ul className="space-y-2">
                 <li className="flex items-center gap-2">
                   <Check className="w-5 h-5 text-green-500" />
-                  <span>Automatic compression on upload</span>
+                  <span className="dark:text-gray-300">Automatic compression on upload</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-5 h-5 text-green-500" />
-                  <span>Bulk optimize existing images</span>
+                  <span className="dark:text-gray-300">Bulk optimize existing images</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-5 h-5 text-green-500" />
-                  <span>RAW file support (DNG, CR2, NEF, ARW)</span>
+                  <span className="dark:text-gray-300">RAW file support (DNG, CR2, NEF, ARW)</span>
                 </li>
                 <li className="flex items-center gap-2">
                   <Check className="w-5 h-5 text-green-500" />
-                  <span>Auto WebP & AVIF conversion</span>
+                  <span className="dark:text-gray-300">Auto WebP & AVIF conversion</span>
                 </li>
               </ul>
             </div>
@@ -888,13 +888,13 @@ function CDNPricing() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
         {plans.map((plan) => (
           <Card
-            key={plan.name}
-            className={`relative ${
-              plan.popular
-                ? 'border-2 border-blue-500 dark:border-blue-400 shadow-xl scale-105'
-                : 'border border-gray-200 dark:border-gray-700'
-            }`}
-          >
+  key={plan.name}
+  className={`relative dark:bg-gray-800 ${
+    plan.popular
+      ? 'border-2 border-blue-500 dark:border-blue-400 shadow-xl scale-105'
+      : 'border border-gray-200 dark:border-gray-700'
+  }`}
+>
             {plan.popular && (
               <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                 <span className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-1 rounded-full text-sm font-bold">
@@ -949,13 +949,13 @@ function CDNPricing() {
 
       {/* CDN Features */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+        <Card className="dark:bg-gray-800">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
                 <Globe className="w-6 h-6 text-blue-600 dark:text-blue-400" />
               </div>
-              <h4 className="font-bold">Global Edge Network</h4>
+              <h4 className="font-bold dark:text-white">Global Edge Network</h4>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Deliver images from 200+ edge locations worldwide for maximum speed.
@@ -963,13 +963,13 @@ function CDNPricing() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="dark:bg-gray-800">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
                 <Zap className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
-              <h4 className="font-bold">Auto Optimization</h4>
+              <h4 className="font-bold dark:text-white">Auto Optimization</h4>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Automatic WebP/AVIF conversion based on browser support.
@@ -977,13 +977,13 @@ function CDNPricing() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="dark:bg-gray-800">
           <CardContent className="pt-6">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
                 <Crown className="w-6 h-6 text-green-600 dark:text-green-400" />
               </div>
-              <h4 className="font-bold">RAW Support</h4>
+              <h4 className="font-bold dark:text-white">RAW Support</h4>
             </div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
               Serve RAW files as optimized JPEG/WebP/AVIF on-the-fly.
@@ -1029,9 +1029,9 @@ function FAQSection() {
       <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
       <div className="space-y-6">
         {faqs.map((faq, idx) => (
-          <Card key={idx}>
+          <Card key={idx} className="dark:bg-gray-800">
             <CardHeader>
-              <CardTitle className="text-lg">{faq.question}</CardTitle>
+              <CardTitle className="text-lg dark:text-white">{faq.question}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 dark:text-gray-400">{faq.answer}</p>
