@@ -280,50 +280,54 @@ export default function CheckoutPage() {
   const savings = billingCycle === 'yearly' ? currentPlan.yearly.savings : 0;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gradient-to-b dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 relative overflow-hidden">
+  {/* Glow Effects */}
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(20,184,166,0.15),transparent_50%)]"></div>
+  <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
+  <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
       <Header isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
       
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto px-4 py-16 relative z-10">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4 dark:text-white">Complete Your Subscription</h1>
-          <p className="text-gray-600 dark:text-gray-400">Choose your plan and payment method</p>
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-teal-400 to-yellow-400 bg-clip-text text-transparent">Complete Your Subscription</h1>
+          <p className="text-gray-300">Choose your plan and payment method</p>
         </div>
 
         <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8">
           <div>
-            <h2 className="text-2xl font-bold mb-6 dark:text-white">Subscription Type</h2>
+            <h2 className="text-2xl font-bold mb-6 text-white">Subscription Type</h2>
             
             <div className="space-y-4 mb-6">
               {Object.entries(PLANS).map(([key, plan]) => (
                 <Card 
-                  key={key} 
-                  onClick={() => setSelectedPlan(key as keyof typeof PLANS)}
-                  className={`cursor-pointer transition-all ${
-                    selectedPlan === key 
-                      ? 'border-2 border-blue-500 shadow-lg' 
-                      : 'border border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                  }`}
-                >
+  key={key} 
+  onClick={() => setSelectedPlan(key as keyof typeof PLANS)}
+  className={`cursor-pointer transition-all bg-gray-800/50 backdrop-blur-xl ${
+    selectedPlan === key 
+      ? 'border-2 border-teal-500 shadow-lg shadow-teal-500/50' 
+      : 'border border-gray-700/50 hover:border-teal-500/50'
+  }`}
+>
                   <CardContent className="p-4 flex items-center justify-between">
                     <div className="flex items-center gap-4">
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                        selectedPlan === key ? 'border-blue-500 bg-blue-500' : 'border-gray-300 dark:border-gray-600'
-                      }`}>
+  selectedPlan === key ? 'border-teal-500 bg-teal-500' : 'border-gray-600'
+}`}>
                         {selectedPlan === key && <div className="w-2 h-2 bg-white rounded-full" />}
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <h3 className="font-bold dark:text-white">{plan.name}</h3>
+                          <h3 className="font-bold text-white">{plan.name}</h3>
                           {plan.popular && <Crown className="w-4 h-4 text-yellow-500" />}
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{plan.description}</p>
+                        <p className="text-sm text-gray-400">{plan.description}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                      <div className="text-sm text-gray-400">
                         {billingCycle === 'monthly' ? 'per month' : 'per year'}
                       </div>
-                      <div className="text-2xl font-bold dark:text-white">
+                      <div className="text-2xl font-bold text-white">
                         ${billingCycle === 'monthly' ? plan.monthly.price : plan.yearly.price}
                       </div>
                     </div>
@@ -332,61 +336,61 @@ export default function CheckoutPage() {
               ))}
             </div>
 
-            <Card className="p-4 bg-gray-50 dark:bg-gray-800 mb-6">
+            <Card className="p-4 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 mb-6">
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <h3 className="font-bold dark:text-white">${currentPrice} per {currentPlan.name} user</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <h3 className="font-bold text-white">${currentPrice} per {currentPlan.name} user</h3>
+                  <p className="text-sm text-gray-400">
                     {billingCycle === 'yearly' ? 'Yearly' : 'Monthly'} subscription
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}
-                    className={`w-12 h-6 rounded-full relative transition-colors ${
-                      billingCycle === 'yearly' ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'
-                    }`}
-                  >
+  onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}
+  className={`w-12 h-6 rounded-full relative transition-colors ${
+    billingCycle === 'yearly' ? 'bg-teal-500' : 'bg-gray-600'
+  }`}
+>
                     <div className={`absolute top-1 ${
                       billingCycle === 'yearly' ? 'right-1' : 'left-1'
                     } w-4 h-4 bg-white rounded-full transition-all`} />
                   </button>
-                  <span className="text-sm font-medium dark:text-white">
+                  <span className="text-sm font-medium text-white">
                     {billingCycle === 'yearly' ? 'Yearly' : 'Monthly'}
                   </span>
                 </div>
               </div>
               {savings > 0 && (
-                <p className="text-sm text-green-600 dark:text-green-400 font-medium">
+                <p className="text-sm text-green-400 font-medium">
                   💰 Save ${savings * quantity}/year with yearly billing
                 </p>
               )}
             </Card>
 
             {/* Quantity Selector */}
-            <Card className="p-4 bg-yellow-50 dark:bg-yellow-900/10 mb-6">
+            <Card className="p-4 bg-gray-800/50 backdrop-blur-xl border-2 border-yellow-500/30 mb-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-bold dark:text-white">Number of Users</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                  <h3 className="font-bold text-white">Number of Users</h3>
+                  <p className="text-sm text-gray-400">
                     {billingCycle === 'yearly' ? 'Yearly' : 'Monthly'} subscription
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    disabled={quantity <= 1}
-                    className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center font-bold text-gray-700 dark:text-gray-300 hover:border-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
+  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+  disabled={quantity <= 1}
+  className="w-8 h-8 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center font-bold text-gray-300 hover:border-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+>
                     −
                   </button>
-                  <span className="text-2xl font-bold dark:text-white min-w-[3ch] text-center">
+                  <span className="text-2xl font-bold text-white min-w-[3ch] text-center">
                     {quantity}
                   </span>
                   <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-8 h-8 rounded-full bg-white dark:bg-gray-700 border-2 border-gray-300 dark:border-gray-600 flex items-center justify-center font-bold text-gray-700 dark:text-gray-300 hover:border-blue-500 transition-colors"
-                  >
+  onClick={() => setQuantity(quantity + 1)}
+  className="w-8 h-8 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center font-bold text-gray-300 hover:border-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+>
                     +
                   </button>
                 </div>
@@ -394,12 +398,12 @@ export default function CheckoutPage() {
             </Card>
 
             <div>
-              <h3 className="font-bold mb-3 dark:text-white">What's included:</h3>
+              <h3 className="font-bold mb-3 text-white">What's included:</h3>
               <ul className="space-y-2">
                 {currentPlan.features.map((feature, idx) => (
                   <li key={idx} className="flex items-center gap-2 text-sm">
                     <Check className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    <span className="dark:text-gray-300">{feature}</span>
+                    <span className="text-gray-300">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -407,28 +411,28 @@ export default function CheckoutPage() {
           </div>
 
           <div>
-            <Card className="mb-6">
-              <CardHeader><CardTitle>Order Summary</CardTitle></CardHeader>
+            <Card className="mb-6 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
+              <CardHeader><CardTitle className="text-white">Order Summary</CardTitle></CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-3 pb-4 border-b dark:border-gray-700">
+                <div className="space-y-3 pb-4 border-b border-gray-700">
                   <div className="flex justify-between items-center">
-                    <span className="text-gray-600 dark:text-gray-400">
+                    <span className="text-gray-400">
                       {quantity}x {currentPlan.name} subscription
                     </span>
-                    <span className="font-medium dark:text-white">${totalPrice}</span>
+                    <span className="font-medium text-white">${totalPrice}</span>
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">
+                  <div className="text-xs text-gray-400">
                     ${currentPrice} × {quantity} user{quantity > 1 ? 's' : ''}
                   </div>
                   {savings > 0 && (
-                    <div className="text-sm text-green-600 dark:text-green-400">
+                    <div className="text-sm text-green-400">
                       💰 Total savings: ${savings * quantity}/year
                     </div>
                   )}
                 </div>
                 <div className="flex justify-between items-center text-xl font-bold">
-                  <span className="dark:text-white">Total</span>
-                  <span className="dark:text-white">${totalPrice}</span>
+                  <span className="text-white">Total</span>
+                  <span className="text-white">${totalPrice}</span>
                 </div>
                 <p className="text-xs text-gray-500 dark:text-gray-400">
                   Includes sales tax (if applicable)
@@ -436,27 +440,27 @@ export default function CheckoutPage() {
               </CardContent>
             </Card>
             
-            <Card>
-              <CardHeader><CardTitle>Choose Payment Method</CardTitle></CardHeader>
+            <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
+              <CardHeader><CardTitle className="text-white">Choose Payment Method</CardTitle></CardHeader>
               <CardContent className="space-y-6">
                 
                 {/* PayPal Subscription */}
-                <div className="border rounded-lg p-4 dark:border-gray-700">
+                <div className="border rounded-lg p-4 border-gray-700/50 bg-gray-900/30">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h3 className="font-bold dark:text-white">PayPal Subscription</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <h3 className="font-bold text-white">PayPal Subscription</h3>
+                      <p className="text-sm text-gray-400">
                         Auto-renews {billingCycle === 'monthly' ? 'monthly' : 'yearly'}
                       </p>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-sm text-gray-300 mb-2">
                     ✓ Automatic renewal<br/>
                     ✓ Cancel anytime<br/>
                     ✓ For PayPal accounts
                   </p>
-                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded p-2 mb-3">
-                    <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                  <div className="bg-yellow-900/30 border border-yellow-500/50 rounded p-2 mb-3">
+                    <p className="text-xs text-yellow-200">
                       ⚠️ Country specific - May not work if paying from India
                     </p>
                   </div>
@@ -473,23 +477,23 @@ export default function CheckoutPage() {
                 </div>
 
                 {/* Pay with Card */}
-                <div className="border-2 border-blue-500 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
+                <div className="border-2 border-teal-500 rounded-lg p-4 bg-teal-900/20 shadow-lg shadow-teal-500/20">
                   <div className="flex items-center justify-between mb-3">
                     <div>
-                      <h3 className="font-bold dark:text-white">Pay with Card (One-time)</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <h3 className="font-bold text-white">Pay with Card (One-time)</h3>
+                      <p className="text-sm text-gray-400">
                         One-time payment for {billingCycle === 'monthly' ? '1 month' : '1 year'}
                       </p>
                     </div>
                     <span className="bg-green-500 text-white text-xs px-2 py-1 rounded">RECOMMENDED</span>
                   </div>
-                  <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
+                  <p className="text-sm text-gray-300 mb-2">
                     ✓ No auto-renewal<br/>
                     ✓ Renew manually<br/>
                     ✓ Works worldwide
                   </p>
-                  <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 rounded p-2 mb-3">
-                    <p className="text-xs text-green-800 dark:text-green-200">
+                  <div className="bg-green-900/30 border border-green-500/50 rounded p-2 mb-3">
+                    <p className="text-xs text-green-200">
                       ✓ Best option for India - Pay with Visa, Mastercard, Amex
                     </p>
                   </div>
