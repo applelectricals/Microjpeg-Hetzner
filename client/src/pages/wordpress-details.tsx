@@ -102,9 +102,6 @@ export default function WordPressDetails() {
     Download Plugin
   </Button>
 </a>
-                <Download className="w-4 h-4 mr-2" />
-                Download Plugin
-              </Button>
               <Link
                 href="/wordpress-plugin/install"
                 className="inline-flex items-center px-8 py-3 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50 transition-all duration-200"
