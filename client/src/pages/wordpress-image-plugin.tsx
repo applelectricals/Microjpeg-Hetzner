@@ -60,10 +60,15 @@ export default function WordPressImagePlugin() {
               </p>
               
               <div className="flex flex-wrap justify-center gap-4">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700" data-testid="button-download-plugin">
-                  <Download className="w-5 h-5 mr-2" />
-                  Download Free Plugin
-                </Button>
+<a 
+  href="/micro-jpeg-api-wordpress-plugin.zip" 
+  download="micro-jpeg-wordpress-plugin.zip"
+>
+  <Button size="lg" className="bg-blue-600 hover:bg-blue-700" data-testid="button-download-plugin">
+    <Download className="w-5 h-5 mr-2" />
+    Download Free Plugin
+  </Button>
+</a>
                 <Button size="lg" variant="outline" data-testid="link-view-documentation">
                   View Documentation
                 </Button>

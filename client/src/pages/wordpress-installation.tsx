@@ -249,13 +249,18 @@ export default function WordPressInstallation() {
                         <p className="text-gray-600 text-sm mb-3">
                           Visit the WordPress.org plugin repository and download the latest version
                         </p>
-                        <Button 
-                          onClick={() => window.open('https://wordpress.org/plugins/micro-jpeg/', '_blank')}
-                          className="mb-3"
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Download from WordPress.org
-                        </Button>
+                        <a 
+  href="/micro-jpeg-api-wordpress-plugin.zip" 
+  download="micro-jpeg-wordpress-plugin.zip"
+>
+  <Button className="mb-3">
+    <Download className="w-4 h-4 mr-2" />
+    Download Plugin
+  </Button>
+</a>
+<p className="text-xs text-gray-500 mt-2">
+  Or <a href="https://wordpress.org/plugins/micro-jpeg/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">download from WordPress.org</a>
+</p>
                         <p className="text-xs text-gray-500">This will download a .zip file containing the plugin</p>
                       </div>
                     </div>

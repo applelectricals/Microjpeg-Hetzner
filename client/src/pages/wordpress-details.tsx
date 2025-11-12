@@ -90,11 +90,18 @@ export default function WordPressDetails() {
               Support for JPEG, PNG, WebP, AVIF, SVG, TIFF, and professional camera RAW formats with intelligent format conversion.
             </p>
             <div className="flex justify-center space-x-4 mt-8">
-              <Button
-                onClick={() => window.location.href = "/api/download/wordpress-plugin"}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3"
-                data-testid="button-download-plugin"
-              >
+              <a 
+  href="/micro-jpeg-api-wordpress-plugin.zip" 
+  download="micro-jpeg-wordpress-plugin.zip"
+>
+  <Button
+    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3"
+    data-testid="button-download-plugin"
+  >
+    <Download className="w-4 h-4 mr-2" />
+    Download Plugin
+  </Button>
+</a>
                 <Download className="w-4 h-4 mr-2" />
                 Download Plugin
               </Button>
