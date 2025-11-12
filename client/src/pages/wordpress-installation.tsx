@@ -32,7 +32,12 @@ export default function WordPressInstallation() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 relative overflow-hidden">
+  {/* Glow Effects */}
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(20,184,166,0.15),transparent_50%)]"></div>
+  <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
+  <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
+
       <SEOHead
         title="WordPress Plugin Installation Guide | Micro JPEG"
         description="Step-by-step WordPress plugin installation guide for Micro JPEG image compression. Easy setup, configuration, and activation instructions for your WordPress site."
@@ -42,7 +47,7 @@ export default function WordPressInstallation() {
       <Header />
       
       {/* Sub Navigation */}
-      <div className="bg-blue-600 text-white">
+      <div className="bg-gray-800/90 backdrop-blur-xl border-b border-teal-500/30 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
             {[
@@ -58,10 +63,10 @@ export default function WordPressInstallation() {
                       id === 'docs' ? '/wordpress-plugin/docs' :
                       '/wordpress-plugin/api'}
                 className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium transition-colors ${
-                  id === 'installation'
-                    ? 'border-white text-white'
-                    : 'border-transparent text-blue-100 hover:text-white hover:border-blue-200'
-                }`}
+  id === 'details'
+    ? 'border-teal-400 text-teal-400'
+    : 'border-transparent text-gray-400 hover:text-white hover:border-teal-500/50'
+}`}
               >
                 <Icon className="w-4 h-4" />
                 <span>{label}</span>
@@ -71,23 +76,23 @@ export default function WordPressInstallation() {
         </div>
       </div>
       
-      <div className="p-4">
+      <div className="p-4 relative z-10">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
           <div className="text-center py-8">
-            <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50">
               <SiWordpress className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-400 to-yellow-400 bg-clip-text text-transparent mb-4">
               WordPress Plugin Installation
             </h1>
-            <p className="text-xl text-gray-600">
+            <p className="text-xl text-gray-300">
               Step-by-step guide to install and configure the Micro JPEG compression plugin
             </p>
           </div>
 
           {/* Prerequisites */}
-          <Card>
+          <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
                 <AlertTriangle className="w-5 h-5 text-yellow-600" />
@@ -138,7 +143,7 @@ export default function WordPressInstallation() {
 
             {/* WordPress Dashboard Installation */}
             <TabsContent value="dashboard" className="space-y-6">
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Monitor className="w-5 h-5" />
@@ -146,16 +151,16 @@ export default function WordPressInstallation() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-400 mb-6">
                     The easiest way to install the Micro JPEG plugin is directly from your WordPress admin dashboard.
                   </p>
                   
                   <div className="space-y-6">
                     <div className="flex items-start space-x-4">
-                      <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">1</div>
+                      <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg">1</div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-2">Access Plugin Section</h3>
-                        <p className="text-gray-600 text-sm mb-3">
+                        <h3 className="font-semibold text-white mb-2">Access Plugin Section</h3>
+                        <p className="text-gray-400 text-sm mb-3">
                           Log in to your WordPress admin dashboard and navigate to <strong>Plugins → Add New</strong>
                         </p>
                         <div className="bg-gray-100 p-3 rounded-lg">
@@ -165,10 +170,10 @@ export default function WordPressInstallation() {
                     </div>
                     
                     <div className="flex items-start space-x-4">
-                      <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">2</div>
+                      <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg">2</div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-2">Search for Micro JPEG</h3>
-                        <p className="text-gray-600 text-sm mb-3">
+                        <h3 className="font-semibold text-white mb-2">Search for Micro JPEG</h3>
+                        <p className="text-gray-400 text-sm mb-3">
                           In the search box, type "Micro JPEG" or "Image Compression" to find our plugin
                         </p>
                         <div className="bg-blue-50 p-3 rounded-lg">
@@ -181,10 +186,10 @@ export default function WordPressInstallation() {
                     </div>
                     
                     <div className="flex items-start space-x-4">
-                      <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">3</div>
+                      <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg">3</div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-2">Install the Plugin</h3>
-                        <p className="text-gray-600 text-sm mb-3">
+                        <h3 className="font-semibold text-white mb-2">Install the Plugin</h3>
+                        <p className="text-gray-400 text-sm mb-3">
                           Click "Install Now" button next to the Micro JPEG plugin
                         </p>
                         <Button size="sm" className="mb-3">
@@ -198,8 +203,8 @@ export default function WordPressInstallation() {
                     <div className="flex items-start space-x-4">
                       <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">4</div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-2">Activate the Plugin</h3>
-                        <p className="text-gray-600 text-sm mb-3">
+                        <h3 className="font-semibold text-white mb-2">Activate the Plugin</h3>
+                        <p className="text-gray-400 text-sm mb-3">
                           After installation, click "Activate" to enable the plugin on your website
                         </p>
                         <Button size="sm" variant="outline">
@@ -211,13 +216,13 @@ export default function WordPressInstallation() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
-                  <CardTitle>Next Steps</CardTitle>
+                  <CardTitle className="text-white">Next Steps</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 mb-4">Once activated, you'll need to configure your API key:</p>
-                  <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600">
+                  <p className="text-gray-400 mb-4">Once activated, you'll need to configure your API key:</p>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-gray-400">
                     <li>Go to <strong>Settings → Micro JPEG</strong> in your WordPress admin</li>
                     <li>Enter your API key from your Micro JPEG account</li>
                     <li>Choose your compression settings</li>
@@ -229,7 +234,7 @@ export default function WordPressInstallation() {
 
             {/* WordPress.org Installation */}
             <TabsContent value="wordpress-org" className="space-y-6">
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Globe className="w-5 h-5" />
@@ -237,7 +242,7 @@ export default function WordPressInstallation() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-400 mb-6">
                     Download the plugin directly from the WordPress.org repository and upload it manually.
                   </p>
                   
@@ -245,8 +250,8 @@ export default function WordPressInstallation() {
                     <div className="flex items-start space-x-4">
                       <div className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">1</div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-2">Download from WordPress.org</h3>
-                        <p className="text-gray-600 text-sm mb-3">
+                        <h3 className="font-semibold text-white mb-2">Download from WordPress.org</h3>
+                        <p className="text-gray-400 text-sm mb-3">
                           Visit the WordPress.org plugin repository and download the latest version
                         </p>
                         <a 
@@ -268,8 +273,8 @@ export default function WordPressInstallation() {
                     <div className="flex items-start space-x-4">
                       <div className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">2</div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-2">Upload to WordPress</h3>
-                        <p className="text-gray-600 text-sm mb-3">
+                        <h3 className="font-semibold text-white mb-2">Upload to WordPress</h3>
+                        <p className="text-gray-400 text-sm mb-3">
                           In your WordPress admin, go to <strong>Plugins → Add New → Upload Plugin</strong>
                         </p>
                         <div className="bg-gray-100 p-3 rounded-lg">
@@ -281,8 +286,8 @@ export default function WordPressInstallation() {
                     <div className="flex items-start space-x-4">
                       <div className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">3</div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-2">Choose File and Install</h3>
-                        <p className="text-gray-600 text-sm mb-3">
+                        <h3 className="font-semibold text-white mb-2">Choose File and Install</h3>
+                        <p className="text-gray-400 text-sm mb-3">
                           Click "Choose File", select the downloaded .zip file, then click "Install Now"
                         </p>
                         <div className="space-y-2">
@@ -300,8 +305,8 @@ export default function WordPressInstallation() {
                     <div className="flex items-start space-x-4">
                       <div className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">4</div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-2">Activate and Configure</h3>
-                        <p className="text-gray-600 text-sm mb-3">
+                        <h3 className="font-semibold text-white mb-2">Activate and Configure</h3>
+                        <p className="text-gray-400 text-sm mb-3">
                           Activate the plugin and configure your API key in the settings
                         </p>
                         <div className="bg-green-50 p-3 rounded-lg">
@@ -315,13 +320,13 @@ export default function WordPressInstallation() {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
-                  <CardTitle>Manual FTP Installation (Advanced)</CardTitle>
+                  <CardTitle className="text-white">Manual FTP Installation (Advanced)</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 mb-4">For advanced users who prefer FTP installation:</p>
-                  <ol className="list-decimal list-inside space-y-2 text-sm text-gray-600">
+                  <p className="text-gray-400 mb-4">For advanced users who prefer FTP installation:</p>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-gray-400">
                     <li>Extract the downloaded .zip file on your computer</li>
                     <li>Upload the 'micro-jpeg' folder to '/wp-content/plugins/' via FTP</li>
                     <li>Log in to WordPress admin and activate the plugin from the Plugins page</li>
@@ -339,7 +344,7 @@ export default function WordPressInstallation() {
 
             {/* Optional Configuration */}
             <TabsContent value="configuration" className="space-y-6">
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Settings className="w-5 h-5" />
@@ -347,14 +352,14 @@ export default function WordPressInstallation() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-400 mb-6">
                     While the plugin works great with default settings, you can customize these options for optimal performance.
                   </p>
                 </CardContent>
               </Card>
 
               <div className="grid md:grid-cols-2 gap-6">
-                <Card>
+                <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
                     <CardTitle className="text-lg">Compression Settings</CardTitle>
                   </CardHeader>
@@ -401,7 +406,7 @@ export default function WordPressInstallation() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
                     <CardTitle className="text-lg">Advanced Options</CardTitle>
                   </CardHeader>
@@ -440,14 +445,14 @@ export default function WordPressInstallation() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
                     <CardTitle className="text-lg">Performance Tuning</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div>
                       <h4 className="font-semibold mb-2">Processing Limits</h4>
-                      <div className="space-y-2 text-sm text-gray-600">
+                      <div className="space-y-2 text-sm text-gray-400">
                         <div className="flex justify-between">
                           <span>Max concurrent jobs:</span>
                           <Badge variant="secondary">3</Badge>
@@ -479,7 +484,7 @@ export default function WordPressInstallation() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
                     <CardTitle className="text-lg">Integration Settings</CardTitle>
                   </CardHeader>
@@ -523,9 +528,9 @@ export default function WordPressInstallation() {
                 </Card>
               </div>
 
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
-                  <CardTitle>Configuration Tips</CardTitle>
+                  <CardTitle className="text-white">Configuration Tips</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -556,7 +561,7 @@ export default function WordPressInstallation() {
           </Tabs>
 
           {/* Support Section */}
-          <Card>
+          <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="w-5 h-5" />
@@ -564,7 +569,7 @@ export default function WordPressInstallation() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-400 mb-4">
                 If you encounter any issues during installation, our support team is here to help!
               </p>
               <div className="flex flex-wrap gap-3">
