@@ -51,7 +51,7 @@ export default function WordPressDevelopment() {
               { id: 'details', label: 'Details', icon: FileImage },
               { id: 'installation', label: 'Installation', icon: Download },
               { id: 'docs', label: 'Documentation', icon: FileImage },
-              { id: 'api', label: 'API', icon: Code2 }
+              
             ].map(({ id, label, icon: Icon }) => (
               <Link 
                 key={id} 
