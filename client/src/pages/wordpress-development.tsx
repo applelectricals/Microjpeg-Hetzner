@@ -95,13 +95,13 @@ export default function WordPressDevelopment() {
               <h3 className="font-semibold text-gray-900 mb-2">Source Code</h3>
               <p className="text-gray-600 text-sm mb-4">Browse the complete source code and contribute to development</p>
               <Button 
-                onClick={() => window.open('https://github.com/microjpeg/wordpress-plugin', '_blank')}
-                variant="outline"
-                size="sm"
-              >
-                <SiGithub className="w-4 h-4 mr-2" />
-                View on GitHub
-              </Button>
+  onClick={() => window.open('https://wordpress.org/plugins/micro-jpeg/', '_blank')}
+  variant="outline"
+  size="sm"
+>
+  <SiWordpress className="w-4 h-4 mr-2" />
+  View on WordPress.org
+</Button>
             </Card>
             
             <Card className="text-center p-6">
@@ -109,13 +109,13 @@ export default function WordPressDevelopment() {
               <h3 className="font-semibold text-gray-900 mb-2">SVN Repository</h3>
               <p className="text-gray-600 text-sm mb-4">Access the official WordPress.org SVN repository</p>
               <Button 
-                onClick={() => window.open('https://plugins.svn.wordpress.org/micro-jpeg/', '_blank')}
-                variant="outline"
-                size="sm"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                Browse SVN
-              </Button>
+  onClick={() => window.open('https://wordpress.org/plugins/micro-jpeg/', '_blank')}
+  variant="outline"
+  size="sm"
+>
+  <Download className="w-4 h-4 mr-2" />
+  View Plugin Page
+</Button>
             </Card>
             
             <Card className="text-center p-6">
@@ -123,13 +123,13 @@ export default function WordPressDevelopment() {
               <h3 className="font-semibold text-gray-900 mb-2">Issue Tracker</h3>
               <p className="text-gray-600 text-sm mb-4">Report bugs and request features</p>
               <Button 
-                onClick={() => window.open('https://github.com/microjpeg/wordpress-plugin/issues', '_blank')}
-                variant="outline"
-                size="sm"
-              >
-                <Bug className="w-4 h-4 mr-2" />
-                Report Issues
-              </Button>
+  onClick={() => window.location.href = 'mailto:support@microjpeg.com?subject=WordPress%20Plugin%20Issue'}
+  variant="outline"
+  size="sm"
+>
+  <Bug className="w-4 h-4 mr-2" />
+  Report Issues
+</Button>
             </Card>
           </div>
 

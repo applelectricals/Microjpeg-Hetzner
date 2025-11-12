@@ -69,9 +69,14 @@ export default function WordPressImagePlugin() {
     Download Free Plugin
   </Button>
 </a>
-                <Button size="lg" variant="outline" data-testid="link-view-documentation">
-                  View Documentation
-                </Button>
+                <Button 
+  size="lg" 
+  variant="outline" 
+  data-testid="link-view-documentation"
+  onClick={() => window.location.href = '/wordpress-plugin/docs'}
+>
+  View Documentation
+</Button>
               </div>
             </div>
           </div>
