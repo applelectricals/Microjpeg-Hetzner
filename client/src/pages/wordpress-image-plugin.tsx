@@ -49,14 +49,16 @@ export default function WordPressImagePlugin() {
 <div className="bg-gray-800/90 backdrop-blur-xl border-b border-teal-500/30 relative z-10">
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div className="flex space-x-8">
-      <a
+    
       {[
+        
         { id: 'details', label: 'Details', icon: FileImage },
         { id: 'installation', label: 'Installation', icon: Download },
         { id: 'docs', label: 'Documentation', icon: FileImage },
       ].map(({ id, label, icon: Icon }) => (
         
           key={id} 
+          <a
           href={id === 'details' ? '/wordpress-plugin' : 
                 id === 'installation' ? '/wordpress-plugin/install' : 
                 '/wordpress-plugin/docs'}
