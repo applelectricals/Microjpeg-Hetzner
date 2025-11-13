@@ -95,27 +95,30 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
               Support for JPEG, PNG, WebP, AVIF, SVG, TIFF, and professional camera RAW formats with intelligent format conversion.
             </p>
             <div className="flex justify-center space-x-4 mt-8">
-              <a 
-  href="/micro-jpeg-api-wordpress-plugin.zip" 
-  download="micro-jpeg-wordpress-plugin.zip"
->
-  <Button
-    className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 px-8 py-3 shadow-lg shadow-teal-500/50 transform hover:scale-105 transition-all"
-    data-testid="button-download-plugin"
+  <a 
+    href="/micro-jpeg-api-wordpress-plugin.zip" 
+    download="micro-jpeg-wordpress-plugin.zip"
   >
-    <Download className="w-4 h-4 mr-2" />
-    Download Plugin
+    <Button
+      size="lg"
+      className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50 transform hover:scale-105 transition-all"
+      data-testid="button-download-plugin"
+    >
+      <Download className="w-4 h-4 mr-2" />
+      Download Plugin
+    </Button>
+  </a>
+  <Button
+    size="lg"
+    variant="outline"
+    className="border-2 border-teal-400 text-teal-400 hover:bg-teal-400/10 backdrop-blur-sm"
+    onClick={() => window.location.href = '/wordpress-plugin/install'}
+    data-testid="button-installation-guide"
+  >
+    Installation Guide
+    <ArrowRight className="w-4 h-4 ml-2" />
   </Button>
-</a>
-              <Link
-                href="/wordpress-plugin/install"
-                className="inline-flex items-center px-8 py-3 border-2 border-teal-400 rounded-lg text-teal-400 font-semibold hover:bg-teal-400/10 backdrop-blur-sm transition-all duration-200"
-                data-testid="button-installation-guide"
-              >
-                Installation Guide
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
-            </div>
+</div>
           </div>
 
           {/* Main Content Tabs */}
@@ -156,19 +159,19 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                       <ul className="space-y-2">
                         <li className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-green-400" />
-                          <span className="text-sm">Faster page loading times</span>
+                          <span className="text-sm text-gray-300">Faster page loading times</span>
                         </li>
                         <li className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-green-400" />
-                          <span className="text-sm">Reduced bandwidth usage</span>
+                          <span className="text-sm text-gray-300">Reduced bandwidth usage</span>
                         </li>
                         <li className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-green-400" />
-                          <span className="text-sm">Better SEO rankings</span>
+                          <span className="text-sm text-gray-300">Better SEO rankings</span>
                         </li>
                         <li className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-green-400" />
-                          <span className="text-sm">Improved user experience</span>
+                          <span className="text-sm text-gray-300">Improved user experience</span>
                         </li>
                       </ul>
                     </div>
@@ -209,17 +212,17 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                   <div className="grid md:grid-cols-3 gap-6">
                     <div className="text-center">
                       <Gauge className="w-8 h-8 text-teal-400 mx-auto mb-3" />
-                      <h4 className="font-semibold mb-2">Superior Compression</h4>
+                      <h4 className="font-semibold mb-2 text-white">Superior Compression</h4>
                       <p className="text-sm text-gray-400">Advanced algorithms achieve up to 80% size reduction while maintaining quality</p>
                     </div>
                     <div className="text-center">
                       <Zap className="w-8 h-8 text-yellow-400 mx-auto mb-3" />
-                      <h4 className="font-semibold mb-2">Automatic Processing</h4>
+                      <h4 className="font-semibold mb-2 text-white">Automatic Processing</h4>
                       <p className="text-sm text-gray-400">No manual work required - compression happens automatically on upload</p>
                     </div>
                     <div className="text-center">
                       <Shield className="w-8 h-8 text-green-400 mx-auto mb-3" />
-                      <h4 className="font-semibold mb-2">Safe & Reliable</h4>
+                      <h4 className="font-semibold mb-2 text-white">Safe & Reliable</h4>
                       <p className="text-sm text-gray-400">Backup originals and rollback capabilities for complete peace of mind</p>
                     </div>
                   </div>
@@ -242,15 +245,15 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                     <ul className="space-y-2">
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">Compression on upload</span>
+                        <span className="text-sm text-gray-300">Compression on upload</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">All image sizes compressed</span>
+                        <span className="text-sm text-gray-300">All image sizes compressed</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">Background processing</span>
+                        <span className="text-sm text-gray-300">Background processing</span>
                       </li>
                     </ul>
                   </CardContent>
@@ -268,15 +271,15 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                     <ul className="space-y-2">
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">Process entire media library</span>
+                        <span className="text-sm text-gray-300">Process entire media library</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">Progress tracking</span>
+                        <span className="text-sm text-gray-300">Progress tracking</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">Pause and resume</span>
+                        <span className="text-sm text-gray-300">Pause and resume</span>
                       </li>
                     </ul>
                   </CardContent>
@@ -294,15 +297,15 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                     <ul className="space-y-2">
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">Quality control</span>
+                        <span className="text-sm text-gray-300">Quality control</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">Image size selection</span>
+                        <span className="text-sm text-gray-300">Image size selection</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">Format preferences</span>
+                        <span className="text-sm text-gray-300">Format preferences</span>
                       </li>
                     </ul>
                   </CardContent>
@@ -320,15 +323,15 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                     <ul className="space-y-2">
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">Original backup storage</span>
+                        <span className="text-sm text-gray-300">Original backup storage</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">One-click restore</span>
+                        <span className="text-sm text-gray-300">One-click restore</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">Backup management</span>
+                        <span className="text-sm text-gray-300">Backup management</span>
                       </li>
                     </ul>
                   </CardContent>
@@ -345,15 +348,15 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                     <ul className="space-y-2">
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">CR2, ARW, DNG, NEF support</span>
+                        <span className="text-sm text-gray-300">CR2, ARW, DNG, NEF support</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">ORF, RAF, RW2 compatibility</span>
+                        <span className="text-sm text-gray-300">ORF, RAF, RW2 compatibility</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">Automatic web conversion</span>
+                        <span className="text-sm text-gray-300">Automatic web conversion</span>
                       </li>
                     </ul>
                   </CardContent>
@@ -371,15 +374,15 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                     <ul className="space-y-2">
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">SVG to optimized raster</span>
+                        <span className="text-sm text-gray-300">SVG to optimized raster</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">TIFF compression</span>
+                        <span className="text-sm text-gray-300">TIFF compression</span>
                       </li>
                       <li className="flex items-center gap-2">
                         <CheckCircle className="w-4 h-4 text-green-400" />
-                        <span className="text-sm">Next-gen format output</span>
+                        <span className="text-sm text-gray-300">Next-gen format output</span>
                       </li>
                     </ul>
                   </CardContent>
@@ -404,7 +407,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                     </div>
                     
                     <div className="flex items-start space-x-4">
-                      <div className="w-8 h-8 bg-teal-500/20 border border-teal-500/30 rounded-lg mx-auto mb-3 flex items-center justify-center">2</div>
+                      <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg">2</div>
                       <div>
                         <h3 className="font-semibold text-white mb-2">Format Detection & Conversion</h3>
                         <p className="text-gray-400">The plugin identifies the image format (including RAW files) and determines the optimal web format for conversion.</p>
@@ -412,7 +415,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                     </div>
                     
                     <div className="flex items-start space-x-4">
-                      <div className="w-8 h-8 bg-teal-500/20 border border-teal-500/30 rounded-lg mx-auto mb-3 flex items-center justify-center">3</div>
+                      <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg">3</div>
                       <div>
                         <h3 className="font-semibold text-white mb-2">Background Processing</h3>
                         <p className="text-gray-400">Images are sent to Micro JPEG's compression servers for processing, without blocking your workflow.</p>
@@ -420,7 +423,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                     </div>
                     
                     <div className="flex items-start space-x-4">
-                      <div className="w-8 h-8 bg-teal-500/20 border border-teal-500/30 rounded-lg mx-auto mb-3 flex items-center justify-center">4</div>
+                      <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg">4</div>
                       <div>
                         <h3 className="font-semibold text-white mb-2">Smart Compression</h3>
                         <p className="text-gray-400">Advanced algorithms analyze each image and apply optimal compression settings for maximum size reduction.</p>
@@ -510,23 +513,23 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                   </p>
                   
                   <div className="space-y-4">
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <h4 className="font-semibold text-blue-900 mb-2">Automatic Future Compression</h4>
-                      <p className="text-blue-800 text-sm">
+<div className="bg-teal-900/30 border border-teal-500/50 p-4 rounded-lg">
+  <h4 className="font-semibold text-teal-400 mb-2">Automatic Future Compression</h4>
+  <p className="text-gray-300 text-sm">
                         Once activated, every new image upload is automatically compressed in the background.
                       </p>
                     </div>
                     
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      <h4 className="font-semibold text-green-900 mb-2">Bulk Optimization Tool</h4>
-                      <p className="text-green-800 text-sm">
+<div className="bg-green-900/30 border border-green-500/50 p-4 rounded-lg">
+  <h4 className="font-semibold text-green-400 mb-2">Bulk Optimization Tool</h4>
+  <p className="text-gray-300 text-sm">
                         Use the dedicated bulk optimization page to process thousands of existing images at once.
                       </p>
                     </div>
                     
-                    <div className="bg-purple-50 p-4 rounded-lg">
-                      <h4 className="font-semibold text-purple-900 mb-2">Selective Processing</h4>
-                      <p className="text-purple-800 text-sm">
+<div className="bg-purple-900/30 border border-purple-500/50 p-4 rounded-lg">
+  <h4 className="font-semibold text-purple-400 mb-2">Selective Processing</h4>
+  <p className="text-gray-300 text-sm">
                         Choose specific folders, dates, or image types to optimize only what you need.
                       </p>
                     </div>
@@ -555,19 +558,19 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                       <ul className="space-y-2">
                         <li className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-green-400" />
-                          <span className="text-sm">Centralized API key management</span>
+                          <span className="text-sm text-gray-300">Centralized API key management</span>
                         </li>
                         <li className="flex items-center gap-2">text-grtext-green-400een-400
                           <CheckCircle className="w-4 h-4 text-green-400" />
-                          <span className="text-sm">Network-wide settings control</span>
+                          <span className="text-sm text-gray-300">Network-wide settings control</span>
                         </li>
                         <li className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-green-400" />
-                          <span className="text-sm">Usage monitoring across all sites</span>
+                          <span className="text-sm text-gray-300">Usage monitoring across all sites</span>
                         </li>
                         <li className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-green-400" />
-                          <span className="text-sm">Bulk optimization for entire network</span>
+                          <span className="text-sm text-gray-300">Bulk optimization for entire network</span>
                         </li>
                       </ul>
                     </div>
@@ -577,19 +580,19 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                       <ul className="space-y-2">
                         <li className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-green-400" />
-                          <span className="text-sm">Individual site customization</span>
+                          <span className="text-sm text-gray-300">Individual site customization</span>
                         </li>
                         <li className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-green-400" />
-                          <span className="text-sm">Site-specific compression stats</span>
+                          <span className="text-sm text-gray-300">Site-specific compression stats</span>
                         </li>
                         <li className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-green-400" />
-                          <span className="text-sm">Local backup management</span>
+                          <span className="text-sm text-gray-300">Local backup management</span>
                         </li>
                         <li className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-green-400" />
-                          <span className="text-sm">Independent optimization queues</span>
+                          <span className="text-sm text-gray-300">Independent optimization queues</span>
                         </li>
                       </ul>
                     </div>
@@ -603,9 +606,9 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <h4 className="font-semibold text-blue-900 mb-2">Centralized Mode</h4>
-                      <p className="text-blue-800 text-sm">
+<div className="bg-teal-900/30 border border-teal-500/50 p-4 rounded-lg">
+  <h4 className="font-semibold text-teal-400 mb-2">Centralized Mode</h4>
+  <p className="text-gray-300 text-sm">
                         Network admin manages all settings and API keys. Individual sites use compression automatically.
                       </p>
                     </div>
@@ -720,15 +723,15 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <Mail className="w-4 h-4 text-teal-400" />
-                      <span className="text-sm">support@microjpeg.com</span>
+                      <span className="text-sm text-gray-300">support@microjpeg.com</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <Clock className="w-4 h-4 text-green-400" />
-                      <span className="text-sm">Average response time: 2-4 hours</span>
+                      <span className="text-sm text-gray-300">Average response time: 2-4 hours</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <Globe className="w-4 h-4 text-purple-400" />
-                      <span className="text-sm">24/7 support for premium users</span>
+                      <span className="text-sm text-gray-300">24/7 support for premium users</span>
                     </div>
                   </div>
                   <Button 

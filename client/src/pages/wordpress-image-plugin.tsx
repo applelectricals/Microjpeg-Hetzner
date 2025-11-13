@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SiWordpress } from 'react-icons/si';
-import { Download, Zap, Shield, Settings, BarChart } from 'lucide-react';
+import { Download, Zap, Shield, Settings, BarChart, FileImage } from 'lucide-react';
 
 export default function WordPressImagePlugin() {
   const seoData = {
@@ -43,6 +43,36 @@ export default function WordPressImagePlugin() {
   <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
   <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
         <Header />
+
+{/* Sub Navigation */}
+<div className="bg-gray-800/90 backdrop-blur-xl border-b border-teal-500/30 relative z-10">
+  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="flex space-x-8">
+      {[
+        { id: 'details', label: 'Details', icon: FileImage },
+        { id: 'installation', label: 'Installation', icon: Download },
+        { id: 'docs', label: 'Documentation', icon: FileImage },
+      ].map(({ id, label, icon: Icon }) => (
+        
+          key={id} 
+          href={id === 'details' ? '/wordpress-plugin' : 
+                id === 'installation' ? '/wordpress-plugin/install' : 
+                '/wordpress-plugin/docs'}
+          className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium transition-colors ${
+            window.location.pathname === (id === 'details' ? '/wordpress-plugin' : 
+                                         id === 'installation' ? '/wordpress-plugin/install' : 
+                                         '/wordpress-plugin/docs')
+              ? 'border-teal-400 text-teal-400'
+              : 'border-transparent text-gray-400 hover:text-white hover:border-teal-500/50'
+          }`}
+        >
+          <Icon className="w-4 h-4" />
+          <span>{label}</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</div>
         
         {/* Hero Section */}
         <section className="pt-24 pb-16 relative z-10">
@@ -96,60 +126,60 @@ export default function WordPressImagePlugin() {
                 </p>
               </Card>
               
-              <Card className="p-6">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                  <BarChart className="w-6 h-6 text-green-600" />
-                </div>
-                <h3 className="font-bold text-lg mb-3">Bulk Optimization</h3>
-                <p className="text-gray-600">
-                  Optimize all existing images in your media library with one click. 
-                  Process thousands of images in the background.
-                </p>
-              </Card>
+              <Card className="p-6 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 hover:border-teal-500/50 transition-all">
+  <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center mb-4">
+    <BarChart className="w-6 h-6 text-green-400" />
+  </div>
+  <h3 className="font-bold text-lg mb-3 text-white">Bulk Optimization</h3>
+  <p className="text-gray-300">
+    Optimize all existing images in your media library with one click. 
+    Process thousands of images in the background.
+  </p>
+</Card>
               
-              <Card className="p-6">
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                  <Settings className="w-6 h-6 text-purple-600" />
-                </div>
-                <h3 className="font-bold text-lg mb-3">Custom Settings</h3>
-                <p className="text-gray-600">
-                  Configure compression quality, output formats, and size limits. 
-                  Perfect control over your image optimization workflow.
-                </p>
-              </Card>
+              <Card className="p-6 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 hover:border-teal-500/50 transition-all">
+  <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center mb-4">
+    <BarChart className="w-6 h-6 text-green-400" />
+  </div>
+  <h3 className="font-bold text-lg mb-3 text-white">Custom Settings</h3>
+  <p className="text-gray-300">
+    Configure compression quality, output formats, and size limits. 
+    Perfect control over your image optimization workflow.
+  </p>
+</Card>
               
-              <Card className="p-6">
-                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
-                  <Shield className="w-6 h-6 text-yellow-600" />
-                </div>
-                <h3 className="font-bold text-lg mb-3">Backup & Restore</h3>
-                <p className="text-gray-600">
-                  Keep original images safely backed up. Restore originals anytime 
-                  if needed. Never lose your source files.
-                </p>
-              </Card>
+              <Card className="p-6 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 hover:border-teal-500/50 transition-all">
+  <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center mb-4">
+    <BarChart className="w-6 h-6 text-green-400" />
+  </div>
+  <h3 className="font-bold text-lg mb-3 text-white">Backup & Restore</h3>
+  <p className="text-gray-300">
+      Keep original images safely backed up. Restore originals anytime  
+    if needed. Never lose your source files.
+  </p>
+</Card>
               
-              <Card className="p-6">
-                <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                  <SiWordpress className="w-6 h-6 text-red-600" />
-                </div>
-                <h3 className="font-bold text-lg mb-3">WordPress Native</h3>
-                <p className="text-gray-600">
-                  Built specifically for WordPress with native integration. 
-                  Works with all themes and other plugins seamlessly.
-                </p>
-              </Card>
+              <Card className="p-6 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 hover:border-teal-500/50 transition-all">
+  <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center mb-4">
+    <BarChart className="w-6 h-6 text-green-400" />
+  </div>
+  <h3 className="font-bold text-lg mb-3 text-white">WordPress Native</h3>
+  <p className="text-gray-300">
+    Built specifically for WordPress with native integration. 
+    Works with all themes and other plugins seamlessly.
+  </p>
+</Card>
               
-              <Card className="p-6">
-                <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                  <Download className="w-6 h-6 text-indigo-600" />
-                </div>
-                <h3 className="font-bold text-lg mb-3">WebP & AVIF Support</h3>
-                <p className="text-gray-600">
-                  Convert images to modern WebP and AVIF formats for maximum 
-                  compression and fastest loading times.
-                </p>
-              </Card>
+              <Card className="p-6 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 hover:border-teal-500/50 transition-all">
+  <div className="w-12 h-12 bg-green-500/20 border border-green-500/30 rounded-lg flex items-center justify-center mb-4">
+    <BarChart className="w-6 h-6 text-green-400" />
+  </div>
+  <h3 className="font-bold text-lg mb-3 text-white">WebP & AVIF Support</h3>
+  <p className="text-gray-300">
+Convert images to modern WebP and AVIF formats for maximum 
+compression and fastest loading times.
+  </p>
+</Card>
             </div>
           </div>
         </section>

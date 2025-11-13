@@ -63,7 +63,7 @@ export default function WordPressInstallation() {
                       id === 'docs' ? '/wordpress-plugin/docs' :
                       '/wordpress-plugin/api'}
                 className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium transition-colors ${
-  id === 'details'
+  id === 'installation'
     ? 'border-teal-400 text-teal-400'
     : 'border-transparent text-gray-400 hover:text-white hover:border-teal-500/50'
 }`}
@@ -102,32 +102,32 @@ export default function WordPressInstallation() {
             <CardContent>
               <div className="grid md:grid-cols-2 gap-6">
                 <ul className="space-y-3">
-                  <li className="flex items-center text-sm">
-                    <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
-                    <span>WordPress 5.0 or higher</span>
-                  </li>
-                  <li className="flex items-center text-sm">
-                    <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
-                    <span>PHP 7.4 or higher</span>
-                  </li>
-                  <li className="flex items-center text-sm">
-                    <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
-                    <span>cURL extension enabled</span>
-                  </li>
+<li className="flex items-center text-sm text-gray-300">
+  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+  <span>WordPress 5.0 or higher</span>
+</li>
+                  <li className="flex items-center text-sm text-gray-300">
+  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+  <span>PHP 7.4 or higher</span>
+</li>
+                  <li className="flex items-center text-sm text-gray-300">
+  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+  <span>cURL extension enabled</span>
+</li>
                 </ul>
                 <ul className="space-y-3">
-                  <li className="flex items-center text-sm">
-                    <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
-                    <span>Admin access to WordPress</span>
-                  </li>
-                  <li className="flex items-center text-sm">
-                    <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
-                    <span>Micro JPEG API key</span>
-                  </li>
-                  <li className="flex items-center text-sm">
-                    <CheckCircle className="w-4 h-4 text-green-600 mr-2" />
-                    <span>Backup of your website</span>
-                  </li>
+<li className="flex items-center text-sm text-gray-300">
+  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+  <span>Admin access to WordPress</span>
+</li>
+                  <li className="flex items-center text-sm text-gray-300">
+  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+  <span>Micro JPEG API key</span>
+</li>
+                  <li className="flex items-center text-sm text-gray-300">
+  <CheckCircle className="w-4 h-4 text-green-400 mr-2" />
+  <span>Backup of your website</span>
+</li>
                 </ul>
               </div>
             </CardContent>
