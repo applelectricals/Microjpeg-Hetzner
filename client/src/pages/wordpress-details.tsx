@@ -448,7 +448,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                 <CardContent>
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-semibold mb-3">Compression Technology</h4>
+                      <h4 className="font-semibold mb-3 text-white">Compression Technology</h4>
                       <ul className="space-y-2 text-sm text-gray-400">
                         <li>• Advanced lossy and lossless algorithms</li>
                         <li>• Smart quality adjustment based on content</li>
@@ -459,7 +459,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-semibold mb-3">WordPress Integration</h4>
+                      <h4 className="font-semibold mb-3 text-white">WordPress Integration</h4>
                       <ul className="space-y-2 text-sm text-gray-400">
                         <li>• Hooks into WordPress upload process</li>
                         <li>• Compatible with all image sizes</li>
