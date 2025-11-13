@@ -94,7 +94,7 @@ export default function WordPressInstallation() {
           {/* Prerequisites */}
           <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
             <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
+              <CardTitle className="flex items-center space-x-2 text-white">
                 <AlertTriangle className="w-5 h-5 text-yellow-600" />
                 <span>Prerequisites</span>
               </CardTitle>
@@ -145,7 +145,7 @@ export default function WordPressInstallation() {
             <TabsContent value="dashboard" className="space-y-6">
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <Monitor className="w-5 h-5" />
                     Install from WordPress Dashboard
                   </CardTitle>
@@ -176,8 +176,8 @@ export default function WordPressInstallation() {
                         <p className="text-gray-400 text-sm mb-3">
                           In the search box, type "Micro JPEG" or "Image Compression" to find our plugin
                         </p>
-                        <div className="bg-blue-50 p-3 rounded-lg">
-                          <p className="text-blue-800 text-sm flex items-center gap-2">
+                        <div className="bg-teal-900/30 border border-teal-500/50 p-3 rounded-lg">
+  <p className="text-teal-400 text-sm flex items-center gap-2">
                             <Search className="w-4 h-4" />
                             Look for "Micro JPEG - WordPress Image Compression" by Micro JPEG
                           </p>
@@ -201,7 +201,7 @@ export default function WordPressInstallation() {
                     </div>
                     
                     <div className="flex items-start space-x-4">
-                      <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-sm flex-shrink-0">4</div>
+                      <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg">4</div>
                       <div className="flex-1">
                         <h3 className="font-semibold text-white mb-2">Activate the Plugin</h3>
                         <p className="text-gray-400 text-sm mb-3">
@@ -309,8 +309,8 @@ export default function WordPressInstallation() {
                         <p className="text-gray-400 text-sm mb-3">
                           Activate the plugin and configure your API key in the settings
                         </p>
-                        <div className="bg-green-50 p-3 rounded-lg">
-                          <p className="text-green-800 text-sm">
+<div className="bg-green-900/30 border border-green-500/50 p-3 rounded-lg">
+  <p className="text-green-400 text-sm">
                             The plugin is now ready to compress your images automatically!
                           </p>
                         </div>
@@ -332,8 +332,8 @@ export default function WordPressInstallation() {
                     <li>Log in to WordPress admin and activate the plugin from the Plugins page</li>
                     <li>Configure your API key in Settings → Micro JPEG</li>
                   </ol>
-                  <div className="bg-yellow-50 p-3 rounded-lg mt-4">
-                    <p className="text-yellow-800 text-sm flex items-center gap-2">
+<div className="bg-yellow-900/30 border border-yellow-500/50 p-3 rounded-lg mt-4">
+  <p className="text-yellow-400 text-sm flex items-center gap-2">
                       <AlertTriangle className="w-4 h-4" />
                       Make sure to set correct file permissions (755 for folders, 644 for files)
                     </p>
@@ -534,26 +534,26 @@ export default function WordPressInstallation() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <div className="bg-blue-50 p-4 rounded-lg">
-                      <h4 className="font-semibold text-blue-900 mb-2">🚀 Performance Tip</h4>
-                      <p className="text-blue-800 text-sm">
-                        For high-traffic sites, enable background processing and set a reasonable concurrent job limit to avoid server overload.
-                      </p>
-                    </div>
+                    <div className="bg-teal-900/30 border border-teal-500/50 p-4 rounded-lg">
+  <h4 className="font-semibold text-teal-400 mb-2">🚀 Performance Tip</h4>
+  <p className="text-gray-300 text-sm">
+    For high-traffic sites, enable background processing and set a reasonable concurrent job limit to avoid server overload.
+  </p>
+</div>
                     
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      <h4 className="font-semibold text-green-900 mb-2">💡 Quality Tip</h4>
-                      <p className="text-green-800 text-sm">
-                        Start with 85% quality for JPEG and adjust based on your specific needs. Photography sites may prefer 90-95%.
-                      </p>
-                    </div>
+                    <div className="bg-green-900/30 border border-green-500/50 p-4 rounded-lg">
+  <h4 className="font-semibold text-green-400 mb-2">💡 Quality Tip</h4>
+  <p className="text-gray-300 text-sm">
+    Start with 85% quality for JPEG and adjust based on your specific needs. Photography sites may prefer 90-95%.
+  </p>
+</div>
                     
-                    <div className="bg-purple-50 p-4 rounded-lg">
-                      <h4 className="font-semibold text-purple-900 mb-2">🔒 Security Tip</h4>
-                      <p className="text-purple-800 text-sm">
-                        Always keep backups enabled for the first few weeks to ensure you're happy with compression results.
-                      </p>
-                    </div>
+                    <div className="bg-purple-900/30 border border-purple-500/50 p-4 rounded-lg">
+  <h4 className="font-semibold text-purple-400 mb-2">🔒 Security Tip</h4>
+  <p className="text-gray-300 text-sm">
+    Always keep backups enabled for the first few weeks to ensure you're happy with compression results.
+  </p>
+</div>
                   </div>
                 </CardContent>
               </Card>
@@ -563,7 +563,7 @@ export default function WordPressInstallation() {
           {/* Support Section */}
           <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-white">
                 <Shield className="w-5 h-5" />
                 Need Help?
               </CardTitle>

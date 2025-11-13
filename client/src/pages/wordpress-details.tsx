@@ -136,7 +136,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
             <TabsContent value="description" className="space-y-6">
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <FileImage className="w-5 h-5" />
                     Plugin Description
                   </CardTitle>
@@ -235,7 +235,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
               <div className="grid md:grid-cols-2 gap-6">
                 <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-white">
                       <Upload className="w-5 h-5 text-blue-600" />
                       Automatic Compression
                     </CardTitle>
@@ -261,7 +261,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
 
                 <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-white">
                       <Layers className="w-5 h-5 text-purple-400" />
                       Bulk Optimization
                     </CardTitle>
@@ -287,7 +287,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
 
                 <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-white">
                       <Settings className="w-5 h-5 text-gray-400" />
                       Flexible Settings
                     </CardTitle>
@@ -313,7 +313,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
 
                 <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-white">
                       <Shield className="w-5 h-5 text-green-400" />
                       Backup & Restore
                     </CardTitle>
@@ -338,7 +338,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                 </Card>
                 <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-white">
                       <Image className="w-5 h-5 text-orange-600" />
                       RAW File Processing
                     </CardTitle>
@@ -364,7 +364,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
 
                 <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-white">
                       <Globe className="w-5 h-5 text-teal-600" />
                       Smart Format Conversion
                     </CardTitle>
@@ -431,7 +431,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                     </div>
                     
                     <div className="flex items-start space-x-4">
-                      <div className="w-8 h-8 bg-teal-500/20 border border-teal-500/30 rounded-lg mx-auto mb-3 flex items-center justify-center">5</div>
+                      <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-full flex items-center justify-center font-bold text-sm shadow-lg">5</div>
                       <div>
                         <h3 className="font-semibold text-white mb-2">File Replacement</h3>
                         <p className="text-gray-400">Compressed images replace the originals in your media library, with originals safely backed up.</p>
@@ -527,8 +527,8 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                       </p>
                     </div>
                     
-<div className="bg-purple-900/30 border border-purple-500/50 p-4 rounded-lg">
-  <h4 className="font-semibold text-purple-400 mb-2">Selective Processing</h4>
+<div className="bg-teal-900/30 border border-teal-500/50 p-4 rounded-lg">
+  <h4 className="font-semibold text-teal-400 mb-2">Selective Processing</h4>
   <p className="text-gray-300 text-sm">
                         Choose specific folders, dates, or image types to optimize only what you need.
                       </p>
@@ -542,7 +542,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
             <TabsContent value="multisite" className="space-y-6">
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <Server className="w-5 h-5" />
                     WordPress Multisite Support
                   </CardTitle>
@@ -560,7 +560,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                           <CheckCircle className="w-4 h-4 text-green-400" />
                           <span className="text-sm text-gray-300">Centralized API key management</span>
                         </li>
-                        <li className="flex items-center gap-2">text-grtext-green-400een-400
+                        <li className="flex items-center gap-2">
                           <CheckCircle className="w-4 h-4 text-green-400" />
                           <span className="text-sm text-gray-300">Network-wide settings control</span>
                         </li>
@@ -609,23 +609,23 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
 <div className="bg-teal-900/30 border border-teal-500/50 p-4 rounded-lg">
   <h4 className="font-semibold text-teal-400 mb-2">Centralized Mode</h4>
   <p className="text-gray-300 text-sm">
-                        Network admin manages all settings and API keys. Individual sites use compression automatically.
-                      </p>
-                    </div>
-                    
-                    <div className="bg-green-50 p-4 rounded-lg">
-                      <h4 className="font-semibold text-green-900 mb-2">Distributed Mode</h4>
-                      <p className="text-green-800 text-sm">
-                        Each site manages its own API key and settings while sharing plugin updates and features.
-                      </p>
-                    </div>
-                    
-                    <div className="bg-purple-50 p-4 rounded-lg">
-                      <h4 className="font-semibold text-purple-900 mb-2">Hybrid Mode</h4>
-                      <p className="text-purple-800 text-sm">
-                        Network admin sets defaults and limits, while sites can customize within those boundaries.
-                      </p>
-                    </div>
+    Network admin manages all settings and API keys. Individual sites use compression automatically.
+  </p>
+</div>
+
+<div className="bg-teal-900/30 border border-teal-500/50 p-4 rounded-lg">
+  <h4 className="font-semibold text-teal-400 mb-2">Distributed Mode</h4>
+  <p className="text-gray-300 text-sm">
+    Each site manages its own API key and settings while sharing plugin updates and features.
+  </p>
+</div>
+
+<div className="bg-teal-900/30 border border-teal-500/50 p-4 rounded-lg">
+  <h4 className="ont-semibold text-teal-400 mb-2">Hybrid Mode</h4>
+  <p className="text-gray-300 text-sm">
+    Network admin sets defaults and limits, while sites can customize within those boundaries.
+  </p>
+</div>
                   </div>
                 </CardContent>
               </Card>
@@ -635,14 +635,14 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
             <TabsContent value="faq" className="space-y-6">
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <HelpCircle className="w-5 h-5" />
                     Frequently Asked Questions
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-4">
-                    <div className="border-b border-gray-200 pb-4">
+                    <div className="border-b border-gray-700 pb-4">
                       <h3 className="font-semibold text-white mb-2">Will the plugin slow down my website?</h3>
                       <p className="text-gray-400 text-sm">
                         No, the plugin processes images in the background using WordPress's built-in queue system. 
@@ -650,7 +650,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                       </p>
                     </div>
                     
-                    <div className="border-b border-gray-200 pb-4">
+                    <div className="border-b border-gray-700 pb-4">
                       <h3 className="font-semibold text-white mb-2">What happens to my original images?</h3>
                       <p className="text-gray-400 text-sm">
                         Original images are safely backed up before compression. You can restore originals at any time 
@@ -658,7 +658,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                       </p>
                     </div>
                     
-                    <div className="border-b border-gray-200 pb-4">
+                    <div className="border-b border-gray-700 pb-4">
                       <h3 className="font-semibold text-white mb-2">Does it work with page builders like Elementor?</h3>
                       <p className="text-gray-400 text-sm">
                         Yes, the plugin works with all page builders including Elementor, Gutenberg, Divi, and others. 
@@ -666,7 +666,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                       </p>
                     </div>
                     
-                    <div className="border-b border-gray-200 pb-4">
+                    <div className="border-b border-gray-700 pb-4">
                       <h3 className="font-semibold text-white mb-2">Can I choose which image sizes to compress?</h3>
                       <p className="text-gray-400 text-sm">
                         Absolutely! You can select which WordPress image sizes to compress (thumbnail, medium, large, etc.) 
@@ -674,7 +674,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                       </p>
                     </div>
                     
-                    <div className="border-b border-gray-200 pb-4">
+                    <div className="border-b border-gray-700 pb-4">
                       <h3 className="font-semibold text-white mb-2">What file formats are supported?</h3>
                       <p className="text-gray-400 text-sm">
                         The plugin supports JPEG, PNG, WebP, and AVIF formats. It can also convert between formats 
@@ -682,7 +682,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                       </p>
                     </div>
                     
-                    <div className="border-b border-gray-200 pb-4">
+                    <div className="border-b border-gray-700 pb-4">
                       <h3 className="font-semibold text-white mb-2">Is there a limit to how many images I can compress?</h3>
                       <p className="text-gray-400 text-sm">
                         Compression limits depend on your Micro JPEG plan. Free accounts get monthly compression credits, 
@@ -690,7 +690,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                       </p>
                     </div>
                     
-                    <div className="border-b border-gray-200 pb-4">
+                    <div className="border-b border-gray-700 pb-4">
                       <h3 className="font-semibold text-white mb-2">Can I use the plugin on multiple websites?</h3>
                       <p className="text-gray-400 text-sm">
                         Yes, you can install the plugin on multiple websites. Each site will need its own API key 
@@ -711,7 +711,7 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
 
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
+                  <CardTitle className="flex items-center gap-2 text-white">
                     <Mail className="w-5 h-5" />
                     Contact Us
                   </CardTitle>
