@@ -70,8 +70,9 @@ export default function Tools() {
               Professional Image Tools
             </h1>
             <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-8">
-              Comprehensive suite of professional image processing tools. Compress, convert, optimize, and batch process your images 
-              with advanced AI-powered algorithms and support for 13+ formats including professional RAW files.
+              Comprehensive suite of professional image processing tools. Compress, convert, optimize, and process your images 
+              with advanced algorithms and support for RAW (ARW, CR2, CRW, DNG, NEF, ORF, RAF) & Regular (JPG, PNG, WEBP, AVIF, TIFF, SVG) formats.
+              Only App in the Internet with 13+ Formats, offering Web, API, CDN, Wordpress & Integrations for All Imaging Needs.
             </p>
             <div className="flex justify-center space-x-4">
               <Button 

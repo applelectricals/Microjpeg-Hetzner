@@ -52,7 +52,7 @@ export default function WebCompress() {
               Advanced Image Compression
             </h1>
             <p className="text-xl text-gray-600 max-w-4xl mx-auto mb-8">
-              Achieve up to 80% size reduction with our AI-powered compression algorithms. Support for 13+ formats including 
+              Compress Large Images up to 200MB and get 60% to 80% size reduction with our AI-powered compression algorithms. Support for 13+ formats including 
               professional RAW files, with intelligent quality preservation and batch processing capabilities.
             </p>
             <div className="flex justify-center space-x-4">
@@ -82,18 +82,13 @@ export default function WebCompress() {
               <div>
                 <h4 className="font-semibold text-gray-800 mb-2">Web & Standard Formats</h4>
                 <div className="flex flex-wrap gap-2">
-                  {['JPEG', 'PNG', 'WebP', 'AVIF', 'SVG', 'TIFF'].map(format => (
+                  {['JPG' to 'JPG', 'PNG' to 'PNG', 'WebP' to 'WEBP', 'AVIF' to 'AVIF', 'SVG' to 'SVG', 'TIFF' to 'TIFF'].map(format => (
                     <Badge key={format} variant="secondary" className="bg-teal-100 text-teal-700">{format}</Badge>
                   ))}
                 </div>
               </div>
               <div>
-                <h4 className="font-semibold text-gray-800 mb-2">Professional RAW Formats</h4>
-                <div className="flex flex-wrap gap-2">
-                  {['CR2 (Canon)', 'ARW (Sony)', 'DNG (Adobe)', 'NEF (Nikon)', 'ORF (Olympus)', 'RAF (Fujifilm)', 'RW2 (Panasonic)'].map(format => (
-                    <Badge key={format} variant="outline" className="border-cyan-200 text-cyan-700">{format}</Badge>
-                  ))}
-                </div>
+                
               </div>
             </CardContent>
           </Card>
