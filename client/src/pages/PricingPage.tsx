@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import Header from '@/components/header';
 import { useAuth } from '@/hooks/useAuth';
-import PayPalButton from '@/components/PayPalButton';
+import { SubscribeButton } from '@/components/PayPalPaymentButton';
 
 // ADD THIS HOOK (same as landing page)
 function useDarkMode() {
@@ -59,9 +59,7 @@ export default function PricingPage() {
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   
-  // Add state for modal
-  const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
+
 
   useEffect(() => {
     fetchPlans();
@@ -79,15 +77,7 @@ export default function PricingPage() {
     }
   };
 
-  const handleSubscribe = (plan: Plan) => {
-    if (!user) {
-      window.location.href = '/login?redirect=/pricing';
-      return;
-    }
-
-    setSelectedPlan(plan);
-    setShowPaymentModal(true);
-  };
+  
 
   const getYearlySavings = (monthly: number, yearly: number) => {
     const yearlyCost = monthly * 12;
@@ -196,18 +186,28 @@ export default function PricingPage() {
                     )}
                   </div>
 
-                  <Button
-                    onClick={() => handleSubscribe(plan)}
-                    className={`w-full mb-6 ${
-                      isPro
-                        ? 'bg-brand-gold hover:bg-brand-gold-dark text-white'
-                        : 'bg-gray-900 hover:bg-gray-800 text-white dark:bg-gray-700 dark:hover:bg-gray-600'
-                    }`}
-                    size="lg"
-                  >
-                    {user ? 'Subscribe Now' : 'Sign Up to Subscribe'}
-                  </Button>
-
+                  {user ? (
+  <SubscribeButton
+    planId={billingCycle === 'monthly' ? plan.planIds.monthly : plan.planIds.yearly}
+    planName={`${plan.name} ${billingCycle === 'monthly' ? 'Monthly' : 'Yearly'}`}
+    amount={price}
+    variant={isPro ? 'default' : 'outline'}
+  >
+    Subscribe Now
+  </SubscribeButton>
+) : (
+  <Button
+    onClick={() => window.location.href = '/login?redirect=/pricing'}
+    className={`w-full mb-6 ${
+      isPro
+        ? 'bg-brand-gold hover:bg-brand-gold-dark text-white'
+        : 'bg-gray-900 hover:bg-gray-800 text-white dark:bg-gray-700 dark:hover:bg-gray-600'
+    }`}
+    size="lg"
+  >
+    Sign Up to Subscribe
+  </Button>
+)}
                   <div className="space-y-3">
                     <div className="flex items-center gap-3 text-sm">
                       <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
@@ -284,70 +284,6 @@ export default function PricingPage() {
           </Card>
         </div>
       </section>
-
-      {/* Payment Modal */}
-      {showPaymentModal && selectedPlan && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="max-w-md w-full p-6 bg-white dark:bg-gray-800">
-            <div className="flex justify-between items-center mb-4">
-              <h3 className="text-2xl font-bold dark:text-white">
-                Subscribe to {selectedPlan.name}
-              </h3>
-              <button
-                onClick={() => {
-                  setShowPaymentModal(false);
-                  setSelectedPlan(null);
-                }}
-                className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="mb-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <div className="flex justify-between mb-2">
-                <span className="text-gray-600 dark:text-gray-300">Plan:</span>
-                <span className="font-bold dark:text-white">{selectedPlan.name}</span>
-              </div>
-              <div className="flex justify-between mb-2">
-                <span className="text-gray-600 dark:text-gray-300">Billing:</span>
-                <span className="font-bold dark:text-white capitalize">{billingCycle}</span>
-              </div>
-              <div className="flex justify-between text-lg">
-                <span className="text-gray-600 dark:text-gray-300">Total:</span>
-                <span className="font-bold text-brand-gold">
-                  ${billingCycle === 'monthly' ? selectedPlan.pricing.monthly : selectedPlan.pricing.yearly}
-                </span>
-              </div>
-            </div>
-
-            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-              <p className="text-sm text-blue-800 dark:text-blue-200">
-                ✓ Pay with PayPal or Credit/Debit Card<br/>
-                ✓ No PayPal account required for card payments<br/>
-                ✓ Renew manually when expires
-              </p>
-            </div>
-
-            <PayPalButton
-              type="order"
-              amount={billingCycle === 'monthly' ? selectedPlan.pricing.monthly : selectedPlan.pricing.yearly}
-              description={`MicroJPEG ${selectedPlan.name} - ${billingCycle}`}
-              userId={user.id}
-              tier={selectedPlan.tier}
-              cycle={billingCycle}
-              onSuccess={(details) => {
-                console.log('Payment success:', details);
-                window.location.href = '/subscription/success';
-              }}
-              onError={(error) => {
-                console.error('Payment error:', error);
-                alert('Payment failed. Please try again.');
-              }}
-            />
-          </Card>
-        </div>
-      )}
     </div>
   );
 }
