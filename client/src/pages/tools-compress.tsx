@@ -109,7 +109,7 @@ export default function ToolsCompress() {
                 <h4 className="font-semibold text-white mb-2">Professional RAW Formats</h4>
                 <div className="flex flex-wrap gap-2">
                   {['CR2 (Canon)', 'ARW (Sony)', 'DNG (Adobe)', 'NEF (Nikon)', 'ORF (Olympus)', 'RAF (Fujifilm)', 'RW2 (Panasonic)'].map(format => (
-                    <Badge key={format} variant="outline" className="border-purple-200 text-purple-700">{format}</Badge>
+                    <Badge key={format} variant="secondary" className="bg-teal-900/50 text-teal-400 border border-teal-500/30">{format}</Badge>
                   ))}
                 </div>
               </div>
@@ -244,9 +244,9 @@ export default function ToolsCompress() {
             <CardContent>
               <div className="grid md:grid-cols-3 gap-8">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Upload className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Upload className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3 text-xl">1. Upload & Analyze</h3>
                   <p className="text-gray-300">
                     AI analyzes your image content, format, and quality to determine optimal compression strategy
@@ -254,9 +254,9 @@ export default function ToolsCompress() {
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Zap className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Zap className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3 text-xl">2. Smart Processing</h3>
                   <p className="text-gray-300">
                     Advanced algorithms apply format-specific optimizations while preserving visual fidelity
@@ -264,9 +264,9 @@ export default function ToolsCompress() {
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Download className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Download className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3 text-xl">3. Instant Download</h3>
                   <p className="text-gray-300">
                     Get your optimized images individually or as batch ZIP downloads, ready for deployment
