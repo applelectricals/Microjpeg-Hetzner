@@ -98,22 +98,22 @@ export default function ToolsOptimizer() {
                 <div className="grid md:grid-cols-4 gap-6">
                   <div className="text-center p-4 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-lg">
                     <div className="text-2xl font-bold text-indigo-600 mb-1">-78%</div>
-                    <div className="text-sm text-gray-300">File Size Reduction</div>
+                    <div className="text-sm text-black">File Size Reduction</div>
                   </div>
                   
                   <div className="text-center p-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg">
                     <div className="text-2xl font-bold text-green-600 mb-1">+45%</div>
-                    <div className="text-sm text-gray-300">Page Load Speed</div>
+                    <div className="text-sm text-black">Page Load Speed</div>
                   </div>
                   
                   <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg">
                     <div className="text-2xl font-bold text-blue-600 mb-1">96.8</div>
-                    <div className="text-sm text-gray-300">Quality Score</div>
+                    <div className="text-sm text-black">Quality Score</div>
                   </div>
                   
                   <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-pink-50 rounded-lg">
                     <div className="text-2xl font-bold text-purple-600 mb-1">2.1s</div>
-                    <div className="text-sm text-gray-300">Processing Time</div>
+                    <div className="text-sm text-black">Processing Time</div>
                   </div>
                 </div>
               </CardContent>
@@ -177,9 +177,9 @@ export default function ToolsOptimizer() {
             <CardContent className="space-y-6">
               <div className="grid md:grid-cols-3 gap-6">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Gauge className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Gauge className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3">Performance Scoring</h3>
                   <p className="text-gray-300 text-sm">
                     Comprehensive scoring system evaluating compression ratio, quality retention, and processing efficiency
@@ -187,9 +187,9 @@ export default function ToolsOptimizer() {
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Cpu className="w-8 h-8" />
-                  </div>text-white
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Cpu className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3">Algorithm Analysis</h3>
                   <p className="text-gray-300 text-sm">
                     Detailed breakdown of which optimization algorithms work best for your specific image content
@@ -197,9 +197,9 @@ export default function ToolsOptimizer() {
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Target className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Target className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3">Format Recommendations</h3>
                   <p className="text-gray-300 text-sm">
                     AI-powered suggestions for optimal format selection based on content type and intended use case
@@ -260,9 +260,9 @@ export default function ToolsOptimizer() {
                   </div>
                   
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <BarChart className="w-8 h-8 text-white" />
-                    </div>
+                    <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <BarChart className="w-10 h-10 text-white" />
+            </div>
                     <p className="font-semibold text-white">Smart Analysis</p>
                     <p className="text-sm text-gray-300">Quality preservation</p>
                   </div>
@@ -289,33 +289,33 @@ export default function ToolsOptimizer() {
             <CardContent>
               <div className="grid md:grid-cols-4 gap-6">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Upload className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Upload className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3 text-lg">1. Upload & Analyze</h3>
                   <p className="text-gray-300">AI analyzes image content, complexity, and optimal compression strategies</p>
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <BarChart className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <BarChart className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3 text-lg">2. Performance Testing</h3>
                   <p className="text-gray-300">Multiple optimization approaches tested with quality and performance metrics</p>
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Target className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Target className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3 text-lg">3. Optimal Selection</h3>
                   <p className="text-gray-300">Best-performing optimization selected based on your quality requirements</p>
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Download className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Download className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3 text-lg">4. Detailed Report</h3>
                   <p className="text-gray-300">Download optimized images with comprehensive analytics and recommendations</p>
                 </div>
