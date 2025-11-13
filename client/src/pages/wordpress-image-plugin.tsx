@@ -51,21 +51,23 @@ export default function WordPressImagePlugin() {
     <div className="flex space-x-8">
     
       {[
-        
         { id: 'details', label: 'Details', icon: FileImage },
         { id: 'installation', label: 'Installation', icon: Download },
         { id: 'docs', label: 'Documentation', icon: FileImage },
       ].map(({ id, label, icon: Icon }) => (
-        
-          key={id} 
-          <a
-          href={id === 'details' ? '/wordpress-plugin' : 
-                id === 'installation' ? '/wordpress-plugin/install' : 
-                '/wordpress-plugin/docs'}
+        <a
+          key={id}
+          href={
+            id === 'details' ? '/wordpress-plugin' :
+            id === 'installation' ? '/wordpress-plugin/install' :
+            '/wordpress-plugin/docs'
+          }
           className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium transition-colors ${
-            window.location.pathname === (id === 'details' ? '/wordpress-plugin' : 
-                                         id === 'installation' ? '/wordpress-plugin/install' : 
-                                         '/wordpress-plugin/docs')
+            window.location.pathname === (
+              id === 'details' ? '/wordpress-plugin' :
+              id === 'installation' ? '/wordpress-plugin/install' :
+              '/wordpress-plugin/docs'
+            )
               ? 'border-teal-400 text-teal-400'
               : 'border-transparent text-gray-400 hover:text-white hover:border-teal-500/50'
           }`}
