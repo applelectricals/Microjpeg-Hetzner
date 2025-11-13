@@ -6,13 +6,17 @@ import { ArrowRight, Upload, Zap, FileImage, Download, Globe, Star, Gauge, Camer
 import { Link } from 'wouter';
 import Header from '@/components/header';
 import { SEOHead } from '@/components/SEOHead';
-import { DynamicBreadcrumb } from '@/components/DynamicBreadcrumb';
+
 
 export default function ToolsCompress() {
   const [activeTab, setActiveTab] = useState('compress');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 relative overflow-hidden">
+  {/* Glow Effects */}
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(20,184,166,0.15),transparent_50%)]"></div>
+  <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
+  <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
       <SEOHead
         title="Image Compression Tools - Professional Compression | Micro JPEG"
         description="Professional image compression tools for photographers and businesses. Reduce file sizes up to 90% while maintaining quality. JPEG, PNG, WebP optimization tools."
@@ -21,15 +25,10 @@ export default function ToolsCompress() {
       />
       <Header />
 
-      {/* Breadcrumb */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <DynamicBreadcrumb />
-        </div>
-      </div>
+      
 
       {/* Sub Navigation */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+      <div className="bg-gray-800/90 backdrop-blur-xl border-b border-teal-500/30 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
             {[

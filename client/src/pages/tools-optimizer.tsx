@@ -11,7 +11,11 @@ export default function ToolsOptimizer() {
   const [activeTab, setActiveTab] = useState('optimizer');
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 relative overflow-hidden">
+  {/* Glow Effects */}
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(20,184,166,0.15),transparent_50%)]"></div>
+  <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
+  <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
       <SEOHead
         title="Image Optimization Tools - Advanced Optimization | Micro JPEG"
         description="Advanced image optimization tools for web performance. Analyze, optimize, and improve image loading speeds. Perfect for web developers and SEO optimization."
@@ -21,7 +25,7 @@ export default function ToolsOptimizer() {
       <Header />
 
       {/* Sub Navigation */}
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
+      <div className="bg-gray-800/90 backdrop-blur-xl border-b border-teal-500/30 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
             {[
