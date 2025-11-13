@@ -520,8 +520,8 @@ className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium
                       </p>
                     </div>
                     
-<div className="bg-green-900/30 border border-green-500/50 p-4 rounded-lg">
-  <h4 className="font-semibold text-green-400 mb-2">Bulk Optimization Tool</h4>
+<div className="bg-teal-900/30 border border-teal-500/50 p-4 rounded-lg">
+  <h4 className="font-semibold text-teal-400 mb-2">Bulk Optimization Tool</h4>
   <p className="text-gray-300 text-sm">
                         Use the dedicated bulk optimization page to process thousands of existing images at once.
                       </p>
