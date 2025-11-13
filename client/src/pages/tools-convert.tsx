@@ -34,7 +34,6 @@ export default function ToolsConvert() {
               { id: 'tools', label: 'Tools', icon: Settings },
               { id: 'compress', label: 'Compress', icon: Zap },
               { id: 'convert', label: 'Convert', icon: ArrowRight },
-              { id: 'batch', label: 'Batch', icon: Package },
               { id: 'optimizer', label: 'Optimizer', icon: BarChart }
             ].map(({ id, label, icon: Icon }) => (
               <Link 
@@ -82,10 +81,10 @@ export default function ToolsConvert() {
               <Button 
                 variant="outline" 
                 className="border-2 border-teal-400 text-teal-400 hover:bg-teal-400/10 backdrop-blur-sm px-8 py-4 text-lg"
-                onClick={() => window.location.href = '#formats'}
-                data-testid="button-view-formats"
+                onClick={() => window.location.href = '/checkout?plan=starter'}
+                data-testid="button-explore-tools"
               >
-                View Formats
+                Unlimited Use 9$
               </Button>
             </div>
           </div>

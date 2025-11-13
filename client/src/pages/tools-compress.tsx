@@ -35,7 +35,6 @@ export default function ToolsCompress() {
               { id: 'tools', label: 'Tools', icon: Settings },
               { id: 'compress', label: 'Compress', icon: Zap },
               { id: 'convert', label: 'Convert', icon: ArrowRight },
-              { id: 'batch', label: 'Batch', icon: Package },
               { id: 'optimizer', label: 'Optimizer', icon: BarChart }
             ].map(({ id, label, icon: Icon }) => (
               <Link 
@@ -83,10 +82,10 @@ export default function ToolsCompress() {
               <Button 
                 variant="outline" 
                 className="border-2 border-teal-400 text-teal-400 hover:bg-teal-400/10 backdrop-blur-sm px-8 py-4 text-lg"
-                onClick={() => window.location.href = '#demo'}
-                data-testid="button-view-demo"
+                onClick={() => window.location.href = '/checkout?plan=starter'}
+                data-testid="button-explore-tools"
               >
-                View Demo
+                Unlimited Use 9$
               </Button>
             </div>
           </div>
