@@ -84,10 +84,10 @@ export default function Tools() {
               <Button 
                 variant="outline" 
                 className="border-indigo-200 text-indigo-600 hover:bg-indigo-50 px-8 py-4 text-lg"
-                onClick={() => window.location.href = '#tools-overview'}
+                onClick={() => window.location.href = '/checkout?plan=starter'}
                 data-testid="button-explore-tools"
               >
-                Explore Tools
+                Unlimited Use 9$
               </Button>
             </div>
           </div>
