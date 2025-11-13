@@ -135,9 +135,9 @@ export default function ToolsCompress() {
                   </div>
                   
                   <div className="text-center">
-                    <div className="w-16 h-16 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <Zap className="w-8 h-8 text-white" />
-                    </div>
+<div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Zap className="w-10 h-10 text-white" />
+            </div>
                     <p className="font-semibold text-white">AI-Powered</p>
                     <p className="text-sm text-gray-300">Smart compression</p>
                   </div>
