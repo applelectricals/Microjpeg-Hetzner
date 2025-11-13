@@ -95,7 +95,7 @@ export default function Tools() {
             <Card className="p-6 text-center bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
               <Link href="/tools/compress" className="block">
                 <div className="w-16 h-16 bg-gradient-to-br from-teal-900/30 to-yellow-900/30 border border-teal-500/30 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
-                  <Zap className="w-8 h-8 text-indigo-600" />
+                  <Zap className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">Smart Compress</h3>
                 <p className="text-gray-300 text-sm mb-4">
@@ -108,7 +108,7 @@ export default function Tools() {
             <Card className="p-6 text-center bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
               <Link href="/tools/convert" className="block">
                 <div className="w-16 h-16 bg-gradient-to-br from-teal-900/30 to-yellow-900/30 border border-teal-500/30 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
-                  <ArrowRight className="w-8 h-8 text-indigo-600" />
+                  <ArrowRight className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">Format Convert</h3>
                 <p className="text-gray-300 text-sm mb-4">
@@ -121,7 +121,7 @@ export default function Tools() {
             <Card className="p-6 text-center bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
               <Link href="/tools/batch" className="block">
                 <div className="w-16 h-16 bg-gradient-to-br from-teal-900/30 to-yellow-900/30 border border-teal-500/30 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
-                  <Package className="w-8 h-8 text-indigo-600" />
+                  <Package className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">Batch Process</h3>
                 <p className="text-gray-300 text-sm mb-4">
@@ -134,7 +134,7 @@ export default function Tools() {
             <Card className="p-6 text-center bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
               <Link href="/tools/optimizer" className="block">
                 <div className="w-16 h-16 bg-gradient-to-br from-teal-900/30 to-yellow-900/30 border border-teal-500/30 rounded-xl flex items-center justify-center mx-auto mb-4 group-hover:scale-105 transition-transform">
-                  <BarChart className="w-8 h-8 text-indigo-600" />
+                  <BarChart className="w-8 h-8 text-white" />
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">Image Optimizer</h3>
                 <p className="text-gray-300 text-sm mb-4">
