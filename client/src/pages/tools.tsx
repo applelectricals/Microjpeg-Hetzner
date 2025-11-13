@@ -164,7 +164,7 @@ export default function Tools() {
                 <h4 className="font-semibold text-white mb-2">Professional RAW Formats</h4>
                 <div className="flex flex-wrap gap-2">
                   {['CR2', 'ARW', 'DNG', 'NEF', 'ORF', 'RAF', 'RW2'].map(format => (
-                    <Badge key={format} variant="outline" className="border-purple-200 text-purple-700">{format}</Badge>
+                    <Badge key={format} variant="outline" className="bg-teal-900/50 text-teal-400 border border-teal-500/30">{format}</Badge>
                   ))}
                 </div>
               </div>
@@ -178,25 +178,25 @@ export default function Tools() {
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               <Card className="p-6 text-center bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
-                <Gauge className="w-10 h-10 text-indigo-600 mx-auto mb-4" />
+                <Gauge className="w-10 h-10 text-teal-400 mx-auto mb-4" />
                 <h3 className="font-bold text-white mb-2">AI-Powered Processing</h3>
                 <p className="text-gray-300 text-sm">Advanced algorithms analyze and optimize each image for perfect quality-to-size ratio</p>
               </Card>
               
               <Card className="p-6 text-center bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
-                <Globe className="w-10 h-10 text-purple-600 mx-auto mb-4" />
+                <Globe className="w-10 h-10 text-teal-400 mx-auto mb-4" />
                 <h3 className="font-bold text-white mb-2">Universal Compatibility</h3>
                 <p className="text-gray-300 text-sm">Support for 13+ formats including professional camera RAW files from all major brands</p>
               </Card>
 
               <Card className="p-6 text-center bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
-                <Zap className="w-10 h-10 text-indigo-600 mx-auto mb-4" />
+                <Zap className="w-10 h-10 text-teal-400 mx-auto mb-4" />
                 <h3 className="font-bold text-white mb-2">Lightning Performance</h3>
                 <p className="text-gray-300 text-sm">Cloud-optimized processing pipeline delivers results in seconds, not minutes</p>
               </Card>
               
               <Card className="p-6 text-center bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
-                <Shield className="w-10 h-10 text-purple-600 mx-auto mb-4" />
+                <Shield className="w-10 h-10 text-teal-400 mx-auto mb-4" />
                 <h3 className="font-bold text-white mb-2">Quality Preservation</h3>
                 <p className="text-gray-300 text-sm">Maintain stunning visual fidelity while achieving maximum file size reduction</p>
               </Card>
@@ -212,25 +212,25 @@ export default function Tools() {
             <CardContent>
               <div className="grid md:grid-cols-3 gap-8">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Upload className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Upload className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3 text-xl">1. Choose Your Tool</h3>
                   <p className="text-gray-300">Select from compression, conversion, batch processing, or optimization tools based on your needs</p>
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Settings className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Settings className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3 text-xl">2. Upload & Configure</h3>
                   <p className="text-gray-300">Upload your images and adjust quality, format, and optimization settings with advanced controls</p>
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Download className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Download className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3 text-xl">3. Download Results</h3>
                   <p className="text-gray-300">Get your processed images individually or as batch ZIP downloads, ready for immediate use</p>
                 </div>
@@ -245,19 +245,19 @@ export default function Tools() {
             </h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               <Card className="p-6 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
-                <Camera className="w-10 h-10 text-indigo-600 mb-4" />
+                <Camera className="w-8 h-8 text-teal-400 mx-auto mb-3" />
                 <h3 className="font-bold text-white mb-2">Photographers</h3>
                 <p className="text-gray-300 text-sm">Process RAW files, batch convert portfolios, and optimize images for web galleries and client delivery</p>
               </Card>
               
               <Card className="p-6 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
-                <Globe className="w-10 h-10 text-purple-600 mb-4" />
+                <Globe className="w-8 h-8 text-teal-400 mx-auto mb-3" />
                 <h3 className="font-bold text-white mb-2">Web Developers</h3>
                 <p className="text-gray-300 text-sm">Optimize images for faster loading, convert to modern web formats, and improve Core Web Vitals</p>
               </Card>
 
               <Card className="p-6 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
-                <FileImage className="w-10 h-10 text-indigo-600 mb-4" />
+                <FileImage className="w-8 h-8 text-teal-400 mx-auto mb-3" />
                 <h3 className="font-bold text-white mb-2">Content Creators</h3>
                 <p className="text-gray-300 text-sm">Reduce file sizes for social media, batch process content, and maintain quality across platforms</p>
               </Card>
