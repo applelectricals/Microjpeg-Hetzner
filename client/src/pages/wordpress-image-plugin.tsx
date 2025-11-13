@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { SiWordpress } from 'react-icons/si';
 import { Download, Zap, Shield, Settings, BarChart, FileImage } from 'lucide-react';
+import { Link } from 'wouter';
 
 export default function WordPressImagePlugin() {
   const seoData = {
@@ -49,26 +50,25 @@ export default function WordPressImagePlugin() {
   <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div className="flex space-x-8">
       {[
-        { id: 'details', label: 'Details', icon: FileImage },
-        { id: 'installation', label: 'Installation', icon: Download },
-        { id: 'docs', label: 'Documentation', icon: FileImage },
-      ].map(({ id, label, icon: Icon }) => (
-        
+        { id: 'details', label: 'Details', icon: FileImage, path: '/wordpress-plugin' },
+        { id: 'installation', label: 'Installation', icon: Download, path: '/wordpress-plugin/install' },
+        { id: 'docs', label: 'Documentation', icon: FileImage, path: '/wordpress-plugin/docs' },
+      ].map(({ id, label, icon: Icon, path }) => (
+        <Link 
           key={id} 
-          href={id === 'details' ? '/wordpress-plugin' : 
-                id === 'installation' ? '/wordpress-plugin/install' : 
-                '/wordpress-plugin/docs'}
-          className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium transition-colors ${
-            window.location.pathname === (id === 'details' ? '/wordpress-plugin' : 
-                                         id === 'installation' ? '/wordpress-plugin/install' : 
-                                         '/wordpress-plugin/docs')
-              ? 'border-teal-400 text-teal-400'
-              : 'border-transparent text-gray-400 hover:text-white hover:border-teal-500/50'
-          }`}
+          href={path}
         >
-          <Icon className="w-4 h-4" />
-          <span>{label}</span>
-        </a>
+          
+            className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium transition-colors ${
+              window.location.pathname === '/wordpress-image-plugin'
+                ? id === 'details' ? 'border-teal-400 text-teal-400' : 'border-transparent text-gray-400 hover:text-white hover:border-teal-500/50'
+                : 'border-transparent text-gray-400 hover:text-white hover:border-teal-500/50'
+            }`}
+          >
+            <Icon className="w-4 h-4" />
+            <span>{label}</span>
+          </a>
+        </Link>
       ))}
     </div>
   </div>
