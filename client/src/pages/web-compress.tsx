@@ -82,7 +82,7 @@ export default function WebCompress() {
               <div>
                 <h4 className="font-semibold text-gray-800 mb-2">Web & Standard Formats</h4>
                 <div className="flex flex-wrap gap-2">
-                  {['JPG' to 'JPG', 'PNG' to 'PNG', 'WebP' to 'WEBP', 'AVIF' to 'AVIF', 'SVG' to 'SVG', 'TIFF' to 'TIFF'].map(format => (
+                  {['JPG', 'PNG', 'WebP', 'AVIF', 'SVG', 'TIFF'].map(format => (
                     <Badge key={format} variant="secondary" className="bg-teal-100 text-teal-700">{format}</Badge>
                   ))}
                 </div>
