@@ -100,7 +100,7 @@ export default function ToolsConvert() {
                 <h4 className="font-semibold text-white mb-3">Web & Standard Formats</h4>
                 <div className="flex flex-wrap gap-2">
                   {['JPEG', 'PNG', 'WebP', 'AVIF', 'SVG', 'TIFF'].map(format => (
-                    <Badge key={format} variant="secondary" className="bg-indigo-100 text-indigo-700 px-3 py-1">{format}</Badge>
+                    <Badge key={format} variant="secondary" className="bg-teal-900/50 text-teal-400 border border-teal-500/30">{format}</Badge>
                   ))}
                 </div>
               </div>
@@ -108,7 +108,7 @@ export default function ToolsConvert() {
                 <h4 className="font-semibold text-white mb-3">Professional RAW Formats</h4>
                 <div className="flex flex-wrap gap-2">
                   {['CR2 (Canon)', 'ARW (Sony)', 'DNG (Adobe)', 'NEF (Nikon)', 'ORF (Olympus)', 'RAF (Fujifilm)', 'RW2 (Panasonic)'].map(format => (
-                    <Badge key={format} variant="outline" className="border-purple-200 text-purple-700 px-3 py-1">{format}</Badge>
+                    <Badge key={format} variant="secondary" className="bg-teal-900/50 text-teal-400 border border-teal-500/30">{format}</Badge>
                   ))}
                 </div>
               </div>
@@ -243,9 +243,9 @@ export default function ToolsConvert() {
             <CardContent>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Camera className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Camera className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3 text-xl">RAW Processing</h3>
                   <p className="text-gray-300">
                     Convert professional camera RAW files from Canon, Nikon, Sony, and more to web-ready formats
@@ -253,9 +253,9 @@ export default function ToolsConvert() {
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-indigo-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Layers className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Layers className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3 text-xl">Batch Conversion</h3>
                   <p className="text-gray-300">
                     Convert multiple images simultaneously with consistent settings and quality preservation
@@ -263,9 +263,9 @@ export default function ToolsConvert() {
                 </div>
                 
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-600 text-white rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Shield className="w-8 h-8" />
-                  </div>
+                  <div className="w-20 h-20 bg-gradient-to-br from-teal-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg shadow-teal-500/50 flex items-center justify-center mx-auto mb-6">
+              <Shield className="w-10 h-10 text-white" />
+            </div>
                   <h3 className="font-bold text-white mb-3 text-xl">Quality Control</h3>
                   <p className="text-gray-300">
                     Fine-tune conversion settings with real-time preview and before/after comparisons
