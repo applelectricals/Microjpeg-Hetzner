@@ -6,6 +6,7 @@ import { ArrowRight, Zap, Shield, Globe, Star, FileImage, Download, Upload, Came
 import { Link } from 'wouter';
 import Header from '@/components/header';
 import { SEOHead } from '@/components/SEOHead';
+import logoUrl from '@assets/mascot-logo-optimized.png';
 
 export default function Tools() {
   const [activeTab, setActiveTab] = useState('tools');
