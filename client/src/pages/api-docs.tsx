@@ -773,26 +773,26 @@ Authorization: Bearer sk_test_1234567890abcdef
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 mt-0.5 text-green-600" />
                       <div>
-                        <h4 className="font-semibold">Real-time Preview</h4>
+                        <h4 className="font-semibold text-teal-200">Real-time Preview</h4>
                         <p className="text-sm text-gray-300">See compression results instantly with before/after comparison</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 mt-0.5 text-green-600" />
                       <div>
-                        <h4 className="font-semibold">No Technical Knowledge Required</h4>
+                        <h4 className="font-semibold text-teal-200">No Technical Knowledge Required</h4>
                         <p className="text-sm text-gray-300">User-friendly interface with preset quality levels</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 mt-0.5 text-green-600" />
                       <div>
-                        <h4 className="font-semibold">Batch ZIP Downloads</h4>
+                        <h4 className="font-semibold text-teal-200">Batch ZIP Downloads</h4>
                         <p className="text-sm text-gray-300">Download multiple processed files as a single ZIP</p>
                       </div>
                     </div>
                   </div>
-                  <Button className="w-full mt-6 bg-green-600 hover:bg-green-700" onClick={() => window.location.href = '/'}>
+                  <Button className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50" onClick={() => window.location.href = '/'}>
                     Try Web Interface
                   </Button>
                 </CardContent>
@@ -811,33 +811,33 @@ Authorization: Bearer sk_test_1234567890abcdef
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 mt-0.5 text-blue-600" />
                       <div>
-                        <h4 className="font-semibold">Automated Processing</h4>
+                        <h4 className="font-semibold text-teal-200">Automated Processing</h4>
                         <p className="text-sm text-gray-300">Integrate image processing directly into your applications</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 mt-0.5 text-blue-600" />
                       <div>
-                        <h4 className="font-semibold">High-Volume Processing</h4>
+                        <h4 className="font-semibold text-teal-200">High-Volume Processing</h4>
                         <p className="text-sm text-gray-300">Process thousands of images with batch endpoints</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 mt-0.5 text-blue-600" />
                       <div>
-                        <h4 className="font-semibold">Advanced Controls</h4>
+                        <h4 className="font-semibold text-teal-200">Advanced Controls</h4>
                         <p className="text-sm text-gray-300">Programmatic access to all compression settings</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 mt-0.5 text-blue-600" />
                       <div>
-                        <h4 className="font-semibold">Concurrent Processing</h4>
+                        <h4 className="font-semibold text-teal-200">Concurrent Processing</h4>
                         <p className="text-sm text-gray-300">Multiple simultaneous requests based on your tier</p>
                       </div>
                     </div>
                   </div>
-                  <Button className="w-full mt-6 bg-blue-600 hover:bg-blue-700" onClick={() => setActiveTab('overview')}>
+                  <Button className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50" onClick={() => setActiveTab('overview')}>
                     Get API Access
                   </Button>
                 </CardContent>
