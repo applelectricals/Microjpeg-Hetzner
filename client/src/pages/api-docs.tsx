@@ -1046,7 +1046,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                     </Button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                    <div className="p-3 border border-gray-700/50 bg-gray-800/50 rounded">
+                    <div className="p-3 border border-gray-700/50 bg-gray-900/50 text-teal-300 rounded">
                       <h5 className="font-medium text-teal-300">📖 What You'll Learn:</h5>
                       <ul className="text-gray-300 mt-1 space-y-1">
                         <li>• What APIs are and how they work</li>
