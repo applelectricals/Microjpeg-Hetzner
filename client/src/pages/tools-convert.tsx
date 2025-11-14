@@ -278,64 +278,60 @@ export default function ToolsConvert() {
         </div>
       </div>
       {/* Footer */}
-            <footer className="bg-gray-100 text-black py-12">
-              <div className="max-w-7xl mx-auto px-4">
-                <div className="grid md:grid-cols-4 gap-8">
-                  {/* Brand */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <img src={logoUrl} alt="MicroJPEG Logo" className="w-10 h-10" />
-                      <span className="text-xl font-bold font-poppins">MicroJPEG</span>
-                    </div>
-                    <p className="text-gray-600 font-opensans">
-                      The smartest way to compress and optimize your images for the web.
-                    </p>
-                  </div>
-      
-                  {/* Product */}
-                  <div>
-                    <h4 className="font-semibold font-poppins mb-4">Product</h4>
-                    <ul className="space-y-2 text-gray-600 font-opensans">
-                      <li><a href="/features" className="hover:text-black">Features</a></li>
-                      <li><a href="/pricing" className="hover:text-black">Pricing</a></li>
-                      <li><a href="/api-docs" className="hover:text-black">API</a></li>
-                      <li><a href="/api-docs" className="hover:text-black">Documentation</a></li>
-                    </ul>
-                  </div>
-      
-                  {/* Company */}
-                  <div>
-                    <h4 className="font-semibold font-poppins mb-4">Company</h4>
-                    <ul className="space-y-2 text-gray-600 font-opensans">
-                      <li><a href="/about" className="hover:text-black">About</a></li>
-                      <li><a href="/blog" className="hover:text-black">Blog</a></li>
-                      <li><a href="/contact" className="hover:text-black">Contact</a></li>
-                      <li><a href="/support" className="hover:text-black">Support</a></li>
-                    </ul>
-                  </div>
-      
-                  {/* Legal */}
-                  <div>
-                    <h4 className="font-semibold font-poppins mb-4">Legal</h4>
-                    <ul className="space-y-2 text-gray-600 font-opensans">
-                      <li><a href="/privacy-policy" className="hover:text-black">Privacy Policy</a></li>
-                      <li><a href="/terms-of-service" className="hover:text-black">Terms of Service</a></li>
-                      <li><a href="/cookie-policy" className="hover:text-black">Cookie Policy</a></li>
-                      <li><a href="/cancellation-policy" className="hover:text-black">Cancellation Policy</a></li>
-                      <li><a href="/privacy-policy" className="hover:text-black">GDPR</a></li>
-                    </ul>
-                  </div>
-                </div>
-      
-      
-                <div className="border-t border-gray-300 pt-8 text-center text-gray-500 font-opensans">
-                  <p>© 2025 MicroJPEG. All rights reserved. Making the web faster, one image at a time.</p>
-                  <p className="text-xs mt-2 opacity-75">
-                    Background photo by <a href="https://www.pexels.com/photo/selective-focus-photo-of-white-petaled-flowers-96627/" target="_blank" rel="noopener noreferrer" className="hover:underline">AS Photography</a>
-                  </p>
-                </div>
-              </div>
-            </footer>
+<footer className="bg-gray-800/50 backdrop-blur-xl border-t border-teal-500/30 text-white py-12 relative z-10">
+  <div className="max-w-7xl mx-auto px-4">
+    <div className="grid md:grid-cols-4 gap-8">
+      {/* Brand */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-3">
+          <img src={logoUrl} alt="MicroJPEG Logo" className="w-10 h-10" />
+          <span className="text-xl font-bold">MicroJPEG</span>
+        </div>
+        <p className="text-gray-300">
+          The smartest way to compress and optimize your images for the web.
+        </p>
+      </div>
+
+      {/* Product */}
+      <div>
+        <h4 className="font-semibold mb-4 text-teal-400">Product</h4>
+        <ul className="space-y-2 text-gray-300">
+          <li><Link href="/features" className="hover:text-teal-400 transition-colors">Features</Link></li>
+          <li><Link href="/pricing" className="hover:text-teal-400 transition-colors">Pricing</Link></li>
+          <li><Link href="/api-docs" className="hover:text-teal-400 transition-colors">API</Link></li>
+          <li><Link href="/api-docs" className="hover:text-teal-400 transition-colors">Documentation</Link></li>
+        </ul>
+      </div>
+
+      {/* Company */}
+      <div>
+        <h4 className="font-semibold mb-4 text-teal-400">Company</h4>
+        <ul className="space-y-2 text-gray-300">
+          <li><Link href="/about" className="hover:text-teal-400 transition-colors">About</Link></li>
+          <li><Link href="/blog" className="hover:text-teal-400 transition-colors">Blog</Link></li>
+          <li><Link href="/contact" className="hover:text-teal-400 transition-colors">Contact</Link></li>
+          <li><Link href="/support" className="hover:text-teal-400 transition-colors">Support</Link></li>
+        </ul>
+      </div>
+
+      {/* Legal */}
+      <div>
+        <h4 className="font-semibold mb-4 text-teal-400">Legal</h4>
+        <ul className="space-y-2 text-gray-300">
+          <li><Link href="/privacy-policy" className="hover:text-teal-400 transition-colors">Privacy Policy</Link></li>
+          <li><Link href="/terms-of-service" className="hover:text-teal-400 transition-colors">Terms of Service</Link></li>
+          <li><Link href="/cookie-policy" className="hover:text-teal-400 transition-colors">Cookie Policy</Link></li>
+          <li><Link href="/cancellation-policy" className="hover:text-teal-400 transition-colors">Cancellation Policy</Link></li>
+          <li><Link href="/privacy-policy" className="hover:text-teal-400 transition-colors">GDPR</Link></li>
+        </ul>
+      </div>
+    </div>
+
+    <div className="border-t border-teal-500/30 mt-8 pt-8 text-center text-gray-400">
+      <p>© 2025 MicroJPEG. All rights reserved. Making the web faster, one image at a time.</p>
+    </div>
+  </div>
+</footer>
     </div>
   );
 }
