@@ -246,8 +246,8 @@ export default function Blog() {
       </div>
 
       {/* Footer */}
-      <footer className="w-screen relative left-[calc(-50vw+50%)] bg-gray-800/50 backdrop-blur-xl border-t border-teal-500/30 text-white py-12 relative z-10">
-        <div className="max-w-6xl mx-auto px-4">
+      <footer className="bg-gray-800/50 backdrop-blur-xl border-t border-teal-500/30 text-white py-12 relative z-10">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
             {/* Brand */}
             <div className="space-y-4">
