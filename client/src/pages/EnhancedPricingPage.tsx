@@ -1014,23 +1014,25 @@ function FAQSection() {
   ];
 
   return (
-    <div className="max-w-3xl mx-auto mt-20">
-      <h2 className="text-3xl font-bold text-center mb-12 bg-gradient-to-r from-teal-400 to-yellow-400 bg-clip-text text-transparent">Frequently Asked Questions</h2>
-      <div className="space-y-6">
-        {faqs.map((faq, idx) => (
-          <Card key={idx} className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 hover:border-teal-500/50 transition-all">
-            <CardHeader>
-              <CardTitle className="text-lg text-white">{faq.question}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-300">{faq.answer}</p>
-            </CardContent>
-          </Card>
-        ))}
+    <div className="mt-20">
+      <div className="max-w-6xl mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-12 bg-gradient-to-r from-teal-400 to-yellow-400 bg-clip-text text-transparent">Frequently Asked Questions</h2>
+        <div className="space-y-6">
+          {faqs.map((faq, idx) => (
+            <Card key={idx} className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 hover:border-teal-500/50 transition-all">
+              <CardHeader>
+                <CardTitle className="text-lg text-white">{faq.question}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-300">{faq.answer}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
       {/* Footer */}
-<footer className="bg-gray-800/50 backdrop-blur-xl border-t border-teal-500/30 text-white py-12 relative z-10">
-  <div className="max-w-7xl mx-auto px-4">
+<footer className="bg-gray-800/50 backdrop-blur-xl border-t border-teal-500/30 text-white py-12 relative z-10 mt-12">
+  <div className="max-w-6xl mx-auto px-4">
     <div className="grid md:grid-cols-4 gap-8">
       {/* Brand */}
       <div className="space-y-4">
@@ -1078,10 +1080,10 @@ function FAQSection() {
       </div>
     </div>
 
-    <div className="border-t border-teal-500/30 mt-8 pt-8 text-center text-gray-400">
-      <p>© 2025 MicroJPEG. All rights reserved. Making the web faster, one image at a time.</p>
+      <div className="border-t border-teal-500/30 mt-8 pt-8 text-center text-gray-400">
+        <p>© 2025 MicroJPEG. All rights reserved. Making the web faster, one image at a time.</p>
+      </div>
     </div>
-  </div>
 </footer>
     </div>
   );
