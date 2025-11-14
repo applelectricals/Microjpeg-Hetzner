@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import Header from "@/components/header";
+import Footer from "@/components/footer";
 
 interface ApiResponse {
   success: boolean;
@@ -747,6 +748,7 @@ async function convertRawFile(filePath, apiKey) {
           </div>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }
