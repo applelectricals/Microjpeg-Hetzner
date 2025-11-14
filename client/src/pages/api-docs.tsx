@@ -1035,9 +1035,9 @@ Authorization: Bearer sk_test_1234567890abcdef
                       data-testid="video-http-tutorial"
                     ></iframe>
                   </div>
-                  <div className="flex items-center justify-between p-3 bg-teal-900/30 border border-teal-500/30 rounded">
+                  <div className="flex items-center justify-between p-3 bg-gray-900/70 border border-gray-700/50 rounded">
                     <div>
-                      <h4 className="font-medium text-teal-200">📚 "APIs for Beginners 2023" by freeCodeCamp</h4>
+                      <h4 className="font-medium text-teal-300">📚 "APIs for Beginners 2023" by freeCodeCamp</h4>
                       <p className="text-sm text-teal-300">⏱️ 3+ hours • 👨‍🏫 Craig Dennis • 4M+ views</p>
                     </div>
                     <Button variant="outline" size="sm" asChild>
@@ -1047,7 +1047,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                     </Button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                    <div className="p-3 border border-gray-700/50 bg-gray-900/50 text-teal-300 rounded">
+                    <div className="p-3 border border-gray-700/50 bg-gray-900/70 text-teal-300 rounded">
                       <h5 className="font-medium text-teal-300">📖 What You'll Learn:</h5>
                       <ul className="text-gray-300 mt-1 space-y-1">
                         <li>• What APIs are and how they work</li>
@@ -1056,7 +1056,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                         <li>• Handling API responses</li>
                       </ul>
                     </div>
-                    <div className="p-3 border border-gray-700/50 bg-gray-900/50 rounded">
+                    <div className="p-3 border border-gray-700/50 bg-gray-900/70 rounded">
                       <h5 className="font-medium text-teal-300">🛠️ Tools Covered:</h5>
                       <ul className="text-gray-300 mt-1 space-y-1">
                         <li>• cURL (command line)</li>
