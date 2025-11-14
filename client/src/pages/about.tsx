@@ -175,7 +175,7 @@ export default function About() {
               size="lg"
               variant="outline"
               className="border-teal-500/50 text-teal-300 hover:bg-teal-900/30 hover:border-teal-400 transition-all"
-              onClick={() => window.location.href = '/simple-pricing'}
+              onClick={() => window.location.href = 'client/src/pages/pricing'}
             >
               View Pricing
             </Button>
