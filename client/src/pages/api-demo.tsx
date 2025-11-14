@@ -217,8 +217,8 @@ console.log('Conversion result:', result);`;
         </div>
       </div>
       
-      <div className="p-4 relative z-10">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <div className="p-4 relative z-10 min-h-screen">
+  <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
           <div className="text-center">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-400 to-yellow-400 bg-clip-text text-transparent mb-4">

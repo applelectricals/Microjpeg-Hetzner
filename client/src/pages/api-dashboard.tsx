@@ -234,8 +234,8 @@ export default function ApiDashboard() {
   <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
   <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
       <Header />
-      <div className="p-4 relative z-10">
-        <div className="max-w-7xl mx-auto space-y-6">
+  <div className="p-4 relative z-10 min-h-screen">
+  <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex-1">
