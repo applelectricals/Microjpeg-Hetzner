@@ -980,12 +980,12 @@ Authorization: Bearer sk_test_1234567890abcdef
             <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Zap className="w-5 h-5 mr-2 text-blue-600" />
+                  <Zap className="w-5 h-5 mr-2 text-white" />
                   Quick Start
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className="space-y-4 text-white">
                   <div>
                     <Label htmlFor="api-key-input">Your API Key:</Label>
                     <Input
@@ -1047,8 +1047,8 @@ Authorization: Bearer sk_test_1234567890abcdef
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                     <div className="p-3 border rounded">
-                      <h5 className="font-medium">📖 What You'll Learn:</h5>
-                      <ul className="text-gray-300 mt-1 space-y-1">
+                      <h5 className="font-medium text-black">📖 What You'll Learn:</h5>
+                      <ul className="text-black mt-1 space-y-1">
                         <li>• What APIs are and how they work</li>
                         <li>• HTTP methods (GET, POST, etc.)</li>
                         <li>• Making requests with code</li>
@@ -1056,8 +1056,8 @@ Authorization: Bearer sk_test_1234567890abcdef
                       </ul>
                     </div>
                     <div className="p-3 border rounded">
-                      <h5 className="font-medium">🛠️ Tools Covered:</h5>
-                      <ul className="text-gray-300 mt-1 space-y-1">
+                      <h5 className="font-medium text-black">🛠️ Tools Covered:</h5>
+                      <ul className="text-black mt-1 space-y-1">
                         <li>• cURL (command line)</li>
                         <li>• Postman (testing)</li>
                         <li>• JavaScript fetch()</li>
@@ -1073,7 +1073,7 @@ Authorization: Bearer sk_test_1234567890abcdef
             <div className="grid md:grid-cols-2 gap-6">
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
-                  <CardTitle className="text-lg">Base URL</CardTitle>
+                  <CardTitle className="text-lg text-white">Base URL</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <code className="bg-gray-100 px-3 py-2 rounded block text-sm">
@@ -1084,7 +1084,7 @@ Authorization: Bearer sk_test_1234567890abcdef
 
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
-                  <CardTitle className="text-lg">Authentication</CardTitle>
+                  <CardTitle className="text-lg text-white">Authentication</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <code className="bg-gray-100 px-3 py-2 rounded block text-sm">
@@ -1096,7 +1096,7 @@ Authorization: Bearer sk_test_1234567890abcdef
 
             {/* Endpoints */}
             <div className="space-y-6">
-              <h3 className="text-2xl font-bold">API Endpoints</h3>
+              <h3 className="text-2xl font-bold text-white">API Endpoints</h3>
 
               {/* Single Compress */}
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
@@ -1109,7 +1109,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <h4 className="font-semibold mb-2">Parameters</h4>
+                    <h4 className="font-semibold mb-2 text-white">Parameters</h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex">
                         <code className="bg-gray-100 px-2 py-1 rounded w-24 mr-3">image</code>
@@ -1123,7 +1123,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                   </div>
                   
                   <div>
-                    <h4 className="font-semibold mb-2">Settings Object</h4>
+                    <h4 className="font-semibold mb-2 text-white">Settings Object</h4>
                     <div className="bg-gray-50 p-3 rounded text-sm">
                       <pre>{`{
   "quality": 85,              // 1-100 (default: 75)
@@ -1159,14 +1159,14 @@ Authorization: Bearer sk_test_1234567890abcdef
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Badge variant="outline" className="mr-3 bg-blue-50 text-blue-700 border-blue-200">POST</Badge>
+                    <Badge variant="outline" className="mr-3 bg-blue-50 text-white border-blue-200">POST</Badge>
                     /batch
                   </CardTitle>
                   <p className="text-gray-300">Process multiple images in a single request</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
-                    <h4 className="font-semibold mb-2">Parameters</h4>
+                    <h4 className="font-semibold mb-2 text-white">Parameters</h4>
                     <div className="space-y-2 text-sm">
                       <div className="flex">
                         <code className="bg-gray-100 px-2 py-1 rounded w-24 mr-3">images</code>
@@ -1180,7 +1180,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                   </div>
 
                   <div>
-                    <h4 className="font-semibold mb-2">Example Request</h4>
+                    <h4 className="font-semibold mb-2 text-white">Example Request</h4>
                     <div className="bg-gray-900 text-gray-100 p-3 rounded text-sm">
                       <pre>{codeExamples.batchCompress}</pre>
                     </div>
@@ -1192,7 +1192,7 @@ Authorization: Bearer sk_test_1234567890abcdef
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Badge variant="outline" className="mr-3 bg-purple-50 text-purple-700 border-purple-200">POST</Badge>
+                    <Badge variant="outline" className="mr-3 bg-purple-50 text-white border-purple-200">POST</Badge>
                     /special/convert
                   </CardTitle>
                   <p className="text-gray-300">Convert RAW, SVG, or TIFF files to standard formats</p>
@@ -1205,14 +1205,14 @@ Authorization: Bearer sk_test_1234567890abcdef
                   </div>
 
                   <div>
-                    <h4 className="font-semibold mb-2">Supported RAW Formats</h4>
+                    <h4 className="font-semibold mb-2 text-white">Supported RAW Formats</h4>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      <Badge variant="outline">.CR2 (Canon)</Badge>
-                      <Badge variant="outline">.ARW (Sony)</Badge>
-                      <Badge variant="outline">.DNG (Adobe)</Badge>
-                      <Badge variant="outline">.NEF (Nikon)</Badge>
-                      <Badge variant="outline">.ORF (Olympus)</Badge>
-                      <Badge variant="outline">.RAF (Fuji)</Badge>
+                      <Badge variant="secondary">.CR2 (Canon)</Badge>
+                      <Badge variant="secondary">.ARW (Sony)</Badge>
+                      <Badge variant="secondary">.DNG (Adobe)</Badge>
+                      <Badge variant="secondary">.NEF (Nikon)</Badge>
+                      <Badge variant="secondary">.ORF (Olympus)</Badge>
+                      <Badge variant="secondary">.RAF (Fuji)</Badge>
                     </div>
                   </div>
 
@@ -1229,7 +1229,7 @@ Authorization: Bearer sk_test_1234567890abcdef
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Badge variant="outline" className="mr-3 bg-gray-50 text-gray-700 border-gray-200">GET</Badge>
+                    <Badge variant="outline" className="mr-3 bg-gray-50 text-white border-gray-200">GET</Badge>
                     /usage
                   </CardTitle>
                   <p className="text-gray-300">Get usage statistics for your API key</p>
@@ -1241,7 +1241,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                   </div>
                   
                   <div>
-                    <h4 className="font-semibold mb-2">Response</h4>
+                    <h4 className="font-semibold mb-2 text-white">Response</h4>
                     <div className="bg-gray-50 p-3 rounded text-sm">
                       <pre>{`{
   "usage": {
