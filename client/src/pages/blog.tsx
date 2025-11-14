@@ -243,7 +243,6 @@ export default function Blog() {
             </div>
           </div>
         </section>
-      </div>
 
       {/* Footer */}
       <footer className="bg-gray-800/50 backdrop-blur-xl border-t border-teal-500/30 text-white py-12 relative z-10">
@@ -300,6 +299,7 @@ export default function Blog() {
           </div>
         </div>
       </footer>
+      </div>
     </>
   );
 }
