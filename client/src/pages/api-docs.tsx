@@ -900,7 +900,7 @@ Authorization: Bearer sk_test_1234567890abcdef
             {/* Use Cases */}
             <div className="grid md:grid-cols-3 gap-6">
               <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50">
-                <CardHeader className="bg-teal-900/30 border-b border-teal-500/30">
+                <CardHeader className="bg-gray-800/50 border-b border-yellow-500/30">
                   <CardTitle className="text-white">Free Tier</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
@@ -915,8 +915,8 @@ Authorization: Bearer sk_test_1234567890abcdef
               </Card>
 
               <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50">
-                <CardHeader className="bg-teal-900/30 border-b border-teal-500/30">
-                  <CardTitle className="text-white">Premium Tier</CardTitle>
+                <CardHeader className="bg-gray-800/50 border-b border-yellow-500/30">
+                  <CardTitle className="text-white">Starter Tier</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
                   <p className="text-sm text-teal-200 mb-3">Perfect for:</p>
@@ -931,7 +931,7 @@ Authorization: Bearer sk_test_1234567890abcdef
 
               <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50">
                 <CardHeader className="bg-gray-800/50 border-b border-yellow-500/30">
-                  <CardTitle className="text-white">Enterprise Tier</CardTitle>
+                  <CardTitle className="text-white">Pro Tier</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
                   <p className="text-sm text-teal-200 mb-3">Perfect for:</p>
