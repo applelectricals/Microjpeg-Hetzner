@@ -268,6 +268,7 @@ export default function Tools() {
       </div>
 
       {/* Footer */}
+      <footer style={{ position: 'relative', zIndex: 9999 }} className="bg-gray-800/50 backdrop-blur-xl border-t border-teal-500/30 text-white py-12"></footer>
       <footer className="bg-gray-100 text-black py-12">
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8">
