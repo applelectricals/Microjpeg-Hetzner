@@ -194,7 +194,7 @@ activeTab === id
             </div>
 
             {/* Quick Visual Guide */}
-            <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-green-50 rounded-lg p-8 mb-8">
+            <div className="bg-gray-800/30 backdrop-blur-xl border border-teal-500/30 rounded-lg p-8 mb-8">
               <div className="text-center mb-8">
                 <h2 className="text-3xl font-bold text-white mb-2">Quick Start: Making HTTP Requests</h2>
                 <p className="text-gray-300">Follow these visual steps to start using our API in minutes</p>
@@ -220,20 +220,20 @@ activeTab === id
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 {/* Step 1: Get API Key */}
-                <Card className="border-2 border-blue-200 bg-blue-50/50 hover:shadow-lg transition-shadow">
+                <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg transition-shadow">
                   <CardHeader className="text-center pb-3">
-                    <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-2">
+                    <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-2">
                       1
                     </div>
-                    <CardTitle className="text-blue-900 text-sm">Get API Key</CardTitle>
+                    <CardTitle className="text-teal-400 text-sm">Get API Key</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="text-center mb-3">
                       <Key className="w-8 h-8 mx-auto text-blue-600 mb-2" />
                       <p className="text-xs text-blue-700 mb-3">Generate from dashboard</p>
                     </div>
-                    <div className="bg-blue-100 p-2 rounded text-xs">
-                      <code className="text-blue-800">sk_test_1234...</code>
+                    <div className="bg-gray-700/50 p-2 rounded text-xs">
+                      <code className="text-teal-400">sk_test_1234...</code>
                     </div>
                     <div className="mt-2 text-xs text-blue-600">
                       ✓ Tier-based limits<br/>
@@ -244,12 +244,12 @@ activeTab === id
                 </Card>
 
                 {/* Step 2: Choose Tool */}
-                <Card className="border-2 border-green-200 bg-green-50/50 hover:shadow-lg transition-shadow">
+                <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg transition-shadow">
                   <CardHeader className="text-center pb-3">
-                    <div className="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-2">
+                    <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-2">
                       2
                     </div>
-                    <CardTitle className="text-green-900 text-sm">Choose Tool</CardTitle>
+                    <CardTitle className="text-teal-400 text-sm">Choose Tool</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="text-center mb-3">
@@ -266,12 +266,12 @@ activeTab === id
                 </Card>
 
                 {/* Step 3: Setup Request */}
-                <Card className="border-2 border-yellow-200 bg-yellow-50/50 hover:shadow-lg transition-shadow">
+                <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-yellow-500/50 hover:shadow-lg transition-shadow">
                   <CardHeader className="text-center pb-3">
-                    <div className="w-12 h-12 bg-yellow-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-2">
+                    <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-2">
                       3
                     </div>
-                    <CardTitle className="text-yellow-900 text-sm">Setup Request</CardTitle>
+                    <CardTitle className="text-yellow-400 text-sm">Setup Request</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="text-center mb-3">
@@ -294,12 +294,12 @@ activeTab === id
                 </Card>
 
                 {/* Step 4: Send Request */}
-                <Card className="border-2 border-purple-200 bg-purple-50/50 hover:shadow-lg transition-shadow">
+                <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-purple-500/50 hover:shadow-lg transition-shadow">
                   <CardHeader className="text-center pb-3">
-                    <div className="w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-2">
+                    <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-2">
                       4
                     </div>
-                    <CardTitle className="text-purple-900 text-sm">Send Request</CardTitle>
+                    <CardTitle className="text-purple-400 text-sm">Send Request</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="text-center mb-3">
@@ -322,12 +322,12 @@ activeTab === id
                 </Card>
 
                 {/* Step 5: Get Response */}
-                <Card className="border-2 border-emerald-200 bg-emerald-50/50 hover:shadow-lg transition-shadow">
+                <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg transition-shadow">
                   <CardHeader className="text-center pb-3">
-                    <div className="w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-2">
+                    <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 text-white rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-2">
                       5
                     </div>
-                    <CardTitle className="text-emerald-900 text-sm">Get Response</CardTitle>
+                    <CardTitle className="text-teal-400 text-sm">Get Response</CardTitle>
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="text-center mb-3">
@@ -914,7 +914,7 @@ Authorization: Bearer sk_test_1234567890abcdef
 
               <Card className="border-blue-200">
                 <CardHeader className="bg-teal-900/30 border-b border-teal-500/30">
-                  <CardTitle className="text-blue-800">Premium Tier</CardTitle>
+                  <CardTitle className="text-teal-400">Premium Tier</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
                   <p className="text-sm text-gray-300 mb-3">Perfect for:</p>
