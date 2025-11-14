@@ -426,7 +426,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
                     </Badge>
                   </div>
                   <CardHeader className="pb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-3">
+                    <div className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50">
                       <Globe className="w-6 h-6 text-white" />
                     </div>
                     <CardTitle className="text-xl text-white">Browser Extension</CardTitle>
@@ -467,7 +467,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
                     </Badge>
                   </div>
                   <CardHeader className="pb-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center mb-3">
+                    <div className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50">
                       <Download className="w-6 h-6 text-white" />
                     </div>
                     <CardTitle className="text-xl text-white">Desktop App</CardTitle>
