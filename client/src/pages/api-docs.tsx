@@ -419,14 +419,14 @@ fetch('https://api.microjpeg.com/v1/compress', {
 
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Browser Extension */}
-                <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg transition-shadow">
+                <Card className="border-2 border-blue-200 bg-white hover:shadow-lg transition-all duration-300 relative overflow-hidden">
                   <div className="absolute top-3 right-3">
                     <Badge className="bg-teal-900/50 text-teal-400 border border-teal-500/30 border border-blue-200">
                       Coming Soon
                     </Badge>
                   </div>
                   <CardHeader className="pb-4">
-                    <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg transition-shadow">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-3">
                       <Globe className="w-6 h-6 text-white" />
                     </div>
                     <CardTitle className="text-xl text-white">Browser Extension</CardTitle>
