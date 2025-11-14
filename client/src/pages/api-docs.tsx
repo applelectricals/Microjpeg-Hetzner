@@ -792,7 +792,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                       </div>
                     </div>
                   </div>
-                  <Button className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50" onClick={() => window.location.href = '/'}>
+                  <Button className="w-full mt-6 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50" onClick={() => window.location.href = '/'}>
                     Try Web Interface
                   </Button>
                 </CardContent>
@@ -837,7 +837,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                       </div>
                     </div>
                   </div>
-                  <Button className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50" onClick={() => setActiveTab('overview')}>
+                  <Button className="w-full mt-6 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50" onClick={() => setActiveTab('overview')}>
                     Get API Access
                   </Button>
                 </CardContent>
