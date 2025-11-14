@@ -229,13 +229,13 @@ activeTab === id
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="text-center mb-3">
-                      <Key className="w-8 h-8 mx-auto text-blue-600 mb-2" />
-                      <p className="text-xs text-blue-700 mb-3">Generate from dashboard</p>
+                      <Key className="w-8 h-8 mx-auto text-teal-400 mb-2" />
+<p className="text-xs text-teal-400 mb-3">Generate from dashboard</p>
                     </div>
                     <div className="bg-gray-700/50 p-2 rounded text-xs">
                       <code className="text-teal-400">sk_test_1234...</code>
                     </div>
-                    <div className="mt-2 text-xs text-blue-600">
+                    <div className="mt-2 text-xs text-teal-400">
                       ✓ Tier-based limits<br/>
                       ✓ Instant generation<br/>
                       ✓ Secure storage
@@ -253,15 +253,15 @@ activeTab === id
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="text-center mb-3">
-                      <Settings className="w-8 h-8 mx-auto text-green-600 mb-2" />
+                      <Settings className="w-8 h-8 mx-auto text-teal-400 mb-2" />
                       <p className="text-xs text-teal-300 mb-3">Pick your method</p>
                     </div>
                     <div className="space-y-1 text-xs">
-                      <div className="bg-green-100 p-1 rounded">🖥️ cURL</div>
-                      <div className="bg-green-100 p-1 rounded">📮 Postman</div>
-                      <div className="bg-green-100 p-1 rounded">⚡ JavaScript</div>
-                      <div className="bg-green-100 p-1 rounded">🐍 Python</div>
-                    </div>
+  <div className="bg-gray-700/50 p-1 rounded text-teal-300">🖥️ cURL</div>
+  <div className="bg-gray-700/50 p-1 rounded text-teal-300">🔮 Postman</div>
+  <div className="bg-gray-700/50 p-1 rounded text-teal-300">⚡ JavaScript</div>
+  <div className="bg-gray-700/50 p-1 rounded text-teal-300">🐍 Python</div>
+</div>
                   </CardContent>
                 </Card>
 
@@ -275,17 +275,17 @@ activeTab === id
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="text-center mb-3">
-                      <Upload className="w-8 h-8 mx-auto text-yellow-600 mb-2" />
-                      <p className="text-xs text-yellow-700 mb-3">Configure & upload</p>
+<Upload className="w-8 h-8 mx-auto text-yellow-400 mb-2" />
+<p className="text-xs text-yellow-400 mb-3">Configure & upload</p>
                     </div>
-                    <div className="bg-yellow-100 p-2 rounded text-xs">
-                      <div className="text-yellow-800 font-mono">
+                    <div className="bg-gray-700/50 p-2 rounded text-xs">
+  <div className="text-yellow-400 font-mono">
                         POST /v1/compress<br/>
                         Authorization: Bearer...<br/>
                         Content-Type: multipart...
                       </div>
                     </div>
-                    <div className="mt-2 text-xs text-yellow-600">
+                    <div className="mt-2 text-xs text-yellow-400">
                       ✓ Headers<br/>
                       ✓ File upload<br/>
                       ✓ Settings
@@ -303,17 +303,17 @@ activeTab === id
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="text-center mb-3">
-                      <Zap className="w-8 h-8 mx-auto text-purple-600 mb-2" />
-                      <p className="text-xs text-purple-700 mb-3">Execute & process</p>
+<Zap className="w-8 h-8 mx-auto text-purple-400 mb-2" />
+<p className="text-xs text-purple-400 mb-3">Execute & process</p>
                     </div>
-                    <div className="bg-purple-100 p-2 rounded text-xs">
-                      <div className="text-purple-800 text-center">
+                    <div className="bg-gray-700/50 p-2 rounded text-xs">
+  <div className="text-purple-400 text-center">
                         ⚡ Processing...<br/>
                         🎯 Compressing<br/>
                         📊 Optimizing
                       </div>
                     </div>
-                    <div className="mt-2 text-xs text-purple-600">
+                    <div className="mt-2 text-xs text-purple-400">
                       ✓ Fast processing<br/>
                       ✓ Quality preserved<br/>
                       ✓ All formats
@@ -331,11 +331,11 @@ activeTab === id
                   </CardHeader>
                   <CardContent className="pt-0">
                     <div className="text-center mb-3">
-                      <Download className="w-8 h-8 mx-auto text-emerald-600 mb-2" />
-                      <p className="text-xs text-emerald-700 mb-3">Receive results</p>
+<Download className="w-8 h-8 mx-auto text-teal-400 mb-2" />
+<p className="text-xs text-teal-400 mb-3">Receive results</p>
                     </div>
-                    <div className="bg-emerald-100 p-2 rounded text-xs">
-                      <div className="text-emerald-800 font-mono">
+                   <div className="bg-gray-700/50 p-2 rounded text-xs">
+  <div className="text-teal-400 font-mono">
                         {"{"}<br/>
                         &nbsp;"success": true,<br/>
                         &nbsp;"data": "base64...",<br/>
@@ -343,7 +343,7 @@ activeTab === id
                         {"}"}
                       </div>
                     </div>
-                    <div className="mt-2 text-xs text-emerald-600">
+                    <div className="mt-2 text-xs text-teal-400">
                       ✓ Compressed file<br/>
                       ✓ Metadata<br/>
                       ✓ Statistics
@@ -354,7 +354,7 @@ activeTab === id
 
               {/* Quick Code Examples */}
               <div className="mt-8 grid md:grid-cols-2 gap-6">
-                <Card className="border border-gray-200">
+                <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center">
                       <Code className="w-5 h-5 mr-2 text-blue-600" />
@@ -372,7 +372,7 @@ activeTab === id
                   </CardContent>
                 </Card>
 
-                <Card className="border border-gray-200">
+                <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
                     <CardTitle className="text-lg flex items-center">
                       <Code className="w-5 h-5 mr-2 text-green-600" />
@@ -419,14 +419,14 @@ fetch('https://api.microjpeg.com/v1/compress', {
 
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Browser Extension */}
-                <Card className="border-2 border-blue-200 bg-white hover:shadow-lg transition-all duration-300 relative overflow-hidden">
+                <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg transition-all duration-300 relative overflow-hidden">
                   <div className="absolute top-3 right-3">
                     <Badge className="bg-teal-900/50 text-teal-400 border border-teal-500/30 border border-blue-200">
                       Coming Soon
                     </Badge>
                   </div>
                   <CardHeader className="pb-4">
-                    <div className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50">
+                    <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center mb-3">
                       <Globe className="w-6 h-6 text-white" />
                     </div>
                     <CardTitle className="text-xl text-white">Browser Extension</CardTitle>
@@ -434,25 +434,25 @@ fetch('https://api.microjpeg.com/v1/compress', {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="flex items-center text-sm text-gray-700">
+                      <div className="flex items-center text-sm text-gray-300">
                         <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
                         Right-click to compress any image
                       </div>
-                      <div className="flex items-center text-sm text-gray-700">
+                      <div className="flex items-center text-sm text-gray-300">
                         <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
                         Bulk compress downloads folder
                       </div>
-                      <div className="flex items-center text-sm text-gray-700">
+                      <div className="flex items-center text-sm text-gray-300">
                         <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
                         Works with Chrome, Firefox, Safari
                       </div>
-                      <div className="flex items-center text-sm text-gray-700">
+                      <div className="flex items-center text-sm text-gray-300">
                         <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
                         Uses your existing API key
                       </div>
                     </div>
-                    <div className="mt-4 p-3 bg-green-50 rounded-lg">
-                      <p className="text-xs text-teal-300 text-center">
+                    <div className="mt-4 p-3 bg-teal-900/30 border border-teal-500/30 rounded-lg">
+  <p className="text-xs text-teal-400 text-center">
                         🚀 <strong>Beta coming Q4 2025</strong> - Get notified when it's ready!
                       </p>
                     </div>
@@ -460,14 +460,14 @@ fetch('https://api.microjpeg.com/v1/compress', {
                 </Card>
 
                 {/* Desktop App */}
-                <Card className="border-2 border-emerald-200 bg-white hover:shadow-lg transition-all duration-300 relative overflow-hidden">
+                <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg transition-all duration-300 relative overflow-hidden">
                   <div className="absolute top-3 right-3">
-                    <Badge className="bg-emerald-100 text-emerald-800 border border-emerald-200">
+                    <Badge className="bg-teal-900/50 text-teal-400 border border-teal-500/30">
                       Coming Soon
                     </Badge>
                   </div>
                   <CardHeader className="pb-4">
-                    <div className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50">
+                    <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center mb-3">
                       <Download className="w-6 h-6 text-white" />
                     </div>
                     <CardTitle className="text-xl text-white">Desktop App</CardTitle>
@@ -475,25 +475,25 @@ fetch('https://api.microjpeg.com/v1/compress', {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
-                      <div className="flex items-center text-sm text-gray-700">
+                      <div className="flex items-center text-sm text-gray-300">
                         <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
                         Drag & drop batch processing
                       </div>
-                      <div className="flex items-center text-sm text-gray-700">
+                      <div className="flex items-center text-sm text-gray-300">
                         <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
                         Watch folders for auto-compression
                       </div>
-                      <div className="flex items-center text-sm text-gray-700">
+                      <div className="flex items-center text-sm text-gray-300">
                         <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
                         Windows, macOS, Linux support
                       </div>
-                      <div className="flex items-center text-sm text-gray-700">
+                      <div className="flex items-center text-sm text-gray-300">
                         <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
                         Offline processing with sync
                       </div>
                     </div>
-                    <div className="mt-4 p-3 bg-purple-50 rounded-lg">
-                      <p className="text-xs text-purple-700 text-center">
+                    <div className="mt-4 p-3 bg-yellow-900/30 border border-yellow-500/30 rounded-lg">
+  <p className="text-xs text-yellow-400 text-center">
                         🎯 <strong>Beta coming Q1 2026</strong> - Join the waitlist for early access!
                       </p>
                     </div>
@@ -503,8 +503,8 @@ fetch('https://api.microjpeg.com/v1/compress', {
 
               <div className="text-center mt-6">
                 <Button 
-                  variant="outline"
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50"
+  variant="outline"
+  className="border-teal-400 text-teal-400 hover:bg-teal-400/10 backdrop-blur-sm"
                   onClick={() => {
                     // Could add email signup for notifications
                     window.open('mailto:hello@microjpeg.com?subject=Extension%20and%20App%20Waitlist&body=Hi!%20Please%20notify%20me%20when%20the%20browser%20extension%20and%20desktop%20app%20are%20available.%0A%0AThanks!', '_blank');
@@ -521,7 +521,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <FileImage className="w-5 h-5 mr-2 text-blue-600" />
+                    <FileImage className="w-5 h-5 mr-2 text-teal-400" />
                     Universal Format Support
                   </CardTitle>
                 </CardHeader>
@@ -538,7 +538,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
+                    <BarChart3 className="w-5 h-5 mr-2 text-teal-400" />
                     Tier-Based Scaling
                   </CardTitle>
                 </CardHeader>
@@ -564,7 +564,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Zap className="w-5 h-5 mr-2 text-yellow-600" />
+                    <Zap className="w-5 h-5 mr-2 text-yellow-400" />
                     High Performance
                   </CardTitle>
                 </CardHeader>
@@ -596,7 +596,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-8">
                   <div>
-                    <h4 className="font-semibold mb-3 text-green-600">Input Formats</h4>
+                    <h4 className="font-semibold mb-3 text-teal-400">Input Formats</h4>
                     <div className="grid grid-cols-2 gap-2">
                       <Badge variant="outline">JPEG (.jpg, .jpeg)</Badge>
                       <Badge variant="outline">PNG (.png)</Badge>
@@ -613,7 +613,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
                     </div>
                   </div>
                   <div>
-                    <h4 className="font-semibold mb-3 text-blue-600">Output Formats</h4>
+                    <h4 className="font-semibold mb-3 text-teal-400">Output Formats</h4>
                     <div className="grid grid-cols-2 gap-2">
                       <Badge variant="outline">JPEG (.jpg)</Badge>
                       <Badge variant="outline">PNG (.png)</Badge>
