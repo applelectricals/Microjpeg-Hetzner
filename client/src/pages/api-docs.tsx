@@ -766,7 +766,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 mt-0.5 text-green-600" />
                       <div>
-                        <h4 className="font-semibold">Perfect for Manual Processing</h4>
+                        <h4 className="font-semibold text-teal-200">Perfect for Manual Processing</h4>
                         <p className="text-sm text-gray-300">Upload and compress images individually with visual controls</p>
                       </div>
                     </div>
