@@ -8,6 +8,7 @@ import { getBlogPost, getAllBlogPosts } from '@/data/blogPosts';
 import { Clock, User, Tag, ArrowLeft, Share2 } from 'lucide-react';
 import { Link } from 'wouter';
 import ReactMarkdown from 'react-markdown';
+import logoUrl from '@assets/mascot-logo-optimized.png';
 
 export default function BlogPost() {
   const [, params] = useRoute('/blog/:slug');
@@ -17,14 +18,14 @@ export default function BlogPost() {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 relative overflow-hidden">
         <Header />
         <div className="pt-24 pb-16">
           <div className="max-w-4xl mx-auto px-4 text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Post Not Found</h1>
-            <p className="text-gray-600 mb-8">The blog post you're looking for doesn't exist.</p>
+            <h1 className="text-4xl font-bold text-white mb-4">Post Not Found</h1>
+            <p className="text-gray-300 mb-8">The blog post you're looking for doesn't exist.</p>
             <Link href="/blog">
-              <Button data-testid="button-back-to-blog">
+              <Button data-testid="button-back-to-blog" className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50 transform hover:scale-105 transition-all text-white">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Blog
               </Button>
@@ -61,15 +62,15 @@ export default function BlogPost() {
         }}
       />
       
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 relative overflow-hidden">
         <Header />
-        
+
         {/* Blog Post Header */}
         <article className="pt-24 pb-16">
           <div className="max-w-4xl mx-auto px-4">
             {/* Breadcrumb */}
             <div className="mb-8">
-              <Link href="/blog" className="text-blue-600 hover:text-blue-800 flex items-center">
+              <Link href="/blog" className="text-teal-400 hover:text-teal-300 flex items-center transition-colors">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Blog
               </Link>
@@ -78,21 +79,21 @@ export default function BlogPost() {
             {/* Post Header */}
             <header className="mb-12">
               <div className="mb-4">
-                <Badge className="bg-blue-100 text-blue-800 border-blue-200 mb-4">
+                <Badge className="bg-teal-900/50 text-teal-300 mb-4">
                   {post.category}
                 </Badge>
               </div>
-              
-              <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-6 leading-tight">
+
+              <h1 className="text-4xl lg:text-5xl font-bold text-white mb-6 leading-tight">
                 {post.title}
               </h1>
-              
-              <p className="text-xl text-gray-600 mb-8">
+
+              <p className="text-xl text-gray-300 mb-8">
                 {post.excerpt}
               </p>
 
               {/* Post Meta */}
-              <div className="flex flex-wrap items-center gap-6 text-gray-500 mb-8">
+              <div className="flex flex-wrap items-center gap-6 text-gray-400 mb-8">
                 <div className="flex items-center">
                   <User className="w-4 h-4 mr-2" />
                   {post.author}
@@ -113,7 +114,7 @@ export default function BlogPost() {
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mb-8">
                 {post.tags.map((tag) => (
-                  <Badge key={tag} variant="outline" className="text-gray-600">
+                  <Badge key={tag} variant="outline" className="text-teal-300 border-teal-500/50">
                     <Tag className="w-3 h-3 mr-1" />
                     {tag}
                   </Badge>
@@ -121,8 +122,8 @@ export default function BlogPost() {
               </div>
 
               {/* Share Button */}
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => {
                   if (navigator.share) {
                     navigator.share({
@@ -135,6 +136,7 @@ export default function BlogPost() {
                   }
                 }}
                 data-testid="button-share-post"
+                className="border-teal-500/50 text-teal-300 hover:bg-teal-900/30 transition-all"
               >
                 <Share2 className="w-4 h-4 mr-2" />
                 Share
@@ -145,26 +147,26 @@ export default function BlogPost() {
             <div className="prose prose-lg max-w-none mb-12">
               <ReactMarkdown
                 components={{
-                  h1: ({ children }) => <h1 className="text-3xl font-bold mt-8 mb-4">{children}</h1>,
-                  h2: ({ children }) => <h2 className="text-2xl font-bold mt-8 mb-4">{children}</h2>,
-                  h3: ({ children }) => <h3 className="text-xl font-bold mt-6 mb-3">{children}</h3>,
-                  p: ({ children }) => <p className="mb-4 text-gray-700 leading-relaxed">{children}</p>,
-                  ul: ({ children }) => <ul className="mb-4 pl-6 list-disc">{children}</ul>,
-                  ol: ({ children }) => <ol className="mb-4 pl-6 list-decimal">{children}</ol>,
-                  li: ({ children }) => <li className="mb-2 text-gray-700">{children}</li>,
+                  h1: ({ children }) => <h1 className="text-3xl font-bold mt-8 mb-4 text-white">{children}</h1>,
+                  h2: ({ children }) => <h2 className="text-2xl font-bold mt-8 mb-4 text-white">{children}</h2>,
+                  h3: ({ children }) => <h3 className="text-xl font-bold mt-6 mb-3 text-white">{children}</h3>,
+                  p: ({ children }) => <p className="mb-4 text-gray-300 leading-relaxed">{children}</p>,
+                  ul: ({ children }) => <ul className="mb-4 pl-6 list-disc text-gray-300">{children}</ul>,
+                  ol: ({ children }) => <ol className="mb-4 pl-6 list-decimal text-gray-300">{children}</ol>,
+                  li: ({ children }) => <li className="mb-2 text-gray-300">{children}</li>,
                   code: ({ inline, children }) => {
                   return inline ? (
-                  <code className="bg-gray-100 px-2 py-1 rounded text-sm font-mono text-gray-800">
+                  <code className="bg-gray-800/50 px-2 py-1 rounded text-sm font-mono text-teal-300 border border-teal-500/30">
                   {children}
                   </code>
                   ) : (
-                  <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto mb-6 text-sm leading-relaxed font-mono">
+                  <pre className="bg-gray-800/80 text-gray-100 p-4 rounded-lg overflow-x-auto mb-6 text-sm leading-relaxed font-mono border border-teal-500/20">
                   <code>{children}</code>
                   </pre>
                   );
                   },
                   blockquote: ({ children }) => (
-                    <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-600 my-4">
+                    <blockquote className="border-l-4 border-teal-500 pl-4 italic text-gray-300 my-4 bg-gray-800/30 py-3 rounded-r">
                       {children}
                     </blockquote>
                   ),
@@ -175,14 +177,14 @@ export default function BlogPost() {
             </div>
 
             {/* CTA Section */}
-            <Card className="p-8 bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200 mb-12">
+            <Card className="p-8 bg-gradient-to-r from-teal-900/50 to-teal-800/50 border-2 border-teal-500/50 mb-12 hover:shadow-lg hover:shadow-teal-500/20">
               <div className="text-center">
-                <h3 className="text-2xl font-bold mb-4">Ready to Optimize Your Images?</h3>
-                <p className="text-gray-600 mb-6">
-                  Try our professional image compression service with advanced algorithms 
+                <h3 className="text-2xl font-bold mb-4 text-white">Ready to Optimize Your Images?</h3>
+                <p className="text-gray-300 mb-6">
+                  Try our professional image compression service with advanced algorithms
                   and support for 13+ formats.
                 </p>
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700" data-testid="button-try-compressor">
+                <Button size="lg" className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50 transform hover:scale-105 transition-all text-white" data-testid="button-try-compressor">
                   Try MicroJPEG Compressor
                 </Button>
               </div>
@@ -192,32 +194,32 @@ export default function BlogPost() {
 
         {/* Related Posts */}
         {relatedPosts.length > 0 && (
-          <section className="py-16 bg-white">
+          <section className="py-16 bg-gray-800/30 backdrop-blur-xl border-t border-teal-500/30">
             <div className="max-w-6xl mx-auto px-4">
-              <h2 className="text-3xl font-bold text-center mb-12">Related Articles</h2>
-              
+              <h2 className="text-3xl font-bold text-center mb-12 text-white">Related Articles</h2>
+
               <div className="grid md:grid-cols-3 gap-8">
                 {relatedPosts.map((relatedPost) => (
-                  <Card key={relatedPost.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  <Card key={relatedPost.id} className="overflow-hidden hover:shadow-lg hover:shadow-teal-500/20 transition-all bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50">
                     <div className="p-6">
-                      <Badge className="mb-3 bg-gray-100 text-gray-800">
+                      <Badge className="mb-3 bg-teal-900/50 text-teal-300">
                         {relatedPost.category}
                       </Badge>
-                      
-                      <h3 className="font-bold text-lg mb-3 line-clamp-2">
-                        <Link 
+
+                      <h3 className="font-bold text-lg mb-3 line-clamp-2 text-white">
+                        <Link
                           href={`/blog/${relatedPost.slug}`}
-                          className="hover:text-blue-600"
+                          className="hover:text-teal-400 transition-colors"
                         >
                           {relatedPost.title}
                         </Link>
                       </h3>
-                      
-                      <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+
+                      <p className="text-gray-300 text-sm mb-4 line-clamp-3">
                         {relatedPost.excerpt}
                       </p>
-                      
-                      <div className="flex items-center justify-between text-sm text-gray-500">
+
+                      <div className="flex items-center justify-between text-sm text-gray-400">
                         <span>{relatedPost.readTime} min read</span>
                         <span>
                           {new Date(relatedPost.publishDate).toLocaleDateString()}
