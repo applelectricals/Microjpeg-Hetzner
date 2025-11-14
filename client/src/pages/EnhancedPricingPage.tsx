@@ -1033,59 +1033,59 @@ function FAQSection() {
         </div>
       </div>
       {/* Footer */}
-      <footer className="bg-gray-800/50 backdrop-blur-xl border-t border-teal-500/30 text-white py-12 relative z-10 mt-12">
-      <div className="max-w-6xl mx-auto px-4">
-        <div className="grid md:grid-cols-4 gap-8">
-          {/* Brand */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <img src={logoUrl} alt="MicroJPEG Logo" className="w-10 h-10" />
-              <span className="text-xl font-bold">MicroJPEG</span>
+      <footer className="w-screen relative left-[calc(-50vw+50%)] bg-gray-800/50 backdrop-blur-xl border-t border-teal-500/30 text-white py-12 relative z-10 mt-12">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-8">
+            {/* Brand */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <img src={logoUrl} alt="MicroJPEG Logo" className="w-10 h-10" />
+                <span className="text-xl font-bold">MicroJPEG</span>
+              </div>
+              <p className="text-gray-300">
+                The smartest way to compress and optimize your images for the web.
+              </p>
             </div>
-            <p className="text-gray-300">
-              The smartest way to compress and optimize your images for the web.
-            </p>
+
+            {/* Product */}
+            <div>
+              <h4 className="font-semibold mb-4 text-teal-400">Product</h4>
+              <ul className="space-y-2 text-gray-300">
+                <li><a href="/features" className="hover:text-teal-400 transition-colors">Features</a></li>
+                <li><a href="/pricing" className="hover:text-teal-400 transition-colors">Pricing</a></li>
+                <li><a href="/api-docs" className="hover:text-teal-400 transition-colors">API</a></li>
+                <li><a href="/api-docs" className="hover:text-teal-400 transition-colors">Documentation</a></li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h4 className="font-semibold mb-4 text-teal-400">Company</h4>
+              <ul className="space-y-2 text-gray-300">
+                <li><a href="/about" className="hover:text-teal-400 transition-colors">About</a></li>
+                <li><a href="/blog" className="hover:text-teal-400 transition-colors">Blog</a></li>
+                <li><a href="/contact" className="hover:text-teal-400 transition-colors">Contact</a></li>
+                <li><a href="/support" className="hover:text-teal-400 transition-colors">Support</a></li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="font-semibold mb-4 text-teal-400">Legal</h4>
+              <ul className="space-y-2 text-gray-300">
+                <li><a href="/privacy-policy" className="hover:text-teal-400 transition-colors">Privacy Policy</a></li>
+                <li><a href="/terms-of-service" className="hover:text-teal-400 transition-colors">Terms of Service</a></li>
+                <li><a href="/cookie-policy" className="hover:text-teal-400 transition-colors">Cookie Policy</a></li>
+                <li><a href="/cancellation-policy" className="hover:text-teal-400 transition-colors">Cancellation Policy</a></li>
+                <li><a href="/privacy-policy" className="hover:text-teal-400 transition-colors">GDPR</a></li>
+              </ul>
+            </div>
           </div>
 
-          {/* Product */}
-          <div>
-            <h4 className="font-semibold mb-4 text-teal-400">Product</h4>
-            <ul className="space-y-2 text-gray-300">
-              <li><a href="/features" className="hover:text-teal-400 transition-colors">Features</a></li>
-              <li><a href="/pricing" className="hover:text-teal-400 transition-colors">Pricing</a></li>
-              <li><a href="/api-docs" className="hover:text-teal-400 transition-colors">API</a></li>
-              <li><a href="/api-docs" className="hover:text-teal-400 transition-colors">Documentation</a></li>
-            </ul>
-          </div>
-
-          {/* Company */}
-          <div>
-            <h4 className="font-semibold mb-4 text-teal-400">Company</h4>
-            <ul className="space-y-2 text-gray-300">
-              <li><a href="/about" className="hover:text-teal-400 transition-colors">About</a></li>
-              <li><a href="/blog" className="hover:text-teal-400 transition-colors">Blog</a></li>
-              <li><a href="/contact" className="hover:text-teal-400 transition-colors">Contact</a></li>
-              <li><a href="/support" className="hover:text-teal-400 transition-colors">Support</a></li>
-            </ul>
-          </div>
-
-          {/* Legal */}
-          <div>
-            <h4 className="font-semibold mb-4 text-teal-400">Legal</h4>
-            <ul className="space-y-2 text-gray-300">
-              <li><a href="/privacy-policy" className="hover:text-teal-400 transition-colors">Privacy Policy</a></li>
-              <li><a href="/terms-of-service" className="hover:text-teal-400 transition-colors">Terms of Service</a></li>
-              <li><a href="/cookie-policy" className="hover:text-teal-400 transition-colors">Cookie Policy</a></li>
-              <li><a href="/cancellation-policy" className="hover:text-teal-400 transition-colors">Cancellation Policy</a></li>
-              <li><a href="/privacy-policy" className="hover:text-teal-400 transition-colors">GDPR</a></li>
-            </ul>
+          <div className="border-t border-teal-500/30 mt-8 pt-8 text-center text-gray-400">
+            <p>© 2025 MicroJPEG. All rights reserved. Making the web faster, one image at a time.</p>
           </div>
         </div>
-
-        <div className="border-t border-teal-500/30 mt-8 pt-8 text-center text-gray-400">
-          <p>© 2025 MicroJPEG. All rights reserved. Making the web faster, one image at a time.</p>
-        </div>
-      </div>
       </footer>
     </>
   );
