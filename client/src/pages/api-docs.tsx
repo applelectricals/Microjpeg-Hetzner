@@ -520,7 +520,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
             <div className="grid md:grid-cols-3 gap-8">
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-white">
                     <FileImage className="w-5 h-5 mr-2 text-teal-400" />
                     Universal Format Support
                   </CardTitle>
