@@ -645,7 +645,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
                   <div className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">
                     1
                   </div>
-                  <h3 className="text-2xl font-bold mb-2">Authenticate</h3>
+                  <h3 className="text-2xl font-bold mb-2 text-white">Authenticate</h3>
                   <p className="text-gray-300">
                     Get your API key from the dashboard and include it in your requests. Each tier provides different limits and capabilities.
                   </p>
@@ -670,7 +670,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                   <div className="w-16 h-16 bg-green-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">
                     2
                   </div>
-                  <h3 className="text-2xl font-bold mb-2">Upload & Configure</h3>
+                  <h3 className="text-2xl font-bold mb-2 text-white">Upload & Configure</h3>
                   <p className="text-gray-300">
                     Send your images with processing settings. Support for single files, batch uploads, and all major formats including RAW files.
                   </p>
@@ -691,7 +691,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                   <div className="w-16 h-16 bg-purple-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-4">
                     3
                   </div>
-                  <h3 className="text-2xl font-bold mb-2">Receive Results</h3>
+                  <h3 className="text-2xl font-bold mb-2 text-white">Receive Results</h3>
                   <p className="text-gray-300">
                     Get optimized images back with metadata including compression ratios, file sizes, and quality metrics.
                   </p>
@@ -722,21 +722,21 @@ Authorization: Bearer sk_test_1234567890abcdef
 
             {/* Advanced Features */}
             <div className="bg-gray-800/50 backdrop-blur-xl border border-teal-500/30 rounded-lg p-8">
-              <h3 className="text-2xl font-bold mb-6 text-center">Advanced Processing Features</h3>
+              <h3 className="text-2xl font-bold mb-6 text-center text-white">Advanced Processing Features</h3>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="text-center">
                   <Settings className="w-8 h-8 mx-auto mb-3 text-blue-600" />
-                  <h4 className="font-semibold mb-2">Custom Quality Controls</h4>
+                  <h4 className="font-semibold mb-2 text-white">Custom Quality Controls</h4>
                   <p className="text-sm text-gray-300">Fine-tune compression with advanced algorithms</p>
                 </div>
                 <div className="text-center">
                   <Layers className="w-8 h-8 mx-auto mb-3 text-green-600" />
-                  <h4 className="font-semibold mb-2">Batch Processing</h4>
+                  <h4 className="font-semibold mb-2 text-white">Batch Processing</h4>
                   <p className="text-sm text-gray-300">Process multiple files simultaneously</p>
                 </div>
                 <div className="text-center">
                   <Repeat className="w-8 h-8 mx-auto mb-3 text-purple-600" />
-                  <h4 className="font-semibold mb-2">Format Conversion</h4>
+                  <h4 className="font-semibold mb-2 text-white">Format Conversion</h4>
                   <p className="text-sm text-gray-300">Convert between any supported formats</p>
                 </div>
               </div>
@@ -754,9 +754,9 @@ Authorization: Bearer sk_test_1234567890abcdef
 
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Web Interface */}
-              <Card className="border-2 border-green-200">
+              <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50">
                 <CardHeader className="bg-teal-900/30 border-b border-teal-500/30">
-                  <CardTitle className="flex items-center text-green-800">
+                  <CardTitle className="flex items-center text-white">
                     <Globe className="w-5 h-5 mr-2" />
                     Web Interface
                   </CardTitle>
@@ -801,7 +801,7 @@ Authorization: Bearer sk_test_1234567890abcdef
               {/* API */}
               <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50">
                 <CardHeader className="bg-teal-900/30 border-b border-teal-500/30">
-                  <CardTitle className="flex items-center text-blue-800">
+                  <CardTitle className="flex items-center text-white">
                     <Code className="w-5 h-5 mr-2" />
                     Developer API
                   </CardTitle>
