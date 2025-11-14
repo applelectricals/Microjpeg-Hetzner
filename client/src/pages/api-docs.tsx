@@ -601,27 +601,27 @@ fetch('https://api.microjpeg.com/v1/compress', {
                     <h4 className="font-semibold mb-3 text-teal-400">Input Formats</h4>
                     <div className="grid grid-cols-2 gap-2">
                       <Badge variant="secondary">JPEG (.jpg, .jpeg)</Badge>
-                      <Badge variant="outline">PNG (.png)</Badge>
-                      <Badge variant="outline">WebP (.webp)</Badge>
-                      <Badge variant="outline">AVIF (.avif)</Badge>
-                      <Badge variant="outline">SVG (.svg)</Badge>
-                      <Badge variant="outline">TIFF (.tiff, .tif)</Badge>
-                      <Badge variant="outline">Canon RAW (.cr2)</Badge>
-                      <Badge variant="outline">Sony RAW (.arw)</Badge>
-                      <Badge variant="outline">Adobe DNG (.dng)</Badge>
-                      <Badge variant="outline">Nikon RAW (.nef)</Badge>
-                      <Badge variant="outline">Olympus RAW (.orf)</Badge>
-                      <Badge variant="outline">Fuji RAW (.raf)</Badge>
+                      <Badge variant="secondary">PNG (.png)</Badge>
+                      <Badge variant="secondary">WebP (.webp)</Badge>
+                      <Badge variant="secondary">AVIF (.avif)</Badge>
+                      <Badge variant="secondary">SVG (.svg)</Badge>
+                      <Badge variant="secondary">TIFF (.tiff, .tif)</Badge>
+                      <Badge variant="secondary">Canon RAW (.cr2)</Badge>
+                      <Badge variant="secondary">Sony RAW (.arw)</Badge>
+                      <Badge variant="secondary">Adobe DNG (.dng)</Badge>
+                      <Badge variant="secondary">Nikon RAW (.nef)</Badge>
+                      <Badge variant="secondary">Olympus RAW (.orf)</Badge>
+                      <Badge variant="secondary">Fuji RAW (.raf)</Badge>
                     </div>
                   </div>
                   <div>
                     <h4 className="font-semibold mb-3 text-teal-400">Output Formats</h4>
                     <div className="grid grid-cols-2 gap-2">
-                      <Badge variant="outline">JPEG (.jpg)</Badge>
-                      <Badge variant="outline">PNG (.png)</Badge>
-                      <Badge variant="outline">WebP (.webp)</Badge>
-                      <Badge variant="outline">AVIF (.avif)</Badge>
-                      <Badge variant="outline">TIFF (.tiff)</Badge>
+                      <Badge variant="secondary">JPEG (.jpg)</Badge>
+                      <Badge variant="secondary">PNG (.png)</Badge>
+                      <Badge variant="secondary">WebP (.webp)</Badge>
+                      <Badge variant="secondary">AVIF (.avif)</Badge>
+                      <Badge variant="secondary">TIFF (.tiff)</Badge>
                     </div>
                   </div>
                 </div>
