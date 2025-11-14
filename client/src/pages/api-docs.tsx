@@ -356,7 +356,7 @@ activeTab === id
               <div className="mt-8 grid md:grid-cols-2 gap-6">
                 <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center">
+                    <CardTitle className="text-lg flex items-center text-white">
                       <Code className="w-5 h-5 mr-2 text-blue-600" />
                       cURL Example
                     </CardTitle>
@@ -374,7 +374,7 @@ activeTab === id
 
                 <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
-                    <CardTitle className="text-lg flex items-center">
+                    <CardTitle className="text-lg flex items-center text-white">
                       <Code className="w-5 h-5 mr-2 text-green-600" />
                       JavaScript Example
                     </CardTitle>
@@ -537,7 +537,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
 
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-white">
                     <BarChart3 className="w-5 h-5 mr-2 text-teal-400" />
                     Tier-Based Scaling
                   </CardTitle>
@@ -545,15 +545,15 @@ fetch('https://api.microjpeg.com/v1/compress', {
                 <CardContent>
                   <p className="text-gray-300 mb-4">Flexible plans to match your processing needs</p>
                   <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-white">
                       <span>Free: 500 ops</span>
                       <span>10MB files</span>
                     </div>
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-white">
                       <span>Premium: 10K ops</span>
                       <span>75MB files</span>
                     </div>
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-white">
                       <span>Enterprise: 50K ops</span>
                       <span>200MB files</span>
                     </div>
@@ -563,7 +563,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
 
               <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
-                  <CardTitle className="flex items-center">
+                  <CardTitle className="flex items-center text-white">
                     <Zap className="w-5 h-5 mr-2 text-yellow-400" />
                     High Performance
                   </CardTitle>
@@ -571,15 +571,15 @@ fetch('https://api.microjpeg.com/v1/compress', {
                 <CardContent>
                   <p className="text-gray-300 mb-4">Optimized processing with concurrent uploads</p>
                   <div className="space-y-2 text-sm">
-                    <div className="flex items-center">
+                    <div className="flex items-center text-white">
                       <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
                       Concurrent processing
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-center text-white">
                       <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
                       Advanced compression algorithms
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-center text-white">
                       <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
                       Batch operations
                     </div>
@@ -591,14 +591,16 @@ fetch('https://api.microjpeg.com/v1/compress', {
             {/* Supported Formats */}
             <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
               <CardHeader>
-                <CardTitle>Supported Input & Output Formats</CardTitle>
+                <CardTitle className="text-white">
+                Supported Input & Output Formats
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-8">
                   <div>
                     <h4 className="font-semibold mb-3 text-teal-400">Input Formats</h4>
                     <div className="grid grid-cols-2 gap-2">
-                      <Badge variant="outline">JPEG (.jpg, .jpeg)</Badge>
+                      <Badge variant="secondary">JPEG (.jpg, .jpeg)</Badge>
                       <Badge variant="outline">PNG (.png)</Badge>
                       <Badge variant="outline">WebP (.webp)</Badge>
                       <Badge variant="outline">AVIF (.avif)</Badge>
