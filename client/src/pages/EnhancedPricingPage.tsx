@@ -1,7 +1,6 @@
 import { useDarkMode } from '@/hooks/useDarkMode';
 import { useState, useEffect } from 'react';
 import { Check, X, Crown, Zap, Code, Globe, Boxes, Calculator, ArrowRight, Plus, Eye, EyeOff } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -1048,10 +1047,10 @@ function FAQSection() {
       <div>
         <h4 className="font-semibold mb-4 text-teal-400">Product</h4>
         <ul className="space-y-2 text-gray-300">
-          <li><Link href="/features" className="hover:text-teal-400 transition-colors">Features</Link></li>
-          <li><Link href="/pricing" className="hover:text-teal-400 transition-colors">Pricing</Link></li>
-          <li><Link href="/api-docs" className="hover:text-teal-400 transition-colors">API</Link></li>
-          <li><Link href="/api-docs" className="hover:text-teal-400 transition-colors">Documentation</Link></li>
+          <li><a href="/features" className="hover:text-teal-400 transition-colors">Features</a></li>
+          <li><a href="/pricing" className="hover:text-teal-400 transition-colors">Pricing</a></li>
+          <li><a href="/api-docs" className="hover:text-teal-400 transition-colors">API</a></li>
+          <li><a href="/api-docs" className="hover:text-teal-400 transition-colors">Documentation</a></li>
         </ul>
       </div>
 
@@ -1059,10 +1058,10 @@ function FAQSection() {
       <div>
         <h4 className="font-semibold mb-4 text-teal-400">Company</h4>
         <ul className="space-y-2 text-gray-300">
-          <li><Link href="/about" className="hover:text-teal-400 transition-colors">About</Link></li>
-          <li><Link href="/blog" className="hover:text-teal-400 transition-colors">Blog</Link></li>
-          <li><Link href="/contact" className="hover:text-teal-400 transition-colors">Contact</Link></li>
-          <li><Link href="/support" className="hover:text-teal-400 transition-colors">Support</Link></li>
+          <li><a href="/about" className="hover:text-teal-400 transition-colors">About</a></li>
+          <li><a href="/blog" className="hover:text-teal-400 transition-colors">Blog</a></li>
+          <li><a href="/contact" className="hover:text-teal-400 transition-colors">Contact</a></li>
+          <li><a href="/support" className="hover:text-teal-400 transition-colors">Support</a></li>
         </ul>
       </div>
 
@@ -1070,11 +1069,11 @@ function FAQSection() {
       <div>
         <h4 className="font-semibold mb-4 text-teal-400">Legal</h4>
         <ul className="space-y-2 text-gray-300">
-          <li><Link href="/privacy-policy" className="hover:text-teal-400 transition-colors">Privacy Policy</Link></li>
-          <li><Link href="/terms-of-service" className="hover:text-teal-400 transition-colors">Terms of Service</Link></li>
-          <li><Link href="/cookie-policy" className="hover:text-teal-400 transition-colors">Cookie Policy</Link></li>
-          <li><Link href="/cancellation-policy" className="hover:text-teal-400 transition-colors">Cancellation Policy</Link></li>
-          <li><Link href="/privacy-policy" className="hover:text-teal-400 transition-colors">GDPR</Link></li>
+          <li><a href="/privacy-policy" className="hover:text-teal-400 transition-colors">Privacy Policy</a></li>
+          <li><a href="/terms-of-service" className="hover:text-teal-400 transition-colors">Terms of Service</a></li>
+          <li><a href="/cookie-policy" className="hover:text-teal-400 transition-colors">Cookie Policy</a></li>
+          <li><a href="/cancellation-policy" className="hover:text-teal-400 transition-colors">Cancellation Policy</a></li>
+          <li><a href="/privacy-policy" className="hover:text-teal-400 transition-colors">GDPR</a></li>
         </ul>
       </div>
     </div>
