@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Header from "@/components/header";
 import { Link } from "wouter";
+import logoUrl from '@assets/mascot-logo-optimized.png';
 import { 
   Zap, 
   Shield, 
@@ -366,11 +367,11 @@ export default function Features() {
             Try our free tier or explore our API with comprehensive documentation.
           </p>
           <div className="flex justify-center space-x-4">
-            <Button size="lg" onClick={() => window.location.href = '/'} className="bg-teal-600 hover:bg-teal-700 text-white">
+            <Button size="lg" onClick={() => window.location.href = '/'} className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50 transform hover:scale-105 transition-all text-white">
               Start Compressing
             </Button>
-            <Button size="lg" variant="outline" onClick={() => window.location.href = '/api-docs'} className="border-teal-500/50 text-teal-300 hover:bg-teal-900/30">
-              View API Docs
+            <Button size="lg" variant="outline" onClick={() => window.location.href = 'https://microjpeg.com/checkout?plan=starter'} className="border-teal-500/50 text-teal-300 hover:bg-teal-900/30 hover:border-teal-400 transition-all">
+              Unlimited Use $9
             </Button>
           </div>
         </div>
@@ -382,7 +383,7 @@ export default function Features() {
             {/* Brand */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <img src="https://cdn.microjpeg.com/logo.png" alt="MicroJPEG Logo" className="w-10 h-10" />
+                <img src={logoUrl} alt="MicroJPEG Logo" className="w-10 h-10" />
                 <span className="text-xl font-bold">MicroJPEG</span>
               </div>
               <p className="text-gray-300">
