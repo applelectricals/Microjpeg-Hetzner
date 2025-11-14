@@ -30,7 +30,7 @@ export default function Features() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 relative overflow-hidden">
       <Header />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
@@ -45,7 +45,7 @@ export default function Features() {
 
         {/* Core Features */}
         <div className="grid md:grid-cols-3 gap-8 mb-16">
-          <Card className="text-center hover:shadow-lg transition-shadow bg-gray-800/50 border border-gray-700/50">
+          <Card className="text-center hover:shadow-lg transition-shadow bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-teal-500/20">
             <CardHeader>
               <Zap className="w-12 h-12 mx-auto text-teal-400 mb-4" />
               <CardTitle className="text-white">Lightning Fast</CardTitle>
@@ -57,7 +57,7 @@ export default function Features() {
             </CardContent>
           </Card>
 
-          <Card className="text-center hover:shadow-lg transition-shadow bg-gray-800/50 border border-gray-700/50">
+          <Card className="text-center hover:shadow-lg transition-shadow bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-teal-500/20">
             <CardHeader>
               <Shield className="w-12 h-12 mx-auto text-teal-400 mb-4" />
               <CardTitle className="text-white">Secure & Private</CardTitle>
@@ -69,7 +69,7 @@ export default function Features() {
             </CardContent>
           </Card>
 
-          <Card className="text-center hover:shadow-lg transition-shadow bg-gray-800/50 border border-gray-700/50">
+          <Card className="text-center hover:shadow-lg transition-shadow bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-teal-500/20">
             <CardHeader>
               <Globe className="w-12 h-12 mx-auto text-teal-400 mb-4" />
               <CardTitle className="text-white">Universal Formats</CardTitle>
@@ -86,7 +86,7 @@ export default function Features() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-center text-white mb-8">Advanced Compression</h2>
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="bg-gray-800/50 border border-gray-700/50">
+            <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all">
               <CardHeader>
                 <Settings className="w-8 h-8 text-teal-400 mb-2" />
                 <CardTitle className="text-lg text-white">Smart Quality Control</CardTitle>
@@ -98,7 +98,7 @@ export default function Features() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-800/50 border border-gray-700/50">
+            <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all">
               <CardHeader>
                 <Layers className="w-8 h-8 text-teal-400 mb-2" />
                 <CardTitle className="text-lg text-white">Multiple Algorithms</CardTitle>
@@ -110,7 +110,7 @@ export default function Features() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-800/50 border border-gray-700/50">
+            <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all">
               <CardHeader>
                 <Repeat className="w-8 h-8 text-teal-400 mb-2" />
                 <CardTitle className="text-lg text-white">Batch Processing</CardTitle>
@@ -122,7 +122,7 @@ export default function Features() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-800/50 border border-gray-700/50">
+            <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all">
               <CardHeader>
                 <Palette className="w-8 h-8 text-teal-400 mb-2" />
                 <CardTitle className="text-lg text-white">Progressive JPEG</CardTitle>
@@ -140,7 +140,7 @@ export default function Features() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-center text-white mb-8">Web Interface</h2>
           <div className="grid md:grid-cols-2 gap-8">
-            <Card className="bg-gray-800/50 border border-gray-700/50">
+            <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all">
               <CardHeader>
                 <CardTitle className="flex items-center text-white">
                   <Upload className="w-6 h-6 mr-2 text-teal-400" />
@@ -167,7 +167,7 @@ export default function Features() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-800/50 border border-gray-700/50">
+            <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all">
               <CardHeader>
                 <CardTitle className="flex items-center text-white">
                   <Smartphone className="w-6 h-6 mr-2 text-teal-400" />
@@ -200,7 +200,7 @@ export default function Features() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-center text-white mb-8">Developer API</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            <Card className="bg-gray-800/50 border border-gray-700/50">
+            <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all">
               <CardHeader>
                 <Code className="w-8 h-8 text-teal-400 mb-2" />
                 <CardTitle className="text-lg text-white">RESTful API</CardTitle>
@@ -214,7 +214,7 @@ export default function Features() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-800/50 border border-gray-700/50">
+            <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all">
               <CardHeader>
                 <Workflow className="w-8 h-8 text-teal-400 mb-2" />
                 <CardTitle className="text-lg text-white">Webhook Support</CardTitle>
@@ -227,7 +227,7 @@ export default function Features() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-800/50 border border-gray-700/50">
+            <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all">
               <CardHeader>
                 <BarChart3 className="w-8 h-8 text-teal-400 mb-2" />
                 <CardTitle className="text-lg text-white">Usage Analytics</CardTitle>
@@ -244,7 +244,7 @@ export default function Features() {
 
         {/* Enterprise Features */}
         <section className="mb-16">
-          <div className="bg-gradient-to-r from-gray-800/50 to-gray-800/70 border border-gray-700/50 rounded-lg p-8">
+          <div className="bg-gray-800/30 backdrop-blur-xl border border-teal-500/30 rounded-lg p-8">
             <h2 className="text-3xl font-bold text-center text-white mb-8">Enterprise Features</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="text-center">
@@ -278,7 +278,7 @@ export default function Features() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-center text-white mb-8">Professional Format Support</h2>
           <div className="grid md:grid-cols-3 gap-6">
-            <Card className="bg-gray-800/50 border border-teal-500/30">
+            <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all">
               <CardHeader>
                 <FileImage className="w-8 h-8 text-teal-400 mb-2" />
                 <CardTitle className="text-lg text-white">RAW Processing</CardTitle>
@@ -296,7 +296,7 @@ export default function Features() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-800/50 border border-teal-500/30">
+            <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all">
               <CardHeader>
                 <FileImage className="w-8 h-8 text-teal-400 mb-2" />
                 <CardTitle className="text-lg text-white">Vector Graphics</CardTitle>
@@ -314,7 +314,7 @@ export default function Features() {
               </CardContent>
             </Card>
 
-            <Card className="bg-gray-800/50 border border-teal-500/30">
+            <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 hover:shadow-lg hover:shadow-teal-500/20 transition-all">
               <CardHeader>
                 <FileImage className="w-8 h-8 text-teal-400 mb-2" />
                 <CardTitle className="text-lg text-white">High-End Formats</CardTitle>
@@ -336,7 +336,7 @@ export default function Features() {
 
         {/* Performance Metrics */}
         <section className="mb-16">
-          <div className="bg-gray-800/50 border border-gray-700/50 text-white rounded-lg p-8">
+          <div className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 text-white rounded-lg p-8">
             <h2 className="text-3xl font-bold text-center mb-8">Performance Metrics</h2>
             <div className="grid md:grid-cols-4 gap-6 text-center">
               <div>
