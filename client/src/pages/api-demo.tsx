@@ -748,63 +748,7 @@ async function convertRawFile(filePath, apiKey) {
             </Card>
           </div>
         </div>
-      </div>
-      
-{/* Footer */}
-<footer className="bg-gray-800/50 backdrop-blur-xl border-t border-teal-500/30 text-white py-12 relative z-10">
-  <div className="max-w-7xl mx-auto px-4">
-    <div className="grid md:grid-cols-4 gap-8">
-      {/* Brand */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <img src={logoUrl} alt="MicroJPEG Logo" className="w-10 h-10" />
-          <span className="text-xl font-bold">MicroJPEG</span>
-        </div>
-        <p className="text-gray-300">
-          The smartest way to compress and optimize your images for the web.
-        </p>
-      </div>
-
-      {/* Product */}
-      <div>
-        <h4 className="font-semibold mb-4 text-teal-400">Product</h4>
-        <ul className="space-y-2 text-gray-300">
-          <li><Link href="/features" className="hover:text-teal-400 transition-colors">Features</Link></li>
-          <li><Link href="/pricing" className="hover:text-teal-400 transition-colors">Pricing</Link></li>
-          <li><Link href="/api-docs" className="hover:text-teal-400 transition-colors">API</Link></li>
-          <li><Link href="/api-docs" className="hover:text-teal-400 transition-colors">Documentation</Link></li>
-        </ul>
-      </div>
-
-      {/* Company */}
-      <div>
-        <h4 className="font-semibold mb-4 text-teal-400">Company</h4>
-        <ul className="space-y-2 text-gray-300">
-          <li><Link href="/about" className="hover:text-teal-400 transition-colors">About</Link></li>
-          <li><Link href="/blog" className="hover:text-teal-400 transition-colors">Blog</Link></li>
-          <li><Link href="/contact" className="hover:text-teal-400 transition-colors">Contact</Link></li>
-          <li><Link href="/support" className="hover:text-teal-400 transition-colors">Support</Link></li>
-        </ul>
-      </div>
-
-      {/* Legal */}
-      <div>
-        <h4 className="font-semibold mb-4 text-teal-400">Legal</h4>
-        <ul className="space-y-2 text-gray-300">
-          <li><Link href="/privacy-policy" className="hover:text-teal-400 transition-colors">Privacy Policy</Link></li>
-          <li><Link href="/terms-of-service" className="hover:text-teal-400 transition-colors">Terms of Service</Link></li>
-          <li><Link href="/cookie-policy" className="hover:text-teal-400 transition-colors">Cookie Policy</Link></li>
-          <li><Link href="/cancellation-policy" className="hover:text-teal-400 transition-colors">Cancellation Policy</Link></li>
-          <li><Link href="/privacy-policy" className="hover:text-teal-400 transition-colors">GDPR</Link></li>
-        </ul>
-      </div>
-    </div>
-
-    <div className="border-t border-teal-500/30 mt-8 pt-8 text-center text-gray-400">
-      <p>© 2025 MicroJPEG. All rights reserved. Making the web faster, one image at a time.</p>
-    </div>
-  </div>
-</footer>
-    </div>
+      </div>    
+   </div>
   );
 }
