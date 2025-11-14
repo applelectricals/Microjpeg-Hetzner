@@ -855,32 +855,32 @@ Authorization: Bearer sk_test_1234567890abcdef
                         <tr>
                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Feature</th>
                           <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Free</th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Premium</th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Enterprise</th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">STARTER</th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">PRO</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
                         <tr>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">Operations/Month</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">500</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">10,000</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">50,000</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">200</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">Unlimited</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">Unlimited</td>
                         </tr>
                         <tr>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">Max File Size</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">10MB</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">7MB(Regular) & 15MB(RAW)</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">75MB</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">200MB</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">150MB</td>
                         </tr>
                         <tr>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">Concurrent Requests</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">2</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">5</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">10</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">1</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">1</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">1</td>
                         </tr>
                         <tr>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">RAW Format Support</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-red-500">✗</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-red-500">✓</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-green-500">✓</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-green-500">✓</td>
                         </tr>
@@ -899,13 +899,13 @@ Authorization: Bearer sk_test_1234567890abcdef
 
             {/* Use Cases */}
             <div className="grid md:grid-cols-3 gap-6">
-              <Card className="border-green-200">
+              <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50">
                 <CardHeader className="bg-teal-900/30 border-b border-teal-500/30">
-                  <CardTitle className="text-green-800">Free Tier</CardTitle>
+                  <CardTitle className="text-white">Free Tier</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <p className="text-sm text-gray-300 mb-3">Perfect for:</p>
-                  <ul className="text-sm text-gray-300 space-y-1">
+                  <p className="text-sm text-teal-200 mb-3">Perfect for:</p>
+                  <ul className="text-sm text-teal-200 space-y-1">
                     <li>• Small websites</li>
                     <li>• Personal projects</li>
                     <li>• Testing and evaluation</li>
@@ -914,13 +914,13 @@ Authorization: Bearer sk_test_1234567890abcdef
                 </CardContent>
               </Card>
 
-              <Card className="border-blue-200">
+              <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50">
                 <CardHeader className="bg-teal-900/30 border-b border-teal-500/30">
-                  <CardTitle className="text-teal-400">Premium Tier</CardTitle>
+                  <CardTitle className="text-white">Premium Tier</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <p className="text-sm text-gray-300 mb-3">Perfect for:</p>
-                  <ul className="text-sm text-gray-300 space-y-1">
+                  <p className="text-sm text-teal-200 mb-3">Perfect for:</p>
+                  <ul className="text-sm text-teal-200 space-y-1">
                     <li>• E-commerce sites</li>
                     <li>• Digital agencies</li>
                     <li>• Photography blogs</li>
@@ -929,13 +929,13 @@ Authorization: Bearer sk_test_1234567890abcdef
                 </CardContent>
               </Card>
 
-              <Card className="border-purple-200">
+              <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50">
                 <CardHeader className="bg-gray-800/50 border-b border-yellow-500/30">
-                  <CardTitle className="text-purple-800">Enterprise Tier</CardTitle>
+                  <CardTitle className="text-white">Enterprise Tier</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <p className="text-sm text-gray-300 mb-3">Perfect for:</p>
-                  <ul className="text-sm text-gray-300 space-y-1">
+                  <p className="text-sm text-teal-200 mb-3">Perfect for:</p>
+                  <ul className="text-sm text-teal-200 space-y-1">
                     <li>• Large platforms</li>
                     <li>• Media companies</li>
                     <li>• High-volume processing</li>
@@ -1368,7 +1368,7 @@ Authorization: Bearer sk_test_1234567890abcdef
             <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Clock className="w-5 h-5 mr-2 text-amber-600" />
+                  <Clock className="w-5 h-5 mr-2 text-white" />
                   Rate Limits & Tier Comparison
                 </CardTitle>
               </CardHeader>
