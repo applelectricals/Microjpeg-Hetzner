@@ -25,6 +25,7 @@ import { SiWordpress, SiGithub } from "react-icons/si";
 import { Link } from "wouter";
 import Header from "@/components/header";
 import { SEOHead } from '@/components/SEOHead';
+import logoUrl from '@assets/mascot-logo-optimized.png';
 
 export default function WordPressDevelopment() {
   const [activeTab, setActiveTab] = useState('development');

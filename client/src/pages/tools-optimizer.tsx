@@ -6,6 +6,7 @@ import { ArrowRight, BarChart, Zap, FileImage, Download, Upload, Gauge, Camera, 
 import { Link } from 'wouter';
 import Header from '@/components/header';
 import { SEOHead } from '@/components/SEOHead';
+import logoUrl from '@assets/mascot-logo-optimized.png';
 
 export default function ToolsOptimizer() {
   const [activeTab, setActiveTab] = useState('optimizer');

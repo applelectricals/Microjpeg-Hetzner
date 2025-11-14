@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { SiWordpress } from 'react-icons/si';
 import { Download, Zap, Shield, Settings, BarChart, FileImage } from 'lucide-react';
 import { Link } from 'wouter';
+import logoUrl from '@assets/mascot-logo-optimized.png';
 
 export default function WordPressImagePlugin() {
   const seoData = {
