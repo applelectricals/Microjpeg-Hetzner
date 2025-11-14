@@ -749,7 +749,8 @@ async function convertRawFile(filePath, apiKey) {
           </div>
         </div>
       </div>
-      {/* Footer */}
+      
+{/* Footer */}
 <footer className="bg-gray-800/50 backdrop-blur-xl border-t border-teal-500/30 text-white py-12 relative z-10">
   <div className="max-w-7xl mx-auto px-4">
     <div className="grid md:grid-cols-4 gap-8">
