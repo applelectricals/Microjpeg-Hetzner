@@ -218,37 +218,41 @@ export default function ApiDashboard() {
   const getPermissionColor = (permission: string) => {
     const colors: Record<string, string> = {
       compress: "bg-blue-100 text-blue-800",
-      convert: "bg-green-100 text-green-800",
+      convert: "bg-green-100 text-teal-400",
       batch: "bg-purple-100 text-purple-800",
       webhook: "bg-orange-100 text-orange-800",
       "special-convert": "bg-teal-100 text-teal-800",
       "special-batch": "bg-cyan-100 text-cyan-800",
     };
-    return colors[permission] || "bg-gray-100 text-gray-800";
+    return colors[permission] || "bg-gray-100 text-white";
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 relative overflow-hidden">
+  {/* Glow Effects */}
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(20,184,166,0.15),transparent_50%)]"></div>
+  <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
+  <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
       <Header />
-      <div className="p-4">
+      <div className="p-4 relative z-10">
         <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-4">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-teal-400 to-yellow-400 bg-clip-text text-transparent">
                 API Dashboard
               </h1>
-              <Badge className={`bg-${tierInfo.color}-100 text-${tierInfo.color}-800 border-${tierInfo.color}-200`}>
+              <Badge className="bg-teal-900/50 text-teal-400 border border-teal-500/30">
                 {tierInfo.tier === 'Pro' && <Crown className="w-3 h-3 mr-1" />}
                 {tierInfo.tier === 'Enterprise' && <Zap className="w-3 h-3 mr-1" />}
                 {tierInfo.tier} Plan
               </Badge>
             </div>
-            <p className="text-gray-600 mt-2">
+            <p className="text-gray-300 mt-2">
               Manage your API keys, monitor usage, and access documentation
             </p>
-            <div className="mt-3 text-sm text-gray-500">
+            <div className="mt-3 text-sm text-gray-400">
               <span className="font-medium">Your Limits:</span> {tierInfo.monthlyLimit.toLocaleString()} operations/month • {tierInfo.tier === 'Enterprise' ? 'Unlimited' : `${tierInfo.rateLimit}/hour`} rate • {tierInfo.maxFileSize} max file size
             </div>
           </div>
@@ -263,7 +267,7 @@ export default function ApiDashboard() {
             <DialogContent>
               <DialogHeader>
                 <DialogTitle>Create New API Key</DialogTitle>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-300">
                   API keys automatically inherit your {tierInfo.tier} plan limits
                 </p>
               </DialogHeader>
@@ -275,14 +279,14 @@ export default function ApiDashboard() {
                     {tierInfo.tier === 'Enterprise' && <Zap className="w-4 h-4 mr-2 text-purple-600" />}
                     {tierInfo.tier} Plan Limits
                   </h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm text-gray-600">
+                  <div className="grid grid-cols-2 gap-2 text-sm text-gray-300">
                     <div><span className="font-medium">Monthly:</span> {tierInfo.monthlyLimit.toLocaleString()} ops</div>
                     <div><span className="font-medium">Rate:</span> {tierInfo.tier === 'Enterprise' ? 'Unlimited' : `${tierInfo.rateLimit}/hour`}</div>
                     <div><span className="font-medium">File Size:</span> {tierInfo.maxFileSize}</div>
                     <div><span className="font-medium">Formats:</span> All formats (JPEG, PNG, WebP, AVIF, RAW, SVG, TIFF)</div>
                   </div>
                   <div className="mt-3 pt-3 border-t">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-gray-300">
                       <span className="font-medium">API Permissions:</span> 
                       <div className="flex flex-wrap gap-1 mt-1">
                         {tierInfo.permissions.map((permission) => (
@@ -322,16 +326,16 @@ export default function ApiDashboard() {
 
         {/* Created Key Display */}
         {createdKey && (
-          <Card className="border-green-200 bg-green-50">
+          <Card className="bg-gray-800/50 backdrop-blur-xl border border-teal-500/30">
             <CardHeader>
-              <CardTitle className="text-green-800 flex items-center">
+              <CardTitle className="text-teal-400 flex items-center">
                 <Key className="w-5 h-5 mr-2" />
                 API Key Created Successfully
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <p className="text-green-700">
+                <p className="text-teal-300">
                   <strong>Important:</strong> This is the only time you'll see your complete API key. Store it securely!
                 </p>
                 <div className="flex items-center space-x-2 p-3 bg-white rounded border">
@@ -364,7 +368,7 @@ export default function ApiDashboard() {
         )}
 
         <Tabs defaultValue="keys" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
             <TabsTrigger value="keys" data-testid="tab-api-keys">API Keys</TabsTrigger>
             <TabsTrigger value="usage" data-testid="tab-usage">Usage & Analytics</TabsTrigger>
           </TabsList>
@@ -374,16 +378,16 @@ export default function ApiDashboard() {
             {isLoadingKeys ? (
               <div className="text-center py-8">
                 <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto"></div>
-                <p className="mt-2 text-gray-600">Loading API keys...</p>
+                <p className="mt-2 text-gray-300">Loading API keys...</p>
               </div>
             ) : (
               <div className="grid gap-4">
                 {apiKeys?.apiKeys?.length === 0 ? (
-                  <Card>
+                  <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                     <CardContent className="text-center py-8">
                       <Key className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                      <h3 className="text-lg font-medium text-gray-900 mb-2">No API Keys</h3>
-                      <p className="text-gray-600 mb-4">Create your first API key to start using the Micro JPEG API</p>
+                      <h3 className="text-lg font-medium text-white mb-2">No API Keys</h3>
+                      <p className="text-gray-300 mb-4">Create your first API key to start using the Micro JPEG API</p>
                       <Button onClick={() => setIsCreateDialogOpen(true)} data-testid="button-create-first-api-key">
                         <Plus className="w-4 h-4 mr-2" />
                         Create Your First API Key
@@ -399,7 +403,7 @@ export default function ApiDashboard() {
                             <Key className="w-5 h-5 text-blue-600" />
                             <div>
                               <CardTitle className="text-lg" data-testid={`text-api-key-name-${key.id}`}>{key.name}</CardTitle>
-                              <p className="text-sm text-gray-500" data-testid={`text-api-key-prefix-${key.id}`}>{key.keyPrefix}••••••••</p>
+                              <p className="text-sm text-gray-400" data-testid={`text-api-key-prefix-${key.id}`}>{key.keyPrefix}••••••••</p>
                             </div>
                           </div>
                           <div className="flex items-center space-x-2">
@@ -419,7 +423,7 @@ export default function ApiDashboard() {
                       <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                           <div>
-                            <Label className="text-xs text-gray-500">Permissions</Label>
+                            <Label className="text-xs text-gray-400">Permissions</Label>
                             <div className="flex flex-wrap gap-1 mt-1">
                               {key.permissions.map((permission) => (
                                 <Badge key={permission} className={getPermissionColor(permission)} data-testid={`badge-permission-${permission}-${key.id}`}>
@@ -429,15 +433,15 @@ export default function ApiDashboard() {
                             </div>
                           </div>
                           <div>
-                            <Label className="text-xs text-gray-500">Rate Limit</Label>
+                            <Label className="text-xs text-gray-400">Rate Limit</Label>
                             <p className="font-medium" data-testid={`text-rate-limit-${key.id}`}>{key.rateLimit.toLocaleString()}/hour</p>
                           </div>
                           <div>
-                            <Label className="text-xs text-gray-500">Usage Count</Label>
+                            <Label className="text-xs text-gray-400">Usage Count</Label>
                             <p className="font-medium" data-testid={`text-usage-count-${key.id}`}>{key.usageCount.toLocaleString()}</p>
                           </div>
                           <div>
-                            <Label className="text-xs text-gray-500">Last Used</Label>
+                            <Label className="text-xs text-gray-400">Last Used</Label>
                             <p className="font-medium" data-testid={`text-last-used-${key.id}`}>{formatDate(key.lastUsedAt)}</p>
                           </div>
                         </div>
@@ -452,7 +456,7 @@ export default function ApiDashboard() {
           {/* Usage & Analytics Tab */}
           <TabsContent value="usage" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
                   <BarChart3 className="h-4 w-4 text-muted-foreground" />
@@ -465,7 +469,7 @@ export default function ApiDashboard() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Active Keys</CardTitle>
                   <Key className="h-4 w-4 text-muted-foreground" />
@@ -478,7 +482,7 @@ export default function ApiDashboard() {
                 </CardContent>
               </Card>
               
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium">Rate Limit</CardTitle>
                   <Info className="h-4 w-4 text-muted-foreground" />
@@ -495,7 +499,7 @@ export default function ApiDashboard() {
             {/* Advanced Analytics Dashboard */}
             <div className="space-y-6">
               {/* Usage Trends Chart */}
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <BarChart3 className="w-5 h-5 mr-2 text-blue-600" />
@@ -508,20 +512,20 @@ export default function ApiDashboard() {
                       <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <BarChart3 className="w-8 h-8 text-blue-600" />
                       </div>
-                      <h4 className="font-medium text-gray-900 mb-2">Usage Analytics</h4>
-                      <p className="text-sm text-gray-600 mb-4">Track your API usage patterns over time</p>
+                      <h4 className="font-medium text-white mb-2">Usage Analytics</h4>
+                      <p className="text-sm text-gray-300 mb-4">Track your API usage patterns over time</p>
                       <div className="grid grid-cols-3 gap-4 max-w-md mx-auto">
                         <div className="p-3 bg-white rounded border">
                           <div className="text-lg font-bold text-blue-600">2,445</div>
-                          <div className="text-xs text-gray-500">This Month</div>
+                          <div className="text-xs text-gray-400">This Month</div>
                         </div>
                         <div className="p-3 bg-white rounded border">
                           <div className="text-lg font-bold text-green-600">1,890</div>
-                          <div className="text-xs text-gray-500">Last Month</div>
+                          <div className="text-xs text-gray-400">Last Month</div>
                         </div>
                         <div className="p-3 bg-white rounded border">
                           <div className="text-lg font-bold text-purple-600">+29%</div>
-                          <div className="text-xs text-gray-500">Growth</div>
+                          <div className="text-xs text-gray-400">Growth</div>
                         </div>
                       </div>
                     </div>
@@ -531,7 +535,7 @@ export default function ApiDashboard() {
 
               {/* Performance & Error Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
+                <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <Clock className="w-5 h-5 mr-2 text-green-600" />
@@ -541,7 +545,7 @@ export default function ApiDashboard() {
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Average Response Time</span>
+                        <span className="text-sm text-gray-300">Average Response Time</span>
                         <div className="flex items-center">
                           <div className="w-24 bg-gray-200 rounded-full h-2 mr-2">
                             <div className="bg-green-600 h-2 rounded-full" style={{width: '85%'}}></div>
@@ -551,7 +555,7 @@ export default function ApiDashboard() {
                       </div>
                       
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">95th Percentile</span>
+                        <span className="text-sm text-gray-300">95th Percentile</span>
                         <div className="flex items-center">
                           <div className="w-24 bg-gray-200 rounded-full h-2 mr-2">
                             <div className="bg-blue-600 h-2 rounded-full" style={{width: '72%'}}></div>
@@ -561,7 +565,7 @@ export default function ApiDashboard() {
                       </div>
 
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Success Rate</span>
+                        <span className="text-sm text-gray-300">Success Rate</span>
                         <div className="flex items-center">
                           <div className="w-24 bg-gray-200 rounded-full h-2 mr-2">
                             <div className="bg-green-600 h-2 rounded-full" style={{width: '98%'}}></div>
@@ -571,10 +575,10 @@ export default function ApiDashboard() {
                       </div>
 
                       <div className="pt-3 border-t">
-                        <div className="text-xs text-gray-500 mb-2">Last 24 Hours</div>
+                        <div className="text-xs text-gray-400 mb-2">Last 24 Hours</div>
                         <div className="grid grid-cols-3 gap-2 text-center">
                           <div className="p-2 bg-green-50 rounded">
-                            <div className="text-sm font-bold text-green-700">847</div>
+                            <div className="text-sm font-bold text-teal-300">847</div>
                             <div className="text-xs text-green-600">Success</div>
                           </div>
                           <div className="p-2 bg-yellow-50 rounded">
@@ -591,7 +595,7 @@ export default function ApiDashboard() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <FileImage className="w-5 h-5 mr-2 text-purple-600" />
@@ -601,7 +605,7 @@ export default function ApiDashboard() {
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Average Compression</span>
+                        <span className="text-sm text-gray-300">Average Compression</span>
                         <div className="flex items-center">
                           <div className="w-24 bg-gray-200 rounded-full h-2 mr-2">
                             <div className="bg-purple-600 h-2 rounded-full" style={{width: '87%'}}></div>
@@ -611,17 +615,17 @@ export default function ApiDashboard() {
                       </div>
                       
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Data Processed</span>
+                        <span className="text-sm text-gray-300">Data Processed</span>
                         <span className="font-medium">2.3 GB</span>
                       </div>
 
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Data Saved</span>
+                        <span className="text-sm text-gray-300">Data Saved</span>
                         <span className="font-medium text-green-600">2.0 GB (87%)</span>
                       </div>
 
                       <div className="pt-3 border-t">
-                        <div className="text-xs text-gray-500 mb-2">Top Formats (Last 7 Days)</div>
+                        <div className="text-xs text-gray-400 mb-2">Top Formats (Last 7 Days)</div>
                         <div className="space-y-2">
                           <div className="flex items-center justify-between text-sm">
                             <span>JPEG</span>
@@ -629,7 +633,7 @@ export default function ApiDashboard() {
                               <div className="w-16 bg-gray-200 rounded h-1 mr-2">
                                 <div className="bg-blue-600 h-1 rounded" style={{width: '68%'}}></div>
                               </div>
-                              <span className="text-xs text-gray-600">68%</span>
+                              <span className="text-xs text-gray-300">68%</span>
                             </div>
                           </div>
                           <div className="flex items-center justify-between text-sm">
@@ -638,7 +642,7 @@ export default function ApiDashboard() {
                               <div className="w-16 bg-gray-200 rounded h-1 mr-2">
                                 <div className="bg-green-600 h-1 rounded" style={{width: '24%'}}></div>
                               </div>
-                              <span className="text-xs text-gray-600">24%</span>
+                              <span className="text-xs text-gray-300">24%</span>
                             </div>
                           </div>
                           <div className="flex items-center justify-between text-sm">
@@ -647,7 +651,7 @@ export default function ApiDashboard() {
                               <div className="w-16 bg-gray-200 rounded h-1 mr-2">
                                 <div className="bg-purple-600 h-1 rounded" style={{width: '8%'}}></div>
                               </div>
-                              <span className="text-xs text-gray-600">8%</span>
+                              <span className="text-xs text-gray-300">8%</span>
                             </div>
                           </div>
                         </div>
@@ -658,7 +662,7 @@ export default function ApiDashboard() {
               </div>
 
               {/* Endpoint Usage Breakdown */}
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Workflow className="w-5 h-5 mr-2 text-indigo-600" />
@@ -671,10 +675,10 @@ export default function ApiDashboard() {
                       <div className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-medium">POST /compress</span>
-                          <Badge className="bg-blue-100 text-blue-800">Popular</Badge>
+                          <Badge className="bg-teal-900/50 text-teal-400 border border-teal-500/30">Popular</Badge>
                         </div>
                         <div className="text-2xl font-bold text-blue-600 mb-1">1,245</div>
-                        <div className="text-xs text-gray-500">72% of total requests</div>
+                        <div className="text-xs text-gray-400">72% of total requests</div>
                         <div className="mt-2 w-full bg-gray-200 rounded-full h-1">
                           <div className="bg-blue-600 h-1 rounded-full" style={{width: '72%'}}></div>
                         </div>
@@ -683,10 +687,10 @@ export default function ApiDashboard() {
                       <div className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-medium">POST /convert</span>
-                          <Badge className="bg-green-100 text-green-800">Growing</Badge>
+                          <Badge className="bg-green-100 text-teal-400">Growing</Badge>
                         </div>
                         <div className="text-2xl font-bold text-green-600 mb-1">387</div>
-                        <div className="text-xs text-gray-500">22% of total requests</div>
+                        <div className="text-xs text-gray-400">22% of total requests</div>
                         <div className="mt-2 w-full bg-gray-200 rounded-full h-1">
                           <div className="bg-green-600 h-1 rounded-full" style={{width: '22%'}}></div>
                         </div>
@@ -695,10 +699,10 @@ export default function ApiDashboard() {
                       <div className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-medium">POST /batch</span>
-                          <Badge className="bg-purple-100 text-purple-800">Pro</Badge>
+                          <Badge className="bg-yellow-900/50 text-yellow-400 border border-yellow-500/30">Pro</Badge>
                         </div>
                         <div className="text-2xl font-bold text-purple-600 mb-1">89</div>
-                        <div className="text-xs text-gray-500">5% of total requests</div>
+                        <div className="text-xs text-gray-400">5% of total requests</div>
                         <div className="mt-2 w-full bg-gray-200 rounded-full h-1">
                           <div className="bg-purple-600 h-1 rounded-full" style={{width: '5%'}}></div>
                         </div>
@@ -707,10 +711,10 @@ export default function ApiDashboard() {
                       <div className="p-4 border rounded-lg">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-medium">GET /usage</span>
-                          <Badge className="bg-gray-100 text-gray-800">Info</Badge>
+                          <Badge className="bg-gray-100 text-white">Info</Badge>
                         </div>
-                        <div className="text-2xl font-bold text-gray-600 mb-1">23</div>
-                        <div className="text-xs text-gray-500">1% of total requests</div>
+                        <div className="text-2xl font-bold text-gray-300 mb-1">23</div>
+                        <div className="text-xs text-gray-400">1% of total requests</div>
                         <div className="mt-2 w-full bg-gray-200 rounded-full h-1">
                           <div className="bg-gray-600 h-1 rounded-full" style={{width: '1%'}}></div>
                         </div>
@@ -726,7 +730,7 @@ export default function ApiDashboard() {
                             <span className="text-sm font-mono">POST /compress</span>
                             <Badge variant="outline" className="ml-2 text-xs">200</Badge>
                           </div>
-                          <div className="text-xs text-gray-500">245ms • 2 mins ago</div>
+                          <div className="text-xs text-gray-400">245ms • 2 mins ago</div>
                         </div>
                         
                         <div className="flex items-center justify-between p-2 bg-blue-50 rounded">
@@ -735,7 +739,7 @@ export default function ApiDashboard() {
                             <span className="text-sm font-mono">POST /convert</span>
                             <Badge variant="outline" className="ml-2 text-xs">200</Badge>
                           </div>
-                          <div className="text-xs text-gray-500">189ms • 5 mins ago</div>
+                          <div className="text-xs text-gray-400">189ms • 5 mins ago</div>
                         </div>
 
                         <div className="flex items-center justify-between p-2 bg-purple-50 rounded">
@@ -744,7 +748,7 @@ export default function ApiDashboard() {
                             <span className="text-sm font-mono">POST /batch</span>
                             <Badge variant="outline" className="ml-2 text-xs">200</Badge>
                           </div>
-                          <div className="text-xs text-gray-500">1.2s • 8 mins ago</div>
+                          <div className="text-xs text-gray-400">1.2s • 8 mins ago</div>
                         </div>
 
                         <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
@@ -753,7 +757,7 @@ export default function ApiDashboard() {
                             <span className="text-sm font-mono">GET /usage</span>
                             <Badge variant="outline" className="ml-2 text-xs">200</Badge>
                           </div>
-                          <div className="text-xs text-gray-500">56ms • 12 mins ago</div>
+                          <div className="text-xs text-gray-400">56ms • 12 mins ago</div>
                         </div>
                       </div>
                     </div>
@@ -763,7 +767,7 @@ export default function ApiDashboard() {
 
               {/* Rate Limiting & Quotas */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Card>
+                <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <Shield className="w-5 h-5 mr-2 text-orange-600" />
@@ -773,10 +777,10 @@ export default function ApiDashboard() {
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Current Hour Usage</span>
+                        <span className="text-sm text-gray-300">Current Hour Usage</span>
                         <div className="text-right">
                           <div className="font-medium">23 / {tierInfo.tier === 'Enterprise' ? '∞' : tierInfo.rateLimit}</div>
-                          <div className="text-xs text-gray-500">Resets in 37 min</div>
+                          <div className="text-xs text-gray-400">Resets in 37 min</div>
                         </div>
                       </div>
                       
@@ -790,16 +794,16 @@ export default function ApiDashboard() {
                       <div className="grid grid-cols-2 gap-4 pt-2">
                         <div className="text-center">
                           <div className="text-lg font-bold text-green-600">98.7%</div>
-                          <div className="text-xs text-gray-500">Avg. Success Rate</div>
+                          <div className="text-xs text-gray-400">Avg. Success Rate</div>
                         </div>
                         <div className="text-center">
                           <div className="text-lg font-bold text-blue-600">156ms</div>
-                          <div className="text-xs text-gray-500">Avg. Response</div>
+                          <div className="text-xs text-gray-400">Avg. Response</div>
                         </div>
                       </div>
 
                       <div className="pt-3 border-t">
-                        <div className="text-xs text-gray-500 mb-2">Rate Limit History (24h)</div>
+                        <div className="text-xs text-gray-400 mb-2">Rate Limit History (24h)</div>
                         <div className="flex items-end space-x-1 h-8">
                           {[4, 7, 12, 8, 15, 23, 19, 31, 28, 22, 18, 25, 33, 29, 21, 26, 24, 19, 15, 28, 32, 27, 23, 20].map((value, index) => (
                             <div 
@@ -814,7 +818,7 @@ export default function ApiDashboard() {
                   </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
                     <CardTitle className="flex items-center">
                       <Calculator className="w-5 h-5 mr-2 text-cyan-600" />
@@ -824,10 +828,10 @@ export default function ApiDashboard() {
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600">Operations Used</span>
+                        <span className="text-sm text-gray-300">Operations Used</span>
                         <div className="text-right">
                           <div className="font-medium">{apiKeys?.apiKeys?.reduce((sum: number, key: ApiKey) => sum + key.usageCount, 0).toLocaleString() || 0} / {tierInfo.monthlyLimit.toLocaleString()}</div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-gray-400">
                             {tierInfo.monthlyLimit - (apiKeys?.apiKeys?.reduce((sum: number, key: ApiKey) => sum + key.usageCount, 0) || 0)} remaining
                           </div>
                         </div>
@@ -845,18 +849,18 @@ export default function ApiDashboard() {
                           <div className="text-lg font-bold text-cyan-600">
                             {Math.round(((apiKeys?.apiKeys?.reduce((sum: number, key: ApiKey) => sum + key.usageCount, 0) || 0) / tierInfo.monthlyLimit) * 100)}%
                           </div>
-                          <div className="text-xs text-gray-500">Quota Used</div>
+                          <div className="text-xs text-gray-400">Quota Used</div>
                         </div>
                         <div className="text-center">
                           <div className="text-lg font-bold text-purple-600">
                             {Math.max(0, 30 - new Date().getDate())}
                           </div>
-                          <div className="text-xs text-gray-500">Days Remaining</div>
+                          <div className="text-xs text-gray-400">Days Remaining</div>
                         </div>
                       </div>
 
                       <div className="pt-3 border-t">
-                        <div className="text-xs text-gray-500 mb-2">Usage Projection</div>
+                        <div className="text-xs text-gray-400 mb-2">Usage Projection</div>
                         <div className="p-2 bg-blue-50 rounded text-sm">
                           <span className="font-medium text-blue-700">
                             On track to use ~{Math.round((apiKeys?.apiKeys?.reduce((sum: number, key: ApiKey) => sum + key.usageCount, 0) || 0) * (30 / new Date().getDate())).toLocaleString()} operations

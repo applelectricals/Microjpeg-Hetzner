@@ -127,7 +127,7 @@ const result = await response.json();`
       <Header />
 
       {/* Sub Navigation */}
-      <div className="bg-blue-600 text-white">
+      <div className="bg-gray-800/90 backdrop-blur-xl border-b border-teal-500/30 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8 overflow-x-auto">
             {[
@@ -142,11 +142,11 @@ const result = await response.json();`
                   setActiveTab(id);
                   window.history.pushState(null, '', `#${id}`);
                 }}
-                className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium transition-colors whitespace-nowrap ${
-                  activeTab === id
-                    ? "border-white text-white"
-                    : "border-transparent text-blue-100 hover:text-white hover:border-blue-200"
-                }`}
+                className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium transition-colors ${
+activeTab === id
+    ? 'border-teal-400 text-teal-400'
+    : 'border-transparent text-gray-400 hover:text-white hover:border-teal-500/50'
+}`}
                 data-testid={`tab-${id}`}
               >
                 <Icon className="w-4 h-4" />
@@ -157,22 +157,22 @@ const result = await response.json();`
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
         {/* Overview Tab */}
         {activeTab === "overview" && (
           <div className="space-y-8">
             {/* Hero Section */}
             <div className="text-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              <h1 className="text-4xl font-bold text-white mb-4">
                 Professional Image Processing API
               </h1>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
                 Convert and compress images at scale with our powerful API. Support for all major formats including RAW, TIFF, SVG with tier-based limits for every use case.
               </p>
               <div className="mt-6 flex justify-center space-x-4">
                 <Button 
                   size="lg" 
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50"
                   onClick={() => window.location.href = '/api-dashboard'}
                 >
                   <Key className="w-4 h-4 mr-2" />
@@ -192,8 +192,8 @@ const result = await response.json();`
             {/* Quick Visual Guide */}
             <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-green-50 rounded-lg p-8 mb-8">
               <div className="text-center mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">Quick Start: Making HTTP Requests</h2>
-                <p className="text-gray-600">Follow these visual steps to start using our API in minutes</p>
+                <h2 className="text-3xl font-bold text-white mb-2">Quick Start: Making HTTP Requests</h2>
+                <p className="text-gray-300">Follow these visual steps to start using our API in minutes</p>
                 <div className="mt-4 flex justify-center">
                   <Button 
                     variant="outline" 
@@ -250,7 +250,7 @@ const result = await response.json();`
                   <CardContent className="pt-0">
                     <div className="text-center mb-3">
                       <Settings className="w-8 h-8 mx-auto text-green-600 mb-2" />
-                      <p className="text-xs text-green-700 mb-3">Pick your method</p>
+                      <p className="text-xs text-teal-300 mb-3">Pick your method</p>
                     </div>
                     <div className="space-y-1 text-xs">
                       <div className="bg-green-100 p-1 rounded">🖥️ cURL</div>
@@ -398,7 +398,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
               <div className="text-center mt-6">
                 <Button 
                   onClick={() => window.location.href = '/api-dashboard'}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-3"
+                  className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50 transform hover:scale-105 transition-all text-white px-8 py-3"
                 >
                   <Key className="w-4 h-4 mr-2" />
                   Start with Your API Key
@@ -409,15 +409,15 @@ fetch('https://api.microjpeg.com/v1/compress', {
             {/* Coming Soon - Extensions & Apps */}
             <div className="bg-gradient-to-r from-gray-50 to-blue-50 rounded-lg p-8">
               <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">Expand Your Workflow</h2>
-                <p className="text-gray-600">Powerful tools to integrate image compression into your daily workflow</p>
+                <h2 className="text-2xl font-bold text-white mb-2">Expand Your Workflow</h2>
+                <p className="text-gray-300">Powerful tools to integrate image compression into your daily workflow</p>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Browser Extension */}
                 <Card className="border-2 border-blue-200 bg-white hover:shadow-lg transition-all duration-300 relative overflow-hidden">
                   <div className="absolute top-3 right-3">
-                    <Badge className="bg-blue-100 text-blue-800 border border-blue-200">
+                    <Badge className="bg-teal-900/50 text-teal-400 border border-teal-500/30 border border-blue-200">
                       Coming Soon
                     </Badge>
                   </div>
@@ -425,8 +425,8 @@ fetch('https://api.microjpeg.com/v1/compress', {
                     <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center mb-3">
                       <Globe className="w-6 h-6 text-white" />
                     </div>
-                    <CardTitle className="text-xl text-gray-900">Browser Extension</CardTitle>
-                    <p className="text-gray-600 text-sm">Compress images directly from your browser with one click</p>
+                    <CardTitle className="text-xl text-white">Browser Extension</CardTitle>
+                    <p className="text-gray-300 text-sm">Compress images directly from your browser with one click</p>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
@@ -448,7 +448,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
                       </div>
                     </div>
                     <div className="mt-4 p-3 bg-green-50 rounded-lg">
-                      <p className="text-xs text-green-700 text-center">
+                      <p className="text-xs text-teal-300 text-center">
                         🚀 <strong>Beta coming Q4 2025</strong> - Get notified when it's ready!
                       </p>
                     </div>
@@ -466,8 +466,8 @@ fetch('https://api.microjpeg.com/v1/compress', {
                     <div className="w-12 h-12 bg-gradient-to-br from-emerald-500 to-green-600 rounded-lg flex items-center justify-center mb-3">
                       <Download className="w-6 h-6 text-white" />
                     </div>
-                    <CardTitle className="text-xl text-gray-900">Desktop App</CardTitle>
-                    <p className="text-gray-600 text-sm">Professional desktop application for power users</p>
+                    <CardTitle className="text-xl text-white">Desktop App</CardTitle>
+                    <p className="text-gray-300 text-sm">Professional desktop application for power users</p>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3">
@@ -514,7 +514,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
 
             {/* Key Features */}
             <div className="grid md:grid-cols-3 gap-8">
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <FileImage className="w-5 h-5 mr-2 text-blue-600" />
@@ -522,7 +522,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 mb-4">Process any image format including professional RAW files</p>
+                  <p className="text-gray-300 mb-4">Process any image format including professional RAW files</p>
                   <div className="space-y-2">
                     <Badge variant="secondary">JPEG, PNG, WebP, AVIF</Badge>
                     <Badge variant="secondary">SVG, TIFF</Badge>
@@ -531,7 +531,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <BarChart3 className="w-5 h-5 mr-2 text-green-600" />
@@ -539,7 +539,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 mb-4">Flexible plans to match your processing needs</p>
+                  <p className="text-gray-300 mb-4">Flexible plans to match your processing needs</p>
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Free: 500 ops</span>
@@ -557,7 +557,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Zap className="w-5 h-5 mr-2 text-yellow-600" />
@@ -565,7 +565,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-gray-600 mb-4">Optimized processing with concurrent uploads</p>
+                  <p className="text-gray-300 mb-4">Optimized processing with concurrent uploads</p>
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center">
                       <CheckCircle className="w-4 h-4 mr-2 text-green-600" />
@@ -585,7 +585,7 @@ fetch('https://api.microjpeg.com/v1/compress', {
             </div>
 
             {/* Supported Formats */}
-            <Card>
+            <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
               <CardHeader>
                 <CardTitle>Supported Input & Output Formats</CardTitle>
               </CardHeader>
@@ -628,8 +628,8 @@ fetch('https://api.microjpeg.com/v1/compress', {
         {activeTab === "how-it-works" && (
           <div className="space-y-8">
             <div className="text-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">How Our API Works</h1>
-              <p className="text-xl text-gray-600">Simple, powerful, and reliable image processing in 3 steps</p>
+              <h1 className="text-4xl font-bold text-white mb-4">How Our API Works</h1>
+              <p className="text-xl text-gray-300">Simple, powerful, and reliable image processing in 3 steps</p>
             </div>
 
             {/* Process Steps */}
@@ -640,12 +640,12 @@ fetch('https://api.microjpeg.com/v1/compress', {
                     1
                   </div>
                   <h3 className="text-2xl font-bold mb-2">Authenticate</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-300">
                     Get your API key from the dashboard and include it in your requests. Each tier provides different limits and capabilities.
                   </p>
                 </div>
                 <div className="md:w-2/3">
-                  <Card>
+                  <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                     <CardContent className="p-4">
                       <pre className="bg-gray-900 text-gray-100 p-4 rounded text-sm overflow-x-auto">
                         <code>{`# Include your API key in the Authorization header
@@ -665,12 +665,12 @@ Authorization: Bearer sk_test_1234567890abcdef
                     2
                   </div>
                   <h3 className="text-2xl font-bold mb-2">Upload & Configure</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-300">
                     Send your images with processing settings. Support for single files, batch uploads, and all major formats including RAW files.
                   </p>
                 </div>
                 <div className="md:w-2/3">
-                  <Card>
+                  <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                     <CardContent className="p-4">
                       <pre className="bg-gray-900 text-gray-100 p-4 rounded text-sm overflow-x-auto">
                         <code>{codeExamples.singleCompress}</code>
@@ -686,12 +686,12 @@ Authorization: Bearer sk_test_1234567890abcdef
                     3
                   </div>
                   <h3 className="text-2xl font-bold mb-2">Receive Results</h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-300">
                     Get optimized images back with metadata including compression ratios, file sizes, and quality metrics.
                   </p>
                 </div>
                 <div className="md:w-2/3">
-                  <Card>
+                  <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                     <CardContent className="p-4">
                       <pre className="bg-gray-900 text-gray-100 p-4 rounded text-sm overflow-x-auto">
                         <code>{`{
@@ -715,23 +715,23 @@ Authorization: Bearer sk_test_1234567890abcdef
             </div>
 
             {/* Advanced Features */}
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-8">
+            <div className="bg-gray-800/50 backdrop-blur-xl border border-teal-500/30 rounded-lg p-8">
               <h3 className="text-2xl font-bold mb-6 text-center">Advanced Processing Features</h3>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="text-center">
                   <Settings className="w-8 h-8 mx-auto mb-3 text-blue-600" />
                   <h4 className="font-semibold mb-2">Custom Quality Controls</h4>
-                  <p className="text-sm text-gray-600">Fine-tune compression with advanced algorithms</p>
+                  <p className="text-sm text-gray-300">Fine-tune compression with advanced algorithms</p>
                 </div>
                 <div className="text-center">
                   <Layers className="w-8 h-8 mx-auto mb-3 text-green-600" />
                   <h4 className="font-semibold mb-2">Batch Processing</h4>
-                  <p className="text-sm text-gray-600">Process multiple files simultaneously</p>
+                  <p className="text-sm text-gray-300">Process multiple files simultaneously</p>
                 </div>
                 <div className="text-center">
                   <Repeat className="w-8 h-8 mx-auto mb-3 text-purple-600" />
                   <h4 className="font-semibold mb-2">Format Conversion</h4>
-                  <p className="text-sm text-gray-600">Convert between any supported formats</p>
+                  <p className="text-sm text-gray-300">Convert between any supported formats</p>
                 </div>
               </div>
             </div>
@@ -742,14 +742,14 @@ Authorization: Bearer sk_test_1234567890abcdef
         {activeTab === "api-vs-web" && (
           <div className="space-y-8">
             <div className="text-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">API vs Web Interface</h1>
-              <p className="text-xl text-gray-600">Choose the right solution for your needs</p>
+              <h1 className="text-4xl font-bold text-white mb-4">API vs Web Interface</h1>
+              <p className="text-xl text-gray-300">Choose the right solution for your needs</p>
             </div>
 
             <div className="grid lg:grid-cols-2 gap-8">
               {/* Web Interface */}
               <Card className="border-2 border-green-200">
-                <CardHeader className="bg-green-50">
+                <CardHeader className="bg-teal-900/30 border-b border-teal-500/30">
                   <CardTitle className="flex items-center text-green-800">
                     <Globe className="w-5 h-5 mr-2" />
                     Web Interface
@@ -761,28 +761,28 @@ Authorization: Bearer sk_test_1234567890abcdef
                       <CheckCircle className="w-5 h-5 mt-0.5 text-green-600" />
                       <div>
                         <h4 className="font-semibold">Perfect for Manual Processing</h4>
-                        <p className="text-sm text-gray-600">Upload and compress images individually with visual controls</p>
+                        <p className="text-sm text-gray-300">Upload and compress images individually with visual controls</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 mt-0.5 text-green-600" />
                       <div>
                         <h4 className="font-semibold">Real-time Preview</h4>
-                        <p className="text-sm text-gray-600">See compression results instantly with before/after comparison</p>
+                        <p className="text-sm text-gray-300">See compression results instantly with before/after comparison</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 mt-0.5 text-green-600" />
                       <div>
                         <h4 className="font-semibold">No Technical Knowledge Required</h4>
-                        <p className="text-sm text-gray-600">User-friendly interface with preset quality levels</p>
+                        <p className="text-sm text-gray-300">User-friendly interface with preset quality levels</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 mt-0.5 text-green-600" />
                       <div>
                         <h4 className="font-semibold">Batch ZIP Downloads</h4>
-                        <p className="text-sm text-gray-600">Download multiple processed files as a single ZIP</p>
+                        <p className="text-sm text-gray-300">Download multiple processed files as a single ZIP</p>
                       </div>
                     </div>
                   </div>
@@ -793,8 +793,8 @@ Authorization: Bearer sk_test_1234567890abcdef
               </Card>
 
               {/* API */}
-              <Card className="border-2 border-blue-200">
-                <CardHeader className="bg-blue-50">
+              <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50">
+                <CardHeader className="bg-teal-900/30 border-b border-teal-500/30">
                   <CardTitle className="flex items-center text-blue-800">
                     <Code className="w-5 h-5 mr-2" />
                     Developer API
@@ -806,28 +806,28 @@ Authorization: Bearer sk_test_1234567890abcdef
                       <CheckCircle className="w-5 h-5 mt-0.5 text-blue-600" />
                       <div>
                         <h4 className="font-semibold">Automated Processing</h4>
-                        <p className="text-sm text-gray-600">Integrate image processing directly into your applications</p>
+                        <p className="text-sm text-gray-300">Integrate image processing directly into your applications</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 mt-0.5 text-blue-600" />
                       <div>
                         <h4 className="font-semibold">High-Volume Processing</h4>
-                        <p className="text-sm text-gray-600">Process thousands of images with batch endpoints</p>
+                        <p className="text-sm text-gray-300">Process thousands of images with batch endpoints</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 mt-0.5 text-blue-600" />
                       <div>
                         <h4 className="font-semibold">Advanced Controls</h4>
-                        <p className="text-sm text-gray-600">Programmatic access to all compression settings</p>
+                        <p className="text-sm text-gray-300">Programmatic access to all compression settings</p>
                       </div>
                     </div>
                     <div className="flex items-start space-x-3">
                       <CheckCircle className="w-5 h-5 mt-0.5 text-blue-600" />
                       <div>
                         <h4 className="font-semibold">Concurrent Processing</h4>
-                        <p className="text-sm text-gray-600">Multiple simultaneous requests based on your tier</p>
+                        <p className="text-sm text-gray-300">Multiple simultaneous requests based on your tier</p>
                       </div>
                     </div>
                   </div>
@@ -841,48 +841,48 @@ Authorization: Bearer sk_test_1234567890abcdef
             {/* Tier Comparison Table */}
             <div>
               <h3 className="text-2xl font-bold text-center mb-6">Tier Comparison</h3>
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <table className="w-full">
-                      <thead className="bg-gray-50">
+                      <thead className="bg-gray-800/50">
                         <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Feature</th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Free</th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Premium</th>
-                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Enterprise</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">Feature</th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Free</th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Premium</th>
+                          <th className="px-6 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">Enterprise</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-200">
                         <tr>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Operations/Month</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">500</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">10,000</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">50,000</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">Operations/Month</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">500</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">10,000</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">50,000</td>
                         </tr>
                         <tr>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Max File Size</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">10MB</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">75MB</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">200MB</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">Max File Size</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">10MB</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">75MB</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">200MB</td>
                         </tr>
                         <tr>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Concurrent Requests</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">2</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">5</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">10</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">Concurrent Requests</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">2</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">5</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">10</td>
                         </tr>
                         <tr>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">RAW Format Support</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">RAW Format Support</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-red-500">✗</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-green-500">✓</td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-green-500">✓</td>
                         </tr>
                         <tr>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Support Level</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">Community</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">Email + Priority</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-500">24/7 + Custom</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">Support Level</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">Community</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">Email + Priority</td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center text-gray-400">24/7 + Custom</td>
                         </tr>
                       </tbody>
                     </table>
@@ -894,12 +894,12 @@ Authorization: Bearer sk_test_1234567890abcdef
             {/* Use Cases */}
             <div className="grid md:grid-cols-3 gap-6">
               <Card className="border-green-200">
-                <CardHeader className="bg-green-50">
+                <CardHeader className="bg-teal-900/30 border-b border-teal-500/30">
                   <CardTitle className="text-green-800">Free Tier</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <p className="text-sm text-gray-600 mb-3">Perfect for:</p>
-                  <ul className="text-sm text-gray-600 space-y-1">
+                  <p className="text-sm text-gray-300 mb-3">Perfect for:</p>
+                  <ul className="text-sm text-gray-300 space-y-1">
                     <li>• Small websites</li>
                     <li>• Personal projects</li>
                     <li>• Testing and evaluation</li>
@@ -909,12 +909,12 @@ Authorization: Bearer sk_test_1234567890abcdef
               </Card>
 
               <Card className="border-blue-200">
-                <CardHeader className="bg-blue-50">
+                <CardHeader className="bg-teal-900/30 border-b border-teal-500/30">
                   <CardTitle className="text-blue-800">Premium Tier</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <p className="text-sm text-gray-600 mb-3">Perfect for:</p>
-                  <ul className="text-sm text-gray-600 space-y-1">
+                  <p className="text-sm text-gray-300 mb-3">Perfect for:</p>
+                  <ul className="text-sm text-gray-300 space-y-1">
                     <li>• E-commerce sites</li>
                     <li>• Digital agencies</li>
                     <li>• Photography blogs</li>
@@ -924,12 +924,12 @@ Authorization: Bearer sk_test_1234567890abcdef
               </Card>
 
               <Card className="border-purple-200">
-                <CardHeader className="bg-purple-50">
+                <CardHeader className="bg-gray-800/50 border-b border-yellow-500/30">
                   <CardTitle className="text-purple-800">Enterprise Tier</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
-                  <p className="text-sm text-gray-600 mb-3">Perfect for:</p>
-                  <ul className="text-sm text-gray-600 space-y-1">
+                  <p className="text-sm text-gray-300 mb-3">Perfect for:</p>
+                  <ul className="text-sm text-gray-300 space-y-1">
                     <li>• Large platforms</li>
                     <li>• Media companies</li>
                     <li>• High-volume processing</li>
@@ -945,15 +945,15 @@ Authorization: Bearer sk_test_1234567890abcdef
         {activeTab === "documentation" && (
           <div className="space-y-8">
             <div className="text-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">Complete API Documentation</h1>
-              <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-6">
+              <h1 className="text-4xl font-bold text-white mb-4">Complete API Documentation</h1>
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-6">
                 Comprehensive guide to integrate image compression and conversion into your applications.
                 Support for all major formats with tier-based access control.
               </p>
               <div className="flex justify-center space-x-4">
                 <Button 
                   size="lg" 
-                  className="bg-blue-600 hover:bg-blue-700"
+                  className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50"
                   onClick={() => window.location.href = '/api-dashboard'}
                 >
                   <Key className="w-4 h-4 mr-2" />
@@ -971,7 +971,7 @@ Authorization: Bearer sk_test_1234567890abcdef
             </div>
 
             {/* Quick Start */}
-            <Card>
+            <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Zap className="w-5 h-5 mr-2 text-blue-600" />
@@ -989,7 +989,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                       placeholder="sk_test_..."
                       className="font-mono"
                     />
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-gray-400 mt-1">
                       <Button variant="link" className="p-0 h-auto" onClick={() => window.location.href = '/api-dashboard'}>
                         Get your API key from the dashboard
                       </Button>
@@ -1011,7 +1011,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                   <ExternalLink className="w-5 h-5 mr-2" />
                   Learn HTTP Requests (Video Tutorial)
                 </CardTitle>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-300">
                   New to APIs? Watch this beginner-friendly tutorial to understand how HTTP requests work before using our API.
                 </p>
               </CardHeader>
@@ -1042,7 +1042,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                     <div className="p-3 border rounded">
                       <h5 className="font-medium">📖 What You'll Learn:</h5>
-                      <ul className="text-gray-600 mt-1 space-y-1">
+                      <ul className="text-gray-300 mt-1 space-y-1">
                         <li>• What APIs are and how they work</li>
                         <li>• HTTP methods (GET, POST, etc.)</li>
                         <li>• Making requests with code</li>
@@ -1051,7 +1051,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                     </div>
                     <div className="p-3 border rounded">
                       <h5 className="font-medium">🛠️ Tools Covered:</h5>
-                      <ul className="text-gray-600 mt-1 space-y-1">
+                      <ul className="text-gray-300 mt-1 space-y-1">
                         <li>• cURL (command line)</li>
                         <li>• Postman (testing)</li>
                         <li>• JavaScript fetch()</li>
@@ -1065,7 +1065,7 @@ Authorization: Bearer sk_test_1234567890abcdef
 
             {/* Base URL & Authentication */}
             <div className="grid md:grid-cols-2 gap-6">
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="text-lg">Base URL</CardTitle>
                 </CardHeader>
@@ -1076,7 +1076,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                 </CardContent>
               </Card>
 
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="text-lg">Authentication</CardTitle>
                 </CardHeader>
@@ -1093,13 +1093,13 @@ Authorization: Bearer sk_test_1234567890abcdef
               <h3 className="text-2xl font-bold">API Endpoints</h3>
 
               {/* Single Compress */}
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
-                    <Badge variant="outline" className="mr-3 bg-green-50 text-green-700 border-green-200">POST</Badge>
+                    <Badge variant="outline" className="mr-3 bg-green-50 text-teal-300 border-green-200">POST</Badge>
                     /compress
                   </CardTitle>
-                  <p className="text-gray-600">Compress or convert a single image file</p>
+                  <p className="text-gray-300">Compress or convert a single image file</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -1107,11 +1107,11 @@ Authorization: Bearer sk_test_1234567890abcdef
                     <div className="space-y-2 text-sm">
                       <div className="flex">
                         <code className="bg-gray-100 px-2 py-1 rounded w-24 mr-3">image</code>
-                        <span className="text-gray-600">File (required) - The image file to process</span>
+                        <span className="text-gray-300">File (required) - The image file to process</span>
                       </div>
                       <div className="flex">
                         <code className="bg-gray-100 px-2 py-1 rounded w-24 mr-3">settings</code>
-                        <span className="text-gray-600">JSON (optional) - Compression settings object</span>
+                        <span className="text-gray-300">JSON (optional) - Compression settings object</span>
                       </div>
                     </div>
                   </div>
@@ -1150,13 +1150,13 @@ Authorization: Bearer sk_test_1234567890abcdef
               </Card>
 
               {/* Batch Compress */}
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Badge variant="outline" className="mr-3 bg-blue-50 text-blue-700 border-blue-200">POST</Badge>
                     /batch
                   </CardTitle>
-                  <p className="text-gray-600">Process multiple images in a single request</p>
+                  <p className="text-gray-300">Process multiple images in a single request</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -1164,11 +1164,11 @@ Authorization: Bearer sk_test_1234567890abcdef
                     <div className="space-y-2 text-sm">
                       <div className="flex">
                         <code className="bg-gray-100 px-2 py-1 rounded w-24 mr-3">images</code>
-                        <span className="text-gray-600">Files (required) - Array of image files (max 10)</span>
+                        <span className="text-gray-300">Files (required) - Array of image files (max 10)</span>
                       </div>
                       <div className="flex">
                         <code className="bg-gray-100 px-2 py-1 rounded w-24 mr-3">settings</code>
-                        <span className="text-gray-600">JSON (optional) - Same settings as single compress</span>
+                        <span className="text-gray-300">JSON (optional) - Same settings as single compress</span>
                       </div>
                     </div>
                   </div>
@@ -1183,13 +1183,13 @@ Authorization: Bearer sk_test_1234567890abcdef
               </Card>
 
               {/* Special Format Conversion */}
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Badge variant="outline" className="mr-3 bg-purple-50 text-purple-700 border-purple-200">POST</Badge>
                     /special/convert
                   </CardTitle>
-                  <p className="text-gray-600">Convert RAW, SVG, or TIFF files to standard formats</p>
+                  <p className="text-gray-300">Convert RAW, SVG, or TIFF files to standard formats</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div>
@@ -1220,13 +1220,13 @@ Authorization: Bearer sk_test_1234567890abcdef
               </Card>
 
               {/* Usage Stats */}
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle className="flex items-center">
                     <Badge variant="outline" className="mr-3 bg-gray-50 text-gray-700 border-gray-200">GET</Badge>
                     /usage
                   </CardTitle>
-                  <p className="text-gray-600">Get usage statistics for your API key</p>
+                  <p className="text-gray-300">Get usage statistics for your API key</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="bg-gray-900 text-gray-100 p-3 rounded text-sm">
@@ -1258,7 +1258,7 @@ Authorization: Bearer sk_test_1234567890abcdef
             </div>
 
             {/* Error Codes */}
-            <Card>
+            <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
               <CardHeader>
                 <CardTitle>Error Responses</CardTitle>
               </CardHeader>
@@ -1289,7 +1289,7 @@ Authorization: Bearer sk_test_1234567890abcdef
             </Card>
 
             {/* Compression Settings Reference */}
-            <Card>
+            <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Settings className="w-5 h-5 mr-2 text-indigo-600" />
@@ -1303,19 +1303,19 @@ Authorization: Bearer sk_test_1234567890abcdef
                     <div className="space-y-2 text-sm">
                       <div className="flex items-start">
                         <code className="bg-gray-100 px-2 py-1 rounded mr-3 text-xs">quality</code>
-                        <span className="text-gray-600">10-100 (default: 75) - Compression quality level</span>
+                        <span className="text-gray-300">10-100 (default: 75) - Compression quality level</span>
                       </div>
                       <div className="flex items-start">
                         <code className="bg-gray-100 px-2 py-1 rounded mr-3 text-xs">outputFormat</code>
-                        <span className="text-gray-600">"jpeg", "png", "webp", "avif", "tiff"</span>
+                        <span className="text-gray-300">"jpeg", "png", "webp", "avif", "tiff"</span>
                       </div>
                       <div className="flex items-start">
                         <code className="bg-gray-100 px-2 py-1 rounded mr-3 text-xs">progressive</code>
-                        <span className="text-gray-600">true/false - Progressive JPEG encoding</span>
+                        <span className="text-gray-300">true/false - Progressive JPEG encoding</span>
                       </div>
                       <div className="flex items-start">
                         <code className="bg-gray-100 px-2 py-1 rounded mr-3 text-xs">webOptimization</code>
-                        <span className="text-gray-600">true/false - Web-specific optimizations</span>
+                        <span className="text-gray-300">true/false - Web-specific optimizations</span>
                       </div>
                     </div>
                   </div>
@@ -1325,15 +1325,15 @@ Authorization: Bearer sk_test_1234567890abcdef
                     <div className="space-y-2 text-sm">
                       <div className="flex items-start">
                         <code className="bg-gray-100 px-2 py-1 rounded mr-3 text-xs">compressionAlgorithm</code>
-                        <span className="text-gray-600">"standard", "aggressive", "mozjpeg"</span>
+                        <span className="text-gray-300">"standard", "aggressive", "mozjpeg"</span>
                       </div>
                       <div className="flex items-start">
                         <code className="bg-gray-100 px-2 py-1 rounded mr-3 text-xs">resizeQuality</code>
-                        <span className="text-gray-600">"lanczos", "bicubic", "bilinear"</span>
+                        <span className="text-gray-300">"lanczos", "bicubic", "bilinear"</span>
                       </div>
                       <div className="flex items-start">
                         <code className="bg-gray-100 px-2 py-1 rounded mr-3 text-xs">resize</code>
-                        <span className="text-gray-600">Object with width, height, maintainAspect</span>
+                        <span className="text-gray-300">Object with width, height, maintainAspect</span>
                       </div>
                     </div>
                   </div>
@@ -1359,7 +1359,7 @@ Authorization: Bearer sk_test_1234567890abcdef
             </Card>
 
             {/* Rate Limits & Tier Comparison */}
-            <Card>
+            <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Clock className="w-5 h-5 mr-2 text-amber-600" />
@@ -1392,8 +1392,8 @@ Authorization: Bearer sk_test_1234567890abcdef
                   <h5 className="font-medium">Tier-Based Features:</h5>
                   <div className="grid md:grid-cols-3 gap-4 text-sm">
                     <div>
-                      <h6 className="font-medium text-green-700">Free Tier</h6>
-                      <ul className="text-gray-600 mt-1 space-y-1">
+                      <h6 className="font-medium text-teal-300">Free Tier</h6>
+                      <ul className="text-gray-300 mt-1 space-y-1">
                         <li>• Basic compression</li>
                         <li>• Format conversion</li>
                         <li>• Standard algorithms</li>
@@ -1401,7 +1401,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                     </div>
                     <div>
                       <h6 className="font-medium text-blue-700">Pro Tier</h6>
-                      <ul className="text-gray-600 mt-1 space-y-1">
+                      <ul className="text-gray-300 mt-1 space-y-1">
                         <li>• Batch processing</li>
                         <li>• Advanced algorithms</li>
                         <li>• RAW format support</li>
@@ -1409,7 +1409,7 @@ Authorization: Bearer sk_test_1234567890abcdef
                     </div>
                     <div>
                       <h6 className="font-medium text-purple-700">Enterprise Tier</h6>
-                      <ul className="text-gray-600 mt-1 space-y-1">
+                      <ul className="text-gray-300 mt-1 space-y-1">
                         <li>• Webhook support</li>
                         <li>• Priority processing</li>
                         <li>• Custom integrations</li>

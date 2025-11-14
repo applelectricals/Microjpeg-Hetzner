@@ -3,7 +3,6 @@ import { useLocation } from 'wouter';
 import { Check, Crown } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/header';
-import Footer from '@/components/footer';
 import { useAuth } from '@/hooks/useAuth';
 
 function useDarkMode() {
@@ -514,7 +513,6 @@ export default function CheckoutPage() {
         </div>
       </div>
 
-      <Footer />
     </div>
   );
 }

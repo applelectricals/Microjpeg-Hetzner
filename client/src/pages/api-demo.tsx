@@ -178,15 +178,19 @@ console.log('Conversion result:', result);`;
     if (['tiff', 'tif'].includes(ext || '')) {
       return <ImageIcon className="w-5 h-5 text-purple-600" />;
     }
-    return <FileText className="w-5 h-5 text-gray-600" />;
+    return <FileText className="w-5 h-5 text-gray-300" />;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 relative overflow-hidden">
+  {/* Glow Effects */}
+  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(20,184,166,0.15),transparent_50%)]"></div>
+  <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
+  <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
       <Header />
       
       {/* Sub Navigation */}
-      <div className="bg-purple-600 text-white">
+      <div className="bg-gray-800/90 backdrop-blur-xl border-b border-teal-500/30 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-8">
             {[
@@ -200,10 +204,10 @@ console.log('Conversion result:', result);`;
                       id === 'documentation' ? '/api-docs' : 
                       '/simple-pricing'}
                 className={`flex items-center space-x-2 px-4 py-4 border-b-2 text-sm font-medium transition-colors ${
-                  id === 'demo'
-                    ? 'border-white text-white'
-                    : 'border-transparent text-purple-100 hover:text-white hover:border-purple-200'
-                }`}
+  id === 'demo'
+    ? 'border-teal-400 text-teal-400'
+    : 'border-transparent text-gray-400 hover:text-white hover:border-teal-500/50'
+}`}
               >
                 <Icon className="w-4 h-4" />
                 <span>{label}</span>
@@ -213,14 +217,14 @@ console.log('Conversion result:', result);`;
         </div>
       </div>
       
-      <div className="p-4">
+      <div className="p-4 relative z-10">
         <div className="max-w-7xl mx-auto space-y-8">
           {/* Header */}
           <div className="text-center">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-400 to-yellow-400 bg-clip-text text-transparent mb-4">
               Professional Format Conversion API Demo
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
               Test our RAW, SVG, and TIFF conversion API in real-time. Convert professional formats 
               to standard web-optimized images with advanced quality controls.
             </p>
@@ -233,7 +237,7 @@ console.log('Conversion result:', result);`;
                 <Camera className="w-8 h-8 text-orange-600" />
                 <h3 className="text-lg font-semibold text-orange-800">RAW Camera Files</h3>
               </div>
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-300 text-sm">
                 Convert professional camera files (ARW, CR2, DNG, NEF, ORF, RAF, RW2) to web formats
               </p>
               <div className="mt-3 text-xs text-orange-600 font-medium">
@@ -246,7 +250,7 @@ console.log('Conversion result:', result);`;
                 <Layers className="w-8 h-8 text-blue-600" />
                 <h3 className="text-lg font-semibold text-blue-800">Vector Graphics</h3>
               </div>
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-300 text-sm">
                 Convert scalable SVG files to raster formats with precise quality control
               </p>
               <div className="mt-3 text-xs text-blue-600 font-medium">
@@ -259,7 +263,7 @@ console.log('Conversion result:', result);`;
                 <ImageIcon className="w-8 h-8 text-purple-600" />
                 <h3 className="text-lg font-semibold text-purple-800">TIFF Formats</h3>
               </div>
-              <p className="text-gray-600 text-sm">
+              <p className="text-gray-300 text-sm">
                 Process high-quality TIFF files with lossless compression options
               </p>
               <div className="mt-3 text-xs text-purple-600 font-medium">
@@ -269,7 +273,7 @@ console.log('Conversion result:', result);`;
           </div>
 
           <Tabs defaultValue="interactive" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-3 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
               <TabsTrigger value="interactive" data-testid="tab-interactive">Interactive Demo</TabsTrigger>
               <TabsTrigger value="examples" data-testid="tab-examples">Code Examples</TabsTrigger>
               <TabsTrigger value="pricing" data-testid="tab-pricing">Pricing Calculator</TabsTrigger>
@@ -279,7 +283,7 @@ console.log('Conversion result:', result);`;
             <TabsContent value="interactive" className="space-y-8">
               <div className="grid lg:grid-cols-2 gap-8">
                 {/* Input Panel */}
-                <Card>
+                <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <Settings className="w-5 h-5" />
@@ -298,7 +302,7 @@ console.log('Conversion result:', result);`;
                         placeholder="sk_test_1234567890abcdef..."
                         data-testid="input-api-key"
                       />
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-gray-400 mt-1">
                         Get your API key from the <a href="/api-dashboard" className="text-blue-600 hover:underline">API Dashboard</a>
                       </p>
                     </div>
@@ -320,7 +324,7 @@ console.log('Conversion result:', result);`;
                           {getFileTypeIcon(selectedFile.name)}
                           <div className="flex-1">
                             <div className="font-medium text-sm">{selectedFile.name}</div>
-                            <div className="text-xs text-gray-500">{formatFileSize(selectedFile.size)}</div>
+                            <div className="text-xs text-gray-400">{formatFileSize(selectedFile.size)}</div>
                           </div>
                         </div>
                       )}
@@ -381,7 +385,7 @@ console.log('Conversion result:', result);`;
                 </Card>
 
                 {/* Response Panel */}
-                <Card>
+                <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
                     <CardTitle className="flex items-center space-x-2">
                       <Zap className="w-5 h-5" />
@@ -390,7 +394,7 @@ console.log('Conversion result:', result);`;
                   </CardHeader>
                   <CardContent>
                     {!response ? (
-                      <div className="text-center py-12 text-gray-500">
+                      <div className="text-center py-12 text-gray-400">
                         <FileText className="w-16 h-16 mx-auto mb-4 text-gray-300" />
                         <p>Configure your test and click "Test API Call" to see the live response</p>
                       </div>
@@ -414,22 +418,22 @@ console.log('Conversion result:', result);`;
                         {/* Conversion Results */}
                         {response.success && response.result && (
                           <div className="space-y-3">
-                            <h4 className="font-semibold text-gray-900">Conversion Results</h4>
+                            <h4 className="font-semibold text-white">Conversion Results</h4>
                             <div className="grid grid-cols-2 gap-4 text-sm">
                               <div>
-                                <span className="text-gray-500">Original Size:</span>
+                                <span className="text-gray-400">Original Size:</span>
                                 <div className="font-medium">{formatFileSize(response.result.originalSize)}</div>
                               </div>
                               <div>
-                                <span className="text-gray-500">Converted Size:</span>
+                                <span className="text-gray-400">Converted Size:</span>
                                 <div className="font-medium">{formatFileSize(response.result.convertedSize)}</div>
                               </div>
                               <div>
-                                <span className="text-gray-500">Compression:</span>
+                                <span className="text-gray-400">Compression:</span>
                                 <div className="font-medium text-green-600">{response.result.compressionRatio}% smaller</div>
                               </div>
                               <div>
-                                <span className="text-gray-500">Processing Time:</span>
+                                <span className="text-gray-400">Processing Time:</span>
                                 <div className="font-medium">{response.result.processingTime}ms</div>
                               </div>
                             </div>
@@ -470,7 +474,7 @@ console.log('Conversion result:', result);`;
 
                         {/* Raw Response */}
                         <div>
-                          <h4 className="font-semibold text-gray-900 mb-2">Raw JSON Response</h4>
+                          <h4 className="font-semibold text-white mb-2">Raw JSON Response</h4>
                           <div className="bg-gray-900 text-gray-100 p-4 rounded-lg text-xs overflow-x-auto">
                             <pre>{JSON.stringify(response, null, 2)}</pre>
                           </div>
@@ -486,7 +490,7 @@ console.log('Conversion result:', result);`;
             <TabsContent value="examples" className="space-y-8">
               <div className="grid lg:grid-cols-2 gap-8">
                 {/* cURL Example */}
-                <Card>
+                <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                       <span>cURL Command</span>
@@ -508,7 +512,7 @@ console.log('Conversion result:', result);`;
                 </Card>
 
                 {/* JavaScript Example */}
-                <Card>
+                <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                       <span>JavaScript Code</span>
@@ -532,11 +536,11 @@ console.log('Conversion result:', result);`;
 
               {/* Additional Examples */}
               <div className="space-y-6">
-                <h3 className="text-2xl font-bold text-gray-900">More Examples</h3>
+                <h3 className="text-2xl font-bold text-white">More Examples</h3>
                 
                 <div className="grid gap-6">
                   {/* Batch Processing Example */}
-                  <Card>
+                  <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                     <CardHeader>
                       <CardTitle>Batch Processing</CardTitle>
                     </CardHeader>
@@ -554,7 +558,7 @@ console.log('Conversion result:', result);`;
                   </Card>
 
                   {/* Node.js SDK Example */}
-                  <Card>
+                  <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                     <CardHeader>
                       <CardTitle>Node.js Integration</CardTitle>
                     </CardHeader>
@@ -589,7 +593,7 @@ async function convertRawFile(filePath, apiKey) {
 
             {/* Pricing Calculator Tab */}
             <TabsContent value="pricing" className="space-y-8">
-              <Card>
+              <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
                 <CardHeader>
                   <CardTitle>Calculate Your API Costs</CardTitle>
                 </CardHeader>
@@ -600,12 +604,12 @@ async function convertRawFile(filePath, apiKey) {
                       <CardHeader className="text-center">
                         <Badge className="w-fit mx-auto mb-2">Developer</Badge>
                         <CardTitle className="text-2xl">Free</CardTitle>
-                        <p className="text-gray-600">Perfect for testing</p>
+                        <p className="text-gray-300">Perfect for testing</p>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         <div className="text-center">
                           <div className="text-3xl font-bold text-green-600">50</div>
-                          <div className="text-sm text-gray-500">free conversions/month</div>
+                          <div className="text-sm text-gray-400">free conversions/month</div>
                         </div>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
@@ -629,12 +633,12 @@ async function convertRawFile(filePath, apiKey) {
                       <CardHeader className="text-center">
                         <Badge className="w-fit mx-auto mb-2 bg-teal-600">Professional</Badge>
                         <CardTitle className="text-2xl">$29.99</CardTitle>
-                        <p className="text-gray-600">For photographers</p>
+                        <p className="text-gray-300">For photographers</p>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         <div className="text-center">
                           <div className="text-3xl font-bold text-teal-600">500</div>
-                          <div className="text-sm text-gray-500">conversions included</div>
+                          <div className="text-sm text-gray-400">conversions included</div>
                         </div>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
@@ -658,12 +662,12 @@ async function convertRawFile(filePath, apiKey) {
                       <CardHeader className="text-center">
                         <Badge className="w-fit mx-auto mb-2 bg-purple-600">Enterprise</Badge>
                         <CardTitle className="text-2xl">$99.99</CardTitle>
-                        <p className="text-gray-600">High-volume workflows</p>
+                        <p className="text-gray-300">High-volume workflows</p>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         <div className="text-center">
                           <div className="text-3xl font-bold text-purple-600">2,500</div>
-                          <div className="text-sm text-gray-500">conversions included</div>
+                          <div className="text-sm text-gray-400">conversions included</div>
                         </div>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
@@ -685,12 +689,12 @@ async function convertRawFile(filePath, apiKey) {
 
                   {/* Usage Calculator */}
                   <div className="mt-8 p-6 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-                    <h4 className="font-semibold text-gray-900 mb-4">Calculate Your Monthly Costs</h4>
+                    <h4 className="font-semibold text-white mb-4">Calculate Your Monthly Costs</h4>
                     <div className="text-center">
-                      <p className="text-gray-600 mb-4">
+                      <p className="text-gray-300 mb-4">
                         Professional format conversions start at <span className="font-bold text-purple-600">$0.10 per conversion</span>
                       </p>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-gray-400">
                         • RAW camera files: $0.10 each
                         • SVG conversions: $0.10 each  
                         • TIFF processing: $0.10 each
@@ -706,11 +710,11 @@ async function convertRawFile(filePath, apiKey) {
           {/* Quick Links */}
           <div className="grid md:grid-cols-3 gap-6">
             <Card className="p-6 text-center">
-              <h3 className="font-semibold text-gray-900 mb-2">Get Started</h3>
-              <p className="text-gray-600 mb-4 text-sm">Create your API key and start converting</p>
+              <h3 className="font-semibold text-white mb-2">Get Started</h3>
+              <p className="text-gray-300 mb-4 text-sm">Create your API key and start converting</p>
               <Button 
                 onClick={() => window.location.href = "/api-dashboard"}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 shadow-lg shadow-teal-500/50"
                 data-testid="button-get-api-key"
               >
                 Get API Key
@@ -718,8 +722,8 @@ async function convertRawFile(filePath, apiKey) {
             </Card>
 
             <Card className="p-6 text-center">
-              <h3 className="font-semibold text-gray-900 mb-2">Documentation</h3>
-              <p className="text-gray-600 mb-4 text-sm">Complete API reference and guides</p>
+              <h3 className="font-semibold text-white mb-2">Documentation</h3>
+              <p className="text-gray-300 mb-4 text-sm">Complete API reference and guides</p>
               <Button 
                 onClick={() => window.location.href = "/api-docs"}
                 variant="outline"
@@ -730,8 +734,8 @@ async function convertRawFile(filePath, apiKey) {
             </Card>
 
             <Card className="p-6 text-center">
-              <h3 className="font-semibold text-gray-900 mb-2">Support</h3>
-              <p className="text-gray-600 mb-4 text-sm">Need help with integration?</p>
+              <h3 className="font-semibold text-white mb-2">Support</h3>
+              <p className="text-gray-300 mb-4 text-sm">Need help with integration?</p>
               <Button 
                 onClick={() => window.location.href = "/contact"}
                 variant="outline"
