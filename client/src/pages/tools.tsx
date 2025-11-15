@@ -10,6 +10,7 @@ import logoUrl from '@assets/mascot-logo-optimized.png';
 
 export default function Tools() {
   const [activeTab, setActiveTab] = useState('tools');
+  const { isDark, setIsDark } = useDarkMode();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 relative overflow-hidden">
