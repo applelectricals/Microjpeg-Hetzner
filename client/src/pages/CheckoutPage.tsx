@@ -321,8 +321,13 @@ export default function CheckoutPage() {
   const totalPrice = currentPrice * quantity;
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      <Header isDarkMode={isDark} setDarkMode={setIsDark} />
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 relative overflow-hidden">
+      {/* Glow Effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(20,184,166,0.15),transparent_50%)]"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
+      
+      <Header isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
       
       {/* ✅ NEW: Processing overlay */}
       {isProcessing && (
@@ -339,58 +344,56 @@ export default function CheckoutPage() {
         </div>
       )}
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-16 relative z-10">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-teal-400 to-cyan-400 text-transparent bg-clip-text">
-            Choose Your Plan
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-teal-400 to-yellow-400 bg-clip-text text-transparent">
+            Complete Your Subscription
           </h1>
-          <p className="text-gray-400 text-lg">Select the perfect plan for your needs</p>
+          <p className="text-gray-300">Choose your plan and payment method</p>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          {Object.entries(PLANS).map(([key, plan]) => (
-            <Card
-              key={key}
-              onClick={() => setSelectedPlan(key as keyof typeof PLANS)}
-              className={`cursor-pointer transition-all hover:scale-105 relative ${
-                selectedPlan === key
-                  ? 'border-2 border-teal-500 bg-gray-800/90 shadow-lg shadow-teal-500/20'
-                  : 'bg-gray-800/50 border border-gray-700/50'
-              } backdrop-blur-xl`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
-                    Most Popular
-                  </span>
-                </div>
-              )}
-              <CardContent className="p-6 pt-8">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Crown className={`w-5 h-5 ${selectedPlan === key ? 'text-teal-500' : 'text-gray-500'}`} />
-                    <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-                  </div>
-                  {selectedPlan === key && (
-                    <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center">
-                      <Check className="w-4 h-4 text-white" />
-                    </div>
-                  )}
-                </div>
-                <p className="text-gray-400 text-sm mb-4">{plan.description}</p>
-                <div className="mb-4">
-                  <span className="text-3xl font-bold text-white">
-                    ${billingCycle === 'monthly' ? plan.monthly.price : plan.yearly.price}
-                  </span>
-                  <span className="text-gray-400 text-sm">/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8">
           <div>
+            <h2 className="text-2xl font-bold mb-6 text-white">Subscription Type</h2>
+            
+            <div className="space-y-4 mb-6">
+              {Object.entries(PLANS).map(([key, plan]) => (
+                <Card
+                  key={key}
+                  onClick={() => setSelectedPlan(key as keyof typeof PLANS)}
+                  className={`cursor-pointer transition-all bg-gray-800/50 backdrop-blur-xl ${
+                    selectedPlan === key
+                      ? 'border-2 border-teal-500 shadow-lg shadow-teal-500/50'
+                      : 'border border-gray-700/50 hover:border-teal-500/50'
+                  }`}
+                >
+                  <CardContent className="p-4 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                        selectedPlan === key ? 'border-teal-500 bg-teal-500' : 'border-gray-600'
+                      }`}>
+                        {selectedPlan === key && <div className="w-2 h-2 bg-white rounded-full" />}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-bold text-white">{plan.name}</h3>
+                          {plan.popular && <Crown className="w-4 h-4 text-yellow-500" />}
+                        </div>
+                        <p className="text-sm text-gray-400">{plan.description}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm text-gray-400">
+                        {billingCycle === 'monthly' ? 'per month' : 'per year'}
+                      </div>
+                      <div className="text-2xl font-bold text-white">
+                        ${billingCycle === 'monthly' ? plan.monthly.price : plan.yearly.price}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
             <Card className="p-4 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 mb-6">
               <div className="flex items-center justify-between mb-3">
                 <div>
