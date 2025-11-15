@@ -31,6 +31,10 @@ export const users = pgTable("users", {
   subscriptionTier: varchar("subscription_tier").default("free_registered"), // free_anonymous, free_registered, pro, enterprise  
   subscriptionStatus: varchar("subscription_status").default("inactive"), // inactive, active, past_due, canceled
   subscriptionEndDate: timestamp("subscription_end_date"),
+  subscriptionStartDate: timestamp("subscription_start_date"),
+  subscriptionBillingCycle: varchar("subscription_billing_cycle"),
+  paypalSubscriptionId: varchar("paypal_subscription_id"),
+  paypalOrderId: varchar("paypal_order_id"),
   monthlyOperations: integer("monthly_operations").default(0), // Current month usage
   dailyOperations: integer("daily_operations").default(0), // Current day usage
   hourlyOperations: integer("hourly_operations").default(0), // Current hour usage

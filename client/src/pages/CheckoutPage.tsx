@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'wouter';
-import { Check, Crown } from 'lucide-react';
+import { Check, Crown, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/header';
 import { useAuth } from '@/hooks/useAuth';
@@ -73,6 +73,10 @@ export default function CheckoutPage() {
   const [subscriptionLoaded, setSubscriptionLoaded] = useState(false);
   const [onetimeLoaded, setOnetimeLoaded] = useState(false);
   
+  // ✅ NEW: Processing states
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingMessage, setProcessingMessage] = useState('');
+  
   // Use refs to track if buttons are currently rendered
   const subscriptionRendered = useRef(false);
   const onetimeRendered = useRef(false);
@@ -124,17 +128,12 @@ export default function CheckoutPage() {
     const plan = PLANS[selectedPlan];
     const planId = billingCycle === 'monthly' ? plan.monthly.subscriptionPlanId : plan.yearly.subscriptionPlanId;
     
-    // Create unique container ID based on plan and cycle
     const containerId = `paypal-sub-${selectedPlan}-${billingCycle}`;
-    
-    // Get the main container
     const mainContainer = document.getElementById('paypal-subscription-container');
     if (!mainContainer) return;
     
-    // Clear all previous buttons
     mainContainer.innerHTML = '';
     
-    // Create new container for this specific plan/cycle
     const buttonContainer = document.createElement('div');
     buttonContainer.id = containerId;
     mainContainer.appendChild(buttonContainer);
@@ -153,8 +152,14 @@ export default function CheckoutPage() {
         },
         onApprove: async function(data: any) {
           console.log('✅ Subscription approved:', data.subscriptionID);
+          
+          // ✅ NEW: Show processing state
+          setIsProcessing(true);
+          setProcessingMessage('Processing your subscription...');
+          
           try {
-            await fetch('/api/payment/paypal/subscription', {
+            // ✅ NEW: Wait for backend response
+            const response = await fetch('/api/payment/paypal/subscription', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
@@ -164,13 +169,32 @@ export default function CheckoutPage() {
                 billing: { name: user?.email || 'guest', email: user?.email || 'guest' }
               })
             });
-          } catch (e) {
-            console.error('Backend error:', e);
+
+            // ✅ NEW: Check response status
+            if (!response.ok) {
+              throw new Error('Payment processing failed');
+            }
+
+            const result = await response.json();
+            console.log('✅ Backend processed successfully:', result);
+
+            setProcessingMessage('Redirecting to success page...');
+            
+            // ✅ NEW: Wait a moment before redirect
+            setTimeout(() => {
+              window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&subscription_id=${data.subscriptionID}`;
+            }, 1000);
+            
+          } catch (error) {
+            console.error('❌ Backend error:', error);
+            setIsProcessing(false);
+            alert('Payment processing failed. Please contact support.');
           }
-          window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&subscription_id=${data.subscriptionID}`;
         },
         onError: function(err: any) {
           console.error('PayPal subscription error:', err);
+          setIsProcessing(false);
+          alert('Payment failed. Please try again.');
         }
       }).render(`#${containerId}`).then(() => {
         subscriptionRendered.current = true;
@@ -180,7 +204,6 @@ export default function CheckoutPage() {
       });
     }
 
-    // Cleanup function
     return () => {
       console.log('🧹 Cleaning up subscription button');
       if (mainContainer) {
@@ -190,25 +213,20 @@ export default function CheckoutPage() {
     };
   }, [subscriptionLoaded, selectedPlan, billingCycle, user]);
 
-  // Render one-time button with proper cleanup
+  // Render one-time payment button
   useEffect(() => {
     if (!onetimeLoaded) return;
 
     const plan = PLANS[selectedPlan];
-    const price = billingCycle === 'monthly' ? plan.monthly.price : plan.yearly.price;
-    const totalAmount = price * quantity;
+    const currentPrice = billingCycle === 'monthly' ? plan.monthly.price : plan.yearly.price;
+    const totalPrice = currentPrice * quantity;
     
-    // Create unique container ID based on plan and cycle
-    const containerId = `paypal-onetime-${selectedPlan}-${billingCycle}`;
-    
-    // Get the main container
+    const containerId = `paypal-onetime-${selectedPlan}-${billingCycle}-${quantity}`;
     const mainContainer = document.getElementById('paypal-onetime-container');
     if (!mainContainer) return;
     
-    // Clear all previous buttons
     mainContainer.innerHTML = '';
     
-    // Create new container for this specific plan/cycle
     const buttonContainer = document.createElement('div');
     buttonContainer.id = containerId;
     mainContainer.appendChild(buttonContainer);
@@ -217,7 +235,7 @@ export default function CheckoutPage() {
 
     // @ts-ignore
     if (window.paypal && !onetimeRendered.current) {
-      console.log('🔄 Rendering one-time button for:', selectedPlan, billingCycle, price);
+      console.log('🔄 Rendering one-time button');
       
       // @ts-ignore
       window.paypal.Buttons({
@@ -225,35 +243,60 @@ export default function CheckoutPage() {
         createOrder: function(data: any, actions: any) {
           return actions.order.create({
             purchase_units: [{
-              amount: { value: totalAmount.toFixed(2), currency_code: 'USD' },
-              description: `${plan.name} - ${billingCycle === 'monthly' ? '1 Month' : '1 Year'} - ${quantity} user${quantity > 1 ? 's' : ''}`
+              amount: { value: totalPrice.toString() },
+              description: `${plan.name} - ${billingCycle === 'monthly' ? 'Monthly' : 'Yearly'} (${quantity} user${quantity > 1 ? 's' : ''})`
             }]
           });
         },
         onApprove: async function(data: any, actions: any) {
-          const order = await actions.order.capture();
-          console.log('✅ One-time payment captured:', order.id);
+          // ✅ NEW: Show processing state
+          setIsProcessing(true);
+          setProcessingMessage('Processing your payment...');
+          
           try {
-            await fetch('/api/payment/paypal/onetime', {
+            const details = await actions.order.capture();
+            console.log('✅ Payment captured:', details);
+
+            setProcessingMessage('Updating your account...');
+
+            // ✅ NEW: Wait for backend response
+            const response = await fetch('/api/payment/paypal/onetime', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               credentials: 'include',
               body: JSON.stringify({
                 plan: `${selectedPlan}-${billingCycle}`,
-                paypal_order_id: order.id,
-                amount: totalAmount,
-                quantity: quantity,
-                duration: billingCycle === 'monthly' ? 30 : 365,
-                billing: { name: user?.email || 'guest', email: user?.email || 'guest' }
+                quantity,
+                order_id: data.orderID,
+                billing: { name: details.payer.name.given_name + ' ' + details.payer.name.surname, email: details.payer.email_address }
               })
             });
-          } catch (e) {
-            console.error('Backend error:', e);
+
+            // ✅ NEW: Check response status
+            if (!response.ok) {
+              throw new Error('Payment processing failed');
+            }
+
+            const result = await response.json();
+            console.log('✅ Backend processed successfully:', result);
+
+            setProcessingMessage('Redirecting to success page...');
+            
+            // ✅ NEW: Wait a moment before redirect
+            setTimeout(() => {
+              window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&order_id=${data.orderID}`;
+            }, 1000);
+            
+          } catch (error) {
+            console.error('❌ Payment error:', error);
+            setIsProcessing(false);
+            alert('Payment processing failed. Please contact support.');
           }
-          window.location.href = `/payment-success?plan=${selectedPlan}-${billingCycle}&order_id=${order.id}&quantity=${quantity}`;
         },
         onError: function(err: any) {
           console.error('PayPal one-time error:', err);
+          setIsProcessing(false);
+          alert('Payment failed. Please try again.');
         }
       }).render(`#${containerId}`).then(() => {
         onetimeRendered.current = true;
@@ -263,7 +306,6 @@ export default function CheckoutPage() {
       });
     }
 
-    // Cleanup function
     return () => {
       console.log('🧹 Cleaning up one-time button');
       if (mainContainer) {
@@ -275,66 +317,80 @@ export default function CheckoutPage() {
 
   const currentPlan = PLANS[selectedPlan];
   const currentPrice = billingCycle === 'monthly' ? currentPlan.monthly.price : currentPlan.yearly.price;
+  const savings = billingCycle === 'yearly' ? (currentPlan.yearly.savings || 0) : 0;
   const totalPrice = currentPrice * quantity;
-  const savings = billingCycle === 'yearly' ? currentPlan.yearly.savings : 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 relative overflow-hidden">
-  {/* Glow Effects */}
-  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(20,184,166,0.15),transparent_50%)]"></div>
-  <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
-  <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
-      <Header isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      <Header isDarkMode={isDark} setDarkMode={setIsDark} />
       
-      <div className="container mx-auto px-4 py-16 relative z-10">
+      {/* ✅ NEW: Processing overlay */}
+      {isProcessing && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 text-center">
+            <Loader2 className="w-16 h-16 text-teal-500 animate-spin mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-white mb-2">Processing Payment</h3>
+            <p className="text-gray-300 mb-4">{processingMessage}</p>
+            <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+              <div className="bg-teal-500 h-full animate-pulse" style={{ width: '100%' }}></div>
+            </div>
+            <p className="text-sm text-gray-400 mt-4">Please do not close this window...</p>
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-teal-400 to-yellow-400 bg-clip-text text-transparent">Complete Your Subscription</h1>
-          <p className="text-gray-300">Choose your plan and payment method</p>
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-teal-400 to-cyan-400 text-transparent bg-clip-text">
+            Choose Your Plan
+          </h1>
+          <p className="text-gray-400 text-lg">Select the perfect plan for your needs</p>
         </div>
 
-        <div className="max-w-6xl mx-auto grid lg:grid-cols-2 gap-8">
-          <div>
-            <h2 className="text-2xl font-bold mb-6 text-white">Subscription Type</h2>
-            
-            <div className="space-y-4 mb-6">
-              {Object.entries(PLANS).map(([key, plan]) => (
-                <Card 
-  key={key} 
-  onClick={() => setSelectedPlan(key as keyof typeof PLANS)}
-  className={`cursor-pointer transition-all bg-gray-800/50 backdrop-blur-xl ${
-    selectedPlan === key 
-      ? 'border-2 border-teal-500 shadow-lg shadow-teal-500/50' 
-      : 'border border-gray-700/50 hover:border-teal-500/50'
-  }`}
->
-                  <CardContent className="p-4 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-  selectedPlan === key ? 'border-teal-500 bg-teal-500' : 'border-gray-600'
-}`}>
-                        {selectedPlan === key && <div className="w-2 h-2 bg-white rounded-full" />}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-bold text-white">{plan.name}</h3>
-                          {plan.popular && <Crown className="w-4 h-4 text-yellow-500" />}
-                        </div>
-                        <p className="text-sm text-gray-400">{plan.description}</p>
-                      </div>
+        <div className="grid md:grid-cols-3 gap-6 mb-8">
+          {Object.entries(PLANS).map(([key, plan]) => (
+            <Card
+              key={key}
+              onClick={() => setSelectedPlan(key as keyof typeof PLANS)}
+              className={`cursor-pointer transition-all hover:scale-105 relative ${
+                selectedPlan === key
+                  ? 'border-2 border-teal-500 bg-gray-800/90 shadow-lg shadow-teal-500/20'
+                  : 'bg-gray-800/50 border border-gray-700/50'
+              } backdrop-blur-xl`}
+            >
+              {plan.popular && (
+                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                  <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-4 py-1 rounded-full text-sm font-semibold shadow-lg">
+                    Most Popular
+                  </span>
+                </div>
+              )}
+              <CardContent className="p-6 pt-8">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Crown className={`w-5 h-5 ${selectedPlan === key ? 'text-teal-500' : 'text-gray-500'}`} />
+                    <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+                  </div>
+                  {selectedPlan === key && (
+                    <div className="w-6 h-6 rounded-full bg-teal-500 flex items-center justify-center">
+                      <Check className="w-4 h-4 text-white" />
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm text-gray-400">
-                        {billingCycle === 'monthly' ? 'per month' : 'per year'}
-                      </div>
-                      <div className="text-2xl font-bold text-white">
-                        ${billingCycle === 'monthly' ? plan.monthly.price : plan.yearly.price}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                  )}
+                </div>
+                <p className="text-gray-400 text-sm mb-4">{plan.description}</p>
+                <div className="mb-4">
+                  <span className="text-3xl font-bold text-white">
+                    ${billingCycle === 'monthly' ? plan.monthly.price : plan.yearly.price}
+                  </span>
+                  <span className="text-gray-400 text-sm">/{billingCycle === 'monthly' ? 'month' : 'year'}</span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
 
+        <div className="grid lg:grid-cols-2 gap-8">
+          <div>
             <Card className="p-4 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 mb-6">
               <div className="flex items-center justify-between mb-3">
                 <div>
@@ -345,11 +401,11 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <button
-  onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}
-  className={`w-12 h-6 rounded-full relative transition-colors ${
-    billingCycle === 'yearly' ? 'bg-teal-500' : 'bg-gray-600'
-  }`}
->
+                    onClick={() => setBillingCycle(billingCycle === 'monthly' ? 'yearly' : 'monthly')}
+                    className={`w-12 h-6 rounded-full relative transition-colors ${
+                      billingCycle === 'yearly' ? 'bg-teal-500' : 'bg-gray-600'
+                    }`}
+                  >
                     <div className={`absolute top-1 ${
                       billingCycle === 'yearly' ? 'right-1' : 'left-1'
                     } w-4 h-4 bg-white rounded-full transition-all`} />
@@ -366,7 +422,6 @@ export default function CheckoutPage() {
               )}
             </Card>
 
-            {/* Quantity Selector */}
             <Card className="p-4 bg-gray-800/50 backdrop-blur-xl border-2 border-yellow-500/30 mb-6">
               <div className="flex items-center justify-between">
                 <div>
@@ -377,19 +432,19 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <button
-  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-  disabled={quantity <= 1}
-  className="w-8 h-8 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center font-bold text-gray-300 hover:border-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
->
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                    className="w-8 h-8 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center font-bold text-gray-300 hover:border-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
                     −
                   </button>
                   <span className="text-2xl font-bold text-white min-w-[3ch] text-center">
                     {quantity}
                   </span>
                   <button
-  onClick={() => setQuantity(quantity + 1)}
-  className="w-8 h-8 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center font-bold text-gray-300 hover:border-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
->
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="w-8 h-8 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center font-bold text-gray-300 hover:border-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
                     +
                   </button>
                 </div>
@@ -464,7 +519,6 @@ export default function CheckoutPage() {
                     </p>
                   </div>
                   
-                  {/* Main container that will be cleared and repopulated */}
                   <div id="paypal-subscription-container"></div>
                   
                   {!subscriptionLoaded && (
@@ -497,7 +551,6 @@ export default function CheckoutPage() {
                     </p>
                   </div>
                   
-                  {/* Main container that will be cleared and repopulated */}
                   <div id="paypal-onetime-container"></div>
                   
                   {!onetimeLoaded && (

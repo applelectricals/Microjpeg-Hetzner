@@ -1,63 +1,49 @@
-import sgMail from '@sendgrid/mail';
+import { Resend } from 'resend';
 
-// Function to get environment variables (called at runtime, not import time)
-function getEnvVar(key: string, defaultValue?: string): string | undefined {
-  return process.env[key] || defaultValue;
-}
+// Initialize Resend
+let resend: Resend | null = null;
 
-// Initialize SendGrid only when first used
-let sendGridInitialized = false;
-
-function initializeSendGrid() {
-  if (sendGridInitialized) return;
-  
-  const apiKey = getEnvVar('SENDGRID_API_KEY');
-  
-  if (!apiKey) {
-    console.warn('⚠️  SENDGRID_API_KEY not set - emails will be logged instead of sent');
-  } else {
-    sgMail.setApiKey(apiKey);
-    console.log('✅ SendGrid initialized with key:', apiKey.substring(0, 10) + '...');
-    sendGridInitialized = true;
+function getResend(): Resend {
+  if (!resend) {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      throw new Error('RESEND_API_KEY not set in environment variables');
+    }
+    resend = new Resend(apiKey);
+    console.log('✅ Resend initialized');
   }
+  return resend;
 }
 
-const FROM_EMAIL = () => getEnvVar('FROM_EMAIL') || getEnvVar('SENDGRID_FROM_EMAIL') || 'noreply@microjpeg.com';
-const SUPPORT_EMAIL = () => getEnvVar('SUPPORT_EMAIL') || 'support@microjpeg.com';
-const SITE_URL = () => getEnvVar('SITE_URL') || 'https://microjpeg.com';
+const FROM_EMAIL = () => process.env.FROM_EMAIL || 'onboarding@resend.dev';
+const SUPPORT_EMAIL = () => process.env.SUPPORT_EMAIL || 'support@microjpeg.com';
+const SITE_URL = () => process.env.SITE_URL || 'https://microjpeg.com';
 
 class EmailService {
   /**
-   * Send email using SendGrid
+   * Send email using Resend
    */
   async sendEmail(to: string, subject: string, html: string): Promise<boolean> {
-    // Initialize SendGrid at runtime
-    initializeSendGrid();
-    
-    const apiKey = getEnvVar('SENDGRID_API_KEY');
-    
-    if (!apiKey) {
-      console.log('📧 [DEV MODE] Email would be sent:');
-      console.log('   To:', to);
-      console.log('   Subject:', subject);
-      console.log('   Content preview:', html.substring(0, 200) + '...');
-      return true;
-    }
-
     try {
-      await sgMail.send({
-        to,
-        from: FROM_EMAIL(),
+      const resendClient = getResend();
+      
+      const { data, error } = await resendClient.emails.send({
+        from: `MicroJPEG <${FROM_EMAIL()}>`,
+        to: [to],
         subject,
         html,
       });
-      console.log(`✅ Email sent successfully to ${to}: ${subject}`);
+
+      if (error) {
+        console.error('❌ Resend error:', error);
+        return false;
+      }
+
+      console.log(`✅ Email sent successfully to ${to}. ID: ${data?.id}`);
       return true;
+      
     } catch (error: any) {
       console.error('❌ Failed to send email:', error);
-      if (error.response) {
-        console.error('SendGrid error:', error.response.body);
-      }
       return false;
     }
   }
@@ -91,7 +77,6 @@ class EmailService {
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 0;">
     <tr>
       <td align="center">
-        <!-- Main Container -->
         <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
           
           <!-- Header -->
@@ -111,7 +96,7 @@ class EmailService {
                 Thank you for subscribing to MicroJPEG! Your payment has been confirmed and your <strong>${planName}</strong> plan is now active.
               </p>
 
-              <!-- Subscription Details Box -->
+              <!-- Subscription Details -->
               <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border: 2px solid #e5e7eb; border-radius: 8px; margin: 24px 0;">
                 <tr>
                   <td style="padding: 24px;">
@@ -148,24 +133,22 @@ class EmailService {
                 </tr>
               </table>
 
-              <!-- What's Next Section -->
+              <!-- What's Next -->
               <table width="100%" cellpadding="0" cellspacing="0" style="border-top: 1px solid #e5e7eb; margin-top: 32px; padding-top: 24px;">
                 <tr>
                   <td>
                     <h4 style="color: #111827; margin: 0 0 16px 0; font-size: 16px;">🚀 What's Next?</h4>
                     <ul style="color: #374151; line-height: 1.8; margin: 0; padding-left: 20px;">
-                      <li>Access your dashboard to manage your subscription</li>
                       <li>Start compressing images with your increased limits</li>
-                      <li>Explore format conversion features (JPEG, PNG, WebP, AVIF)</li>
-                      <li>Take advantage of priority processing</li>
+                      <li>Explore format conversion features</li>
+                      <li>Manage your subscription in your dashboard</li>
                     </ul>
                   </td>
                 </tr>
               </table>
 
-              <!-- Support -->
-              <p style="color: #6b7280; font-size: 14px; margin: 32px 0 0 0; line-height: 1.6;">
-                Need help getting started? Check out our <a href="${SITE_URL()}/docs" style="color: #14b8a6; text-decoration: none;">documentation</a> or contact us at <a href="mailto:${SUPPORT_EMAIL()}" style="color: #14b8a6; text-decoration: none;">${SUPPORT_EMAIL()}</a>
+              <p style="color: #6b7280; font-size: 14px; margin: 32px 0 0 0;">
+                Need help? Contact us at <a href="mailto:${SUPPORT_EMAIL()}" style="color: #14b8a6;">${SUPPORT_EMAIL()}</a>
               </p>
 
               <p style="color: #111827; margin: 32px 0 0 0; font-size: 16px;">
@@ -179,9 +162,7 @@ class EmailService {
           <tr>
             <td style="background-color: #f9fafb; padding: 24px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
               <p style="color: #6b7280; font-size: 12px; margin: 0;">
-                © ${new Date().getFullYear()} MicroJPEG. All rights reserved.<br>
-                <a href="${SITE_URL()}/subscription" style="color: #14b8a6; text-decoration: none;">Manage Subscription</a> | 
-                <a href="${SITE_URL()}/privacy-policy" style="color: #14b8a6; text-decoration: none;">Privacy Policy</a>
+                © ${new Date().getFullYear()} MicroJPEG. All rights reserved.
               </p>
             </td>
           </tr>
@@ -198,7 +179,7 @@ class EmailService {
   }
 
   /**
-   * Send one-time payment confirmation email
+   * Send one-time payment confirmation
    */
   async sendPaymentConfirmation(
     email: string,
@@ -220,7 +201,7 @@ class EmailService {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
+<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 0;">
     <tr>
       <td align="center">
@@ -229,7 +210,6 @@ class EmailService {
           <tr>
             <td style="background: linear-gradient(135deg, #14b8a6 0%, #0891b2 100%); padding: 48px 40px; text-align: center;">
               <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: bold;">Payment Confirmed!</h1>
-              <p style="color: #ffffff; margin: 12px 0 0 0; font-size: 18px; opacity: 0.95;">Your access is now active</p>
             </td>
           </tr>
 
@@ -238,34 +218,30 @@ class EmailService {
               <p style="font-size: 18px; color: #111827; margin: 0 0 20px 0;">Hi ${name || 'there'},</p>
               
               <p style="font-size: 16px; color: #374151; line-height: 1.6; margin: 0 0 24px 0;">
-                Your payment of <strong>$${amount.toFixed(2)}</strong> has been successfully processed! Your <strong>${planName}</strong> plan is now active.
+                Your payment of <strong>$${amount.toFixed(2)}</strong> has been successfully processed!
               </p>
 
               <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border: 2px solid #e5e7eb; border-radius: 8px; margin: 24px 0;">
                 <tr>
                   <td style="padding: 24px;">
-                    <h3 style="margin: 0 0 16px 0; color: #111827; font-size: 18px;">💳 Purchase Details</h3>
+                    <h3 style="margin: 0 0 16px 0; color: #111827;">💳 Purchase Details</h3>
                     
                     <table width="100%" cellpadding="8" cellspacing="0">
                       <tr>
-                        <td style="color: #6b7280; font-size: 14px; width: 140px;">Plan:</td>
-                        <td style="color: #111827; font-size: 14px; font-weight: 600;">${planName}</td>
+                        <td style="color: #6b7280; width: 140px;">Plan:</td>
+                        <td style="color: #111827; font-weight: 600;">${planName}</td>
                       </tr>
                       <tr>
-                        <td style="color: #6b7280; font-size: 14px;">Amount Paid:</td>
-                        <td style="color: #111827; font-size: 14px; font-weight: 600;">$${amount.toFixed(2)}</td>
+                        <td style="color: #6b7280;">Amount:</td>
+                        <td style="color: #111827; font-weight: 600;">$${amount.toFixed(2)}</td>
                       </tr>
                       <tr>
-                        <td style="color: #6b7280; font-size: 14px;">Duration:</td>
-                        <td style="color: #111827; font-size: 14px; font-weight: 600;">${durationText}</td>
+                        <td style="color: #6b7280;">Duration:</td>
+                        <td style="color: #111827; font-weight: 600;">${durationText}</td>
                       </tr>
                       <tr>
-                        <td style="color: #6b7280; font-size: 14px;">Valid Until:</td>
-                        <td style="color: #111827; font-size: 14px; font-weight: 600;">${expiryDate.toLocaleDateString()}</td>
-                      </tr>
-                      <tr>
-                        <td style="color: #6b7280; font-size: 14px;">Status:</td>
-                        <td style="color: #10b981; font-size: 14px; font-weight: 600;">● Active</td>
+                        <td style="color: #6b7280;">Valid Until:</td>
+                        <td style="color: #111827; font-weight: 600;">${expiryDate.toLocaleDateString()}</td>
                       </tr>
                     </table>
                   </td>
@@ -275,26 +251,14 @@ class EmailService {
               <table width="100%" cellpadding="0" cellspacing="0" style="margin: 32px 0;">
                 <tr>
                   <td align="center">
-                    <a href="${SITE_URL()}/compress" style="display: inline-block; background-color: #14b8a6; color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">Start Using Your Plan →</a>
+                    <a href="${SITE_URL()}/compress" style="display: inline-block; background-color: #14b8a6; color: #ffffff; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600;">Start Using Your Plan →</a>
                   </td>
                 </tr>
               </table>
 
-              <p style="color: #6b7280; font-size: 14px; margin: 32px 0 0 0; line-height: 1.6;">
-                Questions? Contact us at <a href="mailto:${SUPPORT_EMAIL()}" style="color: #14b8a6; text-decoration: none;">${SUPPORT_EMAIL()}</a>
-              </p>
-
-              <p style="color: #111827; margin: 32px 0 0 0; font-size: 16px;">
+              <p style="color: #111827; margin: 32px 0 0 0;">
                 Best regards,<br>
                 <strong>The MicroJPEG Team</strong>
-              </p>
-            </td>
-          </tr>
-
-          <tr>
-            <td style="background-color: #f9fafb; padding: 24px 40px; text-align: center; border-top: 1px solid #e5e7eb;">
-              <p style="color: #6b7280; font-size: 12px; margin: 0;">
-                © ${new Date().getFullYear()} MicroJPEG. All rights reserved.
               </p>
             </td>
           </tr>
@@ -318,59 +282,8 @@ class EmailService {
     name: string,
     reason: string
   ): Promise<boolean> {
-    const subject = '⚠️ Payment Failed - MicroJPEG';
-
-    const html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="margin: 0; padding: 0; background-color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 0;">
-    <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
-          
-          <tr>
-            <td style="background-color: #dc2626; padding: 48px 40px; text-align: center;">
-              <h1 style="color: #ffffff; margin: 0; font-size: 32px; font-weight: bold;">Payment Failed</h1>
-            </td>
-          </tr>
-
-          <tr>
-            <td style="padding: 40px;">
-              <p style="font-size: 18px; color: #111827; margin: 0 0 20px 0;">Hi ${name || 'there'},</p>
-              
-              <p style="font-size: 16px; color: #374151; line-height: 1.6; margin: 0 0 24px 0;">
-                We encountered an issue processing your payment for MicroJPEG.
-              </p>
-
-              <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #fef2f2; border: 2px solid #fca5a5; border-radius: 8px; margin: 24px 0;">
-                <tr>
-                  <td style="padding: 20px;">
-                    <p style="color: #dc2626; margin: 0; font-weight: 600;">Reason:</p>
-                    <p style="color: #374151; margin: 8px 0 0 0;">${reason}</p>
-                  </td>
-                </tr>
-              </table>
-
-              <p style="color: #111827; margin: 32px 0 0 0; font-size: 16px;">
-                Best regards,<br>
-                <strong>The MicroJPEG Team</strong>
-              </p>
-            </td>
-          </tr>
-
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>
-    `;
-
+    const subject = '⚠️ Payment Issue - MicroJPEG';
+    const html = `<p>Hi ${name},</p><p>We encountered an issue: ${reason}</p>`;
     return this.sendEmail(email, subject, html);
   }
 }
