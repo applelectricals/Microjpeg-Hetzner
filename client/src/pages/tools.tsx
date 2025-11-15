@@ -17,6 +17,7 @@ export default function Tools() {
   <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(20,184,166,0.15),transparent_50%)]"></div>
   <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
   <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
+  <Header isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
       <SEOHead
         title="Professional Image Tools - Micro JPEG"
         description="Comprehensive suite of professional image tools for compression, conversion, batch processing, and optimization. Advanced features for photographers, designers, and businesses."

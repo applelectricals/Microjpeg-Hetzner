@@ -251,7 +251,7 @@ export default function Support() {
               <FileText className="w-4 h-4 mr-2" />
               API Docs
             </Button>
-            <Button variant="outline" className="border-teal-500/50 text-teal-300 hover:bg-teal-900/30" onClick={() => window.location.href = '/simple-pricing'}>
+            <Button variant="outline" className="border-teal-500/50 text-teal-300 hover:bg-teal-900/30" onClick={() => window.location.href = '/pricing'}>
               <FileText className="w-4 h-4 mr-2" />
               Pricing
             </Button>
