@@ -1830,19 +1830,19 @@ console.log('📏 Computed limits:', {
           {/* Labels */}
           <div className="flex justify-between text-xs">
             <div className="text-left max-w-[45%]">
-              <div className="font-semibold text-red-400">85% - Maximum Compression</div>
+              <div className="font-semibold text-red-400">85% - Max Compress</div>
               <div className="text-gray-400 mt-0.5">
                 • Smallest file size<br/>
-                • Faster processing<br/>
-                • Good quality
+                • Slower processing<br/>
+                • Max Compression
               </div>
             </div>
             <div className="text-right max-w-[45%]">
               <div className="font-semibold text-green-400">100% - Best Quality</div>
               <div className="text-gray-400 mt-0.5">
                 • Larger file size<br/>
-                • Longer processing<br/>
-                • Excellent quality
+                • Faster processing<br/>
+                • Less Compression
               </div>
             </div>
           </div>
