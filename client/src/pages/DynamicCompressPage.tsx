@@ -1809,6 +1809,7 @@ console.log('📏 Computed limits:', {
   onDragEnter={(e) => e.stopPropagation()}
   onDragLeave={(e) => e.stopPropagation()}
   onDrop={(e) => e.stopPropagation()}
+  style={{ cursor: 'default' }}
 >
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
