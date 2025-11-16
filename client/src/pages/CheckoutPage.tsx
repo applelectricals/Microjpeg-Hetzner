@@ -55,7 +55,7 @@ const PLANS = {
   },
 };
 
-const PAYPAL_CLIENT_ID = 'BAA6hsJNpHbcTBMWxqcfbZs22QgzO7knIaUhASkWYLR-u6AtMlYgibBGR9pInXEWV7kartihrWi0wTu9O8';
+const PAYPAL_CLIENT_ID = 'AeGpdRyOVDryc0svrBxmTc-fgzLVwfZi4Ew7_jTLDQUYtnEdnxa-DBtDrgitBhW14eNA_U79w_2Nemgy';
 
 export default function CheckoutPage() {
   const { isDark, setIsDark } = useDarkMode();
