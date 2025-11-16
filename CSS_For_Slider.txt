@@ -1,0 +1,46 @@
+/* Custom Slider Styling */
+.slider-thumb::-webkit-slider-thumb {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #14b8a6, #06b6d4);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.5);
+  transition: all 0.2s;
+}
+
+.slider-thumb::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.7);
+}
+
+.slider-thumb::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #14b8a6, #06b6d4);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(20, 184, 166, 0.5);
+  border: none;
+  transition: all 0.2s;
+}
+
+.slider-thumb::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.7);
+}
+
+.slider-thumb:focus {
+  outline: none;
+}
+
+.slider-thumb::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: 4px;
+}
+
+.slider-thumb::-moz-range-track {
+  height: 8px;
+  border-radius: 4px;
+}
