@@ -72,6 +72,7 @@
     "@vitejs/plugin-react": "^4.3.2",
     "archiver": "^7.0.1",
     "autoprefixer": "^10.4.20",
+    "axios": "^1.13.2",
     "bcryptjs": "^3.0.2",
     "bull": "^4.16.5",
     "class-variance-authority": "^0.7.1",

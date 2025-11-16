@@ -13,11 +13,12 @@ import { seedSuperuser } from "./superuser";
 import  paymentRouter  from './paymentRoutes';
 import paypalPaymentRoutes from './routes/paypalPaymentRoutes';
 import { handlePayPalWebhook } from './paypalWebhook';
-
+import instamojoRoutes from './routes/instamojoRoutes';
 
 const app = express();
 
 app.set('etag', false); // Disable ETags to prevent 304 responses
+app.use('/api', instamojoRoutes);
 app.use('/api', paypalPaymentRoutes);
 app.use('/api/payment', paymentRouter);
 app.use(express.json({ limit: '200mb' }));

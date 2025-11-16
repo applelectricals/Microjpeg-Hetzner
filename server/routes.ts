@@ -38,7 +38,8 @@ import paypalCheckout from './routes/paypalCheckout';
 import paypalApprovals from './routes/paypalApprovals';
 import PaymentSuccessPage from './pages/PaymentSuccess';
 import { promises as fs } from 'fs';
-import path from 'path';
+import path from 'path';import instamojoRoutes from './routes/instamojoRoutes';
+
 
 // ============================================================================
 // CONCURRENT SESSION TRACKING
@@ -626,7 +627,7 @@ async function ensureDirectories() {
 export async function registerRoutes(app: Express): Promise<Server> {
   await ensureDirectories();
   
-  
+  app.use('/api', instamojoRoutes);
 
   // Enable compression middleware for better performance
   app.use(compression({
