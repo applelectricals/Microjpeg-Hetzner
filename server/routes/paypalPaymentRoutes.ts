@@ -4,9 +4,9 @@
  */
 
 import { Router } from 'express';
-import { paypalService } from './paypalService';
-import { storage } from './storage';
-import { emailService } from './emailService';
+import { paypalService } from '../paypalService';        // Go up one level
+import { storage } from '../storage';                    // Go up one level
+import { emailService } from '../services/emailService'; // Go up then into services
 
 const router = Router();
 
