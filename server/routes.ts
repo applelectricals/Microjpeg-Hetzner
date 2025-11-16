@@ -21,7 +21,7 @@ import { db } from "./db";
 import { and, eq, gt, sql } from "drizzle-orm";
 import { compressToTargetSize, generateOptimizationInsights } from "./compressionUtils";
 import { calculateQualityMetrics } from "./qualityAssessment";
-import { paymentRouter } from "./paymentRoutes";
+import  paymentRouter  from "./paymentRoutes";
 import { r2Service, R2_FOLDERS } from './r2Service';
 import { pageIdentifierMiddleware } from './pageIdentifierMiddleware';
 import { DualUsageTracker } from './services/DualUsageTracker';
@@ -36,6 +36,7 @@ import paypalWebhook from './routes/paypalWebhook';
 import paypalSubscribe from './routes/paypalSubscribe';
 import paypalCheckout from './routes/paypalCheckout';
 import paypalApprovals from './routes/paypalApprovals';
+import PaymentSuccessPage from './pages/PaymentSuccess';
 import { promises as fs } from 'fs';
 import path from 'path';
 
@@ -54,26 +55,26 @@ const checkConcurrentSessions = async (req: any, res: any, next: any) => {
 
   const userId = req.user.id;
   const userIP = req.ip || req.connection.remoteAddress || 'unknown';
-
+  
   try {
     // Get user's seat count
     const user = await storage.getUser(userId);
     const allowedSeats = user.seats || 1;
-
+    
     // Get or create session set for this user
     if (!activeSessions.has(userId)) {
       activeSessions.set(userId, new Set());
     }
-
+    
     const userSessions = activeSessions.get(userId)!;
-
+    
     // Add current IP to active sessions
     userSessions.add(userIP);
-
+    
     // Check if exceeded seat limit
     if (userSessions.size > allowedSeats) {
       console.log(`⚠️ Concurrent session limit exceeded for user ${userId}: ${userSessions.size}/${allowedSeats} sessions`);
-
+      
       return res.status(429).json({
         success: false,
         error: `Concurrent session limit exceeded. Your plan allows ${allowedSeats} concurrent session${allowedSeats > 1 ? 's' : ''}.`,
@@ -81,14 +82,14 @@ const checkConcurrentSessions = async (req: any, res: any, next: any) => {
         activeSessions: userSessions.size
       });
     }
-
+    
     // Log session info
     console.log(`✅ Session allowed for user ${userId}: ${userSessions.size}/${allowedSeats} active sessions`);
-
+    
     // Store session info in request
     req.user.activeIP = userIP;
     req.user.allowedSeats = allowedSeats;
-
+    
     next();
   } catch (error) {
     console.error('Session check error:', error);
@@ -848,7 +849,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Queue management endpoints
-  app.post('/api/queue/add', async (req, res) => {
+  app.post('/api/queue/add', checkConcurrentSessions, async (req, res) => {
     try {
       const { jobType, jobData, options = {} } = req.body;
       const { addJobToQueue } = await import('./queueService');
@@ -1114,7 +1115,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // Upload-only endpoint - stores files without compression
-  app.post("/api/upload", upload.array('files', 20), async (req, res) => {
+  app.post("/api/upload", checkConcurrentSessions, upload.array('files', 20), async (req, res) => {
     try {
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
@@ -1205,7 +1206,7 @@ try {
   });
 
   // Process uploaded files endpoint - processes already uploaded files with settings
-  app.post("/api/process", async (req, res) => {
+  app.post("/api/process", checkConcurrentSessions, async (req, res) => {
     // Set timeout based on user plan
     const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
     const user = isUserAuthenticated ? req.user : null;
@@ -1291,7 +1292,7 @@ const results = [];
   });
 
 
-// Compression endpoint for both guest and authenticated users
+// Compression endpoint for both guest and authenticated users  
 app.post("/api/compress", checkConcurrentSessions, upload.array('files', 20), requireScopeFromAuth, async (req, res) => {
   console.log('=== COMPRESS REQUEST STARTED ===');
   console.log('Timestamp:', new Date().toISOString());
@@ -3750,7 +3751,7 @@ return res.json({
   });
 
   // Upload and compress images (now supports guest users) - SECURE VERSION
-  app.post("/api/compress-legacy", checkConcurrentSessions, requireScopeFromAuth, upload.array("images", 20), async (req, res) => {
+  app.post("/api/compress-legacy", requireScopeFromAuth, upload.array("images", 20), async (req, res) => {
     // Set timeout based on user plan - 30 seconds for anonymous, longer for paid users
     const user = req.user;
     const planLimits = user ? getUnifiedPlan('free') : getUnifiedPlan('anonymous');
@@ -4415,7 +4416,7 @@ return res.json({
   });
 
   // Compress with target file size - SECURE VERSION
-  app.post("/api/compress-target-size", checkConcurrentSessions, requireScopeFromAuth, upload.array("images", 10), async (req, res) => {
+  app.post("/api/compress-target-size", requireScopeFromAuth, upload.array("images", 10), async (req, res) => {
     try {
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
@@ -4808,45 +4809,6 @@ return res.json({
       console.error("Trial status check error:", error);
       res.status(500).json({ error: "Failed to check trial status" });
     }
-  });
-
-  // Session cleanup endpoint (called when user logs out or closes browser)
-  app.post('/api/session/cleanup', isAuthenticated, (req, res) => {
-    const userId = req.user?.id;
-    const userIP = req.ip || req.connection.remoteAddress || 'unknown';
-
-    if (userId && activeSessions.has(userId)) {
-      const userSessions = activeSessions.get(userId)!;
-      userSessions.delete(userIP);
-
-      console.log(`🧹 Session cleanup for user ${userId}, IP ${userIP}`);
-
-      // Remove map entry if no sessions left
-      if (userSessions.size === 0) {
-        activeSessions.delete(userId);
-      }
-    }
-
-    res.json({ success: true });
-  });
-
-  // Get active sessions info
-  app.get('/api/session/info', isAuthenticated, (req, res) => {
-    const userId = req.user?.id;
-    const user = req.user;
-
-    const activeSessionCount = activeSessions.has(userId)
-      ? activeSessions.get(userId)!.size
-      : 0;
-
-    res.json({
-      allowedSeats: user.seats || 1,
-      activeSessions: activeSessionCount,
-      currentIP: req.ip || req.connection.remoteAddress || 'unknown',
-      activeIPs: activeSessions.has(userId)
-        ? Array.from(activeSessions.get(userId)!)
-        : []
-    });
   });
 
   // Lead magnet email endpoint with abuse prevention and credit tracking
