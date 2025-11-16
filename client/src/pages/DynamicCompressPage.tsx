@@ -1877,7 +1877,7 @@ console.log('📏 Computed limits:', {
               ? "Great for web - maximum size reduction!"
               : compressionQuality >= 97
               ? "Perfect for professional work - minimal quality loss!"
-              : "Fits most use cases - great balance of size and quality!"
+              : "Fits most use cases - balance of size and quality!"
           }
         </div>
       </div>
