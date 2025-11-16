@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'wouter';
-import { Check, ArrowRight, Crown, Sparkles } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Check, Crown, ArrowRight, Mail, Calendar, CreditCard } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import Header from '@/components/header';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -28,226 +27,213 @@ function useDarkMode() {
   return { isDark, setIsDark };
 }
 
-export default function PaymentSuccess() {
+const PLAN_DETAILS = {
+  'starter-monthly': { name: 'Starter', period: 'Monthly', price: 9 },
+  'starter-yearly': { name: 'Starter', period: 'Yearly', price: 49 },
+  'pro-monthly': { name: 'Pro', period: 'Monthly', price: 19 },
+  'pro-yearly': { name: 'Pro', period: 'Yearly', price: 149 },
+  'business-monthly': { name: 'Business', period: 'Monthly', price: 49 },
+  'business-yearly': { name: 'Business', period: 'Yearly', price: 349 },
+};
+
+export default function PaymentSuccessPage() {
   const { isDark, setIsDark } = useDarkMode();
-  const { user, refreshUser } = useAuth();
+  const { user } = useAuth();
   const [, setLocation] = useLocation();
-  const [loading, setLoading] = useState(true);
-  const [subscriptionData, setSubscriptionData] = useState<any>(null);
+  const [countdown, setCountdown] = useState(10);
 
+  // Get URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const plan = urlParams.get('plan') || 'pro-monthly';
+  const subscriptionId = urlParams.get('subscription_id');
+  const orderId = urlParams.get('order_id');
+
+  const planDetails = PLAN_DETAILS[plan as keyof typeof PLAN_DETAILS] || PLAN_DETAILS['pro-monthly'];
+
+  // Auto-redirect countdown
   useEffect(() => {
-    // Parse URL parameters
-    const urlParams = new URLSearchParams(window.location.search);
-    const plan = urlParams.get('plan');
-    const subscriptionId = urlParams.get('subscription_id');
-    const orderId = urlParams.get('order_id');
-    const quantity = urlParams.get('quantity') || '1';
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      setLocation('/compress');
+    }
+  }, [countdown, setLocation]);
 
-    setSubscriptionData({
-      plan,
-      subscriptionId,
-      orderId,
-      quantity
-    });
-
-    // Refresh user data to get updated subscription
-    const refreshData = async () => {
-      try {
-        await refreshUser();
-      } catch (error) {
-        console.error('Error refreshing user:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    // Wait a moment before refreshing to ensure backend has completed
-    setTimeout(refreshData, 1000);
-  }, [refreshUser]);
-
-  const getPlanDisplayName = (plan: string | null) => {
-    if (!plan) return 'Premium';
-    const [tier] = plan.split('-');
-    return tier.charAt(0).toUpperCase() + tier.slice(1);
+  const handleStartNow = () => {
+    setLocation('/compress');
   };
-
-  const getPlanFeatures = (tier: string) => {
-    const features: Record<string, string[]> = {
-      'starter': [
-        'Unlimited compressions',
-        '75MB max file size',
-        'All formats including RAW',
-        'Unlimited conversions',
-        'Standard processing',
-        '1 concurrent upload'
-      ],
-      'pro': [
-        'Unlimited compressions',
-        '150MB max file size',
-        'All formats including RAW',
-        'Unlimited conversions',
-        'Priority processing (2x faster)',
-        '1 concurrent upload'
-      ],
-      'business': [
-        'Unlimited compressions',
-        '200MB max file size',
-        'All formats including RAW',
-        'Unlimited conversions',
-        'Priority processing (2x faster)',
-        '1 concurrent upload',
-        'Priority support'
-      ]
-    };
-
-    return features[tier.toLowerCase()] || features['starter'];
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900">
-        <Header isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
-        <div className="flex items-center justify-center min-h-[80vh]">
-          <div className="text-center">
-            <div className="inline-block w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p className="text-white text-lg">Confirming your subscription...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const planName = getPlanDisplayName(subscriptionData?.plan);
-  const planTier = subscriptionData?.plan?.split('-')[0] || 'starter';
-  const features = getPlanFeatures(planTier);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900">
-      <Header isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-teal-900 to-gray-900 relative overflow-hidden">
+      {/* Glow Effects */}
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(20,184,166,0.15),transparent_50%)]"></div>
+      <div className="absolute top-0 right-0 w-96 h-96 bg-teal-500/10 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
       
-      <div className="container mx-auto px-4 py-16 max-w-4xl">
-        {/* Success Animation */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-24 h-24 bg-green-500 rounded-full mb-6 animate-bounce">
-            <Check className="w-12 h-12 text-white" />
-          </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
-            🎉 Payment Successful!
-          </h1>
-          <p className="text-xl text-gray-300">
-            Welcome to MicroJPEG {planName}
-          </p>
-        </div>
+      <Header isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
 
-        {/* Subscription Details Card */}
-        <Card className="bg-gray-800/50 backdrop-blur-xl border-gray-700/50 p-8 mb-6">
-          <div className="flex items-start gap-4 mb-6">
-            <div className="p-3 bg-teal-500/20 rounded-lg">
-              <Crown className="w-8 h-8 text-teal-400" />
+      <div className="container mx-auto px-4 py-16 relative z-10">
+        <div className="max-w-3xl mx-auto">
+          
+          {/* Success Icon */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-gradient-to-r from-teal-500 to-green-500 mb-6 animate-bounce">
+              <Check className="w-12 h-12 text-white" />
             </div>
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold text-white mb-2">
-                Your {planName} Plan is Active
-              </h2>
-              <p className="text-gray-300">
-                {user?.email && `Confirmation email sent to ${user.email}`}
-              </p>
-            </div>
+            
+            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-teal-400 to-yellow-400 bg-clip-text text-transparent">
+              Payment Successful!
+            </h1>
+            
+            <p className="text-xl text-gray-300 mb-2">
+              Welcome to MicroJPEG {planDetails.name}! 🎉
+            </p>
+            
+            <p className="text-gray-400">
+              Your subscription is now active and ready to use
+            </p>
           </div>
 
-          {/* Subscription Info */}
-          <div className="grid md:grid-cols-2 gap-4 mb-6">
-            <div className="bg-gray-900/50 p-4 rounded-lg">
-              <p className="text-gray-400 text-sm mb-1">Plan</p>
-              <p className="text-white font-semibold">{planName}</p>
-            </div>
-            <div className="bg-gray-900/50 p-4 rounded-lg">
-              <p className="text-gray-400 text-sm mb-1">Status</p>
-              <p className="text-green-400 font-semibold flex items-center gap-2">
-                <span className="w-2 h-2 bg-green-400 rounded-full"></span>
-                Active
-              </p>
-            </div>
-            {subscriptionData?.subscriptionId && (
-              <div className="bg-gray-900/50 p-4 rounded-lg md:col-span-2">
-                <p className="text-gray-400 text-sm mb-1">Subscription ID</p>
-                <p className="text-gray-300 font-mono text-sm break-all">
-                  {subscriptionData.subscriptionId}
-                </p>
+          {/* Subscription Details Card */}
+          <Card className="mb-6 bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 shadow-lg shadow-teal-500/20">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <Crown className="w-6 h-6 text-yellow-400" />
+                <h2 className="text-2xl font-bold text-white">Subscription Details</h2>
               </div>
-            )}
-          </div>
 
-          {/* Features List */}
-          <div className="border-t border-gray-700 pt-6">
-            <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-teal-400" />
-              What's Included
-            </h3>
-            <div className="grid md:grid-cols-2 gap-3">
-              {features.map((feature, idx) => (
-                <div key={idx} className="flex items-start gap-3">
-                  <Check className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                  <span className="text-gray-300">{feature}</span>
+              <div className="grid md:grid-cols-2 gap-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-teal-500/20 flex items-center justify-center flex-shrink-0">
+                    <CreditCard className="w-5 h-5 text-teal-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Plan</p>
+                    <p className="text-lg font-bold text-white">{planDetails.name} - {planDetails.period}</p>
+                  </div>
                 </div>
-              ))}
-            </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                    <Check className="w-5 h-5 text-green-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Amount Paid</p>
+                    <p className="text-lg font-bold text-white">${planDetails.price}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                    <Calendar className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Status</p>
+                    <p className="text-lg font-bold text-green-400">● Active</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <p className="text-sm text-gray-400">Confirmation Sent</p>
+                    <p className="text-lg font-bold text-white">{user?.email || 'Your email'}</p>
+                  </div>
+                </div>
+              </div>
+
+              {(subscriptionId || orderId) && (
+                <div className="pt-4 border-t border-gray-700">
+                  <p className="text-xs text-gray-500">
+                    Transaction ID: {subscriptionId || orderId}
+                  </p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* What's Next Card */}
+          <Card className="mb-6 bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
+            <CardContent className="p-6">
+              <h3 className="text-xl font-bold text-white mb-4">🚀 What's Next?</h3>
+              
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-teal-400 font-bold">1</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Check Your Email</p>
+                    <p className="text-sm text-gray-400">
+                      We've sent a confirmation email with your subscription details and receipt
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-teal-400 font-bold">2</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Start Compressing Images</p>
+                    <p className="text-sm text-gray-400">
+                      Your {planDetails.name} plan is active with unlimited compressions and all premium features
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-teal-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+                    <span className="text-teal-400 font-bold">3</span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">Manage Your Subscription</p>
+                    <p className="text-sm text-gray-400">
+                      View usage, update billing, or cancel anytime from your dashboard
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* CTA Buttons */}
+          <div className="space-y-4">
+            <button
+              onClick={handleStartNow}
+              className="w-full py-4 px-6 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white font-bold rounded-lg transition-all transform hover:scale-105 shadow-lg shadow-teal-500/50 flex items-center justify-center gap-2"
+            >
+              <span>Start Compressing Now</span>
+              <ArrowRight className="w-5 h-5" />
+            </button>
+
+            <button
+              onClick={() => setLocation('/dashboard')}
+              className="w-full py-4 px-6 bg-gray-800/50 hover:bg-gray-800 border border-gray-700 text-white font-semibold rounded-lg transition-all"
+            >
+              Go to Dashboard
+            </button>
           </div>
-        </Card>
 
-        {/* Next Steps */}
-        <Card className="bg-gradient-to-r from-teal-500/20 to-blue-500/20 backdrop-blur-xl border-teal-500/50 p-6 mb-6">
-          <h3 className="text-xl font-semibold text-white mb-4">
-            🚀 What's Next?
-          </h3>
-          <ul className="space-y-3 text-gray-200">
-            <li className="flex items-start gap-3">
-              <ArrowRight className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5" />
-              <span>Start compressing images with your increased file size limits</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <ArrowRight className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5" />
-              <span>Explore format conversion features (JPEG, PNG, WebP, AVIF)</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <ArrowRight className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5" />
-              <span>Manage your subscription in your account dashboard</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <ArrowRight className="w-5 h-5 text-teal-400 flex-shrink-0 mt-0.5" />
-              <span>Check your email for detailed subscription information</span>
-            </li>
-          </ul>
-        </Card>
+          {/* Auto-redirect notice */}
+          <div className="mt-8 text-center">
+            <p className="text-sm text-gray-400">
+              Redirecting to compress page in <span className="font-bold text-teal-400">{countdown}</span> seconds...
+            </p>
+          </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button
-            size="lg"
-            onClick={() => setLocation('/compress')}
-            className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white"
-          >
-            Start Compressing Images
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            onClick={() => setLocation('/dashboard')}
-            className="border-gray-600 text-gray-300 hover:bg-gray-800"
-          >
-            View Dashboard
-          </Button>
-        </div>
-
-        {/* Support Note */}
-        <div className="text-center mt-8 text-gray-400 text-sm">
-          <p>
-            Need help? Contact us at{' '}
-            <a href="mailto:support@microjpeg.com" className="text-teal-400 hover:text-teal-300">
-              support@microjpeg.com
-            </a>
-          </p>
+          {/* Support */}
+          <div className="mt-12 text-center">
+            <p className="text-gray-500 text-sm">
+              Need help? Contact us at{' '}
+              <a href="mailto:support@microjpeg.com" className="text-teal-400 hover:text-teal-300">
+                support@microjpeg.com
+              </a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
