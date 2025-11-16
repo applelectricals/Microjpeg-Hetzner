@@ -1874,10 +1874,10 @@ console.log('📏 Computed limits:', {
         <div className="mt-3 p-2 bg-teal-900/20 border border-teal-500/30 rounded text-xs text-teal-200">
           <strong>💡 Tip:</strong> {
             compressionQuality <= 90
-              ? "Great for web thumbnails and previews - maximum size reduction!"
+              ? "Great for web - maximum size reduction!"
               : compressionQuality >= 97
               ? "Perfect for professional work - minimal quality loss!"
-              : "Recommended for most use cases - great balance of size and quality!"
+              : "Fits most use cases - great balance of size and quality!"
           }
         </div>
       </div>
