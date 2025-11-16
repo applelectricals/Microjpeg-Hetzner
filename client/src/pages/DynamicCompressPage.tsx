@@ -411,12 +411,12 @@ export default function MicroJPEGLanding() {
   const [currentlyProcessingFormat, setCurrentlyProcessingFormat] = useState<string | null>(null);
   const [conversionEnabled, setConversionEnabled] = useState(true);
   const [selectedFormats, setSelectedFormats] = useState<string[]>(['jpeg']);
+  const [compressionQuality, setCompressionQuality] = useState(95); // Default 95
   const [showModal, setShowModal] = useState(false);
   const [modalState, setModalState] = useState<'processing' | 'complete'>('processing');
   const [dragActive, setDragActive] = useState(false);
   const [showAllFormats, setShowAllFormats] = useState(false);
-  const [compressionQuality, setCompressionQuality] = useState(100);
-
+  
   const [showSignInDialog, setShowSignInDialog] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [claimingOffer, setClaimingOffer] = useState(false);
@@ -873,8 +873,8 @@ console.log('📏 Computed limits:', {
 
       // Prepare compression settings
       const settings = {
-        quality: 95, // Balanced quality for good compression ratios
-        outputFormat: conversionEnabled && selectedFormats.length > 0 ? selectedFormats : 'keep-original',
+  quality: compressionQuality, // User-controlled quality via slider
+  outputFormat: conversionEnabled && selectedFormats.length > 0 ? selectedFormats : 'keep-original',
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
         sessionId: sessionManager.getSessionId(), // ← ADD THIS LINE
@@ -1159,9 +1159,9 @@ console.log('📏 Computed limits:', {
       });
 
       // Prepare compression settings for specific format
-      const settings = {
-        quality: 95,
-        outputFormat: [format], // Only process this specific format
+     const settings = {
+  quality: compressionQuality, // User-controlled quality via slider
+  outputFormat: [format], // Only process this specific format
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
         sessionId: sessionManager.getSessionId(), // ← ADD THIS LINE
@@ -1798,87 +1798,6 @@ console.log('📏 Computed limits:', {
                               </Button>
                             );
                           })}
-        </div>
-      </div>
-
-      {/* Quality Slider Section */}
-      <div className="bg-gray-900/50 border border-teal-500/30 rounded-lg p-4 mb-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold text-white flex items-center gap-2">
-            <Settings className="w-4 h-4 text-teal-400" />
-            Compression Quality
-          </h3>
-          <div className="bg-teal-500/20 text-teal-300 border-teal-500/50 px-3 py-1 rounded border text-sm font-semibold">
-            {compressionQuality}%
-          </div>
-        </div>
-
-        {/* Slider */}
-        <div className="space-y-3">
-          <input
-            type="range"
-            min="85"
-            max="100"
-            value={compressionQuality}
-            onChange={(e) => setCompressionQuality(Number(e.target.value))}
-            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider-thumb"
-            style={{
-              background: `linear-gradient(to right, #ef4444 0%, #f59e0b ${((compressionQuality - 85) / 15) * 50}%, #10b981 ${((compressionQuality - 85) / 15) * 100}%, #10b981 100%)`
-            }}
-          />
-
-          {/* Labels */}
-          <div className="flex justify-between text-xs">
-            <div className="text-left max-w-[45%]">
-              <div className="font-semibold text-red-400">85% - Maximum Compression</div>
-              <div className="text-gray-400 mt-0.5">
-                • Smallest file size<br/>
-                • Faster processing<br/>
-                • Good quality
-              </div>
-            </div>
-            <div className="text-right max-w-[45%]">
-              <div className="font-semibold text-green-400">100% - Best Quality</div>
-              <div className="text-gray-400 mt-0.5">
-                • Larger file size<br/>
-                • Longer processing<br/>
-                • Excellent quality
-              </div>
-            </div>
-          </div>
-
-          {/* Visual Indicators */}
-          <div className="grid grid-cols-3 gap-2 pt-2 border-t border-gray-700">
-            <div className="text-center">
-              <div className={`text-xs font-semibold ${compressionQuality <= 90 ? 'text-red-400' : 'text-gray-500'}`}>
-                High Compression
-              </div>
-              <div className="text-xs text-gray-400">85-90%</div>
-            </div>
-            <div className="text-center">
-              <div className={`text-xs font-semibold ${compressionQuality > 90 && compressionQuality < 97 ? 'text-yellow-400' : 'text-gray-500'}`}>
-                Balanced
-              </div>
-              <div className="text-xs text-gray-400">91-96%</div>
-            </div>
-            <div className="text-center">
-              <div className={`text-xs font-semibold ${compressionQuality >= 97 ? 'text-green-400' : 'text-gray-500'}`}>
-                Best Quality
-              </div>
-              <div className="text-xs text-gray-400">97-100%</div>
-            </div>
-          </div>
-        </div>
-
-        {/* Info Box */}
-        <div className="mt-3 p-2 bg-teal-900/20 border border-teal-500/30 rounded text-xs text-teal-200">
-          <strong>💡 Tip:</strong> {
-            compressionQuality <= 90
-              ? "Great for web thumbnails and previews - maximum size reduction!"
-              : compressionQuality >= 97
-              ? "Perfect for professional work - minimal quality loss!"
-              : "Recommended for most use cases - great balance of size and quality!"
-          }
         </div>
       </div>
     </div>
