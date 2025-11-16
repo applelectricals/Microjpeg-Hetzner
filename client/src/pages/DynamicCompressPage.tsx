@@ -1802,8 +1802,14 @@ console.log('📏 Computed limits:', {
       </div>
 
       {/* Quality Slider Section */}
-      <div className="bg-gray-900/50 border border-teal-500/30 rounded-lg p-4 mb-4">
-        <div className="flex items-center justify-between mb-3">
+      <div 
+      className="bg-gray-900/50 border border-teal-500/30 rounded-lg p-4 mb-4"
+          onClick={(e) => e.stopPropagation()}
+          onDragOver={(e) => e.stopPropagation()}
+          onDragEnter={(e) => e.stopPropagation()}
+          onDragLeave={(e) => e.stopPropagation()}
+          onDrop={(e) => e.stopPropagation()}
+          className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold text-white flex items-center gap-2">
             <Settings className="w-4 h-4 text-teal-400" />
             Compression Quality
