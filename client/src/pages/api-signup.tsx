@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import ReCAPTCHA from 'react-google-recaptcha';
 import { SEOHead } from '@/components/SEOHead';
 import Header from '@/components/header';
 import { Card } from '@/components/ui/card';
@@ -8,8 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Check, Copy, Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
 import { Link } from 'wouter';
-
-const RECAPTCHA_SITE_KEY = process.env.REACT_APP_RECAPTCHA_SITE_KEY || '';
 
 export default function ApiSignup() {
   const [step, setStep] = useState<'signup' | 'success'>('signup');
@@ -22,7 +19,6 @@ export default function ApiSignup() {
   const [apiKey, setApiKey] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,11 +45,6 @@ export default function ApiSignup() {
       return;
     }
 
-    if (!captchaToken) {
-      setError('Please complete the CAPTCHA verification');
-      return;
-    }
-
     setLoading(true);
 
     try {
@@ -62,7 +53,7 @@ export default function ApiSignup() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, captchaToken }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
@@ -209,22 +200,6 @@ export default function ApiSignup() {
                         </Link>
                       </label>
                     </div>
-
-                    {/* CAPTCHA */}
-                    {RECAPTCHA_SITE_KEY && (
-                      <div className="flex justify-center">
-                        <ReCAPTCHA
-                          sitekey={RECAPTCHA_SITE_KEY}
-                          onChange={(token: string | null) => {
-                            setCaptchaToken(token);
-                            if (error === 'Please complete the CAPTCHA verification') {
-                              setError('');
-                            }
-                          }}
-                          theme="dark"
-                        />
-                      </div>
-                    )}
 
                     {/* Error Message */}
                     {error && (

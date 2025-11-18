@@ -3002,7 +3002,7 @@ return res.json({
         });
       }
 
-      const { email, password, captchaToken } = req.body;
+      const { email, password } = req.body;
 
       // Basic validation
       if (!email || !password) {
@@ -3010,43 +3010,6 @@ return res.json({
           success: false,
           message: "Email and password are required"
         });
-      }
-
-      // Verify CAPTCHA token if provided
-      if (captchaToken) {
-        try {
-          const recaptchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
-          if (!recaptchaSecretKey) {
-            console.warn('RECAPTCHA_SECRET_KEY not configured, skipping verification');
-          } else {
-            const captchaResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-              },
-              body: `secret=${recaptchaSecretKey}&response=${captchaToken}`,
-            });
-
-            const captchaData = await captchaResponse.json();
-
-            // Check if CAPTCHA verification was successful
-            if (!captchaData.success || captchaData.score < 0.5) {
-              return res.status(400).json({
-                success: false,
-                message: "CAPTCHA verification failed. Please try again."
-              });
-            }
-
-            console.log(`CAPTCHA verified for ${email}, score: ${captchaData.score}`);
-          }
-        } catch (captchaError: any) {
-          console.error('CAPTCHA verification error:', captchaError);
-          // Don't fail on CAPTCHA error, log and continue
-          console.warn('Allowing signup despite CAPTCHA verification error');
-        }
-      } else {
-        // If CAPTCHA is expected but not provided, reject (optional based on config)
-        console.warn('No CAPTCHA token provided for registration');
       }
 
       if (password.length < 8) {
