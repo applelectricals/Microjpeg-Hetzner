@@ -186,16 +186,19 @@ export default function ApiSignup() {
                       />
                     </div>
 
-                    {/* Terms Checkbox */}
+                    {/* Terms Checkbox - IMPROVED VERSION */}
                     <div className="flex items-start gap-3">
-                      <input
-                        type="checkbox"
-                        id="terms"
-                        checked={agreedToTerms}
-                        onChange={(e) => setAgreedToTerms(e.target.checked)}
-                        className="mt-1 w-4 h-4 rounded border-gray-700 bg-gray-900/50 text-teal-500 focus:ring-teal-500"
-                      />
-                      <label htmlFor="terms" className="text-sm text-gray-300">
+                      <div className="flex items-center h-5">
+                        <input
+                          type="checkbox"
+                          id="terms"
+                          checked={agreedToTerms}
+                          onChange={(e) => setAgreedToTerms(e.target.checked)}
+                          className="w-4 h-4 rounded border-2 border-gray-600 bg-gray-800 checked:bg-teal-500 checked:border-teal-500 focus:ring-2 focus:ring-teal-500 focus:ring-offset-0 cursor-pointer appearance-none relative after:content-[''] after:absolute after:hidden checked:after:block after:left-[5px] after:top-[2px] after:w-[6px] after:h-[10px] after:border-white after:border-r-2 after:border-b-2 after:rotate-45"
+                          required
+                        />
+                      </div>
+                      <label htmlFor="terms" className="text-sm text-gray-300 cursor-pointer select-none flex-1">
                         I agree to the{' '}
                         <Link href="/terms" className="text-teal-400 hover:underline">
                           Terms of Service
@@ -212,7 +215,7 @@ export default function ApiSignup() {
                       <div className="flex justify-center">
                         <ReCAPTCHA
                           sitekey={RECAPTCHA_SITE_KEY}
-                          onChange={(token) => {
+                          onChange={(token: string | null) => {
                             setCaptchaToken(token);
                             if (error === 'Please complete the CAPTCHA verification') {
                               setError('');
