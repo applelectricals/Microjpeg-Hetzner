@@ -39,6 +39,61 @@ import paypalApprovals from './routes/paypalApprovals';
 import PaymentSuccessPage from './pages/PaymentSuccess';
 import { promises as fs } from 'fs';
 import path from 'path';import instamojoRoutes from './routes/instamojoRoutes';
+import bcrypt from 'bcrypt';
+import crypto from 'crypto';
+
+// ============================================================================
+// RATE LIMITING FOR SIGNUP
+// ============================================================================
+
+interface SignupAttempt {
+  count: number;
+  resetTime: Date;
+}
+
+const signupAttempts = new Map<string, SignupAttempt>();
+
+// Clean up old entries every hour
+setInterval(() => {
+  const now = new Date();
+  for (const [key, value] of signupAttempts.entries()) {
+    if (value.resetTime <= now) {
+      signupAttempts.delete(key);
+    }
+  }
+}, 60 * 60 * 1000);
+
+/**
+ * IP-based rate limiting for signup (5 signups per 15 minutes per IP)
+ */
+function checkSignupRateLimit(ipAddress: string): { allowed: boolean; remainingAttempts: number; resetTime: Date } {
+  const now = new Date();
+  const MAX_ATTEMPTS = 5;
+  const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+
+  let attempt = signupAttempts.get(ipAddress);
+
+  // Create new entry if doesn't exist or window expired
+  if (!attempt || attempt.resetTime <= now) {
+    attempt = {
+      count: 0,
+      resetTime: new Date(now.getTime() + WINDOW_MS)
+    };
+  }
+
+  const allowed = attempt.count < MAX_ATTEMPTS;
+
+  if (allowed) {
+    attempt.count++;
+    signupAttempts.set(ipAddress, attempt);
+  }
+
+  return {
+    allowed,
+    remainingAttempts: Math.max(0, MAX_ATTEMPTS - attempt.count),
+    resetTime: attempt.resetTime
+  };
+}
 
 
 // ============================================================================
@@ -2928,6 +2983,178 @@ return res.json({
     } catch (error) {
       console.error("Error during signup:", error);
       res.status(500).json({ message: "Failed to create account" });
+    }
+  });
+
+  // API Signup route - Creates user and API key
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      // Rate limiting - check IP address
+      const ipAddress = (req.ip || req.socket.remoteAddress || 'unknown').toString();
+      const rateLimit = checkSignupRateLimit(ipAddress);
+
+      if (!rateLimit.allowed) {
+        return res.status(429).json({
+          success: false,
+          message: "Too many signup attempts. Please try again later.",
+          retryAfter: Math.ceil((rateLimit.resetTime.getTime() - Date.now()) / 1000),
+          resetTime: rateLimit.resetTime.toISOString()
+        });
+      }
+
+      const { email, password, captchaToken } = req.body;
+
+      // Basic validation
+      if (!email || !password) {
+        return res.status(400).json({
+          success: false,
+          message: "Email and password are required"
+        });
+      }
+
+      // Verify CAPTCHA token if provided
+      if (captchaToken) {
+        try {
+          const recaptchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
+          if (!recaptchaSecretKey) {
+            console.warn('RECAPTCHA_SECRET_KEY not configured, skipping verification');
+          } else {
+            const captchaResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: `secret=${recaptchaSecretKey}&response=${captchaToken}`,
+            });
+
+            const captchaData = await captchaResponse.json();
+
+            // Check if CAPTCHA verification was successful
+            if (!captchaData.success || captchaData.score < 0.5) {
+              return res.status(400).json({
+                success: false,
+                message: "CAPTCHA verification failed. Please try again."
+              });
+            }
+
+            console.log(`CAPTCHA verified for ${email}, score: ${captchaData.score}`);
+          }
+        } catch (captchaError: any) {
+          console.error('CAPTCHA verification error:', captchaError);
+          // Don't fail on CAPTCHA error, log and continue
+          console.warn('Allowing signup despite CAPTCHA verification error');
+        }
+      } else {
+        // If CAPTCHA is expected but not provided, reject (optional based on config)
+        console.warn('No CAPTCHA token provided for registration');
+      }
+
+      if (password.length < 8) {
+        return res.status(400).json({
+          success: false,
+          message: "Password must be at least 8 characters"
+        });
+      }
+
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({
+          success: false,
+          message: "User already exists with this email"
+        });
+      }
+
+      // Hash password
+      const hashedPassword = await hashPassword(password);
+
+      // Generate email verification token
+      const verificationToken = emailService.generateVerificationToken();
+      const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+      // Create user with unverified email
+      const user = await storage.createUser({
+        email,
+        password: hashedPassword,
+        firstName: null,
+        lastName: null,
+        profileImageUrl: null,
+        isEmailVerified: "false", // Requires email verification
+        emailVerificationToken: verificationToken,
+        emailVerificationExpires: verificationExpires,
+        lastLogin: null,
+      });
+
+      console.log(`Created API user: ${user.id} (${email})`);
+
+      // Create API key for the user
+      const { ApiKeyManager } = await import('./apiAuth');
+      const { getUserApiTier } = await import('./apiSubscriptions');
+
+      // Get free tier config
+      const tierConfig = getUserApiTier('free');
+
+      const apiKeyResult = await ApiKeyManager.createApiKey(
+        user.id,
+        'Default API Key',
+        tierConfig.permissions,
+        tierConfig.rateLimit,
+        undefined // No expiration
+      );
+
+      console.log(`Created API key for user: ${user.id}`);
+
+      // Send verification email
+      try {
+        await emailService.sendVerificationEmail(
+          email,
+          verificationToken,
+          email.split('@')[0]
+        );
+        console.log(`Verification email sent to ${email}`);
+      } catch (emailError) {
+        console.error("Failed to send verification email:", emailError);
+        // Continue anyway - don't fail the registration
+      }
+
+      // Also send welcome email with API key details
+      try {
+        await emailService.sendApiKeyWelcome(
+          email,
+          email.split('@')[0],
+          apiKeyResult.apiKey.keyPrefix,
+          tierConfig.monthlyFreeOps
+        );
+        console.log(`Welcome email sent to ${email}`);
+      } catch (emailError) {
+        console.error("Failed to send welcome email:", emailError);
+        // Continue anyway - don't fail the registration
+      }
+
+      // Set session
+      req.session.userId = user.id;
+
+      // Return success with API key (note: full functionality requires email verification)
+      res.status(201).json({
+        success: true,
+        message: "Account created! Please verify your email to activate your API key.",
+        apiKey: apiKeyResult.fullKey, // Show key, but it's limited until verified
+        keyPrefix: apiKeyResult.apiKey.keyPrefix,
+        userId: user.id,
+        email: email,
+        requiresVerification: true,
+        verificationSentTo: email,
+        monthlyLimit: tierConfig.monthlyFreeOps,
+        rateLimit: tierConfig.rateLimit
+      });
+
+    } catch (error: any) {
+      console.error("Error during API registration:", error);
+      res.status(500).json({
+        success: false,
+        message: "Failed to create API key",
+        error: error.message
+      });
     }
   });
 

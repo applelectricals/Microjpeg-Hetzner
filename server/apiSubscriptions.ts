@@ -83,14 +83,14 @@ export const API_TIERS: Record<string, ApiTierConfig> = {
     name: 'free',
     displayName: 'Free',
     pricePerOperation: 0,
-    monthlyFreeOps: 500, // 500 free operations per month
+    monthlyFreeOps: 200, // 200 free operations per month
     rateLimit: 100, // 100 requests per hour
     maxFileSize: {
       regular: 10, // 10MB for regular images
       raw: 50, // 50MB for RAW files
     },
     features: [
-      '500 free operations per month',
+      '200 free operations per month',
       'Pay-as-you-go after free tier',
       'All image formats',
       'Basic support',
@@ -105,14 +105,14 @@ export const API_TIERS: Record<string, ApiTierConfig> = {
     name: 'starter',
     displayName: 'Starter',
     pricePerOperation: 0.004, // Average starting price
-    monthlyFreeOps: 500, // Same 500 free ops
+    monthlyFreeOps: 200, // Same 200 free ops
     rateLimit: 500, // 500 requests per hour
     maxFileSize: {
       regular: 30, // 30MB
       raw: 75, // 75MB
     },
     features: [
-      '500 free operations per month',
+      '200 free operations per month',
       'Pay-as-you-go pricing',
       'Higher rate limits',
       'All formats including RAW',
@@ -128,14 +128,14 @@ export const API_TIERS: Record<string, ApiTierConfig> = {
     name: 'pro',
     displayName: 'Pro',
     pricePerOperation: 0.003, // Better pricing
-    monthlyFreeOps: 500,
+    monthlyFreeOps: 200,
     rateLimit: 2000, // 2000 requests per hour
     maxFileSize: {
       regular: 50, // 50MB
       raw: 100, // 100MB
     },
     features: [
-      '500 free operations per month',
+      '200 free operations per month',
       'Discounted pay-as-you-go',
       'Priority processing',
       'Webhook support',
@@ -152,14 +152,14 @@ export const API_TIERS: Record<string, ApiTierConfig> = {
     name: 'business',
     displayName: 'Business',
     pricePerOperation: 0.002, // Best pricing
-    monthlyFreeOps: 500,
+    monthlyFreeOps: 200,
     rateLimit: 10000, // 10000 requests per hour
     maxFileSize: {
       regular: 100, // 100MB
       raw: 200, // 200MB
     },
     features: [
-      '500 free operations per month',
+      '200 free operations per month',
       'Best pay-as-you-go rates',
       'Priority processing',
       'Webhook support',
