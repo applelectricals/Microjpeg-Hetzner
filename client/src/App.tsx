@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { lazy, Suspense, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import ApiSignup from '@/pages/api-signup';
 
 // Loading component for better UX during chunk loading
 const PageLoader = () => (
@@ -65,6 +66,7 @@ const CheckoutPage = lazy(() => import("@/pages/CheckoutPage"));
 const ApiDashboard = lazy(() => import("@/pages/api-dashboard"));
 const ApiDocs = lazy(() => import("@/pages/api-docs"));
 const ApiDemo = lazy(() => import("@/pages/api-demo"));
+const ApiSignup = lazy(() => import("@/pages/api-signup"));
 
 // Web tools pages (lower priority)
 const WebOverview = lazy(() => import("@/pages/web-overview"));
@@ -172,6 +174,7 @@ function Router() {
       <Switch>
         {/* Public routes with lazy loading */}
         <Route path="/api-docs" component={ApiDocs} />
+        <Route path="/api-signup" component={ApiSignup} />
         <Route path="/about" component={About} />
         <Route path="/contact" component={Contact} />
         <Route path="/support" component={Support} />
