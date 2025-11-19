@@ -1,41 +1,50 @@
-FROM node:20-bookworm
-
-# Set working directory
+# ---------- Stage 1: build ----------
+FROM node:18-alpine AS builder
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    imagemagick \
-    libraw-bin \
-    dcraw \
-    python3 \
-    make \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
+# Install dependencies for the client app (assumes app is in /client)
+# If your app is at project root (no client/), change COPY paths accordingly.
+COPY ./client/package.json ./client/package-lock.json* ./client/yarn.lock* ./
 
-# Copy package files
-COPY package*.json ./
+# If you use npm
+RUN if [ -f package-lock.json ]; then npm ci --silent; elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; else npm install --silent; fi
 
-# Install ALL dependencies (needed for db:push)
-ENV NPM_CONFIG_PRODUCTION=false
-RUN npm ci
+# Copy full client sources
+COPY ./client ./
 
-# Copy all application code
-COPY . .
+# Copy the sitemap generator script (assumes scripts/generate-sitemap.js at repo root)
+# If your script is in the project root relative to Docker build context, copy it in.
+COPY ./scripts ./scripts
 
-# Build the application
+# Generate sitemap at build-time (writes to public/sitemap.xml)
+# Make sure scripts/generate-sitemap.js writes to ./public/sitemap.xml
+RUN node ./scripts/generate-sitemap.js
+
+# Build the production static bundle
+# Works for CRA, Vite, or most React apps that expose "build" script in package.json
 RUN npm run build
 
-# Set environment
-ENV NODE_ENV=production
-ENV PORT=10000
+# ---------- Stage 2: production image (nginx) ----------
+FROM nginx:stable-alpine AS production
 
-# Expose port
-EXPOSE 10000
+# Copy nginx config (optional) - you can add a custom nginx.conf if needed
+# COPY ./docker/nginx.conf /etc/nginx/nginx.conf
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:10000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+# Remove default nginx html
+RUN rm -rf /usr/share/nginx/html/*
 
-# Run migrations then start (use shell form, not exec form)
-CMD sh -c "npm run db:push && npm start"
+# Copy built static files from builder
+COPY --from=builder /app/build /usr/share/nginx/html
+
+# Copy the generated sitemap and robots.txt if present (already in build or public)
+# If generate-sitemap placed sitemap in public/ then it is already included in /app/build
+# but we copy public just in case:
+COPY --from=builder /app/public/sitemap.xml /usr/share/nginx/html/sitemap.xml
+COPY --from=builder /app/public/robots.txt /usr/share/nginx/html/robots.txt
+
+# Expose port and run nginx
+EXPOSE 80
+STOPSIGNAL SIGTERM
+CMD ["nginx", "-g", "daemon off;"]
