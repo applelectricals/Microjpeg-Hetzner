@@ -1,5 +1,13 @@
 // vike.config.js
 export default {
-  ssr: false,      // <-- DISABLE SSR (your app is client-only)
-  prerender: true  // <-- ENABLE PRERENDERING (generates real HTML for all pages)
+  // Client-only app — no SSR server
+  ssr: false,
+
+  // Generate real HTML for all pages (homepage + all 65 convert pages)
+  prerender: {
+    // This is the key — generate pure static HTML files
+    partial: false,
+    noExtraDir: false,
+    parallel: true
+  }
 }
