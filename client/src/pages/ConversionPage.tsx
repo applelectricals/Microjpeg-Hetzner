@@ -875,7 +875,31 @@ export default function ConversionPage() {
           </div>
         </div>
       </section>
-
+{/* SEO-RICH STATIC CONTENT FOR ALL 65 PAGES — Google loves this */}
+<section className="py-16 bg-gray-50 dark:bg-gray-900">
+  <div className="max-w-7xl mx-auto px-4 text-center">
+    <h1 className="text-4xl md:text-5xl font-bold mb-6">
+      Convert {conversion.toUpperCase().replace('-', ' to ')} Online – Free & Instant
+    </h1>
+    <p className="text-xl text-gray-700 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed">
+      Free online {conversion.split('-')[0].toUpperCase()} to {conversion.split('-')[1].toUpperCase()} converter. No software download, no signup required. Supports Canon CR2/CR3, Nikon NEF, Sony ARW, Fujifilm RAF, Olympus ORF, Panasonic RW2, Pentax PEF, and 60+ other RAW formats. Preserve EXIF data, batch processing, and unlimited free conversions for files under 25MB.
+    </p>
+    <div className="grid md:grid-cols-3 gap-8 mt-12">
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+        <h3 className="text-2xl font-bold mb-4">Zero Quality Loss</h3>
+        <p className="text-gray-600 dark:text-gray-400">Advanced decoding preserves every detail from your RAW files.</p>
+      </div>
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+        <h3 className="text-2xl font-bold mb-4">Lightning Fast</h3>
+        <p className="text-gray-600 dark:text-gray-400">Convert any RAW file in under 3 seconds on desktop or mobile.</p>
+      </div>
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+        <h3 className="text-2xl font-bold mb-4">100% Private</h3>
+        <p className="text-gray-600 dark:text-gray-400">Files deleted automatically after 24 hours. No storage, no sharing.</p>
+      </div>
+    </div>
+  </div>
+</section>
       {/* Unified Conversion Output Modal */}
       <ConversionOutputModal
         modalState={modalState}
