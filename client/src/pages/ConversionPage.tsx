@@ -683,66 +683,6 @@ export default function ConversionPage() {
 
       <Header />
 
-    {/* ====== FINAL BULLETPROOF SEO BLOCK — USES urlParams (NEVER FAILS) ====== */}
-      <section className="py-16 bg-white dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          {(() => {
-            if (!urlParams || !fromFormat || !toFormat) {
-              return null;
-            }
-
-            const fromUpper = (fromFormat.id || 'image').toUpperCase();
-            const toUpper = (toFormat.id || 'file').toUpperCase();
-            const fromTitle = fromUpper === 'JPG' ? 'JPEG' : fromUpper;
-            const toTitle = toUpper === 'JPG' ? 'JPEG' : toUpper;
-
-            return (
-              <>
-                <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                  Convert <span className="text-brand-gold">{fromFormat.displayName}</span> to <span className="text-brand-teal">{toFormat.displayName}</span> Online – Free & Instant
-                </h1>
-                <p className="text-xl text-gray-700 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed mb-12">
-                  Convert <span className="text-brand-gold">{fromFormat.displayName}</span> to <span className="text-brand-teal">{toFormat.displayName}</span> Free Converter. Supports Canon CR2/CR3, Nikon NEF, Sony ARW, Fujifilm RAF, Olympus ORF, Panasonic RW2 and 60+ RAW formats. No signup required, preserve EXIF data, batch processing, unlimited free conversions for files under 15MB.
-                </p>
-              </>
-            );
-          })()}
-
-          <div className="grid md:grid-cols-3 gap-8 mt-12">
-            <div className="bg-gray-50 dark:bg-gray-800 p-8 rounded-xl shadow-lg">
-              <h3 className="text-2xl font-bold mb-4">Zero Quality Loss</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Advanced decoding preserves every detail, color profile, and metadata — better than Adobe DNG Converter.
-              </p>
-            </div>
-            <div className="bg-gray-50 dark:bg-gray-800 p-8 rounded-xl shadow-lg">
-              <h3 className="text-2xl font-bold mb-4">Lightning Fast</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Convert any RAW or regular image in under 3 seconds using multi-core processing.
-              </p>
-            </div>
-            <div className="bg-gray-50 dark:bg-gray-800 p-8 rounded-xl shadow-lg">
-              <h3 className="text-2xl font-bold mb-4">100% Private & Secure</h3>
-              <p className="text-gray-600 dark:text-gray-400">
-                Files automatically deleted within 24 hours. GDPR compliant, no logs.
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-16 prose prose-lg dark:prose-invert max-w-5xl mx-auto text-left">
-            <h2>Supported Cameras & Formats</h2>
-            <p>
-              • Canon: EOS R5, R6, R3, 5D Mark IV, 90D (CR2/CR3)<br/>
-              • Nikon: Z9, Z8, D850, D780 (NEF)<br/>
-              • Sony: A1, A7 IV, A7S III, A6700 (ARW)<br/>
-              • Fujifilm: X-T5, X-H2, X100VI (RAF)<br/>
-              • Olympus: OM-1, E-M1X (ORF)<br/>
-              • Panasonic: S5 II, GH6 (RW2)
-            </p>
-          </div>
-        </div>
-      </section>
-      {/* ====== END SEO BLOCK ====== */}
 
       {/* Dark Mode Toggle - Floating Button */}
       <div className="fixed top-20 right-4 z-50">
@@ -997,6 +937,67 @@ export default function ConversionPage() {
           </Card>
         </div>
       )}
+
+        {/* ====== FINAL BULLETPROOF SEO BLOCK — USES urlParams (NEVER FAILS) ====== */}
+      <section className="py-16 bg-white dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          {(() => {
+            if (!urlParams || !fromFormat || !toFormat) {
+              return null;
+            }
+
+            const fromUpper = (fromFormat.id || 'image').toUpperCase();
+            const toUpper = (toFormat.id || 'file').toUpperCase();
+            const fromTitle = fromUpper === 'JPG' ? 'JPEG' : fromUpper;
+            const toTitle = toUpper === 'JPG' ? 'JPEG' : toUpper;
+
+            return (
+              <>
+                <h1 className="text-4xl md:text-5xl font-bold mb-6">
+                  Convert <span className="text-brand-gold">{fromFormat.displayName}</span> to <span className="text-brand-teal">{toFormat.displayName}</span> Online – Free & Instant
+                </h1>
+                <p className="text-xl text-gray-700 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed mb-12">
+                  Convert <span className="text-brand-gold">{fromFormat.displayName}</span> to <span className="text-brand-teal">{toFormat.displayName}</span> Free Converter. Supports Canon CR2/CR3, Nikon NEF, Sony ARW, Fujifilm RAF, Olympus ORF, Panasonic RW2 and 60+ RAW formats. No signup required, preserve EXIF data, batch processing, unlimited free conversions for files under 15MB.
+                </p>
+              </>
+            );
+          })()}
+
+          <div className="grid md:grid-cols-3 gap-8 mt-12">
+            <div className="bg-gray-50 dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+              <h3 className="text-2xl font-bold mb-4">Zero Quality Loss</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Advanced decoding preserves every detail, color profile, and metadata — better than Adobe DNG Converter.
+              </p>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+              <h3 className="text-2xl font-bold mb-4">Lightning Fast</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Convert any RAW or regular image in under 3 seconds using multi-core processing.
+              </p>
+            </div>
+            <div className="bg-gray-50 dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+              <h3 className="text-2xl font-bold mb-4">100% Private & Secure</h3>
+              <p className="text-gray-600 dark:text-gray-400">
+                Files automatically deleted within 24 hours. GDPR compliant, no logs.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-16 prose prose-lg dark:prose-invert max-w-5xl mx-auto text-left">
+            <h2>Supported Cameras & Formats</h2>
+            <p>
+              • Canon: EOS R5, R6, R3, 5D Mark IV, 90D (CR2/CR3)<br/>
+              • Nikon: Z9, Z8, D850, D780 (NEF)<br/>
+              • Sony: A1, A7 IV, A7S III, A6700 (ARW)<br/>
+              • Fujifilm: X-T5, X-H2, X100VI (RAF)<br/>
+              • Olympus: OM-1, E-M1X (ORF)<br/>
+              • Panasonic: S5 II, GH6 (RW2)
+            </p>
+          </div>
+        </div>
+      </section>
+      {/* ====== END SEO BLOCK ====== */}
 
 
       {/* Footer */}
