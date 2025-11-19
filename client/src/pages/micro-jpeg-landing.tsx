@@ -2070,6 +2070,8 @@ export default function MicroJPEGLanding() {
         </div>
       )}
       </section>
+
+      
        {/* Quick Actions Section - Expandable */}
 <section className="py-10 bg-gray-900/30 border-y border-gray-800/50">
   <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -2083,163 +2085,7 @@ export default function MicroJPEGLanding() {
     </div>
 
 
-    {/* ==================== NEW: SEO-RICH VISIBLE CONTENT SECTIONS ==================== */}
     
-      
-      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-            MicroJPEG — The Smartest Online Image Compressor & RAW Converter
-          </h1>
-          <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
-            Reduce JPEG, PNG, WebP, AVIF, TIFF, GIF, SVG, and over 65 RAW camera formats (CR2, NEF, ARW, DNG, ORF, RAF, RW2, etc.) by up to 90% 
-            while keeping perfect visual quality. No software installation, no signup required for 500 free operations per month.
-          </p>
-        </div>
-      </section>
-
-      {/* Features Grid */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-            Why Thousands Choose MicroJPEG Every Month
-          </h2>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { icon: Zap, title: "Lightning Fast", desc: "Process images in under 3 seconds using latest AVIF/WebP encoders and multi-core RAW decoding." },
-              { icon: Shield, title: "100% Private", desc: "All files automatically deleted within 24 hours. GDPR compliant, no logs, no third-party sharing." },
-              { icon: Sparkles, title: "Lossless & Lossy", desc: "Choose perfect quality or maximum compression — up to 90% smaller with no visible difference." },
-              { icon: Globe, title: "65+ RAW Formats", desc: "Full support for Canon CR2/CR3, Nikon NEF, Sony ARW, Fujifilm RAF, Olympus ORF, Panasonic RW2 and more." },
-              { icon: Gauge, title: "Batch Processing", desc: "Premium users compress up to 20 images at once and download as ZIP in one click." },
-              { icon: FileImage, title: "Format Conversion", desc: "Convert RAW → JPEG/AVIF/WebP, PNG → AVIF, JPEG → WebP and 80+ other combinations." },
-              { icon: HeadphonesIcon, title: "Developer API", desc: "500 free API calls/month. Simple REST API with SDKs coming soon." },
-              { icon: Star, title: "WordPress Plugin", desc: "Automatic compression on upload + bulk optimize your entire media library." },
-            ].map((feature, i) => (
-              <div key={i} className="text-center group">
-                <div className="w-16 h-16 mx-auto mb-4 bg-teal-100 rounded-2xl flex items-center justify-center group-hover:bg-teal-600 transition-colors">
-                  <feature.icon className="w-9 h-9 text-teal-600 group-hover:text-white transition-colors" />
-                </div>
-                <h3 className="font-bold text-gray-900 mb-2">{feature.title}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{feature.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-            How MicroJPEG Works — 3 Simple Steps
-          </h2>
-          <div className="grid md:grid-cols-3 gap-10">
-            {[
-              { step: "1", title: "Upload Your Images", desc: "Drag & drop or select files. We support JPEG, PNG, WebP, AVIF, TIFF, SVG, GIF and all major RAW formats from Canon, Nikon, Sony, Fujifilm, Olympus, Panasonic and more." },
-              { step: "2", title: "Choose Settings", desc: "Keep original format or convert to modern WebP/AVIF. Select quality level from lossless to maximum compression. Premium users get advanced controls." },
-              { step: "3", title: "Download Optimized Files", desc: "Get instantly compressed images with full EXIF preserved. Download individually or as ZIP. Free users get 500 operations/month." },
-            ].map((s, i) => (
-              <div key={i} className="text-center">
-                <div className="text-6xl font-bold text-teal-600 mb-4">{s.step}</div>
-                <h3 className="text-2xl font-bold text-gray-900 mb-3">{s.title}</h3>
-                <p className="text-gray-700 leading-relaxed">{s.desc}</p>
-                {i < 2 && <ArrowDown className="w-10 h-10 text-teal-500 mx-auto mt-8 hidden md:block" />}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Supported Formats Table */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-            Supported Input & Output Formats
-          </h2>
-          <div className="grid md:grid-cols-2 gap-12">
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Input Formats (70+)</h3>
-              <div className="grid grid-cols-3 gap-4 text-gray-700">
-                {["JPEG", "PNG", "WebP", "AVIF", "TIFF", "SVG", "GIF", "BMP", "ICO", 
-                  "Canon CR2/CR3", "Nikon NEF", "Sony ARW", "Adobe DNG", "Fujifilm RAF", 
-                  "Olympus ORF", "Panasonic RW2", "Pentax PEF", "Samsung SRW", "Leica DNG", 
-                  "And 50+ more RAW..."].map(f => (
-                  <div key={f} className="bg-gray-100 px-4 py-3 rounded-lg text-center text-sm font-medium">
-                    {f}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Output Formats</h3>
-              <div className="grid grid-cols-3 gap-4 text-gray-700">
-                {["JPEG", "PNG", "WebP", "AVIF", "TIFF (lossless)"].map(f => (
-                  <div key={f} className="bg-teal-100 px-4 py-3 rounded-lg text-center text-sm font-medium">
-                    {f}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose MicroJPEG */}
-      <section className="py-20 bg-gradient-to-r from-teal-600 to-teal-800 text-white">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-8">
-            Why Photographers & Developers Love MicroJPEG
-          </h2>
-          <div className="grid md:grid-cols-3 gap-10 text-lg">
-            <div className="bg-white/10 backdrop-blur rounded-2xl p-8">
-              <div className="text-5xl mb-4">90%</div>
-              <p className="font-bold">Average Size Reduction</p>
-              <p className="text-teal-100 mt-2">Without visible quality loss</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur rounded-2xl p-8">
-              <div className="text-5xl mb-4">65+</div>
-              <p className="font-bold">RAW Formats Supported</p>
-              <p className="text-teal-100 mt-2">Including latest Canon CR3 & Sony ARW</p>
-            </div>
-            <div className="bg-white/10 backdrop-blur rounded-2xl p-8">
-              <div className="text-5xl mb-4">24h</div>
-              <p className="font-bold">Auto-Delete Policy</p>
-              <p className="text-teal-100 mt-2">Your privacy is guaranteed</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Testimonials Placeholder (will become real soon) */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
-            What Our Users Say
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              { name: "Alex M.", role: "Wedding Photographer", text: "Finally a tool that handles Canon CR3 files perfectly and converts to AVIF in seconds. Saved me hours every week." },
-              { name: "Sarah K.", role: "Web Developer", text: "The API integration was dead simple. Reduced my site’s image weight from 8MB to 1.2MB. Core Web Vitals are green!" },
-              { name: "Mike T.", role: "E-commerce Owner", text: "Batch processing + ZIP download is a game changer. Went from 5 minutes per product to 30 seconds." },
-            ].map((t, i) => (
-              <div key={i} className="bg-white p-8 rounded-2xl shadow-lg">
-                <div className="flex mb-4">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-yellow-500 fill-current" />
-                  ))}
-                </div>
-                <p className="text-gray-700 italic mb-6">"{t.text}"</p>
-                <div>
-                  <div className="font-bold text-gray-900">{t.name}</div>
-                  <div className="text-sm text-gray-600">{t.role}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-{/* ==================== END OF NEW SEO CONTENT ==================== */}
 
 
     {/* Popular Conversions (Always Visible) */}
@@ -2495,6 +2341,164 @@ export default function MicroJPEGLanding() {
     </p>
   </div>
 </section>
+
+{/* ==================== NEW: SEO-RICH VISIBLE CONTENT SECTIONS ==================== */}
+    
+      
+      <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+            MicroJPEG — The Smartest Online Image Compressor & RAW Converter
+          </h1>
+          <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
+            Reduce JPEG, PNG, WebP, AVIF, TIFF, GIF, SVG, and over 65 RAW camera formats (CR2, NEF, ARW, DNG, ORF, RAF, RW2, etc.) by up to 90% 
+            while keeping perfect visual quality. No software installation, no signup required for 500 free operations per month.
+          </p>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
+            Why Thousands Choose MicroJPEG Every Month
+          </h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              { icon: Zap, title: "Lightning Fast", desc: "Process images in under 3 seconds using latest AVIF/WebP encoders and multi-core RAW decoding." },
+              { icon: Shield, title: "100% Private", desc: "All files automatically deleted within 24 hours. GDPR compliant, no logs, no third-party sharing." },
+              { icon: Sparkles, title: "Lossless & Lossy", desc: "Choose perfect quality or maximum compression — up to 90% smaller with no visible difference." },
+              { icon: Globe, title: "65+ RAW Formats", desc: "Full support for Canon CR2/CR3, Nikon NEF, Sony ARW, Fujifilm RAF, Olympus ORF, Panasonic RW2 and more." },
+              { icon: Gauge, title: "Batch Processing", desc: "Premium users compress up to 20 images at once and download as ZIP in one click." },
+              { icon: FileImage, title: "Format Conversion", desc: "Convert RAW → JPEG/AVIF/WebP, PNG → AVIF, JPEG → WebP and 80+ other combinations." },
+              { icon: HeadphonesIcon, title: "Developer API", desc: "500 free API calls/month. Simple REST API with SDKs coming soon." },
+              { icon: Star, title: "WordPress Plugin", desc: "Automatic compression on upload + bulk optimize your entire media library." },
+            ].map((feature, i) => (
+              <div key={i} className="text-center group">
+                <div className="w-16 h-16 mx-auto mb-4 bg-teal-100 rounded-2xl flex items-center justify-center group-hover:bg-teal-600 transition-colors">
+                  <feature.icon className="w-9 h-9 text-teal-600 group-hover:text-white transition-colors" />
+                </div>
+                <h3 className="font-bold text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
+            How MicroJPEG Works — 3 Simple Steps
+          </h2>
+          <div className="grid md:grid-cols-3 gap-10">
+            {[
+              { step: "1", title: "Upload Your Images", desc: "Drag & drop or select files. We support JPEG, PNG, WebP, AVIF, TIFF, SVG, GIF and all major RAW formats from Canon, Nikon, Sony, Fujifilm, Olympus, Panasonic and more." },
+              { step: "2", title: "Choose Settings", desc: "Keep original format or convert to modern WebP/AVIF. Select quality level from lossless to maximum compression. Premium users get advanced controls." },
+              { step: "3", title: "Download Optimized Files", desc: "Get instantly compressed images with full EXIF preserved. Download individually or as ZIP. Free users get 500 operations/month." },
+            ].map((s, i) => (
+              <div key={i} className="text-center">
+                <div className="text-6xl font-bold text-teal-600 mb-4">{s.step}</div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-3">{s.title}</h3>
+                <p className="text-gray-700 leading-relaxed">{s.desc}</p>
+                {i < 2 && <ArrowDown className="w-10 h-10 text-teal-500 mx-auto mt-8 hidden md:block" />}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Supported Formats Table */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
+            Supported Input & Output Formats
+          </h2>
+          <div className="grid md:grid-cols-2 gap-12">
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Input Formats (70+)</h3>
+              <div className="grid grid-cols-3 gap-4 text-gray-700">
+                {["JPEG", "PNG", "WebP", "AVIF", "TIFF", "SVG", "GIF", "BMP", "ICO", 
+                  "Canon CR2/CR3", "Nikon NEF", "Sony ARW", "Adobe DNG", "Fujifilm RAF", 
+                  "Olympus ORF", "Panasonic RW2", "Pentax PEF", "Samsung SRW", "Leica DNG", 
+                  "And 50+ more RAW..."].map(f => (
+                  <div key={f} className="bg-gray-100 px-4 py-3 rounded-lg text-center text-sm font-medium">
+                    {f}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-6">Output Formats</h3>
+              <div className="grid grid-cols-3 gap-4 text-gray-700">
+                {["JPEG", "PNG", "WebP", "AVIF", "TIFF (lossless)"].map(f => (
+                  <div key={f} className="bg-teal-100 px-4 py-3 rounded-lg text-center text-sm font-medium">
+                    {f}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why Choose MicroJPEG */}
+      <section className="py-20 bg-gradient-to-r from-teal-600 to-teal-800 text-white">
+        <div className="max-w-6xl mx-auto px-4 text-center">
+          <h2 className="text-4xl md:text-5xl font-bold mb-8">
+            Why Photographers & Developers Love MicroJPEG
+          </h2>
+          <div className="grid md:grid-cols-3 gap-10 text-lg">
+            <div className="bg-white/10 backdrop-blur rounded-2xl p-8">
+              <div className="text-5xl mb-4">90%</div>
+              <p className="font-bold">Average Size Reduction</p>
+              <p className="text-teal-100 mt-2">Without visible quality loss</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-2xl p-8">
+              <div className="text-5xl mb-4">65+</div>
+              <p className="font-bold">RAW Formats Supported</p>
+              <p className="text-teal-100 mt-2">Including latest Canon CR3 & Sony ARW</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur rounded-2xl p-8">
+              <div className="text-5xl mb-4">24h</div>
+              <p className="font-bold">Auto-Delete Policy</p>
+              <p className="text-teal-100 mt-2">Your privacy is guaranteed</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Placeholder (will become real soon) */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
+            What Our Users Say
+          </h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { name: "Alex M.", role: "Wedding Photographer", text: "Finally a tool that handles Canon CR3 files perfectly and converts to AVIF in seconds. Saved me hours every week." },
+              { name: "Sarah K.", role: "Web Developer", text: "The API integration was dead simple. Reduced my site’s image weight from 8MB to 1.2MB. Core Web Vitals are green!" },
+              { name: "Mike T.", role: "E-commerce Owner", text: "Batch processing + ZIP download is a game changer. Went from 5 minutes per product to 30 seconds." },
+            ].map((t, i) => (
+              <div key={i} className="bg-white p-8 rounded-2xl shadow-lg">
+                <div className="flex mb-4">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 text-yellow-500 fill-current" />
+                  ))}
+                </div>
+                <p className="text-gray-700 italic mb-6">"{t.text}"</p>
+                <div>
+                  <div className="font-bold text-gray-900">{t.name}</div>
+                  <div className="text-sm text-gray-600">{t.role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+{/* ==================== END OF NEW SEO CONTENT ==================== */}
 
       {/* Test Premium for $1 Section */}
       <section className="py-16 bg-gradient-to-r from-gray-800 via-gray-900 to-gray-800 relative overflow-hidden">
