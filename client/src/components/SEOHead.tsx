@@ -25,6 +25,19 @@ export function SEOHead({
       console.log('🔧 SEO Head (Authoritative): Setting title to:', title);
       (window as any).__seo_authoritative = true;
     }
+
+    // ========== ADD THESE 4 LINES FOR PRERENDER.IO TOKEN ==========
+  // This meta tag MUST be added synchronously so bots see it in raw HTML
+  const prerenderToken = 'wqG6yzxek2NWzipdNtwb'; // ← replace this!
+  if (prerenderToken && prerenderToken !== 'wqG6yzxek2NWzipdNtwb') {
+    let prerenderMeta = document.querySelector('meta[name="prerender-token"]');
+    if (!prerenderMeta) {
+      prerenderMeta = document.createElement('meta');
+      prerenderMeta.setAttribute('name', 'prerender-token');
+      prerenderMeta.setAttribute('content', prerenderToken);
+      document.head.appendChild(prerenderMeta);
+    }
+  }
     
     // Set document title
     document.title = title;
