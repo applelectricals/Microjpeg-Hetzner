@@ -682,16 +682,17 @@ export default function ConversionPage() {
       {/* Header */}
 
       <Header />
-      {/* ====== FINAL BULLETPROOF SEO BLOCK — ALWAYS SHOWS CORRECT FORMAT ====== */}
+
+    {/* ====== FINAL BULLETPROOF SEO BLOCK — USES urlParams (NEVER FAILS) ====== */}
       <section className="py-16 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 text-center">
           {(() => {
             if (!urlParams || !fromFormat || !toFormat) {
-              return null; // Safety — shouldn't happen
+              return null;
             }
 
-            const fromUpper = fromFormat.id.toUpperCase();
-            const toUpper = toFormat.id.toUpperCase();
+            const fromUpper = (fromFormat.id || 'image').toUpperCase();
+            const toUpper = (toFormat.id || 'file').toUpperCase();
             const fromTitle = fromUpper === 'JPG' ? 'JPEG' : fromUpper;
             const toTitle = toUpper === 'JPG' ? 'JPEG' : toUpper;
 
