@@ -699,10 +699,10 @@ export default function ConversionPage() {
             return (
               <>
                 <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                  Convert {fromTitle} to {toTitle} Online – Free & Instant
+                  Convert <span className="text-brand-gold">{fromFormat.displayName}</span> to <span className="text-brand-teal">{toFormat.displayName}</span> Online – Free & Instant
                 </h1>
                 <p className="text-xl text-gray-700 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed mb-12">
-                  Free online {fromTitle} to {toTitle} converter. Supports Canon CR2/CR3, Nikon NEF, Sony ARW, Fujifilm RAF, Olympus ORF, Panasonic RW2 and 60+ RAW formats. No signup required, preserve EXIF data, batch processing, unlimited free conversions for files under 25MB.
+                  Convert <span className="text-brand-gold">{fromFormat.displayName}</span> to <span className="text-brand-teal">{toFormat.displayName}</span> Free Converter. Supports Canon CR2/CR3, Nikon NEF, Sony ARW, Fujifilm RAF, Olympus ORF, Panasonic RW2 and 60+ RAW formats. No signup required, preserve EXIF data, batch processing, unlimited free conversions for files under 15MB.
                 </p>
               </>
             );
