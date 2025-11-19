@@ -682,23 +682,28 @@ export default function ConversionPage() {
       {/* Header */}
 
       <Header />
-{/* ====== 600-WORD SEO BLOCK — SHOWS ON EVERY PAGE ====== */}
+      {/* ====== FINAL SEO BLOCK — PERFECT DYNAMIC TEXT ====== */}
       <section className="py-16 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 text-center">
           {(() => {
-            const path = location[0];
-            const slug = path.split('/').pop() || '';
-            const parts = slug.split('-');
-            const from = parts[0]?.toUpperCase() || 'IMAGE';
-            const to = parts[1]?.toUpperCase() || 'FILE';
+            // Safely extract from/to from URL like /convert/cr2-to-jpg
+            const slug = location[0].split('/').pop() || '';
+            const parts = slug.split('-to-');
+            const fromRaw = parts[0] || 'image';
+            const toRaw = parts[1] || 'file';
+
+            const fromUpper = fromRaw.toUpperCase();
+            const toUpper = toRaw.toUpperCase();
+            const fromTitle = fromUpper === 'JPG' ? 'JPEG' : fromUpper; // nicer display
+            const toTitle = toUpper === 'JPG' ? 'JPEG' : toUpper;
 
             return (
               <>
                 <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                  Convert {from} to {to} Online – Free & Instant
+                  Convert {fromTitle} to {toTitle} Online – Free & Instant
                 </h1>
                 <p className="text-xl text-gray-700 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed mb-12">
-                  Free online {from} to {to} converter. Supports Canon CR2/CR3, Nikon NEF, Sony ARW, Fujifilm RAF, Olympus ORF, Panasonic RW2 and 60+ RAW formats. No signup required, preserve EXIF data, batch processing, unlimited free conversions for files under 25MB.
+                  Free online {fromTitle} to {toTitle} converter. Supports Canon CR2/CR3, Nikon NEF, Sony ARW, Fujifilm RAF, Olympus ORF, Panasonic RW2 and 60+ RAW formats. No signup required, preserve EXIF data, batch processing, unlimited free conversions for files under 25MB.
                 </p>
               </>
             );
@@ -708,7 +713,7 @@ export default function ConversionPage() {
             <div className="bg-gray-50 dark:bg-gray-800 p-8 rounded-xl shadow-lg">
               <h3 className="text-2xl font-bold mb-4">Zero Quality Loss</h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Advanced RAW decoding preserves every detail, color profile, and metadata — better than Adobe DNG Converter.
+                Advanced decoding preserves every detail, color profile, and metadata — better than Adobe DNG Converter.
               </p>
             </div>
             <div className="bg-gray-50 dark:bg-gray-800 p-8 rounded-xl shadow-lg">
@@ -725,7 +730,7 @@ export default function ConversionPage() {
             </div>
           </div>
 
-          <div className="mt-16 prose prose-lg dark:prose-in Nik mx-auto text-left">
+          <div className="mt-16 prose prose-lg dark:prose-invert max-w-5xl mx-auto text-left">
             <h2>Supported Cameras & Formats</h2>
             <p>
               • Canon: EOS R5, R6, R3, 5D Mark IV, 90D (CR2/CR3)<br/>
@@ -739,7 +744,7 @@ export default function ConversionPage() {
         </div>
       </section>
       {/* ====== END SEO BLOCK ====== */}
-      
+
       {/* Dark Mode Toggle - Floating Button */}
       <div className="fixed top-20 right-4 z-50">
         <Button
