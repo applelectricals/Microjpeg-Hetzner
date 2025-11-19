@@ -1,5 +1,8 @@
-// vike.config.js  (place next to vite.config.ts)
+// vike.config.js   (must be in project root, same level as vite.config.ts)
 export default {
-  prerender: true,
-  ssr: true   // <--- THIS LINE FIXES EVERYTHING
+  // THIS LINE SOLVES THE ERROR FOREVER
+  ssr: true,
+
+  // This generates real HTML files for all pages (your 65 + homepage)
+  prerender: true
 }
