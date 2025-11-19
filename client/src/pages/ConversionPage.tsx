@@ -682,19 +682,21 @@ export default function ConversionPage() {
       {/* Header */}
 
       <Header />
-      {/* ====== FINAL SEO BLOCK — PERFECT DYNAMIC TEXT ====== */}
+        {/* ====== FINAL SEO BLOCK — DYNAMIC & BULLETPROOF ====== */}
       <section className="py-16 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 text-center">
           {(() => {
-            // Safely extract from/to from URL like /convert/cr2-to-jpg
-            const slug = location[0].split('/').pop() || '';
+            // Super-safe extraction — works even with trailing slash
+            const fullPath = location[0]; // e.g. "/convert/cr2-to-jpg" or "/convert/"
+            const cleanPath = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
+            const slug = cleanPath.split('/').pop() || '';
             const parts = slug.split('-to-');
             const fromRaw = parts[0] || 'image';
             const toRaw = parts[1] || 'file';
 
             const fromUpper = fromRaw.toUpperCase();
             const toUpper = toRaw.toUpperCase();
-            const fromTitle = fromUpper === 'JPG' ? 'JPEG' : fromUpper; // nicer display
+            const fromTitle = fromUpper === 'JPG' ? 'JPEG' : fromUpper;
             const toTitle = toUpper === 'JPG' ? 'JPEG' : toUpper;
 
             return (
