@@ -1,5 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+  <script>
+  // Tell Prerender.io the page is ready as soon as React mounts the root
+  // This works on all your 3 processing pages (landing, compress, all 65 convert/*)
+  document.addEventListener('DOMContentLoaded', function() {
+    // Wait for React to hydrate (your #root div gets content)
+    const checkReady = setInterval(function() {
+      if (document.querySelector('#root')?.children.length > 0 || document.body.innerHTML.length > 5000) {
+        window.prerenderReady = true;
+        clearInterval(checkReady);
+      }
+    }, 500);
+
+    // Fallback: force ready after 15 seconds (safe timeout)
+    setTimeout(function() {
+      window.prerenderReady = true;
+      clearInterval(checkReady);
+    }, 15000);
+  });
+</script>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
