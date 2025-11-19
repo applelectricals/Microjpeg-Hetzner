@@ -15,7 +15,7 @@ Allow: /manifest.json
 Allow: /sitemap.xml
 
 # Sitemap location
-Sitemap: https://micro-jpeg.replit.app/sitemap.xml
+Sitemap: https://microjpeg.com/sitemap.xml
 
 # Crawl-delay for respectful crawling
 Crawl-delay: 1
