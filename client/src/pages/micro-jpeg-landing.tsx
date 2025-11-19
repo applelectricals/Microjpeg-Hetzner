@@ -2589,6 +2589,70 @@ export default function MicroJPEGLanding() {
         </div>
       </section>
 
+      {/* FAQ Section */}
+      <section className="bg-gray-900 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
+            <p className="text-gray-400 text-lg">Everything you need to know about Micro JPEG</p>
+          </div>
+          
+          <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto">
+            {/* Categories Sidebar */}
+            <div className="lg:w-1/3">
+              <div className="space-y-2">
+                {Object.keys(FAQ_DATA).map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => switchCategory(category)}
+                    className={`w-full text-left px-6 py-4 rounded-lg font-medium transition-all duration-200 ${
+                      activeCategory === category
+                        ? 'bg-teal-500 text-white shadow-lg'
+                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
+                    }`}
+                    data-testid={`faq-category-${category.toLowerCase()}`}
+                  >
+                    {category}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* FAQ Content */}
+            <div className="lg:w-2/3">
+              <div className="bg-gray-800 rounded-lg">
+                <div className="p-6">
+                  <h3 className="text-2xl font-bold mb-6 text-teal-400">{activeCategory}</h3>
+                  <div className="space-y-4">
+                    {FAQ_DATA[activeCategory as keyof typeof FAQ_DATA]?.map((faq, index) => (
+                      <div key={index} className="border-b border-gray-700 last:border-b-0">
+                        <button
+                          onClick={() => toggleQuestion(index)}
+                          className="w-full text-left py-4 pr-8 flex items-center justify-between hover:text-teal-400 transition-colors"
+                          data-testid={`faq-question-${index}`}
+                        >
+                          <span className="font-medium text-gray-200">{faq.question}</span>
+                          {expandedQuestions.has(index) ? (
+                            <Minus className="w-5 h-5 text-teal-400 flex-shrink-0" />
+                          ) : (
+                            <Plus className="w-5 h-5 text-gray-400 flex-shrink-0" />
+                          )}
+                        </button>
+                        {expandedQuestions.has(index) && (
+                          <div className="pb-4">
+                            <p className="text-gray-300 leading-relaxed">{faq.answer}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Loyalty Program Section */}
       <section className="py-16 bg-gradient-to-br from-gray-800 to-gray-900">
         <div className="max-w-6xl mx-auto px-4">
@@ -2960,69 +3024,7 @@ export default function MicroJPEGLanding() {
       {/* Exit Intent Pop-up Trigger Section */}
       <div id="exit-intent-trigger" className="hidden"></div>
 
-      {/* FAQ Section */}
-      <section className="bg-gray-900 text-white py-16">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
-            <p className="text-gray-400 text-lg">Everything you need to know about Micro JPEG</p>
-          </div>
-          
-          <div className="flex flex-col lg:flex-row gap-8 max-w-6xl mx-auto">
-            {/* Categories Sidebar */}
-            <div className="lg:w-1/3">
-              <div className="space-y-2">
-                {Object.keys(FAQ_DATA).map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => switchCategory(category)}
-                    className={`w-full text-left px-6 py-4 rounded-lg font-medium transition-all duration-200 ${
-                      activeCategory === category
-                        ? 'bg-teal-500 text-white shadow-lg'
-                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
-                    }`}
-                    data-testid={`faq-category-${category.toLowerCase()}`}
-                  >
-                    {category}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* FAQ Content */}
-            <div className="lg:w-2/3">
-              <div className="bg-gray-800 rounded-lg">
-                <div className="p-6">
-                  <h3 className="text-2xl font-bold mb-6 text-teal-400">{activeCategory}</h3>
-                  <div className="space-y-4">
-                    {FAQ_DATA[activeCategory as keyof typeof FAQ_DATA]?.map((faq, index) => (
-                      <div key={index} className="border-b border-gray-700 last:border-b-0">
-                        <button
-                          onClick={() => toggleQuestion(index)}
-                          className="w-full text-left py-4 pr-8 flex items-center justify-between hover:text-teal-400 transition-colors"
-                          data-testid={`faq-question-${index}`}
-                        >
-                          <span className="font-medium text-gray-200">{faq.question}</span>
-                          {expandedQuestions.has(index) ? (
-                            <Minus className="w-5 h-5 text-teal-400 flex-shrink-0" />
-                          ) : (
-                            <Plus className="w-5 h-5 text-gray-400 flex-shrink-0" />
-                          )}
-                        </button>
-                        {expandedQuestions.has(index) && (
-                          <div className="pb-4">
-                            <p className="text-gray-300 leading-relaxed">{faq.answer}</p>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Footer */}
       <footer className="bg-gray-100 text-black py-12">
