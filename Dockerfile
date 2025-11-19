@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Install dependencies for the client app (assumes app is in /client)
 # If your app is at project root (no client/), change COPY paths accordingly.
-COPY ./client/package.json ./client/package-lock.json* ./client/yarn.lock* ./
+COPY ./package.json ./package-lock.json* ./client/yarn.lock* ./
 
 # If you use npm
 RUN if [ -f package-lock.json ]; then npm ci --silent; elif [ -f yarn.lock ]; then yarn install --frozen-lockfile; else npm install --silent; fi
