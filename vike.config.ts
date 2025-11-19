@@ -1,8 +1,5 @@
-// vike.config.js   (must be in project root, same level as vite.config.ts)
+// vike.config.js
 export default {
-  // THIS LINE SOLVES THE ERROR FOREVER
-  ssr: true,
-
-  // This generates real HTML files for all pages (your 65 + homepage)
-  prerender: true
+  ssr: false,      // <-- DISABLE SSR (your app is client-only)
+  prerender: true  // <-- ENABLE PRERENDERING (generates real HTML for all pages)
 }
