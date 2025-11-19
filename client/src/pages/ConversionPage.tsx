@@ -682,20 +682,16 @@ export default function ConversionPage() {
       {/* Header */}
 
       <Header />
-        {/* ====== FINAL SEO BLOCK — DYNAMIC & BULLETPROOF ====== */}
+      {/* ====== FINAL BULLETPROOF SEO BLOCK — ALWAYS SHOWS CORRECT FORMAT ====== */}
       <section className="py-16 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 text-center">
           {(() => {
-            // Super-safe extraction — works even with trailing slash
-            const fullPath = location[0]; // e.g. "/convert/cr2-to-jpg" or "/convert/"
-            const cleanPath = fullPath.endsWith('/') ? fullPath.slice(0, -1) : fullPath;
-            const slug = cleanPath.split('/').pop() || '';
-            const parts = slug.split('-to-');
-            const fromRaw = parts[0] || 'image';
-            const toRaw = parts[1] || 'file';
+            if (!urlParams || !fromFormat || !toFormat) {
+              return null; // Safety — shouldn't happen
+            }
 
-            const fromUpper = fromRaw.toUpperCase();
-            const toUpper = toRaw.toUpperCase();
+            const fromUpper = fromFormat.id.toUpperCase();
+            const toUpper = toFormat.id.toUpperCase();
             const fromTitle = fromUpper === 'JPG' ? 'JPEG' : fromUpper;
             const toTitle = toUpper === 'JPG' ? 'JPEG' : toUpper;
 
