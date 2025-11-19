@@ -107,6 +107,7 @@
     "passport-local": "^1.0.0",
     "pg": "^8.16.3",
     "postcss": "^8.4.47",
+    "prerender-node": "^3.8.3",
     "razorpay": "^2.9.6",
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
