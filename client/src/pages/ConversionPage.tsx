@@ -934,7 +934,45 @@ export default function ConversionPage() {
         </div>
       )}
 
+// Inside your return() in ConversionPage.tsx, after the hero and before the upload area
+<section className="py-16 bg-gray-50 dark:bg-gray-900">
+  <div className="max-w-7xl mx-auto px-4 text-center">
+    <h1 className="text-4xl md:text-5xl font-bold mb-6 capitalize">
+      Convert {conversion.replace('-', ' to ')} Online – Free, Fast & No Signup
+    </h1>
+    <p className="text-xl text-gray-700 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed mb-12">
+      Instantly convert {conversion.split('-')[0].toUpperCase()} files to {conversion.split('-')[1].toUpperCase()} with zero quality loss. Supports Canon CR2/CR3, Nikon NEF, Sony ARW, Fujifilm RAF, Olympus ORF, Panasonic RW2, Pentax PEF, Samsung SRW, Leica DNG and 60+ other RAW formats. Preserve all EXIF metadata, batch processing available, and unlimited free conversions for files under 25MB.
+    </p>
 
+    <div className="grid md:grid-cols-3 gap-8 mt-12">
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+        <h3 className="text-2xl font-bold mb-4">Perfect Quality Preservation</h3>
+        <p className="text-gray-600 dark:text-gray-400">Advanced RAW decoding keeps every detail, color profile, and metadata intact — better than Adobe DNG Converter.</p>
+      </div>
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+        <h3 className="text-2xl font-bold mb-4">Lightning Fast Processing</h3>
+        <p className="text-gray-600 dark:text-gray-400">Convert any RAW file in under 3 seconds using multi-core processing and latest AVIF/WebP encoders.</p>
+      </div>
+      <div className="bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg">
+        <h3 className="text-2xl font-bold mb-4">100% Private & Secure</h3>
+        <p className="text-gray-600 dark:text-gray-400">Files automatically deleted after 24 hours. No storage, no logs, GDPR compliant.</p>
+      </div>
+    </div>
+
+    <div className="mt-16 prose prose-lg dark:prose-invert max-w-5xl mx-auto text-left">
+      <h2>Why Photographers Choose MicroJPEG for {conversion.replace('-', ' to ')} Conversion</h2>
+      <p>Whether you're a professional photographer shooting Canon CR2/CR3, Nikon NEF, Sony ARW, or Fujifilm RAF files, MicroJPEG is the fastest way to convert RAW to JPEG, PNG, WebP or AVIF without installing software. Unlike Adobe Lightroom or Capture One, there's no subscription — just drag, drop, and download.</p>
+      <p>Our converter supports the latest camera models including Canon R5/R6 (CR3), Nikon Z9 (NEF), Sony A1/A7S III (ARW), and Fujifilm X-T5 (RAF). All EXIF data (aperture, shutter speed, ISO, lens info) is preserved perfectly.</p>
+      <h2>Supported Cameras & Formats</h2>
+      <p>Canon: EOS R5, R6, R3, 5D Mark IV, 90D, M50 (CR2/CR3)<br/>
+         Nikon: Z9, Z8, Z7 II, D850, D780 (NEF)<br/>
+         Sony: A1, A7 IV, A7S III, A6700 (ARW)<br/>
+         Fujifilm: X-T5, X-H2, X100VI (RAF)<br/>
+         Olympus: OM-1, E-M1 Mark III (ORF)<br/>
+         Panasonic: S5 II, GH6 (RW2)</p>
+    </div>
+  </div>
+</section>
       {/* Footer */}
       <footer className="bg-gray-100 dark:bg-gray-800 text-black dark:text-white py-12">
         <div className="max-w-7xl mx-auto px-4">
