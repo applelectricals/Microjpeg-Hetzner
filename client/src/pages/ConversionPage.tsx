@@ -12,6 +12,7 @@ import { SEOHead } from '@/components/SEOHead';
 import { useLocation, useParams } from 'wouter';
 import ConversionOutputModal from '@/components/ConversionOutputModal';
 import { Moon, Sun } from 'lucide-react'; // Add Moon and Sun to existing lucide imports
+import ButtonsSection from "@/components/ButtonsSection";
 
 
 // Import conversion matrix and utilities
@@ -937,7 +938,7 @@ export default function ConversionPage() {
           </Card>
         </div>
       )}
-
+<ButtonsSection />
         {/* ====== FINAL BULLETPROOF SEO BLOCK — USES urlParams (NEVER FAILS) ====== */}
       <section className="py-16 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 text-center">
