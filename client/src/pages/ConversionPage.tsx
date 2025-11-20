@@ -69,7 +69,7 @@ function useDarkMode() {
 
 // File size limits for free pages
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file for regular formats
-const MAX_RAW_FILE_SIZE = 15 * 1024 * 1024; // 25MB per file for RAW formats
+const MAX_RAW_FILE_SIZE = 25 * 1024 * 1024; // 25MB per file for RAW formats
 
 // Supported file types (same as main landing page)
 const SUPPORTED_FORMATS = [
