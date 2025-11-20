@@ -940,94 +940,94 @@ export default function ConversionPage() {
         </div>
       )}
 
-       {/* Test Premium for $1 Section */}
-            <section className="py-16 bg-gradient-to-r from-gray-800 via-gray-900 to-gray-800 relative overflow-hidden">
-              <div className="max-w-4xl mx-auto px-4 text-center relative">
-                
-                <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl p-8 border border-brand-gold/20 relative">
-                  {/* Premium Badge - Fixed Mobile Layout */}
-                  <div 
-                    className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2"
-                    style={{
-                      position: 'absolute' as const,
-                      top: '-0.75rem !important',
-                      left: '50% !important',
-                      transform: 'translateX(-50%) !important',
-                      zIndex: '10 !important'
-                    }}
-                  >
-                    <div 
-                      className="bg-gradient-to-r from-brand-gold to-amber-400 px-3 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm font-bold shadow-lg rounded-lg"
-                      style={{
-                        backgroundColor: '#f59e0b !important',
-                        color: '#AD0000 !important',
-                        padding: '6px 12px !important',
-                        fontSize: '12px !important',
-                        fontWeight: 'bold !important',
-                        borderRadius: '8px !important',
-                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1) !important',
-                        whiteSpace: 'nowrap !important',
-                        display: 'inline-block !important'
-                      }}
-                    >
-                      <span className="hidden sm:inline" style={{ color: '#AD0000 !important' }}>⭐ STARTER PLAN FOR JUST $9</span>
-                      <span className="inline sm:hidden" style={{ color: '#AD0000 !important' }}>⭐ STARTER $9</span>
-                    </div>
+{/* Test Premium for $1 Section */}
+      <section className="py-16 bg-gradient-to-r from-gray-800 via-gray-900 to-gray-800 relative overflow-hidden">
+        <div className="max-w-4xl mx-auto px-4 text-center relative">
+          
+          <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl p-8 border border-brand-gold/20 relative">
+            {/* Premium Badge - Fixed Mobile Layout */}
+            <div 
+              className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2"
+              style={{
+                position: 'absolute' as const,
+                top: '-0.75rem !important',
+                left: '50% !important',
+                transform: 'translateX(-50%) !important',
+                zIndex: '10 !important'
+              }}
+            >
+              <div 
+                className="bg-gradient-to-r from-brand-gold to-amber-400 px-3 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm font-bold shadow-lg rounded-lg"
+                style={{
+                  backgroundColor: '#f59e0b !important',
+                  color: '#AD0000 !important',
+                  padding: '6px 12px !important',
+                  fontSize: '12px !important',
+                  fontWeight: 'bold !important',
+                  borderRadius: '8px !important',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1) !important',
+                  whiteSpace: 'nowrap !important',
+                  display: 'inline-block !important'
+                }}
+              >
+                <span className="hidden sm:inline" style={{ color: '#AD0000 !important' }}>⭐ STARTER PLAN FOR JUST $9</span>
+                <span className="inline sm:hidden" style={{ color: '#AD0000 !important' }}>⭐ STARTER $9</span>
+              </div>
+            </div>
+            
+            <div className="mt-8 sm:mt-6">
+              <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold font-poppins text-brand-dark mb-4 px-2">
+                Experience <span className="text-brand-teal">Premium Features</span><br />
+                <span className="text-brand-gold text-lg sm:text-3xl lg:text-4xl">Only $9 per month</span>
+              </h2>
+              
+              <p className="text-lg text-gray-600 font-opensans mb-8 max-w-2xl mx-auto">
+                Perfect for Product Hunt reviewers, colleagues, developers and photographers wanting to test our full Premium experience before committing.
+              </p>
+              
+              {/* Features Grid */}
+              <div className="grid md:grid-cols-3 gap-6 mb-8">
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-brand-teal/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Zap className="w-6 h-6 text-brand-teal" />
                   </div>
-                  
-                  <div className="mt-8 sm:mt-6">
-                    <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold font-poppins text-brand-dark mb-4 px-2">
-                      Experience <span className="text-brand-teal">Premium Features</span><br />
-                      <span className="text-brand-gold text-lg sm:text-3xl lg:text-4xl">Only $9 per month</span>
-                    </h2>
-                    
-                    <p className="text-lg text-gray-600 font-opensans mb-8 max-w-2xl mx-auto">
-                      Perfect for Product Hunt reviewers, colleagues, developers and photographers wanting to test our full Premium experience before committing.
-                    </p>
-                    
-                    {/* Features Grid */}
-                    <div className="grid md:grid-cols-3 gap-6 mb-8">
-                      <div className="text-center">
-                        <div className="w-12 h-12 bg-brand-teal/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <Zap className="w-6 h-6 text-brand-teal" />
-                        </div>
-                        <h3 className="font-semibold text-brand-dark mb-2">3000 operations</h3>
-                        <p className="text-sm text-gray-600">Test bulk processing power</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="w-12 h-12 bg-brand-gold/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <Crown className="w-6 h-6 text-brand-gold" />
-                        </div>
-                        <h3 className="font-semibold text-brand-dark mb-2">20 Concurrent Uploads</h3>
-                        <p className="text-sm text-gray-600">Advanced controls, no ads, API access</p>
-                      </div>
-                      <div className="text-center">
-                        <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
-                          <Shield className="w-6 h-6 text-red-500" />
-                        </div>
-                        <h3 className="font-semibold text-brand-dark mb-2">Access for 1 month</h3>
-                        <p className="text-sm text-gray-600">No recurring charges</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                      <Button 
-                        size="lg"
-                        onClick={() => window.location.href = '/checkout?plan=starter'}
-                        className="bg-gradient-to-r from-brand-teal to-brand-teal-dark hover:from-brand-teal-dark hover:to-brand-teal text-[#AD0000] font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                        data-testid="button-test-premium"
-                      >
-                        🚀 Subscribe Today for $9
-                        <ArrowRight className="w-5 h-5 ml-2" />
-                      </Button>
-                      <p className="text-xs text-gray-500 max-w-xs">
-                        💳 Secure payment via Paypal • Cancel anytime
-                      </p>
-                    </div>
+                  <h3 className="font-semibold text-brand-dark mb-2">Unlimited operations</h3>
+                  <p className="text-sm text-gray-600">Test bulk processing power</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-brand-gold/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Crown className="w-6 h-6 text-brand-gold" />
                   </div>
+                  <h3 className="font-semibold text-brand-dark mb-2">20 Concurrent Uploads</h3>
+                  <p className="text-sm text-gray-600">Advanced controls, no ads, API access</p>
+                </div>
+                <div className="text-center">
+                  <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <Shield className="w-6 h-6 text-red-500" />
+                  </div>
+                  <h3 className="font-semibold text-brand-dark mb-2">Access for 1 month</h3>
+                  <p className="text-sm text-gray-600">No recurring charges</p>
                 </div>
               </div>
-            </section>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Button 
+                  size="lg"
+                  onClick={() => window.location.href = '/checkout?plan=starter'}
+                  className="bg-gradient-to-r from-brand-teal to-brand-teal-dark hover:from-brand-teal-dark hover:to-brand-teal text-[#AD0000] font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                  data-testid="button-test-premium"
+                >
+                  🚀 Subscribe Today for $9
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+                <p className="text-xs text-gray-500 max-w-xs">
+                  💳 Secure payment via Paypal/Razorpay • Cancel anytime
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
 <ButtonsSection />
         {/* ====== FINAL BULLETPROOF SEO BLOCK — USES urlParams (NEVER FAILS) ====== */}

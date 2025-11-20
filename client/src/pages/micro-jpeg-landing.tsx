@@ -2124,14 +2124,14 @@ export default function MicroJPEGLanding() {
                   <div className="w-12 h-12 bg-brand-teal/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Zap className="w-6 h-6 text-brand-teal" />
                   </div>
-                  <h3 className="font-semibold text-brand-dark mb-2">3000 operations</h3>
+                  <h3 className="font-semibold text-brand-dark mb-2">Unlimited operations</h3>
                   <p className="text-sm text-gray-600">Test bulk processing power</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-brand-gold/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Crown className="w-6 h-6 text-brand-gold" />
                   </div>
-                  <h3 className="font-semibold text-brand-dark mb-2">20 Concurrent Uploads</h3>
+                  <h3 className="font-semibold text-brand-dark mb-2">Upto 75MB each image</h3>
                   <p className="text-sm text-gray-600">Advanced controls, no ads, API access</p>
                 </div>
                 <div className="text-center">
@@ -2154,7 +2154,7 @@ export default function MicroJPEGLanding() {
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
                 <p className="text-xs text-gray-500 max-w-xs">
-                  💳 Secure payment via Paypal • Cancel anytime
+                  💳 Secure payment via Paypal/Razorpay • Cancel anytime
                 </p>
               </div>
             </div>
