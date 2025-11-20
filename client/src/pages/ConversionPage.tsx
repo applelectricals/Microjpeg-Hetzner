@@ -1076,17 +1076,7 @@ export default function ConversionPage() {
             </div>
           </div>
 
-          <div className="mt-16 prose prose-lg dark:prose-invert max-w-5xl mx-auto text-left">
-            <h2>Supported Cameras & Formats</h2>
-            <p>
-              • Canon: EOS R5, R6, R3, 5D Mark IV, 90D (CR2/CR3)<br/>
-              • Nikon: Z9, Z8, D850, D780 (NEF)<br/>
-              • Sony: A1, A7 IV, A7S III, A6700 (ARW)<br/>
-              • Fujifilm: X-T5, X-H2, X100VI (RAF)<br/>
-              • Olympus: OM-1, E-M1X (ORF)<br/>
-              • Panasonic: S5 II, GH6 (RW2)
-            </p>
-          </div>
+          
         </div>
       </section>
       {/* ====== END SEO BLOCK ====== */}
