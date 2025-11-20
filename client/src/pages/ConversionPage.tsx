@@ -69,7 +69,7 @@ function useDarkMode() {
 
 // File size limits for free pages
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file for regular formats
-const MAX_RAW_FILE_SIZE = 25 * 1024 * 1024; // 25MB per file for RAW formats
+const MAX_RAW_FILE_SIZE = 15 * 1024 * 1024; // 25MB per file for RAW formats
 
 // Supported file types (same as main landing page)
 const SUPPORTED_FORMATS = [
@@ -458,7 +458,7 @@ export default function ConversionPage() {
   
     // Prepare settings for /api/compress endpoint (EXACT COPY from landing page)
     const settings = {
-    quality: qualityPercent || 80, // Use simple quality like landing page
+    quality: qualityPercent || 95, // Use simple quality like landing page
     outputFormat: [normalizedFormat], // ← Use normalized format
     resizeOption: 'keep-original', // Landing page uses keep-original for RAW files
     compressionAlgorithm: 'standard', // Same as landing page
