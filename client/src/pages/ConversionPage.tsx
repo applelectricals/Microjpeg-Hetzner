@@ -13,6 +13,7 @@ import { useLocation, useParams } from 'wouter';
 import ConversionOutputModal from '@/components/ConversionOutputModal';
 import { Moon, Sun } from 'lucide-react'; // Add Moon and Sun to existing lucide imports
 import ButtonsSection from "@/components/ButtonsSection";
+import { Upload, Settings, Download, Zap, Shield, Sparkles, X, Check, ArrowRight, ImageIcon, ChevronDown, ChevronUp, Crown, Plus, Minus, Menu, Calendar, Activity } from 'lucide-react';
 
 
 // Import conversion matrix and utilities
