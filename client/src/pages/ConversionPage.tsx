@@ -970,13 +970,13 @@ export default function ConversionPage() {
                   display: 'inline-block !important'
                 }}
               >
-                <span className="hidden sm:inline" style={{ color: '#AD0000 !important' }}>⭐ STARTER PLAN FOR JUST $9</span>
+                <span className="hidden sm:inline" style={{ color: '#000000 !important' }}>⭐ STARTER PLAN FOR JUST $9</span>
                 <span className="inline sm:hidden" style={{ color: '#AD0000 !important' }}>⭐ STARTER $9</span>
               </div>
             </div>
             
             <div className="mt-8 sm:mt-6">
-              <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold font-poppins text-brand-dark mb-4 px-2">
+              <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold font-poppins text-black mb-4 px-2">
                 Experience <span className="text-brand-teal">Premium Features</span><br />
                 <span className="text-brand-gold text-lg sm:text-3xl lg:text-4xl">Only $9 per month</span>
               </h2>
@@ -991,21 +991,21 @@ export default function ConversionPage() {
                   <div className="w-12 h-12 bg-brand-teal/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Zap className="w-6 h-6 text-brand-teal" />
                   </div>
-                  <h3 className="font-semibold text-brand-dark mb-2">Unlimited operations</h3>
+                  <h3 className="font-semibold text-black mb-2">Unlimited operations</h3>
                   <p className="text-sm text-gray-600">Test bulk processing power</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-brand-gold/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Crown className="w-6 h-6 text-brand-gold" />
                   </div>
-                  <h3 className="font-semibold text-brand-dark mb-2">20 Concurrent Uploads</h3>
+                  <h3 className="font-semibold text-black mb-2">Upto 75MB each image</h3>
                   <p className="text-sm text-gray-600">Advanced controls, no ads, API access</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Shield className="w-6 h-6 text-red-500" />
                   </div>
-                  <h3 className="font-semibold text-brand-dark mb-2">Access for 1 month</h3>
+                  <h3 className="font-semibold text-black mb-2">Access for 1 month</h3>
                   <p className="text-sm text-gray-600">No recurring charges</p>
                 </div>
               </div>
