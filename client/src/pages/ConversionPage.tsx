@@ -957,7 +957,7 @@ export default function ConversionPage() {
               }}
             >
               <div 
-                className="bg-gradient-to-r from-brand-gold to-amber-400 px-3 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm font-bold shadow-lg rounded-lg"
+                className="bg-gradient-to-r from-brand-gold to-amber-400 px-3 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm font-bold shadow-lg rounded-lg text-black"
                 style={{
                   backgroundColor: '#f59e0b !important',
                   color: '#AD0000 !important',
