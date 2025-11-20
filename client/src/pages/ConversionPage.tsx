@@ -971,7 +971,7 @@ export default function ConversionPage() {
                 }}
               >
                 <span className="hidden sm:inline" style={{ color: '#000000 !important' }}>⭐ STARTER PLAN FOR JUST $9</span>
-                <span className="inline sm:hidden" style={{ color: '#AD0000 !important' }}>⭐ STARTER $9</span>
+                <span className="inline sm:hidden" style={{ color: '#000000 !important' }}>⭐ STARTER $9</span>
               </div>
             </div>
             
