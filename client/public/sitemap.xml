@@ -3,14 +3,13 @@
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">
 
-  <!-- Homepage with image optimization content -->
+  <!-- Existing homepage block (kept as-is) -->
   <url>
     <loc>https://microjpeg.com/</loc>
     <lastmod>2025-01-10</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
 
-    <!-- Image sitemap entries for SEO -->
     <image:image>
       <image:loc>https://microjpeg.com/images/seo-assets/before-after-compression.svg</image:loc>
       <image:title>JPEG Compression Before and After Results - 88% File Size Reduction</image:title>
@@ -35,7 +34,6 @@
       <image:caption>Comprehensive comparison of free JPEG compression tools showing advantages of our lossless compressor vs xxx and other alternatives</image:caption>
     </image:image>
 
-    <!-- Video sitemap entry -->
     <video:video>
       <video:thumbnail_loc>https://microjpeg.com/images/video-thumbnail-compression-demo.jpg</video:thumbnail_loc>
       <video:title>Professional JPEG Compression Demo - Before vs After Results</video:title>
@@ -52,7 +50,7 @@
     </video:video>
   </url>
 
-  <!-- JPEG Compression Tool Section -->
+  <!-- Anchor sections kept (homepage anchors) -->
   <url>
     <loc>https://microjpeg.com/#jpeg-compressor</loc>
     <lastmod>2025-01-10</lastmod>
@@ -60,7 +58,6 @@
     <priority>0.9</priority>
   </url>
 
-  <!-- How to Compress JPEG Section -->
   <url>
     <loc>https://microjpeg.com/#how-to-compress-jpeg</loc>
     <lastmod>2025-01-10</lastmod>
@@ -68,7 +65,6 @@
     <priority>0.8</priority>
   </url>
 
-  <!-- Compression Results Section -->
   <url>
     <loc>https://microjpeg.com/#compression-results</loc>
     <lastmod>2025-01-10</lastmod>
@@ -76,7 +72,6 @@
     <priority>0.8</priority>
   </url>
 
-  <!-- FAQ Section -->
   <url>
     <loc>https://microjpeg.com/#faq</loc>
     <lastmod>2025-01-10</lastmod>
@@ -84,7 +79,6 @@
     <priority>0.7</priority>
   </url>
 
-  <!-- Features Section -->
   <url>
     <loc>https://microjpeg.com/#features</loc>
     <lastmod>2025-01-10</lastmod>
@@ -92,12 +86,138 @@
     <priority>0.6</priority>
   </url>
 
-  <!-- Comparison Section -->
   <url>
     <loc>https://microjpeg.com/#comparison</loc>
     <lastmod>2025-01-10</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
+
+  <!-- ---- ADDED: Full list of URLs you provided (kept ordering as submitted) ---- -->
+  <!-- convert / compress pages -->
+  <url><loc>https://microjpeg.com/convert/webp-to-tiff</loc></url>
+  <url><loc>https://microjpeg.com/convert/webp-to-jpg</loc></url>
+  <url><loc>https://microjpeg.com/convert/webp-to-png</loc></url>
+  <url><loc>https://microjpeg.com/compress/webp-to-webp</loc></url>
+  <url><loc>https://microjpeg.com/convert/webp-to-avif</loc></url>
+
+  <url><loc>https://microjpeg.com/compress/tiff-to-tiff</loc></url>
+  <url><loc>https://microjpeg.com/convert/tiff-to-jpg</loc></url>
+  <url><loc>https://microjpeg.com/convert/tiff-to-png</loc></url>
+  <url><loc>https://microjpeg.com/convert/tiff-to-webp</loc></url>
+  <url><loc>https://microjpeg.com/convert/tiff-to-avif</loc></url>
+
+  <url><loc>https://microjpeg.com/convert/svg-to-tiff</loc></url>
+  <url><loc>https://microjpeg.com/convert/svg-to-jpg</loc></url>
+  <url><loc>https://microjpeg.com/convert/svg-to-png</loc></url>
+  <url><loc>https://microjpeg.com/convert/svg-to-webp</loc></url>
+  <url><loc>https://microjpeg.com/convert/svg-to-avif</loc></url>
+
+  <url><loc>https://microjpeg.com/convert/raf-to-jpg</loc></url>
+  <url><loc>https://microjpeg.com/convert/raf-to-png</loc></url>
+  <url><loc>https://microjpeg.com/convert/raf-to-tiff</loc></url>
+  <url><loc>https://microjpeg.com/convert/raf-to-webp</loc></url>
+  <url><loc>https://microjpeg.com/convert/raf-to-avif</loc></url>
+
+  <url><loc>https://microjpeg.com/convert/orf-to-jpg</loc></url>
+  <url><loc>https://microjpeg.com/convert/orf-to-png</loc></url>
+  <url><loc>https://microjpeg.com/convert/orf-to-tiff</loc></url>
+  <url><loc>https://microjpeg.com/convert/orf-to-webp</loc></url>
+  <url><loc>https://microjpeg.com/convert/orf-to-avif</loc></url>
+
+  <url><loc>https://microjpeg.com/convert/nef-to-jpg</loc></url>
+  <url><loc>https://microjpeg.com/convert/nef-to-png</loc></url>
+  <url><loc>https://microjpeg.com/convert/nef-to-tiff</loc></url>
+  <url><loc>https://microjpeg.com/convert/nef-to-webp</loc></url>
+  <url><loc>https://microjpeg.com/convert/nef-to-avif</loc></url>
+
+  <url><loc>https://microjpeg.com/convert/dng-to-jpg</loc></url>
+  <url><loc>https://microjpeg.com/convert/dng-to-png</loc></url>
+  <url><loc>https://microjpeg.com/convert/dng-to-tiff</loc></url>
+  <url><loc>https://microjpeg.com/convert/dng-to-webp</loc></url>
+  <url><loc>https://microjpeg.com/convert/dng-to-avif</loc></url>
+
+  <url><loc>https://microjpeg.com/convert/crw-to-jpg</loc></url>
+  <url><loc>https://microjpeg.com/convert/crw-to-png</loc></url>
+  <url><loc>https://microjpeg.com/convert/crw-to-tiff</loc></url>
+  <url><loc>https://microjpeg.com/convert/crw-to-webp</loc></url>
+  <url><loc>https://microjpeg.com/convert/crw-to-avif</loc></url>
+
+  <url><loc>https://microjpeg.com/convert/cr2-to-jpg</loc></url>
+  <url><loc>https://microjpeg.com/convert/cr2-to-png</loc></url>
+  <url><loc>https://microjpeg.com/convert/cr2-to-tiff</loc></url>
+  <url><loc>https://microjpeg.com/convert/cr2-to-webp</loc></url>
+  <url><loc>https://microjpeg.com/convert/cr2-to-avif</loc></url>
+
+  <url><loc>https://microjpeg.com/convert/arw-to-jpg</loc></url>
+  <url><loc>https://microjpeg.com/convert/arw-to-png</loc></url>
+  <url><loc>https://microjpeg.com/convert/arw-to-tiff</loc></url>
+  <url><loc>https://microjpeg.com/convert/arw-to-webp</loc></url>
+  <url><loc>https://microjpeg.com/convert/arw-to-avif</loc></url>
+
+  <url><loc>https://microjpeg.com/convert/png-to-tiff</loc></url>
+  <url><loc>https://microjpeg.com/convert/png-to-jpg</loc></url>
+  <url><loc>https://microjpeg.com/compress/png-to-png</loc></url>
+  <url><loc>https://microjpeg.com/convert/png-to-webp</loc></url>
+  <url><loc>https://microjpeg.com/convert/png-to-avif</loc></url>
+
+  <url><loc>https://microjpeg.com/convert/jpg-to-tiff</loc></url>
+  <url><loc>https://microjpeg.com/compress/jpg-to-jpg</loc></url>
+  <url><loc>https://microjpeg.com/convert/jpg-to-png</loc></url>
+  <url><loc>https://microjpeg.com/convert/jpg-to-webp</loc></url>
+  <url><loc>https://microjpeg.com/convert/jpg-to-avif</loc></url>
+
+  <url><loc>https://microjpeg.com/convert/avif-to-tiff</loc></url>
+  <url><loc>https://microjpeg.com/compress/avif-to-avif</loc></url>
+  <url><loc>https://microjpeg.com/convert/avif-to-jpg</loc></url>
+  <url><loc>https://microjpeg.com/convert/avif-to-png</loc></url>
+  <url><loc>https://microjpeg.com/convert/avif-to-webp</loc></url>
+
+  <!-- blog pages -->
+  <url><loc>https://microjpeg.com/blog</loc></url>
+  <url><loc>https://microjpeg.com/blog/how-to-use-microjpeg</loc></url>
+  <url><loc>https://microjpeg.com/blog/optimize-png-tiff-wordpress</loc></url>
+  <url><loc>https://microjpeg.com/blog/avif-vs-webp-vs-jpg-2025</loc></url>
+  <url><loc>https://microjpeg.com/blog/batch-convert-avif-2025</loc></url>
+  <url><loc>https://microjpeg.com/blog/raw-to-webp-photographer-workflow</loc></url>
+  <url><loc>https://microjpeg.com/blog/webp-back-to-jpg-png</loc></url>
+  <url><loc>https://microjpeg.com/blog/image-compression-best-practices</loc></url>
+  <url><loc>https://microjpeg.com/blog/svg-to-avif-icons</loc></url>
+  <url><loc>https://microjpeg.com/blog/jpg-recompression-myths</loc></url>
+  <url><loc>https://microjpeg.com/blog/python-raw-to-tiff</loc></url>
+  <url><loc>https://microjpeg.com/blog/webp-quality-settings</loc></url>
+  <url><loc>https://microjpeg.com/blog/compress-jpg-images-without-losing-quality</loc></url>
+  <url><loc>https://microjpeg.com/blog/raw-to-jpg-conversion-guide</loc></url>
+  <url><loc>https://microjpeg.com/blog/wordpress-image-optimization-guide</loc></url>
+
+  <!-- core pages -->
+  <url><loc>https://microjpeg.com/features</loc></url>
+  <url><loc>https://microjpeg.com/about</loc></url>
+  <url><loc>https://microjpeg.com/contact</loc></url>
+  <url><loc>https://microjpeg.com/support</loc></url>
+  <url><loc>https://microjpeg.com/pricing</loc></url>
+
+  <!-- legal -->
+  <url><loc>https://microjpeg.com/legal/privacy</loc></url>
+  <url><loc>https://microjpeg.com/legal/terms</loc></url>
+  <url><loc>https://microjpeg.com/legal/cookies</loc></url>
+  <url><loc>https://microjpeg.com/legal/cancellation</loc></url>
+
+  <!-- tools -->
+  <url><loc>https://microjpeg.com/tools</loc></url>
+  <url><loc>https://microjpeg.com/tools/compress</loc></url>
+  <url><loc>https://microjpeg.com/tools/convert</loc></url>
+  <url><loc>https://microjpeg.com/tools/optimizer</loc></url>
+
+  <!-- wordpress plugin -->
+  <url><loc>https://microjpeg.com/wordpress-plugin</loc></url>
+  <url><loc>https://microjpeg.com/wordpress-plugin/install</loc></url>
+  <url><loc>https://microjpeg.com/wordpress-plugin/docs</loc></url>
+
+  <!-- api docs -->
+  <url><loc>https://microjpeg.com/api-docs</loc></url>
+  <url><loc>https://microjpeg.com/api-docs#how-it-works</loc></url>
+  <url><loc>https://microjpeg.com/api-docs#api-vs-web</loc></url>
+  <url><loc>https://microjpeg.com/api-docs#documentation</loc></url>
 
 </urlset>
