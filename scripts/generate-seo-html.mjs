@@ -16,6 +16,10 @@ import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -96,16 +100,21 @@ BLOG_POSTS.forEach(slug => {
 let serverProcess = null;
 
 /**
- * Start the production server
+ * Start the development server (which already has .env loaded)
  */
 function startServer() {
   return new Promise((resolve, reject) => {
-    console.log('🚀 Starting production server...');
+    console.log('🚀 Starting development server...');
     
-    // Start the server
-    serverProcess = spawn('node', ['dist/index.js'], {
-      env: { ...process.env, PORT: SERVER_PORT },
-      stdio: 'pipe'
+    // Start the dev server (tsx already loads .env)
+    serverProcess = spawn('npm', ['run', 'dev'], {
+      env: { 
+        ...process.env,
+        PORT: SERVER_PORT,
+        NODE_ENV: 'development'
+      },
+      stdio: 'pipe',
+      shell: true
     });
 
     serverProcess.stdout.on('data', (data) => {
