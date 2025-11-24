@@ -698,6 +698,7 @@ export default function ConversionPage() {
         <script type="application/ld+json">
           {JSON.stringify(STRUCTURED_DATA)}
         </script>
+</Helmet>
 
       {/* Header */}
 
