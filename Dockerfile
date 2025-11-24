@@ -3,7 +3,7 @@ FROM node:20-bookworm
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including Chromium for Puppeteer
 RUN apt-get update && apt-get install -y \
     imagemagick \
     libraw-bin \
@@ -11,19 +11,44 @@ RUN apt-get update && apt-get install -y \
     python3 \
     make \
     g++ \
+    chromium \
+    chromium-sandbox \
+    libnspr4 \
+    libnss3 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libdbus-1-3 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libpango-1.0-0 \
+    libcairo2 \
+    libasound2 \
+    libatspi2.0-0 \
+    fonts-liberation \
+    fonts-noto-color-emoji \
     && rm -rf /var/lib/apt/lists/*
+
+# Configure Puppeteer to use system Chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Copy package files
 COPY package*.json ./
 
-# Install ALL dependencies (needed for db:push)
+# Install ALL dependencies (needed for db:push and Puppeteer)
 ENV NPM_CONFIG_PRODUCTION=false
 RUN npm ci
 
 # Copy all application code
 COPY . .
 
-# Build the application
+# Build the application (includes SEO generation with Puppeteer)
 RUN npm run build
 
 # Set environment
