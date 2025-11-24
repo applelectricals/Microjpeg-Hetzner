@@ -11,3 +11,6 @@ previews/
 FINAL_BACKUP_FROM_REPLIT/
 *.exe
 FINAL_BACKUP_FROM_REPLIT/
+# Allow SEO HTML files
+!dist/seo/
+!dist/seo/**

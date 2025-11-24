@@ -19,14 +19,13 @@ const queueConfig = {
   }
 };
 
-// Create separate queues for different types of processing
 export const imageQueue: Queue = new Bull('image-processing', {
   redis: {
-    host: redis.options.host,
-    port: redis.options.port,
-    password: redis.options.password,
-    db: redis.options.db,
-    ...(redis.options.tls && { tls: redis.options.tls })
+    host: redis?.options?.host || 'localhost',
+    port: redis?.options?.port || 6379,
+    password: redis?.options?.password,
+    db: redis?.options?.db || 0,
+    ...(redis?.options?.tls && { tls: redis.options.tls })
   },
   defaultJobOptions: {
     ...queueConfig.defaultJobOptions,
@@ -37,11 +36,11 @@ export const imageQueue: Queue = new Bull('image-processing', {
 
 export const rawQueue: Queue = new Bull('raw-processing', {
   redis: {
-    host: redis.options.host,
-    port: redis.options.port,
-    password: redis.options.password,
-    db: redis.options.db,
-    ...(redis.options.tls && { tls: redis.options.tls })
+    host: redis?.options?.host || 'localhost',
+    port: redis?.options?.port || 6379,
+    password: redis?.options?.password,
+    db: redis?.options?.db || 0,
+    ...(redis?.options?.tls && { tls: redis.options.tls })
   },
   defaultJobOptions: {
     ...queueConfig.defaultJobOptions,
@@ -53,11 +52,11 @@ export const rawQueue: Queue = new Bull('raw-processing', {
 
 export const bulkQueue: Queue = new Bull('bulk-processing', {
   redis: {
-    host: redis.options.host,
-    port: redis.options.port,
-    password: redis.options.password,
-    db: redis.options.db,
-    ...(redis.options.tls && { tls: redis.options.tls })
+    host: redis?.options?.host || 'localhost',
+    port: redis?.options?.port || 6379,
+    password: redis?.options?.password,
+    db: redis?.options?.db || 0,
+    ...(redis?.options?.tls && { tls: redis.options.tls })
   },
   defaultJobOptions: {
     ...queueConfig.defaultJobOptions,
@@ -71,11 +70,11 @@ export const bulkQueue: Queue = new Bull('bulk-processing', {
 // Ensures predictable performance and memory usage for batch operations
 export const sequentialBatchQueue: Queue = new Bull('sequential-batch-processing', {
   redis: {
-    host: redis.options.host,
-    port: redis.options.port,
-    password: redis.options.password,
-    db: redis.options.db,
-    ...(redis.options.tls && { tls: redis.options.tls })
+    host: redis?.options?.host || 'localhost',
+    port: redis?.options?.port || 6379,
+    password: redis?.options?.password,
+    db: redis?.options?.db || 0,
+    ...(redis?.options?.tls && { tls: redis.options.tls })
   },
   defaultJobOptions: {
     ...queueConfig.defaultJobOptions,

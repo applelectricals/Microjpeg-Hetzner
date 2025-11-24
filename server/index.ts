@@ -1,5 +1,7 @@
 // server/index.ts - UPDATED VERSION
 // Old user routes (kept for reference) - replaced by simplified user tier routes
+import 'dotenv/config'; // ← ADD THIS AS FIRST LINE
+
 // import userRoutes from './routes/api-user-routes';
 import userTierRoutes from './routes/user-tier-routes';
 import userRoutes from './routes/userRoutes'; // ← NEW: Tier config API
