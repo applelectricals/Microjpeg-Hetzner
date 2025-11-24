@@ -5,15 +5,16 @@ import userTierRoutes from './routes/user-tier-routes';
 import userRoutes from './routes/userRoutes'; // ← NEW: Tier config API
 import sequentialBatchRoutes from './sequentialBatchRoutes'; // ← NEW: Sequential batch processing
 import express, { type Request, Response, NextFunction } from "express";
+import path from 'path';
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { TestPremiumExpiryManager } from "./testPremiumExpiry";
 import { initializeQueueService, shutdownQueueService } from "./queueService";
 import { seedSuperuser } from "./superuser";
-import  paymentRouter  from './paymentRoutes';
+import paymentRouter from './paymentRoutes';
 import paypalPaymentRoutes from './routes/paypalPaymentRoutes';
-import { handlePayPalWebhook } from './paypalWebhook';
 import instamojoRoutes from './routes/instamojoRoutes';
+import { botDetectionMiddleware, seoDebugEndpoint } from './middleware/bot-detector.js';
 
 const app = express();
 
@@ -142,6 +143,19 @@ app.use((req, res, next) => {
   } else {
     serveStatic(app);
   }
+
+  // IMPORTANT: Add this AFTER API routes but BEFORE the React fallback
+
+  // Debug endpoint (optional, for testing)
+  app.get('/__seo-debug', seoDebugEndpoint);
+
+  // Bot detection middleware (CRITICAL)
+  app.use(botDetectionMiddleware);
+
+  // React app fallback (MUST BE LAST)
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/index.html'));
+  });
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
