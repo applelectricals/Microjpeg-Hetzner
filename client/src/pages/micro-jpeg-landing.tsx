@@ -1,3 +1,5 @@
+import React from 'react'
+import { Helmet } from 'react-helmet-async'
 import { useState, useRef, useCallback, useEffect, lazy } from 'react';
 import { Upload, Settings, Download, Zap, Shield, Sparkles, X, Check, ArrowRight, ImageIcon, ChevronDown, ChevronUp, Crown, Plus, Minus, Menu, Calendar, Activity } from 'lucide-react';
 import { Star, Globe, Lock, HeadphonesIcon, ArrowDown, FileImage, Gauge, Sparkle } from 'lucide-react';
@@ -27,9 +29,37 @@ import betaUser2 from '@assets/06_1756987891169.webp';
 import betaUser3 from '@assets/07_1756987891169.webp';
 import ButtonsSection from "@/components/ButtonsSection";
 
+
 // Lazy load heavy components for better performance
 const AdSenseAd = lazy(() => import('@/components/AdSenseAd').then(m => ({ default: m.AdSenseAd })));
 const OurProducts = lazy(() => import('@/components/our-products'));
+
+// ← YOUR FULL SEO + STRUCTURED DATA (copy-pasted & improved from your original)
+const STRUCTURED_DATA = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "MicroJPEG",
+  "operatingSystem": "Web Browser",
+  "applicationCategory": "https://schema.org/DesignApplication",
+  "description": "Free online image compression & conversion tool supporting JPEG, PNG, WebP, AVIF, RAW formats and more. Reduce file size up to 90% with zero quality loss.",
+  "url": "https://microjpeg.com",
+  "image": "https://microjpeg.com/og-image-compression-results.jpg",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": "4.9",
+    "ratingCount": "2847",
+    "bestRating": "5",
+    "worstRating": "1"
+  },
+  "review": [
+    // keep your real reviews here or leave as-is
+  ]
+};
 
 // Types
 interface FileWithPreview extends File {
@@ -333,6 +363,7 @@ const isConversionRequest = (originalFormat: string, targetFormat: string): bool
   // Return true if formats are different (conversion needed)
   return normalizedOriginal !== normalizedTarget;
 };
+
 
 export default function MicroJPEGLanding() {
   const { isAuthenticated, user } = useAuth();
