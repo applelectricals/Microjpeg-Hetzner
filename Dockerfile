@@ -50,25 +50,8 @@ COPY . .
 
 # Build the application (includes SEO generation with Puppeteer)
 RUN npm run build
+RUN echo "=======================================" && echo "DEBUG: Checking build output" && echo "=======================================" && ls -la /app/ && echo "" && echo "Contents of /app/dist:" && ls -la /app/dist/ 2>/dev/null || echo "dist does not exist" && echo "" && echo "Contents of /app/client:" && ls -la /app/client/ 2>/dev/null || echo "client does not exist" && echo "" && echo "Finding all index.html files:" && find /app -name "index.html" -type f 2>/dev/null && echo "" && echo "Finding all dist directories:" && find /app -type d -name "dist" 2>/dev/null && echo "======================================="
 
-# DEBUG: Show what was actually built
-RUN echo "=======================================" && \
-    echo "🔍 DEBUG: Checking build output" && \
-    echo "=======================================" && \
-    ls -la /app/ && \
-    echo "" && \
-    echo "📁 /app/dist:" && \
-    ls -la /app/dist/ 2>/dev/null || echo "❌ /app/dist does not exist" && \
-    echo "" && \
-    echo "📁 /app/client:" && \
-    ls -la /app/client/ 2>/dev/null || echo "❌ /app/client does not exist" && \
-    echo "" && \
-    echo "🔍 Finding all index.html files:" && \
-    find /app -name "index.html" -type f 2>/dev/null && \
-    echo "" && \
-    echo "🔍 Finding all 'dist' directories:" && \
-    find /app -type d -name "dist" 2>/dev/null && \
-    echo "======================================="
 
 # Set environment
 ENV NODE_ENV=production
