@@ -68,13 +68,31 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(import.meta.dirname, "client");
+  // FIXED: Use process.cwd() instead of import.meta.dirname
+  // This ensures we always resolve from /app/ (the project root)
+  const distPath = path.resolve(process.cwd(), 'dist', 'client');
+
+  console.log('🔍 Static files debug:');
+  console.log('   process.cwd():', process.cwd());
+  console.log('   import.meta.dirname:', import.meta.dirname);
+  console.log('   Resolved distPath:', distPath);
+  console.log('   Directory exists:', fs.existsSync(distPath));
 
   if (!fs.existsSync(distPath)) {
+    // List what DOES exist in dist/
+    const distRoot = path.resolve(process.cwd(), 'dist');
+    if (fs.existsSync(distRoot)) {
+      console.log('   Contents of dist/:', fs.readdirSync(distRoot));
+    } else {
+      console.log('   ❌ dist/ directory does not exist!');
+    }
+
     throw new Error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`,
     );
   }
+
+  console.log('   ✅ Found static files directory');
 
   app.use(express.static(distPath));
 
