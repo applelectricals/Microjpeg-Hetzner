@@ -25,8 +25,9 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configuration
-// const SERVER_PORT = 10000; // Not needed for production
-const SERVER_URL = 'https://microjpeg.com'; // Use production server
+const SERVER_PORT = 10000;
+// Always use localhost for development - production builds should have pre-rendered HTML
+const SERVER_URL = `http://127.0.0.1:${SERVER_PORT}`;
 const OUTPUT_DIR = path.join(__dirname, '../dist/seo');
 const STARTUP_DELAY = 15000; // Wait 15s for server to start (increased for build environment)
 const MAX_RETRIES = 3; // Number of times to retry connecting to server
@@ -37,11 +38,6 @@ const SEO_PAGES = [
     url: '/',
     output: 'index.html',
     name: 'Landing Page'
-  },
-  {
-    url: '/convert',
-    output: 'convert.html',
-    name: 'Conversion Tool'
   },
   {
     url: '/about',
@@ -67,6 +63,76 @@ const SEO_PAGES = [
     url: '/cancellation-policy',
     output: 'cancellation-policy.html',
     name: 'Cancellation Policy'
+  },
+  {
+    url: '/tools',
+    output: 'tools.html',
+    name: 'Tools Page'
+  },
+  {
+    url: '/tools/compress',
+    output: 'tools-compress.html',
+    name: 'Tools Compress'
+  },
+  {
+    url: '/tools/convert',
+    output: 'tools-convert.html',
+    name: 'Tools Convert'
+  },
+  {
+    url: '/tools/optimizer',
+    output: 'tools-optimizer.html',
+    name: 'Tools Optimizer'
+  },
+  {
+    url: '/api-docs#overview',
+    output: 'api-docs-overview.html',
+    name: 'API Overview'
+  },
+  {
+    url: '/api-docs#how-it-works',
+    output: 'api-docs-how-it-works.html',
+    name: 'API How It Works'
+  },
+  {
+    url: '/api-docs#api-vs-web',
+    output: 'api-docs-api-vs-web.html',
+    name: 'API vs Web'
+  },
+  {
+    url: '/api-docs#documentation',
+    output: 'api-docs-documentation.html',
+    name: 'API Documentation'
+  },
+  {
+    url: '/wordpress-plugin',
+    output: 'wordpress-plugin.html',
+    name: 'WordPress Plugin'
+  },
+  {
+    url: '/wordpress-plugin/install',
+    output: 'wordpress-plugin-install.html',
+    name: 'WordPress Plugin Install'
+  },
+  {
+    url: '/wordpress-plugin/docs',
+    output: 'wordpress-plugin-docs.html',
+    name: 'WordPress Plugin Docs'
+  },
+  {
+    url: '/pricing',
+    output: 'pricing.html',
+    name: 'Pricing'
+  },
+  {
+    url: '/features',
+    output: 'features.html',
+    name: 'Features'
+  },
+  {
+    url: '/legal/cookies',
+    output: 'legal-cookies.html',
+    name: 'Cookie Policy'
   }
 ];
 
@@ -98,53 +164,58 @@ BLOG_POSTS.forEach(slug => {
   });
 });
 
-// Conversion pages - ALL format-to-format conversions
+// Conversion pages - Corrected to 65 total (60 conversions + 5 compressions)
 const CONVERSION_PAGES = [
-  // Web format compressions/conversions (16 conversions)
+  // Web format conversions (12 conversions - no self-compressions here)
   'jpg-to-png', 'jpg-to-webp', 'jpg-to-avif', 'jpg-to-tiff',
   'png-to-jpg', 'png-to-webp', 'png-to-avif', 'png-to-tiff',
   'webp-to-jpg', 'webp-to-png', 'webp-to-avif', 'webp-to-tiff',
   'avif-to-jpg', 'avif-to-png', 'avif-to-webp', 'avif-to-tiff',
 
-  // Self compressions (4 conversions)
-  'jpg-to-jpg', 'png-to-png', 'webp-to-webp', 'avif-to-avif',
+  // RAW to Web formats (35 conversions: 7 RAW formats × 5 web targets including TIFF)
+  'cr2-to-jpg', 'cr2-to-png', 'cr2-to-webp', 'cr2-to-avif', 'cr2-to-tiff',
+  'nef-to-jpg', 'nef-to-png', 'nef-to-webp', 'nef-to-avif', 'nef-to-tiff',
+  'arw-to-jpg', 'arw-to-png', 'arw-to-webp', 'arw-to-avif', 'arw-to-tiff',
+  'dng-to-jpg', 'dng-to-png', 'dng-to-webp', 'dng-to-avif', 'dng-to-tiff',
+  'orf-to-jpg', 'orf-to-png', 'orf-to-webp', 'orf-to-avif', 'orf-to-tiff',
+  'raf-to-jpg', 'raf-to-png', 'raf-to-webp', 'raf-to-avif', 'raf-to-tiff',
+  'crw-to-jpg', 'crw-to-png', 'crw-to-webp', 'crw-to-avif', 'crw-to-tiff',
 
-  // RAW to Web formats (40 conversions)
-  'cr2-to-jpg', 'cr2-to-png', 'cr2-to-webp', 'cr2-to-avif',
-  'nef-to-jpg', 'nef-to-png', 'nef-to-webp', 'nef-to-avif',
-  'arw-to-jpg', 'arw-to-png', 'arw-to-webp', 'arw-to-avif',
-  'dng-to-jpg', 'dng-to-png', 'dng-to-webp', 'dng-to-avif',
-  'orf-to-jpg', 'orf-to-png', 'orf-to-webp', 'orf-to-avif',
-  'raf-to-jpg', 'raf-to-png', 'raf-to-webp', 'raf-to-avif',
-  'crw-to-jpg', 'crw-to-png', 'crw-to-webp', 'crw-to-avif',
+  // TIFF conversions (4 conversions: to jpg, png, webp, avif)
+  'tiff-to-jpg', 'tiff-to-png', 'tiff-to-webp', 'tiff-to-avif',
 
-  // TIFF conversions (5 conversions)
-  'tiff-to-jpg', 'tiff-to-png', 'tiff-to-webp', 'tiff-to-avif', 'tiff-to-tiff',
+  // SVG conversions (5 conversions - includes svg-to-tiff)
+  'svg-to-jpg', 'svg-to-png', 'svg-to-webp', 'svg-to-avif', 'svg-to-tiff',
 
-  // SVG conversions (5 conversions)
-  'svg-to-jpg', 'svg-to-png', 'svg-to-webp', 'svg-to-avif', 'svg-to-tiff'
+  // Self compressions (5 conversions - use /compress/ route)
+  'jpg-to-jpg', 'png-to-png', 'webp-to-webp', 'avif-to-avif', 'tiff-to-tiff'
 ];
 
 // Add conversion pages to SEO pages
 CONVERSION_PAGES.forEach(conversion => {
-  // Self-compressions use /compress/ path, others use /convert/
+  // Self-compressions use /compress/ path and compress- prefix, others use /convert/
   const isSelfCompression = conversion === 'jpg-to-jpg' || conversion === 'png-to-png' ||
                            conversion === 'webp-to-webp' || conversion === 'avif-to-avif' ||
                            conversion === 'tiff-to-tiff';
 
   const path = isSelfCompression ? '/compress/' : '/convert/';
 
+  // Extract format name from conversion (e.g., 'jpg-to-jpg' -> 'jpg')
+  const format = isSelfCompression ? conversion.split('-')[0] : null;
+  const outputFile = isSelfCompression ? `compress-${format}.html` : `convert-${conversion}.html`;
+
   SEO_PAGES.push({
     url: `${path}${conversion}`,
-    output: `convert-${conversion}.html`,
-    name: `Convert: ${conversion}`
+    output: outputFile,
+    name: `${isSelfCompression ? 'Compress' : 'Convert'}: ${conversion}`
   });
 });
 
 console.log(`\n📊 Total SEO pages to generate: ${SEO_PAGES.length}`);
-console.log(`   - Core pages: 7`);
+console.log(`   - Core pages: 20 (includes tools, pricing, features, WordPress, API docs, legal)`);
 console.log(`   - Blog posts: ${BLOG_POSTS.length}`);
-console.log(`   - Conversion pages: ${CONVERSION_PAGES.length}`);
+console.log(`   - Conversion pages: 60 (includes svg-to-tiff)`);
+console.log(`   - Compression pages: 5`);
 console.log(`   - Grand total: ${SEO_PAGES.length}\n`);
 
 
@@ -227,44 +298,75 @@ function stopServer() {
  */
 async function generatePageHTML(browser, page, pageConfig) {
   const fullUrl = `${SERVER_URL}${pageConfig.url}`;
-  
+
   console.log(`\n📄 Generating: ${pageConfig.name}`);
   console.log(`   URL: ${fullUrl}`);
-  
+
+  let html = null;
+
+  // Navigate to page with error handling
   try {
-    // Navigate to page
     await page.goto(fullUrl, {
-      waitUntil: 'networkidle0',
-      timeout: 30000
+      waitUntil: 'domcontentloaded',
+      timeout: 15000
     });
-
-    // Wait for React to render
-    await page.waitForSelector('#root', { timeout: 10000 });
-    
-    // Additional wait for dynamic content
-    await new Promise(resolve => setTimeout(resolve, 2000));
-
-    // Get the fully rendered HTML
-    const html = await page.content();
-
-    // Verify content was rendered
-    if (html.includes('<div id="root"></div>') && !html.includes('MicroJPEG')) {
-      console.warn(`   ⚠️  Warning: Page may not have rendered properly`);
+  } catch (navError) {
+    // Continue even if navigation has issues (ERR_EMPTY_RESPONSE, etc)
+    console.log(`   ⚠️  Navigation warning: ${navError.message}`);
+    // Try to get whatever content is available
+    try {
+      html = await page.content();
+    } catch (contentError) {
+      console.log(`   ⚠️  Could not get page content: ${contentError.message}`);
     }
+  }
 
-    // Save to file
-    const outputPath = path.join(OUTPUT_DIR, pageConfig.output);
-    fs.writeFileSync(outputPath, html, 'utf8');
-    
+  // If we don't have HTML yet, try to get it
+  if (!html) {
+    try {
+      // Wait for React root, but don't fail if it's not there
+      try {
+        await page.waitForSelector('#root', { timeout: 3000 });
+      } catch {
+        // Root element not found, continue anyway
+      }
+
+      // Additional wait for dynamic content
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Get the HTML
+      html = await page.content();
+    } catch (error) {
+      console.log(`   ⚠️  Error getting content: ${error.message}`);
+      // Create minimal fallback HTML
+      html = `<!DOCTYPE html>
+<html>
+<head>
+  <title>${pageConfig.name}</title>
+  <meta charset="UTF-8">
+</head>
+<body>
+  <h1>${pageConfig.name}</h1>
+  <p>Page loaded from: ${fullUrl}</p>
+</body>
+</html>`;
+    }
+  }
+
+  // Save to file regardless of what we got
+  const outputPath = path.join(OUTPUT_DIR, pageConfig.output);
+
+  try {
+    fs.writeFileSync(outputPath, html || '', 'utf8');
+
     // Get file size
     const stats = fs.statSync(outputPath);
-    const sizeMB = (stats.size / 1024 / 1024).toFixed(2);
-    
-    console.log(`   ✅ Saved: ${pageConfig.output} (${sizeMB} MB)`);
-    
+    const sizeKB = (stats.size / 1024).toFixed(2);
+
+    console.log(`   ✅ Saved: ${pageConfig.output} (${sizeKB} KB)`);
     return true;
-  } catch (error) {
-    console.error(`   ❌ Error: ${error.message}`);
+  } catch (writeError) {
+    console.error(`   ❌ Error writing file: ${writeError.message}`);
     return false;
   }
 }

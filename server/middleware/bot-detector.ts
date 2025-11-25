@@ -48,24 +48,74 @@ export function isBot(userAgent: string): boolean {
  */
 function getStaticHTMLPath(route: string): string | null {
   const seoDir = path.join(process.cwd(), 'dist/seo');
-  
+
   // Map routes to files
   const routeMap: Record<string, string> = {
     '/': 'index.html',
-    '/convert': 'convert.html',
     '/about': 'about.html',
     '/contact': 'contact.html',
     '/privacy-policy': 'privacy-policy.html',
     '/terms-of-service': 'terms-of-service.html',
     '/cancellation-policy': 'cancellation-policy.html',
+    '/tools': 'tools.html',
+    '/tools/compress': 'tools-compress.html',
+    '/tools/convert': 'tools-convert.html',
+    '/tools/optimizer': 'tools-optimizer.html',
+    '/api-docs': 'api-docs-overview.html', // Default to overview
+    '/wordpress-plugin': 'wordpress-plugin.html',
+    '/wordpress-plugin/install': 'wordpress-plugin-install.html',
+    '/wordpress-plugin/docs': 'wordpress-plugin-docs.html',
+    '/pricing': 'pricing.html',
+    '/features': 'features.html',
+    '/legal/cookies': 'legal-cookies.html',
   };
+
+  // Handle API docs fragment routes (#overview, #how-it-works, etc.)
+  if (route.startsWith('/api-docs')) {
+    const fragment = route.split('#')[1];
+    let fileName = 'api-docs-overview.html'; // Default
+
+    if (fragment) {
+      fileName = `api-docs-${fragment}.html`;
+    }
+
+    const filePath = path.join(seoDir, fileName);
+    if (fs.existsSync(filePath)) {
+      return filePath;
+    }
+    return null;
+  }
 
   // Handle blog posts
   if (route.startsWith('/blog/')) {
     const slug = route.replace('/blog/', '');
     const fileName = `blog-${slug}.html`;
     const filePath = path.join(seoDir, fileName);
-    
+
+    if (fs.existsSync(filePath)) {
+      return filePath;
+    }
+    return null;
+  }
+
+  // Handle conversion pages
+  if (route.startsWith('/convert/')) {
+    const conversion = route.replace('/convert/', '');
+    const fileName = `convert-${conversion}.html`;
+    const filePath = path.join(seoDir, fileName);
+
+    if (fs.existsSync(filePath)) {
+      return filePath;
+    }
+    return null;
+  }
+
+  // Handle compression pages
+  if (route.startsWith('/compress/')) {
+    const format = route.replace('/compress/', '').split('-')[0];
+    const fileName = `compress-${format}.html`;
+    const filePath = path.join(seoDir, fileName);
+
     if (fs.existsSync(filePath)) {
       return filePath;
     }
@@ -77,7 +127,7 @@ function getStaticHTMLPath(route: string): string | null {
   if (!fileName) return null;
 
   const filePath = path.join(seoDir, fileName);
-  
+
   // Check if file exists
   if (fs.existsSync(filePath)) {
     return filePath;
