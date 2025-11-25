@@ -8,7 +8,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import path from 'path';
 import { registerRoutes } from "./routes";
 import { setupVite, log } from "./vite";
-import { forceServeStatic } from "./force-static";  // ← EMERGENCY IMPORT
+import { safeServeStatic } from "./force-static";  // ← EMERGENCY IMPORT
 import { TestPremiumExpiryManager } from "./testPremiumExpiry";
 import { initializeQueueService, shutdownQueueService } from "./queueService";
 import { seedSuperuser } from "./superuser";
@@ -151,7 +151,7 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    forceServeStatic(app);  // ← USE EMERGENCY VERSION
+    safeServeStatic(app);  // ← USE EMERGENCY VERSION
   }
 
   const port = parseInt(process.env.PORT || '5000', 10);
