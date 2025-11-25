@@ -7,10 +7,12 @@ export function safeServeStatic(app: Express) {
   console.log('║  🔍 SAFE STATIC FILE SERVING - CHECKING ALL LOCATIONS   ║');
   console.log('╚══════════════════════════════════════════════════════════╝\n');
   
-  // Try multiple possible locations
+  // Try multiple possible locations (including where Vite is ACTUALLY building)
   const locations = [
+    path.resolve(process.cwd(), 'client', 'dist', 'client'), // ← Where Vite is ACTUALLY building!
     path.resolve(process.cwd(), 'dist', 'client'),
     path.resolve(process.cwd(), 'dist', 'public'),
+    '/app/client/dist/client', // ← Absolute version
     '/app/dist/client',
     '/app/dist/public',
   ];
