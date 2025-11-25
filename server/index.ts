@@ -18,6 +18,22 @@ import paypalPaymentRoutes from './routes/paypalPaymentRoutes';
 import instamojoRoutes from './routes/instamojoRoutes';
 import { botDetectionMiddleware, seoDebugEndpoint } from './middleware/bot-detector.js';
 
+// ========================================================================
+// Global error handlers - prevent crashes from unhandled errors
+// ========================================================================
+process.on('unhandledRejection', (error: any) => {
+  console.error('⚠️  Unhandled rejection (non-fatal):', error?.message || error);
+  // Don't exit - server keeps running
+});
+
+process.on('uncaughtException', (error: any) => {
+  console.error('⚠️  Uncaught exception (non-fatal):', error?.message || error);
+  // Don't exit - server keeps running
+});
+
+console.log('🛡️  Global error handlers installed');
+// ========================================================================
+
 const app = express();
 
 app.set('etag', false); // Disable ETags to prevent 304 responses
@@ -80,8 +96,14 @@ app.use((req, res, next) => {
     console.log('📝 Note: Set REDIS_URL environment variable for queue functionality');
   }
 
-  // Initialize superuser (seed if doesn't exist)
-  await seedSuperuser();
+  // Seed superuser account
+  try {
+    await seedSuperuser();
+    console.log('✅ Superuser seeded successfully');
+  } catch (error: any) {
+    console.error('❌ Failed to seed superuser (non-fatal):', error.message);
+    // Server continues despite error
+  }
 
   // 301 redirects for legacy URLs (SEO-friendly permanent redirects)
   app.use((req, res, next) => {
@@ -172,9 +194,10 @@ server.listen({
     ...(isDevelopment ? {} : { reusePort: true }),
   }, () => {
     log(`serving on port ${port}`);
-    
+
     // Start test-premium expiry checker
-    // TestPremiumExpiryManager.startExpiryChecker();
+    // TestPremiumExpiryManager.startExpiryChecker(); // Disabled - causes crashes in Docker
+    console.log('⏭️  Skipping test-premium expiry checker');
   });
 
   // Graceful shutdown handling
