@@ -1,0 +1,404 @@
+{
+  "generatedAt": "2025-11-25T06:52:03.343Z",
+  "totalPages": 99,
+  "successful": 99,
+  "failed": 0,
+  "pages": [
+    {
+      "url": "/",
+      "file": "index.html"
+    },
+    {
+      "url": "/about",
+      "file": "about.html"
+    },
+    {
+      "url": "/contact",
+      "file": "contact.html"
+    },
+    {
+      "url": "/privacy-policy",
+      "file": "privacy-policy.html"
+    },
+    {
+      "url": "/terms-of-service",
+      "file": "terms-of-service.html"
+    },
+    {
+      "url": "/cancellation-policy",
+      "file": "cancellation-policy.html"
+    },
+    {
+      "url": "/tools",
+      "file": "tools.html"
+    },
+    {
+      "url": "/tools/compress",
+      "file": "tools-compress.html"
+    },
+    {
+      "url": "/tools/convert",
+      "file": "tools-convert.html"
+    },
+    {
+      "url": "/tools/optimizer",
+      "file": "tools-optimizer.html"
+    },
+    {
+      "url": "/api-docs#overview",
+      "file": "api-docs-overview.html"
+    },
+    {
+      "url": "/api-docs#how-it-works",
+      "file": "api-docs-how-it-works.html"
+    },
+    {
+      "url": "/api-docs#api-vs-web",
+      "file": "api-docs-api-vs-web.html"
+    },
+    {
+      "url": "/api-docs#documentation",
+      "file": "api-docs-documentation.html"
+    },
+    {
+      "url": "/wordpress-plugin",
+      "file": "wordpress-plugin.html"
+    },
+    {
+      "url": "/wordpress-plugin/install",
+      "file": "wordpress-plugin-install.html"
+    },
+    {
+      "url": "/wordpress-plugin/docs",
+      "file": "wordpress-plugin-docs.html"
+    },
+    {
+      "url": "/pricing",
+      "file": "pricing.html"
+    },
+    {
+      "url": "/features",
+      "file": "features.html"
+    },
+    {
+      "url": "/legal/cookies",
+      "file": "legal-cookies.html"
+    },
+    {
+      "url": "/blog/how-to-use-microjpeg",
+      "file": "blog-how-to-use-microjpeg.html"
+    },
+    {
+      "url": "/blog/optimize-png-tiff-wordpress",
+      "file": "blog-optimize-png-tiff-wordpress.html"
+    },
+    {
+      "url": "/blog/avif-vs-webp-vs-jpg-2025",
+      "file": "blog-avif-vs-webp-vs-jpg-2025.html"
+    },
+    {
+      "url": "/blog/batch-convert-avif-2025",
+      "file": "blog-batch-convert-avif-2025.html"
+    },
+    {
+      "url": "/blog/raw-to-webp-photographer-workflow",
+      "file": "blog-raw-to-webp-photographer-workflow.html"
+    },
+    {
+      "url": "/blog/webp-back-to-jpg-png",
+      "file": "blog-webp-back-to-jpg-png.html"
+    },
+    {
+      "url": "/blog/image-compression-best-practices",
+      "file": "blog-image-compression-best-practices.html"
+    },
+    {
+      "url": "/blog/svg-to-avif-icons",
+      "file": "blog-svg-to-avif-icons.html"
+    },
+    {
+      "url": "/blog/jpg-recompression-myths",
+      "file": "blog-jpg-recompression-myths.html"
+    },
+    {
+      "url": "/blog/python-raw-to-tiff",
+      "file": "blog-python-raw-to-tiff.html"
+    },
+    {
+      "url": "/blog/webp-quality-settings",
+      "file": "blog-webp-quality-settings.html"
+    },
+    {
+      "url": "/blog/compress-jpg-images-without-losing-quality",
+      "file": "blog-compress-jpg-images-without-losing-quality.html"
+    },
+    {
+      "url": "/blog/raw-to-jpg-conversion-guide",
+      "file": "blog-raw-to-jpg-conversion-guide.html"
+    },
+    {
+      "url": "/blog/wordpress-image-optimization-guide",
+      "file": "blog-wordpress-image-optimization-guide.html"
+    },
+    {
+      "url": "/convert/jpg-to-png",
+      "file": "convert-jpg-to-png.html"
+    },
+    {
+      "url": "/convert/jpg-to-webp",
+      "file": "convert-jpg-to-webp.html"
+    },
+    {
+      "url": "/convert/jpg-to-avif",
+      "file": "convert-jpg-to-avif.html"
+    },
+    {
+      "url": "/convert/jpg-to-tiff",
+      "file": "convert-jpg-to-tiff.html"
+    },
+    {
+      "url": "/convert/png-to-jpg",
+      "file": "convert-png-to-jpg.html"
+    },
+    {
+      "url": "/convert/png-to-webp",
+      "file": "convert-png-to-webp.html"
+    },
+    {
+      "url": "/convert/png-to-avif",
+      "file": "convert-png-to-avif.html"
+    },
+    {
+      "url": "/convert/png-to-tiff",
+      "file": "convert-png-to-tiff.html"
+    },
+    {
+      "url": "/convert/webp-to-jpg",
+      "file": "convert-webp-to-jpg.html"
+    },
+    {
+      "url": "/convert/webp-to-png",
+      "file": "convert-webp-to-png.html"
+    },
+    {
+      "url": "/convert/webp-to-avif",
+      "file": "convert-webp-to-avif.html"
+    },
+    {
+      "url": "/convert/webp-to-tiff",
+      "file": "convert-webp-to-tiff.html"
+    },
+    {
+      "url": "/convert/avif-to-jpg",
+      "file": "convert-avif-to-jpg.html"
+    },
+    {
+      "url": "/convert/avif-to-png",
+      "file": "convert-avif-to-png.html"
+    },
+    {
+      "url": "/convert/avif-to-webp",
+      "file": "convert-avif-to-webp.html"
+    },
+    {
+      "url": "/convert/avif-to-tiff",
+      "file": "convert-avif-to-tiff.html"
+    },
+    {
+      "url": "/convert/cr2-to-jpg",
+      "file": "convert-cr2-to-jpg.html"
+    },
+    {
+      "url": "/convert/cr2-to-png",
+      "file": "convert-cr2-to-png.html"
+    },
+    {
+      "url": "/convert/cr2-to-webp",
+      "file": "convert-cr2-to-webp.html"
+    },
+    {
+      "url": "/convert/cr2-to-avif",
+      "file": "convert-cr2-to-avif.html"
+    },
+    {
+      "url": "/convert/cr2-to-tiff",
+      "file": "convert-cr2-to-tiff.html"
+    },
+    {
+      "url": "/convert/nef-to-jpg",
+      "file": "convert-nef-to-jpg.html"
+    },
+    {
+      "url": "/convert/nef-to-png",
+      "file": "convert-nef-to-png.html"
+    },
+    {
+      "url": "/convert/nef-to-webp",
+      "file": "convert-nef-to-webp.html"
+    },
+    {
+      "url": "/convert/nef-to-avif",
+      "file": "convert-nef-to-avif.html"
+    },
+    {
+      "url": "/convert/nef-to-tiff",
+      "file": "convert-nef-to-tiff.html"
+    },
+    {
+      "url": "/convert/arw-to-jpg",
+      "file": "convert-arw-to-jpg.html"
+    },
+    {
+      "url": "/convert/arw-to-png",
+      "file": "convert-arw-to-png.html"
+    },
+    {
+      "url": "/convert/arw-to-webp",
+      "file": "convert-arw-to-webp.html"
+    },
+    {
+      "url": "/convert/arw-to-avif",
+      "file": "convert-arw-to-avif.html"
+    },
+    {
+      "url": "/convert/arw-to-tiff",
+      "file": "convert-arw-to-tiff.html"
+    },
+    {
+      "url": "/convert/dng-to-jpg",
+      "file": "convert-dng-to-jpg.html"
+    },
+    {
+      "url": "/convert/dng-to-png",
+      "file": "convert-dng-to-png.html"
+    },
+    {
+      "url": "/convert/dng-to-webp",
+      "file": "convert-dng-to-webp.html"
+    },
+    {
+      "url": "/convert/dng-to-avif",
+      "file": "convert-dng-to-avif.html"
+    },
+    {
+      "url": "/convert/dng-to-tiff",
+      "file": "convert-dng-to-tiff.html"
+    },
+    {
+      "url": "/convert/orf-to-jpg",
+      "file": "convert-orf-to-jpg.html"
+    },
+    {
+      "url": "/convert/orf-to-png",
+      "file": "convert-orf-to-png.html"
+    },
+    {
+      "url": "/convert/orf-to-webp",
+      "file": "convert-orf-to-webp.html"
+    },
+    {
+      "url": "/convert/orf-to-avif",
+      "file": "convert-orf-to-avif.html"
+    },
+    {
+      "url": "/convert/orf-to-tiff",
+      "file": "convert-orf-to-tiff.html"
+    },
+    {
+      "url": "/convert/raf-to-jpg",
+      "file": "convert-raf-to-jpg.html"
+    },
+    {
+      "url": "/convert/raf-to-png",
+      "file": "convert-raf-to-png.html"
+    },
+    {
+      "url": "/convert/raf-to-webp",
+      "file": "convert-raf-to-webp.html"
+    },
+    {
+      "url": "/convert/raf-to-avif",
+      "file": "convert-raf-to-avif.html"
+    },
+    {
+      "url": "/convert/raf-to-tiff",
+      "file": "convert-raf-to-tiff.html"
+    },
+    {
+      "url": "/convert/crw-to-jpg",
+      "file": "convert-crw-to-jpg.html"
+    },
+    {
+      "url": "/convert/crw-to-png",
+      "file": "convert-crw-to-png.html"
+    },
+    {
+      "url": "/convert/crw-to-webp",
+      "file": "convert-crw-to-webp.html"
+    },
+    {
+      "url": "/convert/crw-to-avif",
+      "file": "convert-crw-to-avif.html"
+    },
+    {
+      "url": "/convert/crw-to-tiff",
+      "file": "convert-crw-to-tiff.html"
+    },
+    {
+      "url": "/convert/tiff-to-jpg",
+      "file": "convert-tiff-to-jpg.html"
+    },
+    {
+      "url": "/convert/tiff-to-png",
+      "file": "convert-tiff-to-png.html"
+    },
+    {
+      "url": "/convert/tiff-to-webp",
+      "file": "convert-tiff-to-webp.html"
+    },
+    {
+      "url": "/convert/tiff-to-avif",
+      "file": "convert-tiff-to-avif.html"
+    },
+    {
+      "url": "/convert/svg-to-jpg",
+      "file": "convert-svg-to-jpg.html"
+    },
+    {
+      "url": "/convert/svg-to-png",
+      "file": "convert-svg-to-png.html"
+    },
+    {
+      "url": "/convert/svg-to-webp",
+      "file": "convert-svg-to-webp.html"
+    },
+    {
+      "url": "/convert/svg-to-avif",
+      "file": "convert-svg-to-avif.html"
+    },
+    {
+      "url": "/convert/svg-to-tiff",
+      "file": "convert-svg-to-tiff.html"
+    },
+    {
+      "url": "/compress/jpg-to-jpg",
+      "file": "compress-jpg.html"
+    },
+    {
+      "url": "/compress/png-to-png",
+      "file": "compress-png.html"
+    },
+    {
+      "url": "/compress/webp-to-webp",
+      "file": "compress-webp.html"
+    },
+    {
+      "url": "/compress/avif-to-avif",
+      "file": "compress-avif.html"
+    },
+    {
+      "url": "/compress/tiff-to-tiff",
+      "file": "compress-tiff.html"
+    }
+  ]
+}

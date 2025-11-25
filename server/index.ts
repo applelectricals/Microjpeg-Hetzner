@@ -166,15 +166,15 @@ app.use((req, res, next) => {
   const port = parseInt(process.env.PORT || '5000', 10);
   const isDevelopment = process.env.NODE_ENV === 'development';
   
-  server.listen({
-    port,
-    host: isDevelopment ? "localhost" : "0.0.0.0",
+server.listen({
+  port,
+  host: "0.0.0.0",  // Listen on all interfaces (IPv4 + IPv6)
     ...(isDevelopment ? {} : { reusePort: true }),
   }, () => {
     log(`serving on port ${port}`);
     
     // Start test-premium expiry checker
-    TestPremiumExpiryManager.startExpiryChecker();
+    // TestPremiumExpiryManager.startExpiryChecker();
   });
 
   // Graceful shutdown handling
