@@ -1,15 +1,14 @@
-// server/index.ts - FIXED VERSION
-// Old user routes (kept for reference) - replaced by simplified user tier routes
-import 'dotenv/config'; // ← ADD THIS AS FIRST LINE
+// server/index.ts - WITH EMERGENCY FIX
+import 'dotenv/config';
 
-// import userRoutes from './routes/api-user-routes';
 import userTierRoutes from './routes/user-tier-routes';
-import userRoutes from './routes/userRoutes'; // ← NEW: Tier config API
-import sequentialBatchRoutes from './sequentialBatchRoutes'; // ← NEW: Sequential batch processing
+import userRoutes from './routes/userRoutes';
+import sequentialBatchRoutes from './sequentialBatchRoutes';
 import express, { type Request, Response, NextFunction } from "express";
 import path from 'path';
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite, log } from "./vite";
+import { forceServeStatic } from "./force-static";  // ← EMERGENCY IMPORT
 import { TestPremiumExpiryManager } from "./testPremiumExpiry";
 import { initializeQueueService, shutdownQueueService } from "./queueService";
 import { seedSuperuser } from "./superuser";
@@ -18,39 +17,32 @@ import paypalPaymentRoutes from './routes/paypalPaymentRoutes';
 import instamojoRoutes from './routes/instamojoRoutes';
 import { botDetectionMiddleware, seoDebugEndpoint } from './middleware/bot-detector.js';
 
-// ========================================================================
-// Global error handlers - prevent crashes from unhandled errors
-// ========================================================================
+// Global error handlers
 process.on('unhandledRejection', (error: any) => {
   console.error('⚠️  Unhandled rejection (non-fatal):', error?.message || error);
-  // Don't exit - server keeps running
 });
 
 process.on('uncaughtException', (error: any) => {
   console.error('⚠️  Uncaught exception (non-fatal):', error?.message || error);
-  // Don't exit - server keeps running
 });
 
 console.log('🛡️  Global error handlers installed');
-// ========================================================================
 
 const app = express();
 
-app.set('etag', false); // Disable ETags to prevent 304 responses
+app.set('etag', false);
 app.use('/api', instamojoRoutes);
 app.use('/api', paypalPaymentRoutes);
 app.use('/api/payment', paymentRouter);
 app.use(express.json({ limit: '200mb' }));
 app.use(express.urlencoded({ extended: true, limit: '200mb' }));
 app.use((req, res, next) => {
-  req.setTimeout(600000); // 10 minutes
+  req.setTimeout(600000);
   res.setTimeout(600000);
   next();
 });
 
-// Force all traffic to serve the React app (prevent external redirects)
 app.use((req, res, next) => {
-  // Add security headers to prevent external redirects
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -85,33 +77,27 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Initialize Redis and queue services
   try {
     const queueInitialized = await initializeQueueService();
     if (!queueInitialized) {
-      console.warn('⚠️  Queue service failed to initialize - will fallback to direct processing');
+      console.warn('⚠️  Queue service failed to initialize');
     }
   } catch (error) {
     console.error('❌ Queue service initialization error:', error);
-    console.log('📝 Note: Set REDIS_URL environment variable for queue functionality');
   }
 
-  // Seed superuser account
   try {
     await seedSuperuser();
     console.log('✅ Superuser seeded successfully');
   } catch (error: any) {
     console.error('❌ Failed to seed superuser (non-fatal):', error.message);
-    // Server continues despite error
   }
 
-  // 301 redirects for legacy URLs (SEO-friendly permanent redirects)
+  // 301 redirects
   app.use((req, res, next) => {
-    // Normalize path by removing trailing slash for consistent matching
     const normalizedPath = req.path.endsWith('/') && req.path !== '/' ? req.path.slice(0, -1) : req.path;
     
     const redirectMap: Record<string, string> = {
-      // '/compress-free': '/free',  // Commented out - allow /compress-free to work normally
       '/compress-premium': '/premium', 
       '/compress-enterprise': '/enterprise',
       '/wordpress/details': '/wordpress-plugin',
@@ -134,7 +120,6 @@ app.use((req, res, next) => {
 
     const redirectTo = redirectMap[normalizedPath];
     if (redirectTo) {
-      // Preserve query parameters if any
       const queryString = req.url.includes('?') ? req.url.substring(req.url.indexOf('?')) : '';
       return res.redirect(301, redirectTo + queryString);
     }
@@ -144,60 +129,43 @@ app.use((req, res, next) => {
 
   const server = await registerRoutes(app);
 
-  // User tier and usage routes
   app.use('/api/user', userTierRoutes);
-  app.use('/api/user', userRoutes); // ← NEW: Add tier config routes
-
-  // Sequential batch processing routes
-  app.use('/api/sequential-batch', sequentialBatchRoutes); // ← NEW: Sequential batch processing
+  app.use('/api/user', userRoutes);
+  app.use('/api/sequential-batch', sequentialBatchRoutes);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-
     res.status(status).json({ message });
     throw err;
   });
 
-  // Debug endpoint (optional, for testing)
+  // Debug endpoint
   app.get('/__seo-debug', seoDebugEndpoint);
 
-  // Bot detection middleware (CRITICAL - must come BEFORE serveStatic)
-  app.use(botDetectionMiddleware);
+  // TEMPORARILY DISABLE BOT DETECTOR FOR DEBUGGING
+  // app.use(botDetectionMiddleware);
+  console.log('⚠️  Bot detector DISABLED for debugging');
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
+  // ⚡ EMERGENCY STATIC SERVING - checks ALL locations
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    forceServeStatic(app);  // ← USE EMERGENCY VERSION
   }
 
-  // ❌ REMOVED: Duplicate catch-all route that was breaking production
-  // The serveStatic() function already has a catch-all route inside it
-  // that serves index.html for all non-matching routes
-  
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
   const port = parseInt(process.env.PORT || '5000', 10);
   const isDevelopment = process.env.NODE_ENV === 'development';
   
-server.listen({
-  port,
-  host: "0.0.0.0",  // Listen on all interfaces (IPv4 + IPv6)
+  server.listen({
+    port,
+    host: "0.0.0.0",
     ...(isDevelopment ? {} : { reusePort: true }),
   }, () => {
     log(`serving on port ${port}`);
-
-    // Start test-premium expiry checker
-    // TestPremiumExpiryManager.startExpiryChecker(); // Disabled - causes crashes in Docker
     console.log('⏭️  Skipping test-premium expiry checker');
   });
 
-  // Graceful shutdown handling
   process.on('SIGTERM', async () => {
     console.log('🔄 Received SIGTERM, shutting down gracefully...');
     await shutdownQueueService();
