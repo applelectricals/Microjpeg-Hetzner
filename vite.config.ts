@@ -25,11 +25,9 @@ export default defineConfig({
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
-    // CRITICAL FIX: outDir must go UP one level from root (client/)
-    // to place build in /app/dist/client instead of /app/client/dist/client
-    outDir: path.resolve(import.meta.dirname, "client", "..", "dist", "client"),
-    // Alternative (clearer):
-    // outDir: path.resolve(import.meta.dirname, "dist", "client"),
+    // CRITICAL: Use ABSOLUTE path, not relative to root
+    // This ensures it goes to /app/dist/client, not /app/client/dist/client
+    outDir: path.resolve(import.meta.dirname, "dist", "client"),
     emptyOutDir: true,
   },
   server: {
