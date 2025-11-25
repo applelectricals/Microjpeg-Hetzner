@@ -6,7 +6,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { lazy, Suspense, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import ApiSignup from '@/pages/api-signup';
 
 // Loading component for better UX during chunk loading
 const PageLoader = () => (
