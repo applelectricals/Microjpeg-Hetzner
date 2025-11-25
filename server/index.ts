@@ -8,7 +8,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import path from 'path';
 import { registerRoutes } from "./routes";
 import { setupVite, log } from "./vite";
-import { safeServeStatic } from "./force-static";  // ← EMERGENCY IMPORT
+import { safeServeStatic } from "./safe-static";  // ← SAFE IMPORT
 import { TestPremiumExpiryManager } from "./testPremiumExpiry";
 import { initializeQueueService, shutdownQueueService } from "./queueService";
 import { seedSuperuser } from "./superuser";
