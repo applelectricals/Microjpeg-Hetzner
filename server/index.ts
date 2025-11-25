@@ -143,9 +143,10 @@ app.use((req, res, next) => {
   // Debug endpoint
   app.get('/__seo-debug', seoDebugEndpoint);
 
-  // TEMPORARILY DISABLE BOT DETECTOR FOR DEBUGGING
-  // app.use(botDetectionMiddleware);
-  console.log('⚠️  Bot detector DISABLED for debugging');
+  
+   app.use(botDetectionMiddleware);
+   // TEMPORARILY DISABLE BOT DETECTOR FOR DEBUGGING
+  //console.log('⚠️  Bot detector DISABLED for debugging');
 
   // ⚡ EMERGENCY STATIC SERVING - checks ALL locations
   if (app.get("env") === "development") {
