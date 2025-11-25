@@ -68,36 +68,61 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  // FIXED: Use process.cwd() instead of import.meta.dirname
-  // This ensures we always resolve from /app/ (the project root)
-  const distPath = path.resolve(process.cwd(), 'dist', 'client');
+  console.log('🔍 Searching for client build directory...');
+  
+  // Try multiple possible locations
+  const possiblePaths = [
+    // Strategy 1: From project root (most likely in production)
+    path.resolve(process.cwd(), 'dist', 'client'),
+    
+    // Strategy 2: Relative to compiled server code location
+    path.resolve(import.meta.dirname, 'client'),
+    
+    // Strategy 3: One level up from compiled code, then into dist/client
+    path.resolve(import.meta.dirname, '..', 'client'),
+    
+    // Strategy 4: Absolute path (if everything else fails)
+    '/app/dist/client',
+  ];
 
-  console.log('🔍 Static files debug:');
-  console.log('   process.cwd():', process.cwd());
-  console.log('   import.meta.dirname:', import.meta.dirname);
-  console.log('   Resolved distPath:', distPath);
-  console.log('   Directory exists:', fs.existsSync(distPath));
+  console.log('   Checking paths:');
+  let distPath: string | null = null;
+  
+  for (const testPath of possiblePaths) {
+    const exists = fs.existsSync(testPath);
+    console.log(`   ${exists ? '✅' : '❌'} ${testPath}`);
+    
+    if (exists && !distPath) {
+      distPath = testPath;
+    }
+  }
 
-  if (!fs.existsSync(distPath)) {
-    // List what DOES exist in dist/
+  if (!distPath) {
+    // Last resort: show what actually exists
+    console.log('\n❌ Could not find client build in any expected location!');
+    console.log('📂 Debugging info:');
+    console.log('   process.cwd():', process.cwd());
+    console.log('   import.meta.dirname:', import.meta.dirname);
+    
+    // Show contents of dist/ if it exists
     const distRoot = path.resolve(process.cwd(), 'dist');
     if (fs.existsSync(distRoot)) {
-      console.log('   Contents of dist/:', fs.readdirSync(distRoot));
+      console.log('   Contents of dist/:', fs.readdirSync(distRoot).join(', '));
     } else {
-      console.log('   ❌ dist/ directory does not exist!');
+      console.log('   ❌ dist/ directory does not exist at project root!');
     }
 
     throw new Error(
-      `Could not find the build directory: ${distPath}, make sure to build the client first`,
+      `Could not find the build directory in any of these locations: ${possiblePaths.join(', ')}`
     );
   }
 
-  console.log('   ✅ Found static files directory');
+  console.log(`\n✅ Found client build at: ${distPath}\n`);
 
   app.use(express.static(distPath));
 
   // fall through to index.html if the file doesn't exist
   app.use("*", (_req, res) => {
-    res.sendFile(path.resolve(distPath, "index.html"));
+    res.sendFile(path.resolve(distPath!, "index.html"));
   });
 }
