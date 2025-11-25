@@ -1,4 +1,4 @@
-// server/index.ts - UPDATED VERSION
+// server/index.ts - FIXED VERSION
 // Old user routes (kept for reference) - replaced by simplified user tier routes
 import 'dotenv/config'; // ← ADD THIS AS FIRST LINE
 
@@ -159,6 +159,12 @@ app.use((req, res, next) => {
     throw err;
   });
 
+  // Debug endpoint (optional, for testing)
+  app.get('/__seo-debug', seoDebugEndpoint);
+
+  // Bot detection middleware (CRITICAL - must come BEFORE serveStatic)
+  app.use(botDetectionMiddleware);
+
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
@@ -168,19 +174,10 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // IMPORTANT: Add this AFTER API routes but BEFORE the React fallback
-
-  // Debug endpoint (optional, for testing)
-  app.get('/__seo-debug', seoDebugEndpoint);
-
-  // Bot detection middleware (CRITICAL)
-  app.use(botDetectionMiddleware);
-
-  // React app fallback (MUST BE LAST)
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/index.html'));
-  });
-
+  // ❌ REMOVED: Duplicate catch-all route that was breaking production
+  // The serveStatic() function already has a catch-all route inside it
+  // that serves index.html for all non-matching routes
+  
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
   // this serves both the API and the client.
