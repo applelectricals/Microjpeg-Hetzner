@@ -1,7 +1,9 @@
 {
-  "generatedAt": "2025-11-26T07:24:51.562Z",
-  "totalPages": 99,
-  "successful": 99,
+  "generatedAt": "2025-11-26T10:21:23.523Z",
+  "sourceUrl": "https://microjpeg.com",
+  "duration": "2436.5s",
+  "totalPages": 96,
+  "successful": 96,
   "failed": 0,
   "pages": [
     {
@@ -45,20 +47,8 @@
       "file": "tools-optimizer.html"
     },
     {
-      "url": "/api-docs#overview",
+      "url": "/api-docs",
       "file": "api-docs-overview.html"
-    },
-    {
-      "url": "/api-docs#how-it-works",
-      "file": "api-docs-how-it-works.html"
-    },
-    {
-      "url": "/api-docs#api-vs-web",
-      "file": "api-docs-api-vs-web.html"
-    },
-    {
-      "url": "/api-docs#documentation",
-      "file": "api-docs-documentation.html"
     },
     {
       "url": "/wordpress-plugin",
