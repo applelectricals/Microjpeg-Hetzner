@@ -27,7 +27,7 @@ const __dirname = path.dirname(__filename);
 // Configuration
 const SERVER_PORT = 10000;
 // Always use localhost for development - production builds should have pre-rendered HTML
-const SERVER_URL = `http://127.0.0.1:${SERVER_PORT}`;
+const SERVER_URL = 'https://microjpeg.com';
 const OUTPUT_DIR = path.join(__dirname, '../dist/seo');
 const STARTUP_DELAY = 15000; // Wait 15s for server to start (increased for build environment)
 const MAX_RETRIES = 3; // Number of times to retry connecting to server
@@ -294,6 +294,77 @@ function stopServer() {
 }
 
 /**
+ * Wait for React app to fully render with content
+ * This is the KEY FIX - we need to wait for actual content, not just the shell
+ */
+async function waitForReactRender(page, pageConfig) {
+  // Define selectors that indicate the page has fully loaded
+  // These should be elements that only appear AFTER React renders the content
+  const contentSelectors = [
+    // Common content indicators - at least one should exist on every page
+    'main',
+    '[data-testid="page-content"]',
+    'article',
+    '.content',
+    '#content',
+    // Specific page indicators
+    'h1',
+    'h2',
+    // Footer usually loads last
+    'footer',
+  ];
+
+  // Wait for network to be idle (no pending requests for 500ms)
+  try {
+    await page.waitForNetworkIdle({ 
+      idleTime: 500,
+      timeout: 10000 
+    });
+  } catch (e) {
+    console.log(`   ⚠️  Network idle timeout, continuing...`);
+  }
+
+  // Wait for at least one content selector to appear
+  let foundContent = false;
+  for (const selector of contentSelectors) {
+    try {
+      await page.waitForSelector(selector, { timeout: 2000 });
+      foundContent = true;
+      break;
+    } catch (e) {
+      // Continue to next selector
+    }
+  }
+
+  if (!foundContent) {
+    console.log(`   ⚠️  No content selectors found, waiting extra time...`);
+  }
+
+  // Additional wait for any lazy-loaded content or animations
+  await new Promise(resolve => setTimeout(resolve, 2000));
+
+  // Check if the page has meaningful content (not just empty shell)
+  const hasContent = await page.evaluate(() => {
+    const root = document.getElementById('root');
+    if (!root) return false;
+    
+    // Check if root has substantial content
+    const textContent = root.innerText || '';
+    const childCount = root.querySelectorAll('*').length;
+    
+    // Page should have more than just a header
+    return textContent.length > 100 && childCount > 10;
+  });
+
+  if (!hasContent) {
+    console.log(`   ⚠️  Page appears to have minimal content, waiting longer...`);
+    await new Promise(resolve => setTimeout(resolve, 3000));
+  }
+
+  return hasContent;
+}
+
+/**
  * Generate HTML for a single page
  */
 async function generatePageHTML(browser, page, pageConfig) {
@@ -304,60 +375,87 @@ async function generatePageHTML(browser, page, pageConfig) {
 
   let html = null;
 
-  // Navigate to page with error handling
+  // Navigate to page with proper wait conditions
   try {
+    // KEY FIX: Use 'networkidle0' or 'networkidle2' instead of 'domcontentloaded'
+    // networkidle0: Wait until there are no network connections for 500ms
+    // networkidle2: Wait until there are ≤2 network connections for 500ms
     await page.goto(fullUrl, {
-      waitUntil: 'domcontentloaded',
-      timeout: 15000
+      waitUntil: 'networkidle2',  // Changed from 'domcontentloaded'
+      timeout: 30000              // Increased timeout to 30s
     });
+
+    // Wait for React to fully render the page content
+    const hasContent = await waitForReactRender(page, pageConfig);
+    
+    if (!hasContent) {
+      console.log(`   ⚠️  Content may be incomplete`);
+    }
+
+    // Get the fully rendered HTML
+    html = await page.content();
+
   } catch (navError) {
-    // Continue even if navigation has issues (ERR_EMPTY_RESPONSE, etc)
     console.log(`   ⚠️  Navigation warning: ${navError.message}`);
+    
     // Try to get whatever content is available
     try {
+      // Even if navigation failed, wait a bit and try to get content
+      await new Promise(resolve => setTimeout(resolve, 5000));
       html = await page.content();
     } catch (contentError) {
       console.log(`   ⚠️  Could not get page content: ${contentError.message}`);
     }
   }
 
-  // If we don't have HTML yet, try to get it
-  if (!html) {
-    try {
-      // Wait for React root, but don't fail if it's not there
+  // Validate the HTML has actual content
+  if (html) {
+    const contentLength = html.length;
+    const hasBody = html.includes('<main') || html.includes('<article') || 
+                    html.includes('class="content"') || html.includes('<h1');
+    
+    if (contentLength < 5000 || !hasBody) {
+      console.log(`   ⚠️  HTML seems incomplete (${contentLength} bytes, hasBody: ${hasBody})`);
+      console.log(`   🔄 Retrying with longer wait...`);
+      
+      // Retry with longer wait
       try {
-        await page.waitForSelector('#root', { timeout: 3000 });
-      } catch {
-        // Root element not found, continue anyway
+        await page.goto(fullUrl, {
+          waitUntil: 'networkidle0',
+          timeout: 45000
+        });
+        await new Promise(resolve => setTimeout(resolve, 5000));
+        html = await page.content();
+        console.log(`   ✅ Retry successful (${html.length} bytes)`);
+      } catch (retryError) {
+        console.log(`   ⚠️  Retry failed: ${retryError.message}`);
       }
+    }
+  }
 
-      // Additional wait for dynamic content
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      // Get the HTML
-      html = await page.content();
-    } catch (error) {
-      console.log(`   ⚠️  Error getting content: ${error.message}`);
-      // Create minimal fallback HTML
-      html = `<!DOCTYPE html>
+  // If still no good HTML, create fallback
+  if (!html || html.length < 1000) {
+    console.log(`   ❌ Failed to get valid HTML, creating fallback`);
+    html = `<!DOCTYPE html>
 <html>
 <head>
-  <title>${pageConfig.name}</title>
+  <title>${pageConfig.name} - MicroJPEG</title>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
   <h1>${pageConfig.name}</h1>
   <p>Page loaded from: ${fullUrl}</p>
+  <p>Please visit <a href="${fullUrl}">${fullUrl}</a> for the full content.</p>
 </body>
 </html>`;
-    }
   }
 
-  // Save to file regardless of what we got
+  // Save to file
   const outputPath = path.join(OUTPUT_DIR, pageConfig.output);
 
   try {
-    fs.writeFileSync(outputPath, html || '', 'utf8');
+    fs.writeFileSync(outputPath, html, 'utf8');
 
     // Get file size
     const stats = fs.statSync(outputPath);
@@ -397,7 +495,7 @@ async function main() {
     await waitForServer();
     console.log('✅ Server is responding\n');
 
-    // Launch Puppeteer
+    // Launch Puppeteer with optimized settings
     console.log('🌐 Launching browser...');
     const browser = await puppeteer.launch({
       headless: 'new',
@@ -405,7 +503,9 @@ async function main() {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-gpu'
+        '--disable-gpu',
+        '--disable-web-security',  // Allow cross-origin requests
+        '--disable-features=IsolateOrigins,site-per-process'  // Faster rendering
       ]
     });
     console.log('✅ Browser launched\n');
@@ -414,6 +514,12 @@ async function main() {
     
     // Set viewport for consistent rendering
     await page.setViewport({ width: 1920, height: 1080 });
+
+    // Set a realistic user agent (some sites block headless browsers)
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
+
+    // Enable JavaScript (should be on by default, but explicit is good)
+    await page.setJavaScriptEnabled(true);
 
     // Track results
     let successful = 0;

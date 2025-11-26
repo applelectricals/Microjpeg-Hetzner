@@ -143,10 +143,14 @@ app.use((req, res, next) => {
   // Debug endpoint
   app.get('/__seo-debug', seoDebugEndpoint);
 
-  
-   app.use(botDetectionMiddleware);
-   // TEMPORARILY DISABLE BOT DETECTOR FOR DEBUGGING
-  //console.log('⚠️  Bot detector DISABLED for debugging');
+   // TEMPORARILY DISABLE BOT DETECTOR DURING SEO GENERATION
+   // This allows Puppeteer to get the full React-rendered pages instead of empty static files
+   const isSeoGenerationMode = process.env.NODE_ENV === 'development' && process.env.PORT === '10000';
+   if (!isSeoGenerationMode) {
+     app.use(botDetectionMiddleware);
+   } else {
+     console.log('⚠️  Bot detector DISABLED - SEO generation mode (PORT=10000)');
+   }
 
   // ⚡ EMERGENCY STATIC SERVING - checks ALL locations
   if (app.get("env") === "development") {
