@@ -65,68 +65,49 @@ const convertToINR = (usd: number) => {
   return Math.round(usd * rate);
 };
 
-// Razorpay Subscription Button Component - Let React handle cleanup
-function RazorpayButton({ billingCycle }: { billingCycle: 'monthly' | 'yearly' }) {
+// Razorpay Subscription Button Component - Separate components for each cycle
+function RazorpayMonthlyButton() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const buttonId = RAZORPAY_BUTTON_IDS[billingCycle];
-  const [showButton, setShowButton] = useState(false);
 
   useEffect(() => {
-    // Reset on billing cycle change
-    setShowButton(false);
-    
-    // Delay to allow cleanup
-    const timer = setTimeout(() => {
-      setShowButton(true);
-    }, 100);
+    if (!containerRef.current) return;
 
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [billingCycle]);
-
-  useEffect(() => {
-    if (!showButton || !containerRef.current) return;
-
-    const container = containerRef.current;
-    container.innerHTML = '';
-
-    // Create form element
     const form = document.createElement('form');
-    
-    // Create script element
     const script = document.createElement('script');
     script.src = 'https://cdn.razorpay.com/static/widget/subscription-button.js';
-    script.setAttribute('data-subscription_button_id', buttonId);
+    script.setAttribute('data-subscription_button_id', RAZORPAY_BUTTON_IDS.monthly);
     script.setAttribute('data-button_theme', 'brand-color');
     script.async = true;
 
     form.appendChild(script);
-    container.appendChild(form);
+    containerRef.current.appendChild(form);
 
-    console.log(`✅ Loaded ${billingCycle} button: ${buttonId}`);
+    console.log('✅ Monthly button loaded');
+  }, []);
 
-    return () => {
-      if (container) {
-        container.innerHTML = '';
-      }
-    };
-  }, [showButton, billingCycle, buttonId]);
+  return <div ref={containerRef} className="min-h-[50px] razorpay-container" />;
+}
 
-  return (
-    <div>
-      {showButton ? (
-        <div 
-          ref={containerRef}
-          className="min-h-[50px] razorpay-container"
-        />
-      ) : (
-        <div className="text-center py-4">
-          <Loader2 className="w-6 h-6 text-green-500 mx-auto animate-spin" />
-        </div>
-      )}
-    </div>
-  );
+function RazorpayYearlyButton() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const form = document.createElement('form');
+    const script = document.createElement('script');
+    script.src = 'https://cdn.razorpay.com/static/widget/subscription-button.js';
+    script.setAttribute('data-subscription_button_id', RAZORPAY_BUTTON_IDS.yearly);
+    script.setAttribute('data-button_theme', 'brand-color');
+    script.async = true;
+
+    form.appendChild(script);
+    containerRef.current.appendChild(form);
+
+    console.log('✅ Yearly button loaded');
+  }, []);
+
+  return <div ref={containerRef} className="min-h-[50px] razorpay-container" />;
 }
 
 export default function CheckoutPage() {
@@ -564,7 +545,11 @@ export default function CheckoutPage() {
                   <p className="text-sm text-gray-300 mb-3">
                     ✓ Cards/UPI/NetBanking • All {billingCycle} plans available
                   </p>
-                  <RazorpayButton billingCycle={billingCycle} />
+                  {billingCycle === 'monthly' ? (
+                    <RazorpayMonthlyButton />
+                  ) : (
+                    <RazorpayYearlyButton />
+                  )}
                 </div>
 
               </CardContent>
