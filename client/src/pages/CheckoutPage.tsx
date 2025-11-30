@@ -21,11 +21,19 @@ const RAZORPAY_PLAN_IDS = {
   'business-yearly': 'plan_RlaJ3zyeHm24ML',   // $349
 };
 
+const PAYPAL_CLIENT_ID = 'BAA6hsJNpHbcTBMWxqcfbZs22QgzO7knIaUhASkWYLR-u6AtMlYgibBGR9pInXEWV7kartihrWi0wTu9O8';
+
 // Plan details for display
 const PLAN_FEATURES = {
   starter: ['Unlimited compressions', '75MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Standard processing', '1 concurrent upload'],
   pro: ['Unlimited compressions', '150MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Priority processing', '1 concurrent upload'],
   business: ['Unlimited compressions', '200MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Priority processing', '1 concurrent upload'],
+};
+
+const PLAN_PRICES = {
+  starter: { monthly: 9, yearly: 49 },
+  pro: { monthly: 19, yearly: 149 },
+  business: { monthly: 49, yearly: 349 },
 };
 
 function useDarkMode() {
@@ -99,15 +107,114 @@ export default function CheckoutPage() {
   const [quantity, setQuantity] = useState(1);
   const [selectedPlan, setSelectedPlan] = useState<'starter' | 'pro' | 'business'>('pro');
   const [selectedCycle, setSelectedCycle] = useState<'monthly' | 'yearly'>('monthly');
+  const [paypalLoaded, setPaypalLoaded] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const paypalRendered = useRef(false);
 
-  // Plan prices
-  const planPrices = {
-    starter: { monthly: 9, yearly: 49 },
-    pro: { monthly: 19, yearly: 149 },
-    business: { monthly: 49, yearly: 349 },
-  };
+  // Load PayPal SDK
+  useEffect(() => {
+    const existingScript = document.getElementById('paypal-sdk');
+    if (existingScript) {
+      setPaypalLoaded(true);
+      return;
+    }
 
-  const currentPrice = planPrices[selectedPlan][selectedCycle];
+    const script = document.createElement('script');
+    script.id = 'paypal-sdk';
+    script.src = `https://www.paypal.com/sdk/js?client-id=${PAYPAL_CLIENT_ID}&intent=capture&disable-funding=credit`;
+    script.async = true;
+    script.onload = () => {
+      console.log('✅ PayPal SDK loaded');
+      setPaypalLoaded(true);
+    };
+    script.onerror = () => console.error('❌ Failed to load PayPal SDK');
+    document.body.appendChild(script);
+  }, []);
+
+  // Render PayPal button
+  useEffect(() => {
+    if (!paypalLoaded) return;
+
+    const currentPrice = PLAN_PRICES[selectedPlan][selectedCycle];
+    const totalPrice = currentPrice * quantity;
+    const planName = `${selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} ${selectedCycle === 'monthly' ? 'Monthly' : 'Yearly'}`;
+    
+    const containerId = `paypal-button-${selectedPlan}-${selectedCycle}-${quantity}`;
+    const mainContainer = document.getElementById('paypal-button-container');
+    if (!mainContainer) return;
+    
+    mainContainer.innerHTML = '';
+    
+    const buttonContainer = document.createElement('div');
+    buttonContainer.id = containerId;
+    mainContainer.appendChild(buttonContainer);
+    
+    paypalRendered.current = false;
+
+    // @ts-ignore
+    if (window.paypal && !paypalRendered.current) {
+      // @ts-ignore
+      window.paypal.Buttons({
+        style: { 
+          shape: 'rect', 
+          color: 'blue', 
+          layout: 'vertical', 
+          label: 'pay',
+          height: 45
+        },
+        createOrder: function(data: any, actions: any) {
+          return actions.order.create({
+            purchase_units: [{
+              amount: { value: totalPrice.toString() },
+              description: `${planName} (${quantity} user${quantity > 1 ? 's' : ''})`
+            }]
+          });
+        },
+        onApprove: async function(data: any, actions: any) {
+          setIsProcessing(true);
+          
+          try {
+            const details = await actions.order.capture();
+            
+            const response = await fetch('/api/payment/paypal/onetime', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                plan: `${selectedPlan}-${selectedCycle}`,
+                quantity,
+                order_id: data.orderID,
+                billing: { name: details.payer.name.given_name, email: details.payer.email_address }
+              })
+            });
+
+            if (!response.ok) throw new Error('Failed');
+            
+            setTimeout(() => {
+              window.location.href = `/payment-success?plan=${selectedPlan}-${selectedCycle}&order_id=${data.orderID}&quantity=${quantity}`;
+            }, 1000);
+            
+          } catch (error) {
+            setIsProcessing(false);
+            alert('Payment failed. Please try again.');
+          }
+        },
+        onError: function(err: any) {
+          setIsProcessing(false);
+          alert('Payment failed. Please try again.');
+        }
+      }).render(`#${containerId}`).then(() => {
+        paypalRendered.current = true;
+      });
+    }
+
+    return () => {
+      if (mainContainer) mainContainer.innerHTML = '';
+      paypalRendered.current = false;
+    };
+  }, [paypalLoaded, selectedPlan, selectedCycle, quantity, user]);
+
+  const currentPrice = PLAN_PRICES[selectedPlan][selectedCycle];
   const totalPrice = currentPrice * quantity;
 
   return (
@@ -123,6 +230,17 @@ export default function CheckoutPage() {
           </h1>
           <p className="text-gray-300">Select monthly or yearly subscription</p>
         </div>
+
+        {/* Processing Overlay */}
+        {isProcessing && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center">
+            <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4 text-center">
+              <Loader2 className="w-16 h-16 text-teal-500 animate-spin mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">Processing Payment</h3>
+              <p className="text-gray-300 mb-4">Please wait...</p>
+            </div>
+          </div>
+        )}
 
         <div className="max-w-6xl mx-auto space-y-8">
           
@@ -249,25 +367,121 @@ export default function CheckoutPage() {
           </Card>
 
           {/* Order Summary - Bottom */}
-          <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 max-w-md mx-auto">
+          <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 max-w-2xl mx-auto">
             <CardHeader>
-              <CardTitle className="text-white text-center">Order Summary</CardTitle>
+              <CardTitle className="text-white text-center">Estimated Order Summary</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="text-center space-y-3">
-                <p className="text-gray-400 text-sm">
-                  After selecting your plan in the Razorpay button above, your order summary will reflect the chosen option.
+              <div className="space-y-4">
+                <p className="text-gray-400 text-sm text-center">
+                  Select your plan and payment method above. The final amount will depend on your selection.
                 </p>
-                <div className="pt-4 border-t border-gray-700">
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="text-gray-400">Number of Users:</span>
-                    <span className="font-bold text-white">{quantity}</span>
+                
+                <div className="border-t border-gray-700 pt-4">
+                  <h4 className="font-bold text-white mb-3 text-center">Example Pricing (per user)</h4>
+                  
+                  <div className="grid md:grid-cols-2 gap-4">
+                    <div className="bg-gray-900/30 rounded-lg p-4">
+                      <h5 className="font-semibold text-teal-400 mb-2">Monthly Plans</h5>
+                      <div className="space-y-1 text-sm text-gray-300">
+                        <div className="flex justify-between">
+                          <span>Starter:</span>
+                          <span className="font-medium">${PLAN_PRICES.starter.monthly}/mo × {quantity} = ${PLAN_PRICES.starter.monthly * quantity}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Pro:</span>
+                          <span className="font-medium">${PLAN_PRICES.pro.monthly}/mo × {quantity} = ${PLAN_PRICES.pro.monthly * quantity}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Business:</span>
+                          <span className="font-medium">${PLAN_PRICES.business.monthly}/mo × {quantity} = ${PLAN_PRICES.business.monthly * quantity}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-900/30 rounded-lg p-4">
+                      <h5 className="font-semibold text-yellow-400 mb-2">Yearly Plans</h5>
+                      <div className="space-y-1 text-sm text-gray-300">
+                        <div className="flex justify-between">
+                          <span>Starter:</span>
+                          <span className="font-medium">${PLAN_PRICES.starter.yearly}/yr × {quantity} = ${PLAN_PRICES.starter.yearly * quantity}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Pro:</span>
+                          <span className="font-medium">${PLAN_PRICES.pro.yearly}/yr × {quantity} = ${PLAN_PRICES.pro.yearly * quantity}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Business:</span>
+                          <span className="font-medium">${PLAN_PRICES.business.yearly}/yr × {quantity} = ${PLAN_PRICES.business.yearly * quantity}</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-4">
-                    💡 Tip: Select your preferred plan (Starter, Pro, or Business) and billing cycle (Monthly or Yearly) from the Razorpay payment button above.
-                  </p>
+
+                  <div className="mt-4 text-center">
+                    <p className="text-xs text-gray-500">
+                      💡 Your final charge will match the plan you select in the payment button above, multiplied by {quantity} user{quantity > 1 ? 's' : ''}.
+                    </p>
+                  </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* PayPal One-time Payment */}
+          <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-blue-500 max-w-2xl mx-auto">
+            <CardHeader className="text-center">
+              <CardTitle className="text-2xl font-bold text-white">Alternative Payment: PayPal</CardTitle>
+              <p className="text-gray-400 text-sm">One-time payment • Works worldwide</p>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-gray-900/30 rounded-lg p-4 mb-4">
+                <h4 className="font-bold text-white mb-3">Select Plan & Billing Cycle</h4>
+                
+                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-2">Choose Plan</label>
+                    <select
+                      value={selectedPlan}
+                      onChange={(e) => setSelectedPlan(e.target.value as 'starter' | 'pro' | 'business')}
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                    >
+                      <option value="starter">Starter</option>
+                      <option value="pro">Pro</option>
+                      <option value="business">Business</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-2">Billing Cycle</label>
+                    <select
+                      value={selectedCycle}
+                      onChange={(e) => setSelectedCycle(e.target.value as 'monthly' | 'yearly')}
+                      className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:border-blue-500 focus:outline-none"
+                    >
+                      <option value="monthly">Monthly</option>
+                      <option value="yearly">Yearly</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 text-center">
+                  <div className="text-2xl font-bold text-white mb-1">
+                    ${totalPrice}
+                  </div>
+                  <div className="text-sm text-gray-300">
+                    {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} {selectedCycle === 'monthly' ? 'Monthly' : 'Yearly'} × {quantity} user{quantity > 1 ? 's' : ''}
+                  </div>
+                </div>
+              </div>
+
+              <div id="paypal-button-container" className="min-h-[50px]"></div>
+              {!paypalLoaded && (
+                <div className="text-center py-4">
+                  <Loader2 className="w-6 h-6 text-blue-500 mx-auto animate-spin" />
+                  <p className="text-gray-400 text-sm mt-2">Loading PayPal...</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 
