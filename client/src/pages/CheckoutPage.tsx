@@ -7,9 +7,9 @@ import { useAuth } from '@/hooks/useAuth';
 
 // Razorpay Plan Button IDs - ONLY FOR MONTHLY PLANS
 const RAZORPAY_PLAN_BUTTONS = {
-  starter: 'plan_Rkbt8vVdqEAWtB',  // ✅ Starter Monthly USD
-  pro: 'plan_RlaBnfeyayAq2V',      // Replace when you create Pro plan
-  business: 'plan_RlaI1OibtE9gaB', // Replace when you create Business plan
+  starter: 'pl_RlaSYlOEgnhvGu',  // ✅ Starter Monthly USD
+  pro: 'pl_YOUR_PRO_MONTHLY_ID',      // Replace when you create Pro plan
+  business: 'pl_YOUR_BUSINESS_MONTHLY_ID', // Replace when you create Business plan
 };
 
 function useDarkMode() {
@@ -65,37 +65,9 @@ const convertToINR = (usd: number) => {
   return Math.round(usd * rate);
 };
 
-// Razorpay Subscription Button Component
+// Razorpay Subscription Button Component - Using dangerouslySetInnerHTML
 function RazorpayButton({ planId }: { planId: 'starter' | 'pro' | 'business' }) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const buttonId = RAZORPAY_PLAN_BUTTONS[planId];
-
-  useEffect(() => {
-    if (!containerRef.current || !buttonId) return;
-
-    // Clear previous button
-    containerRef.current.innerHTML = '';
-
-    // Create form with Razorpay subscription button script
-    const form = document.createElement('form');
-    const script = document.createElement('script');
-    
-    script.src = 'https://cdn.razorpay.com/static/widget/subscription-button.js';
-    script.setAttribute('data-subscription_button_id', buttonId);
-    script.setAttribute('data-button_theme', 'brand-color');
-    script.async = true;
-    
-    form.appendChild(script);
-    containerRef.current.appendChild(form);
-
-    console.log('✅ Razorpay subscription button injected:', buttonId);
-
-    return () => {
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
-      }
-    };
-  }, [buttonId]);
 
   if (!buttonId || buttonId.startsWith('pl_YOUR_')) {
     return (
@@ -107,10 +79,23 @@ function RazorpayButton({ planId }: { planId: 'starter' | 'pro' | 'business' }) 
     );
   }
 
+  // Direct HTML injection - the way Razorpay expects it
+  const razorpayHtml = `
+    <form>
+      <script 
+        src="https://cdn.razorpay.com/static/widget/subscription-button.js" 
+        data-subscription_button_id="${buttonId}" 
+        data-button_theme="brand-color"
+        async>
+      </script>
+    </form>
+  `;
+
   return (
-    <div ref={containerRef} className="min-h-[50px] flex items-center justify-center">
-      <Loader2 className="w-6 h-6 text-teal-400 animate-spin" />
-    </div>
+    <div 
+      className="min-h-[50px] razorpay-container"
+      dangerouslySetInnerHTML={{ __html: razorpayHtml }}
+    />
   );
 }
 
