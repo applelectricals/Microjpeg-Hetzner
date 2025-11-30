@@ -69,44 +69,47 @@ const convertToINR = (usd: number) => {
 function RazorpayButton({ billingCycle }: { billingCycle: 'monthly' | 'yearly' }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonId = RAZORPAY_BUTTON_IDS[billingCycle];
-  const scriptIdRef = useRef<string>('');
 
   useEffect(() => {
     if (!containerRef.current) return;
 
-    // Generate unique ID for this render
-    const uniqueId = `razorpay-script-${Date.now()}-${Math.random()}`;
-    scriptIdRef.current = uniqueId;
-
-    // Clear container
+    // Clear container first
     containerRef.current.innerHTML = '';
 
-    // Create form
-    const form = document.createElement('form');
-    form.id = `form-${uniqueId}`;
+    // Remove ALL existing Razorpay scripts from the entire document
+    const existingScripts = document.querySelectorAll('script[src*="razorpay.com/static/widget/subscription-button.js"]');
+    existingScripts.forEach(script => {
+      script.remove();
+    });
 
-    // Create script with unique ID
-    const script = document.createElement('script');
-    script.id = uniqueId;
-    script.src = 'https://cdn.razorpay.com/static/widget/subscription-button.js';
-    script.setAttribute('data-subscription_button_id', buttonId);
-    script.setAttribute('data-button_theme', 'brand-color');
-    script.async = true;
+    // Wait a bit for cleanup to complete
+    const timer = setTimeout(() => {
+      if (!containerRef.current) return;
 
-    // Append script to form, then form to container
-    form.appendChild(script);
-    containerRef.current.appendChild(form);
+      // Create fresh form
+      const form = document.createElement('form');
 
-    console.log(`✅ Razorpay button loaded: ${billingCycle} - ${buttonId}`);
+      // Create new script
+      const script = document.createElement('script');
+      script.src = 'https://cdn.razorpay.com/static/widget/subscription-button.js';
+      script.setAttribute('data-subscription_button_id', buttonId);
+      script.setAttribute('data-button_theme', 'brand-color');
+      script.async = true;
 
-    // Cleanup function
+      script.onload = () => {
+        console.log(`✅ Razorpay button loaded: ${billingCycle} - ${buttonId}`);
+      };
+
+      script.onerror = () => {
+        console.error(`❌ Failed to load Razorpay button: ${billingCycle}`);
+      };
+
+      form.appendChild(script);
+      containerRef.current.appendChild(form);
+    }, 200); // Increased delay for proper cleanup
+
     return () => {
-      // Remove the script from DOM
-      const oldScript = document.getElementById(uniqueId);
-      if (oldScript) {
-        oldScript.remove();
-      }
-      // Clear container
+      clearTimeout(timer);
       if (containerRef.current) {
         containerRef.current.innerHTML = '';
       }
