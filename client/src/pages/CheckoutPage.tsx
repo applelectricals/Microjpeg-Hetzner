@@ -65,17 +65,35 @@ const convertToINR = (usd: number) => {
   return Math.round(usd * rate);
 };
 
-// Razorpay Subscription Button Component - Proper script execution
+// Razorpay Subscription Button Component - With delayed rendering to avoid conflicts
 function RazorpayButton({ billingCycle }: { billingCycle: 'monthly' | 'yearly' }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonId = RAZORPAY_BUTTON_IDS[billingCycle];
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    // Reset ready state when billing cycle changes
+    setIsReady(false);
+    
+    // Remove all existing Razorpay scripts from document
+    const existingScripts = document.querySelectorAll('script[src*="razorpay.com/static/widget/subscription-button.js"]');
+    existingScripts.forEach(script => script.remove());
+
+    // Wait for cleanup, then set ready
+    const cleanupTimer = setTimeout(() => {
+      setIsReady(true);
+    }, 300);
+
+    return () => {
+      clearTimeout(cleanupTimer);
+      setIsReady(false);
+    };
+  }, [billingCycle]);
+
+  useEffect(() => {
+    if (!isReady || !containerRef.current) return;
 
     const container = containerRef.current;
-    
-    // Clear any existing content
     container.innerHTML = '';
 
     // Create form element
@@ -88,25 +106,27 @@ function RazorpayButton({ billingCycle }: { billingCycle: 'monthly' | 'yearly' }
     script.setAttribute('data-button_theme', 'brand-color');
     script.async = true;
 
-    // Append script to form
     form.appendChild(script);
-    
-    // Append form to container
     container.appendChild(form);
 
     console.log(`✅ Loaded ${billingCycle} button: ${buttonId}`);
 
-    // Cleanup
     return () => {
       container.innerHTML = '';
-      console.log(`🧹 Cleaned up ${billingCycle} button`);
     };
-  }, [billingCycle, buttonId]);
+  }, [isReady, billingCycle, buttonId]);
+
+  if (!isReady) {
+    return (
+      <div className="text-center py-4">
+        <Loader2 className="w-6 h-6 text-green-500 mx-auto animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div 
       ref={containerRef}
-      key={billingCycle}
       className="min-h-[50px] razorpay-container"
     />
   );
