@@ -65,33 +65,28 @@ const convertToINR = (usd: number) => {
   return Math.round(usd * rate);
 };
 
-// Razorpay Subscription Button Component - With delayed rendering to avoid conflicts
+// Razorpay Subscription Button Component - Let React handle cleanup
 function RazorpayButton({ billingCycle }: { billingCycle: 'monthly' | 'yearly' }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonId = RAZORPAY_BUTTON_IDS[billingCycle];
-  const [isReady, setIsReady] = useState(false);
+  const [showButton, setShowButton] = useState(false);
 
   useEffect(() => {
-    // Reset ready state when billing cycle changes
-    setIsReady(false);
+    // Reset on billing cycle change
+    setShowButton(false);
     
-    // Remove all existing Razorpay scripts from document
-    const existingScripts = document.querySelectorAll('script[src*="razorpay.com/static/widget/subscription-button.js"]');
-    existingScripts.forEach(script => script.remove());
-
-    // Wait for cleanup, then set ready
-    const cleanupTimer = setTimeout(() => {
-      setIsReady(true);
-    }, 300);
+    // Delay to allow cleanup
+    const timer = setTimeout(() => {
+      setShowButton(true);
+    }, 100);
 
     return () => {
-      clearTimeout(cleanupTimer);
-      setIsReady(false);
+      clearTimeout(timer);
     };
   }, [billingCycle]);
 
   useEffect(() => {
-    if (!isReady || !containerRef.current) return;
+    if (!showButton || !containerRef.current) return;
 
     const container = containerRef.current;
     container.innerHTML = '';
@@ -112,23 +107,25 @@ function RazorpayButton({ billingCycle }: { billingCycle: 'monthly' | 'yearly' }
     console.log(`✅ Loaded ${billingCycle} button: ${buttonId}`);
 
     return () => {
-      container.innerHTML = '';
+      if (container) {
+        container.innerHTML = '';
+      }
     };
-  }, [isReady, billingCycle, buttonId]);
-
-  if (!isReady) {
-    return (
-      <div className="text-center py-4">
-        <Loader2 className="w-6 h-6 text-green-500 mx-auto animate-spin" />
-      </div>
-    );
-  }
+  }, [showButton, billingCycle, buttonId]);
 
   return (
-    <div 
-      ref={containerRef}
-      className="min-h-[50px] razorpay-container"
-    />
+    <div>
+      {showButton ? (
+        <div 
+          ref={containerRef}
+          className="min-h-[50px] razorpay-container"
+        />
+      ) : (
+        <div className="text-center py-4">
+          <Loader2 className="w-6 h-6 text-green-500 mx-auto animate-spin" />
+        </div>
+      )}
+    </div>
   );
 }
 
