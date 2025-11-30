@@ -5,8 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/header';
 import { useAuth } from '@/hooks/useAuth';
 
-// Razorpay Subscription Button ID - Includes both subscription and one-time payments
-const RAZORPAY_SUBSCRIPTION_BUTTON_ID = 'pl_RlaSYlOEgnhvGu';
+// Razorpay Subscription Button IDs - Includes both subscription and one-time payments
+const RAZORPAY_BUTTON_IDS = {
+  monthly: 'pl_RlaSYlOEgnhvGu',  // Monthly plans + one-time
+  yearly: 'pl_RlwkI8y1JWtyrV',   // Yearly plans + one-time
+};
 
 function useDarkMode() {
   const [isDark, setIsDark] = useState(() => {
@@ -62,9 +65,10 @@ const convertToINR = (usd: number) => {
   return Math.round(usd * rate);
 };
 
-// Razorpay Subscription Button Component - Single button for all plans
-function RazorpayButton() {
+// Razorpay Subscription Button Component - Toggles between monthly/yearly
+function RazorpayButton({ billingCycle }: { billingCycle: 'monthly' | 'yearly' }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonId = RAZORPAY_BUTTON_IDS[billingCycle];
 
   useEffect(() => {
     // Clean up any existing scripts in this container
@@ -75,7 +79,7 @@ function RazorpayButton() {
     // Create the Razorpay button script
     const script = document.createElement('script');
     script.src = 'https://cdn.razorpay.com/static/widget/subscription-button.js';
-    script.setAttribute('data-subscription_button_id', RAZORPAY_SUBSCRIPTION_BUTTON_ID);
+    script.setAttribute('data-subscription_button_id', buttonId);
     script.setAttribute('data-button_theme', 'brand-color');
     script.async = true;
 
@@ -90,7 +94,7 @@ function RazorpayButton() {
         containerRef.current.innerHTML = '';
       }
     };
-  }, []);
+  }, [buttonId, billingCycle]); // Re-render when billing cycle changes
 
   return (
     <form ref={containerRef} className="min-h-[50px] razorpay-container">
@@ -551,16 +555,18 @@ export default function CheckoutPage() {
                   <div className="flex items-center justify-between mb-3">
                     <div>
                       <h3 className="font-bold text-white">Razorpay Payment</h3>
-                      <p className="text-sm text-gray-400">Subscription or One-time</p>
+                      <p className="text-sm text-gray-400">
+                        {billingCycle === 'monthly' ? 'Monthly' : 'Yearly'} Subscription or One-time
+                      </p>
                     </div>
                     <span className="bg-green-500 text-white text-xs px-2 py-1 rounded font-semibold">
                       🇮🇳 INDIA
                     </span>
                   </div>
                   <p className="text-sm text-gray-300 mb-3">
-                    ✓ Cards/UPI/NetBanking • All plans & payment types
+                    ✓ Cards/UPI/NetBanking • All {billingCycle} plans available
                   </p>
-                  <RazorpayButton />
+                  <RazorpayButton billingCycle={billingCycle} />
                 </div>
 
                 {/* Instamojo */}
