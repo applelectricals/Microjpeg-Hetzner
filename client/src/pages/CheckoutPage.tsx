@@ -67,63 +67,26 @@ const convertToINR = (usd: number) => {
 
 // Razorpay Subscription Button Component - Toggles between monthly/yearly
 function RazorpayButton({ billingCycle }: { billingCycle: 'monthly' | 'yearly' }) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const buttonId = RAZORPAY_BUTTON_IDS[billingCycle];
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    setIsLoading(true);
-    
-    // Clean up any existing content
-    if (containerRef.current) {
-      containerRef.current.innerHTML = '';
-    }
-
-    // Small delay to ensure cleanup is complete
-    const timer = setTimeout(() => {
-      if (!containerRef.current) return;
-
-      // Create a new form element
-      const form = document.createElement('form');
-      
-      // Create the Razorpay button script
-      const script = document.createElement('script');
-      script.src = 'https://cdn.razorpay.com/static/widget/subscription-button.js';
-      script.setAttribute('data-subscription_button_id', buttonId);
-      script.setAttribute('data-button_theme', 'brand-color');
-      script.async = true;
-      
-      script.onload = () => {
-        setIsLoading(false);
-      };
-      
-      script.onerror = () => {
-        setIsLoading(false);
-        console.error('Failed to load Razorpay button');
-      };
-
-      form.appendChild(script);
-      containerRef.current.appendChild(form);
-    }, 100);
-
-    return () => {
-      clearTimeout(timer);
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
-      }
-    };
-  }, [buttonId, billingCycle]);
-
+  // Force complete re-render by using key
   return (
-    <div>
-      <div ref={containerRef} className="min-h-[50px] razorpay-container">
-        {/* Razorpay script will be injected here */}
-      </div>
-      {isLoading && (
-        <div className="text-center py-4">
-          <Loader2 className="w-6 h-6 text-green-500 mx-auto animate-spin" />
-        </div>
-      )}
+    <div key={`razorpay-${billingCycle}-${buttonId}`}>
+      <div 
+        dangerouslySetInnerHTML={{
+          __html: `
+            <form>
+              <script 
+                src="https://cdn.razorpay.com/static/widget/subscription-button.js" 
+                data-subscription_button_id="${buttonId}" 
+                data-button_theme="brand-color"
+                async>
+              </script>
+            </form>
+          `
+        }}
+        className="min-h-[50px] razorpay-container"
+      />
     </div>
   );
 }
