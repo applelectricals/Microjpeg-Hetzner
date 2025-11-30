@@ -11,6 +11,16 @@ const RAZORPAY_BUTTON_IDS = {
   yearly: 'pl_RlwkI8y1JWtyrV',   // Yearly plans + one-time
 };
 
+// Razorpay Plan IDs for reference
+const RAZORPAY_PLAN_IDS = {
+  'starter-monthly': 'plan_Rkbt8vVdqEAWtB',   // $9
+  'starter-yearly': 'plan_RkdJ0gPYJrRvtH',    // $49
+  'pro-monthly': 'plan_RlaBnfeyayAq2V',       // $19
+  'pro-yearly': 'plan_RlaGdSwbmfKxfO',        // $149
+  'business-monthly': 'plan_RlaI1OibtE9gaB',  // $49
+  'business-yearly': 'plan_RlaJ3zyeHm24ML',   // $349
+};
+
 // Plan details for display
 const PLAN_FEATURES = {
   starter: ['Unlimited compressions', '75MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Standard processing', '1 concurrent upload'],
