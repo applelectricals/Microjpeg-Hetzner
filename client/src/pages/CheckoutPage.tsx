@@ -5,12 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/header';
 import { useAuth } from '@/hooks/useAuth';
 
-// Razorpay Plan Button IDs - ONLY FOR MONTHLY PLANS
-const RAZORPAY_PLAN_BUTTONS = {
-  starter: 'plan_Rkbt8vVdqEAWtB',  // ✅ Starter Monthly USD
-  pro: 'plan_RlaBnfeyayAq2V',      // Replace when you create Pro plan
-  business: 'plan_RlaI1OibtE9gaB', // Replace when you create Business plan
-};
+// Razorpay Subscription Button ID - Single button with all 3 monthly USD plans
+const RAZORPAY_SUBSCRIPTION_BUTTON_ID = 'pl_RlaSYlOEgnhvGu';
 
 function useDarkMode() {
   const [isDark, setIsDark] = useState(() => {
@@ -29,32 +25,33 @@ function useDarkMode() {
   return { isDark, setIsDark };
 }
 
-//const PLANS = {
-  //starter: {
-    //id: 'starter',
-    //name: 'Starter',
-    //description: 'For freelancers',
-    //monthly: { price: 9, subscriptionPlanId: 'plan_Rkbt8vVdqEAWtB' },
-    //yearly: { price: 49, subscriptionPlanId: 'P-8RD90370JE5056234NEHPDGA', savings: 59 },
-    //features: ['Unlimited compressions', '75MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Standard processing', '1 concurrent upload'],
-  //},
-  //pro: {
-    //id: 'pro',
-    //name: 'Pro',
-    //description: 'For professionals',
-    //monthly: { price: 19, subscriptionPlanId: 'plan_RlaBnfeyayAq2V' },
-    //yearly: { price: 149, subscriptionPlanId: 'P-1EF84364HY329484XNEHPFMA', savings: 79 },
-    //features: ['Unlimited compressions', '150MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Priority processing', '1 concurrent upload'],
-    //popular: true,
-  //},
-  //business: {
-    //id: 'business',
-    //name: 'Business',
-    //description: 'For teams',
-    //monthly: { price: 49, subscriptionPlanId: 'plan_RlaI1OibtE9gaB' },
-    //yearly: { price: 349, subscriptionPlanId: 'P-3Y884449P0365514TNEHPHDA', savings: 239 },
-    //features: ['Unlimited compressions', '200MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Priority processing', '1 concurrent upload'],
-  //},
+// UNCOMMENTED AND FIXED PLANS OBJECT
+const PLANS = {
+  starter: {
+    id: 'starter',
+    name: 'Starter',
+    description: 'For freelancers',
+    monthly: { price: 9, subscriptionPlanId: 'plan_Rkbt8vVdqEAWtB' },
+    yearly: { price: 49, subscriptionPlanId: 'P-8RD90370JE5056234NEHPDGA', savings: 59 },
+    features: ['Unlimited compressions', '75MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Standard processing', '1 concurrent upload'],
+  },
+  pro: {
+    id: 'pro',
+    name: 'Pro',
+    description: 'For professionals',
+    monthly: { price: 19, subscriptionPlanId: 'plan_RlaBnfeyayAq2V' },
+    yearly: { price: 149, subscriptionPlanId: 'P-1EF84364HY329484XNEHPFMA', savings: 79 },
+    features: ['Unlimited compressions', '150MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Priority processing', '1 concurrent upload'],
+    popular: true,
+  },
+  business: {
+    id: 'business',
+    name: 'Business',
+    description: 'For teams',
+    monthly: { price: 49, subscriptionPlanId: 'plan_RlaI1OibtE9gaB' },
+    yearly: { price: 349, subscriptionPlanId: 'P-3Y884449P0365514TNEHPHDA', savings: 239 },
+    features: ['Unlimited compressions', '200MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Priority processing', '1 concurrent upload'],
+  },
 };
 
 const PAYPAL_CLIENT_ID = 'BAA6hsJNpHbcTBMWxqcfbZs22QgzO7knIaUhASkWYLR-u6AtMlYgibBGR9pInXEWV7kartihrWi0wTu9O8';
@@ -65,37 +62,40 @@ const convertToINR = (usd: number) => {
   return Math.round(usd * rate);
 };
 
-// Razorpay Subscription Button Component - Using dangerouslySetInnerHTML
-function RazorpayButton({ planId }: { planId: 'starter' | 'pro' | 'business' }) {
-  const buttonId = RAZORPAY_PLAN_BUTTONS[planId];
+// Razorpay Subscription Button Component - Single button for all plans
+function RazorpayButton() {
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  if (!buttonId || buttonId.startsWith('pl_YOUR_')) {
-    return (
-      <div className="bg-yellow-900/30 border border-yellow-500/50 rounded p-3 text-center">
-        <p className="text-yellow-200 text-xs">
-          ⚠️ {planId.toUpperCase()} plan not configured. Create plan in Razorpay Dashboard.
-        </p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    // Clean up any existing scripts in this container
+    if (containerRef.current) {
+      containerRef.current.innerHTML = '';
+    }
 
-  // Direct HTML injection - the way Razorpay expects it
-  const razorpayHtml = `
-    <form>
-      <script 
-        src="https://cdn.razorpay.com/static/widget/subscription-button.js" 
-        data-subscription_button_id="${buttonId}" 
-        data-button_theme="brand-color"
-        async>
-      </script>
-    </form>
-  `;
+    // Create the Razorpay button script
+    const script = document.createElement('script');
+    script.src = 'https://cdn.razorpay.com/static/widget/subscription-button.js';
+    script.setAttribute('data-subscription_button_id', RAZORPAY_SUBSCRIPTION_BUTTON_ID);
+    script.setAttribute('data-button_theme', 'brand-color');
+    script.async = true;
+
+    // Append to container
+    if (containerRef.current) {
+      containerRef.current.appendChild(script);
+    }
+
+    return () => {
+      // Cleanup on unmount
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+    };
+  }, []);
 
   return (
-    <div 
-      className="min-h-[50px] razorpay-container"
-      dangerouslySetInnerHTML={{ __html: razorpayHtml }}
-    />
+    <form ref={containerRef} className="min-h-[50px] razorpay-container">
+      {/* Razorpay script will be injected here */}
+    </form>
   );
 }
 
@@ -181,7 +181,7 @@ export default function CheckoutPage() {
 
     // @ts-ignore
     if (window.paypal && !subscriptionRendered.current) {
-      console.log('📄 Rendering PayPal subscription button');
+      console.log('🔄 Rendering PayPal subscription button');
       
       // @ts-ignore
       window.paypal.Buttons({
@@ -559,9 +559,9 @@ export default function CheckoutPage() {
                       </span>
                     </div>
                     <p className="text-sm text-gray-300 mb-3">
-                      ✓ Cards/UPI/NetBanking • Cancel anytime
+                      ✓ Cards/UPI/NetBanking • All 3 plans available
                     </p>
-                    <RazorpayButton planId={selectedPlan} />
+                    <RazorpayButton />
                   </div>
                 )}
 
