@@ -7,9 +7,9 @@ import { useAuth } from '@/hooks/useAuth';
 
 // Razorpay Plan Button IDs - ONLY FOR MONTHLY PLANS
 const RAZORPAY_PLAN_BUTTONS = {
-  starter: 'pl_RlaSYlOEgnhvGu',  // ✅ Starter Monthly USD
-  pro: 'pl_YOUR_PRO_MONTHLY_ID',      // Replace when you create Pro plan
-  business: 'pl_YOUR_BUSINESS_MONTHLY_ID', // Replace when you create Business plan
+  starter: 'plan_Rkbt8vVdqEAWtB',  // ✅ Starter Monthly USD
+  pro: 'plan_RlaBnfeyayAq2V',      // Replace when you create Pro plan
+  business: 'plan_RlaI1OibtE9gaB', // Replace when you create Business plan
 };
 
 function useDarkMode() {
@@ -34,16 +34,16 @@ const PLANS = {
     id: 'starter',
     name: 'Starter',
     description: 'For freelancers',
-    monthly: { price: 9, subscriptionPlanId: 'P-5H209695PC6961949NEHOG2Q' },
-    yearly: { price: 49, subscriptionPlanId: 'P-8RD90370JE5056234NEHPDGA', savings: 59 },
+    monthly: { price: 9, subscriptionPlanId: 'plan_Rkbt8vVdqEAWtB' },
+    //yearly: { price: 49, subscriptionPlanId: 'P-8RD90370JE5056234NEHPDGA', savings: 59 },
     features: ['Unlimited compressions', '75MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Standard processing', '1 concurrent upload'],
   },
   pro: {
     id: 'pro',
     name: 'Pro',
     description: 'For professionals',
-    monthly: { price: 19, subscriptionPlanId: 'P-3T648163FS1399357NEHPECQ' },
-    yearly: { price: 149, subscriptionPlanId: 'P-1EF84364HY329484XNEHPFMA', savings: 79 },
+    monthly: { price: 19, subscriptionPlanId: 'plan_RlaBnfeyayAq2V' },
+    //yearly: { price: 149, subscriptionPlanId: 'P-1EF84364HY329484XNEHPFMA', savings: 79 },
     features: ['Unlimited compressions', '150MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Priority processing', '1 concurrent upload'],
     popular: true,
   },
@@ -51,8 +51,8 @@ const PLANS = {
     id: 'business',
     name: 'Business',
     description: 'For teams',
-    monthly: { price: 49, subscriptionPlanId: 'P-5AW33365PX203061NNEHPGIY' },
-    yearly: { price: 349, subscriptionPlanId: 'P-3Y884449P0365514TNEHPHDA', savings: 239 },
+    monthly: { price: 49, subscriptionPlanId: 'plan_RlaI1OibtE9gaB' },
+    //yearly: { price: 349, subscriptionPlanId: 'P-3Y884449P0365514TNEHPHDA', savings: 239 },
     features: ['Unlimited compressions', '200MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Priority processing', '1 concurrent upload'],
   },
 };
