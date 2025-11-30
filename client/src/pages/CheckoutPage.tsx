@@ -65,26 +65,48 @@ const convertToINR = (usd: number) => {
   return Math.round(usd * rate);
 };
 
-// Razorpay Subscription Button Component - Uses key-based remounting
+// Razorpay Subscription Button Component - Proper script execution
 function RazorpayButton({ billingCycle }: { billingCycle: 'monthly' | 'yearly' }) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const buttonId = RAZORPAY_BUTTON_IDS[billingCycle];
 
-  // Using dangerouslySetInnerHTML with a unique key to force complete remount
-  const htmlContent = `
-    <form>
-      <script 
-        src="https://cdn.razorpay.com/static/widget/subscription-button.js" 
-        data-subscription_button_id="${buttonId}" 
-        data-button_theme="brand-color"
-        async>
-      </script>
-    </form>
-  `;
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const container = containerRef.current;
+    
+    // Clear any existing content
+    container.innerHTML = '';
+
+    // Create form element
+    const form = document.createElement('form');
+    
+    // Create script element
+    const script = document.createElement('script');
+    script.src = 'https://cdn.razorpay.com/static/widget/subscription-button.js';
+    script.setAttribute('data-subscription_button_id', buttonId);
+    script.setAttribute('data-button_theme', 'brand-color');
+    script.async = true;
+
+    // Append script to form
+    form.appendChild(script);
+    
+    // Append form to container
+    container.appendChild(form);
+
+    console.log(`✅ Loaded ${billingCycle} button: ${buttonId}`);
+
+    // Cleanup
+    return () => {
+      container.innerHTML = '';
+      console.log(`🧹 Cleaned up ${billingCycle} button`);
+    };
+  }, [billingCycle, buttonId]);
 
   return (
     <div 
-      key={billingCycle} 
-      dangerouslySetInnerHTML={{ __html: htmlContent }}
+      ref={containerRef}
+      key={billingCycle}
       className="min-h-[50px] razorpay-container"
     />
   );
@@ -525,9 +547,7 @@ export default function CheckoutPage() {
                   <p className="text-sm text-gray-300 mb-3">
                     ✓ Cards/UPI/NetBanking • All {billingCycle} plans available
                   </p>
-                  <div key={`razorpay-wrapper-${billingCycle}`}>
-                    <RazorpayButton billingCycle={billingCycle} />
-                  </div>
+                  <RazorpayButton billingCycle={billingCycle} />
                 </div>
 
               </CardContent>
