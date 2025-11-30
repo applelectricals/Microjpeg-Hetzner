@@ -544,34 +544,6 @@ export default function CheckoutPage() {
               <CardHeader><CardTitle className="text-white">Choose Payment Method</CardTitle></CardHeader>
               <CardContent className="space-y-6">
                 
-                {/* PayPal Subscription */}
-                <div className="border rounded-lg p-4 border-gray-700/50 bg-gray-900/30">
-                  <h3 className="font-bold text-white mb-2">PayPal Subscription</h3>
-                  <p className="text-sm text-gray-300 mb-2">
-                    ✓ Auto-renewal • Cancel anytime
-                  </p>
-                  <div id="paypal-subscription-container" className="min-h-[50px]"></div>
-                  {!subscriptionLoaded && (
-                    <div className="text-center py-4">
-                      <Loader2 className="w-6 h-6 border-b-2 border-blue-500 mx-auto animate-spin" />
-                    </div>
-                  )}
-                </div>
-
-                {/* PayPal One-time */}
-                <div className="border-2 border-teal-500 rounded-lg p-4 bg-teal-900/20">
-                  <h3 className="font-bold text-white mb-2">Pay with Card (One-time)</h3>
-                  <p className="text-sm text-gray-300 mb-2">
-                    ✓ No auto-renewal • Works worldwide
-                  </p>
-                  <div id="paypal-onetime-container" className="min-h-[50px]"></div>
-                  {!onetimeLoaded && (
-                    <div className="text-center py-4">
-                      <Loader2 className="w-6 h-6 border-b-2 border-blue-500 mx-auto animate-spin" />
-                    </div>
-                  )}
-                </div>
-
                 {/* Razorpay - Subscription + One-time payments */}
                 <div className="border-2 border-green-500 rounded-lg p-4 bg-green-900/20">
                   <div className="flex items-center justify-between mb-3">
@@ -591,20 +563,6 @@ export default function CheckoutPage() {
                   <RazorpayButton billingCycle={billingCycle} />
                 </div>
 
-                {/* Instamojo */}
-                <div className="border-2 border-blue-500 rounded-lg p-4 bg-blue-900/20">
-                  <h3 className="font-bold text-white mb-2">Pay with Instamojo</h3>
-                  <p className="text-sm text-gray-300 mb-3">
-                    ✓ For India • All payment methods
-                  </p>
-                  <button
-                    onClick={handleInstamojoPayment}
-                    disabled={isProcessing}
-                    className="w-full py-3 px-6 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-lg disabled:opacity-50"
-                  >
-                    Pay ₹{convertToINR(totalPrice)} with Instamojo
-                  </button>
-                </div>
               </CardContent>
             </Card>
           </div>
