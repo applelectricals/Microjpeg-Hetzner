@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Header from '@/components/header';
 import { useAuth } from '@/hooks/useAuth';
 
-// Razorpay Subscription Button ID - Single button with all 3 monthly USD plans
+// Razorpay Subscription Button ID - Includes both subscription and one-time payments
 const RAZORPAY_SUBSCRIPTION_BUTTON_ID = 'pl_RlaSYlOEgnhvGu';
 
 function useDarkMode() {
@@ -546,24 +546,22 @@ export default function CheckoutPage() {
                   )}
                 </div>
 
-                {/* Razorpay - ONLY FOR MONTHLY */}
-                {billingCycle === 'monthly' && (
-                  <div className="border-2 border-green-500 rounded-lg p-4 bg-green-900/20">
-                    <div className="flex items-center justify-between mb-3">
-                      <div>
-                        <h3 className="font-bold text-white">Razorpay Subscription</h3>
-                        <p className="text-sm text-gray-400">Monthly auto-renewal</p>
-                      </div>
-                      <span className="bg-green-500 text-white text-xs px-2 py-1 rounded font-semibold">
-                        🇮🇳 INDIA
-                      </span>
+                {/* Razorpay - Subscription + One-time payments */}
+                <div className="border-2 border-green-500 rounded-lg p-4 bg-green-900/20">
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <h3 className="font-bold text-white">Razorpay Payment</h3>
+                      <p className="text-sm text-gray-400">Subscription or One-time</p>
                     </div>
-                    <p className="text-sm text-gray-300 mb-3">
-                      ✓ Cards/UPI/NetBanking • All 3 plans available
-                    </p>
-                    <RazorpayButton />
+                    <span className="bg-green-500 text-white text-xs px-2 py-1 rounded font-semibold">
+                      🇮🇳 INDIA
+                    </span>
                   </div>
-                )}
+                  <p className="text-sm text-gray-300 mb-3">
+                    ✓ Cards/UPI/NetBanking • All plans & payment types
+                  </p>
+                  <RazorpayButton />
+                </div>
 
                 {/* Instamojo */}
                 <div className="border-2 border-blue-500 rounded-lg p-4 bg-blue-900/20">
