@@ -35,7 +35,7 @@ const PLANS = {
     name: 'Starter',
     description: 'For freelancers',
     monthly: { price: 9, subscriptionPlanId: 'plan_Rkbt8vVdqEAWtB' },
-    yearly: { price: 49, subscriptionPlanId: 'P-8RD90370JE5056234NEHPDGA', savings: 59 },
+    yearly: { price: 49, subscriptionPlanId: 'plan_RkdJ0gPYJrRvtH', savings: 59 },
     features: ['Unlimited compressions', '75MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Standard processing', '1 concurrent upload'],
   },
   pro: {
@@ -43,7 +43,7 @@ const PLANS = {
     name: 'Pro',
     description: 'For professionals',
     monthly: { price: 19, subscriptionPlanId: 'plan_RlaBnfeyayAq2V' },
-    yearly: { price: 149, subscriptionPlanId: 'P-1EF84364HY329484XNEHPFMA', savings: 79 },
+    yearly: { price: 149, subscriptionPlanId: 'plan_RlaGdSwbmfKxfO', savings: 79 },
     features: ['Unlimited compressions', '150MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Priority processing', '1 concurrent upload'],
     popular: true,
   },
@@ -52,7 +52,7 @@ const PLANS = {
     name: 'Business',
     description: 'For teams',
     monthly: { price: 49, subscriptionPlanId: 'plan_RlaI1OibtE9gaB' },
-    yearly: { price: 349, subscriptionPlanId: 'P-3Y884449P0365514TNEHPHDA', savings: 239 },
+    yearly: { price: 349, subscriptionPlanId: 'plan_RlaJ3zyeHm24ML', savings: 239 },
     features: ['Unlimited compressions', '200MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Priority processing', '1 concurrent upload'],
   },
 };
@@ -61,7 +61,7 @@ const PAYPAL_CLIENT_ID = 'BAA6hsJNpHbcTBMWxqcfbZs22QgzO7knIaUhASkWYLR-u6AtMlYgib
 
 // Convert USD to INR
 const convertToINR = (usd: number) => {
-  const rate = 83;
+  const rate = 89;
   return Math.round(usd * rate);
 };
 
