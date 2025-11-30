@@ -65,66 +65,28 @@ const convertToINR = (usd: number) => {
   return Math.round(usd * rate);
 };
 
-// Razorpay Subscription Button Component - Toggles between monthly/yearly
+// Razorpay Subscription Button Component - Uses key-based remounting
 function RazorpayButton({ billingCycle }: { billingCycle: 'monthly' | 'yearly' }) {
-  const containerRef = useRef<HTMLDivElement>(null);
   const buttonId = RAZORPAY_BUTTON_IDS[billingCycle];
 
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    // Clear container first
-    containerRef.current.innerHTML = '';
-
-    // Remove ALL existing Razorpay scripts from the entire document
-    const existingScripts = document.querySelectorAll('script[src*="razorpay.com/static/widget/subscription-button.js"]');
-    existingScripts.forEach(script => {
-      script.remove();
-    });
-
-    // Wait a bit for cleanup to complete
-    const timer = setTimeout(() => {
-      if (!containerRef.current) return;
-
-      // Create fresh form
-      const form = document.createElement('form');
-
-      // Create new script
-      const script = document.createElement('script');
-      script.src = 'https://cdn.razorpay.com/static/widget/subscription-button.js';
-      script.setAttribute('data-subscription_button_id', buttonId);
-      script.setAttribute('data-button_theme', 'brand-color');
-      script.async = true;
-
-      script.onload = () => {
-        console.log(`✅ Razorpay button loaded: ${billingCycle} - ${buttonId}`);
-      };
-
-      script.onerror = () => {
-        console.error(`❌ Failed to load Razorpay button: ${billingCycle}`);
-      };
-
-      form.appendChild(script);
-      containerRef.current.appendChild(form);
-    }, 200); // Increased delay for proper cleanup
-
-    return () => {
-      clearTimeout(timer);
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
-      }
-      console.log(`🧹 Cleaned up ${billingCycle} button`);
-    };
-  }, [billingCycle, buttonId]);
+  // Using dangerouslySetInnerHTML with a unique key to force complete remount
+  const htmlContent = `
+    <form>
+      <script 
+        src="https://cdn.razorpay.com/static/widget/subscription-button.js" 
+        data-subscription_button_id="${buttonId}" 
+        data-button_theme="brand-color"
+        async>
+      </script>
+    </form>
+  `;
 
   return (
     <div 
-      ref={containerRef} 
+      key={billingCycle} 
+      dangerouslySetInnerHTML={{ __html: htmlContent }}
       className="min-h-[50px] razorpay-container"
-      data-billing-cycle={billingCycle}
-    >
-      {/* Razorpay form and script will be injected here */}
-    </div>
+    />
   );
 }
 
@@ -563,7 +525,9 @@ export default function CheckoutPage() {
                   <p className="text-sm text-gray-300 mb-3">
                     ✓ Cards/UPI/NetBanking • All {billingCycle} plans available
                   </p>
-                  <RazorpayButton billingCycle={billingCycle} />
+                  <div key={`razorpay-wrapper-${billingCycle}`}>
+                    <RazorpayButton billingCycle={billingCycle} />
+                  </div>
                 </div>
 
               </CardContent>
