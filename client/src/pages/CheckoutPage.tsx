@@ -292,153 +292,47 @@ export default function CheckoutPage() {
             </Card>
           </div>
 
-          {/* Number of Users */}
-          <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 max-w-md mx-auto">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-white text-lg">Number of Users</h3>
-                  <p className="text-sm text-gray-400">Adjust quantity as needed</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    disabled={quantity <= 1}
-                    className="w-10 h-10 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center font-bold text-xl text-gray-300 hover:border-teal-500 disabled:opacity-50 transition-colors"
-                  >
-                    −
-                  </button>
-                  <span className="text-3xl font-bold text-white min-w-[4ch] text-center">
-                    {quantity}
-                  </span>
-                  <button
-                    onClick={() => setQuantity(quantity + 1)}
-                    className="w-10 h-10 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center font-bold text-xl text-gray-300 hover:border-teal-500 transition-colors"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* What's Included Section */}
-          <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 max-w-2xl mx-auto">
-            <CardHeader>
-              <CardTitle className="text-white text-center">What's Included</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div>
-                  <h4 className="font-bold text-teal-400 mb-3">Starter</h4>
-                  <ul className="space-y-2">
-                    {PLAN_FEATURES.starter.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm">
-                        <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-300">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-bold text-teal-400 mb-3">Pro</h4>
-                  <ul className="space-y-2">
-                    {PLAN_FEATURES.pro.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm">
-                        <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-300">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h4 className="font-bold text-teal-400 mb-3">Business</h4>
-                  <ul className="space-y-2">
-                    {PLAN_FEATURES.business.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-2 text-sm">
-                        <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-gray-300">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Order Summary - Bottom */}
-          <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-teal-500/50 max-w-2xl mx-auto">
-            <CardHeader>
-              <CardTitle className="text-white text-center">Estimated Order Summary</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-4">
-                <p className="text-gray-400 text-sm text-center">
-                  Select your plan and payment method above. The final amount will depend on your selection.
-                </p>
-                
-                <div className="border-t border-gray-700 pt-4">
-                  <h4 className="font-bold text-white mb-3 text-center">Example Pricing (per user)</h4>
-                  
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="bg-gray-900/30 rounded-lg p-4">
-                      <h5 className="font-semibold text-teal-400 mb-2">Monthly Plans</h5>
-                      <div className="space-y-1 text-sm text-gray-300">
-                        <div className="flex justify-between">
-                          <span>Starter:</span>
-                          <span className="font-medium">${PLAN_PRICES.starter.monthly}/mo × {quantity} = ${PLAN_PRICES.starter.monthly * quantity}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Pro:</span>
-                          <span className="font-medium">${PLAN_PRICES.pro.monthly}/mo × {quantity} = ${PLAN_PRICES.pro.monthly * quantity}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Business:</span>
-                          <span className="font-medium">${PLAN_PRICES.business.monthly}/mo × {quantity} = ${PLAN_PRICES.business.monthly * quantity}</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-gray-900/30 rounded-lg p-4">
-                      <h5 className="font-semibold text-yellow-400 mb-2">Yearly Plans</h5>
-                      <div className="space-y-1 text-sm text-gray-300">
-                        <div className="flex justify-between">
-                          <span>Starter:</span>
-                          <span className="font-medium">${PLAN_PRICES.starter.yearly}/yr × {quantity} = ${PLAN_PRICES.starter.yearly * quantity}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Pro:</span>
-                          <span className="font-medium">${PLAN_PRICES.pro.yearly}/yr × {quantity} = ${PLAN_PRICES.pro.yearly * quantity}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Business:</span>
-                          <span className="font-medium">${PLAN_PRICES.business.yearly}/yr × {quantity} = ${PLAN_PRICES.business.yearly * quantity}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 text-center">
-                    <p className="text-xs text-gray-500">
-                      💡 Your final charge will match the plan you select in the payment button above, multiplied by {quantity} user{quantity > 1 ? 's' : ''}.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* PayPal One-time Payment */}
-          <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-blue-500 max-w-2xl mx-auto">
+          <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-blue-500">
             <CardHeader className="text-center">
               <CardTitle className="text-2xl font-bold text-white">Alternative Payment: PayPal</CardTitle>
               <p className="text-gray-400 text-sm">One-time payment • Works worldwide</p>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-gray-900/30 rounded-lg p-4 mb-4">
+            <CardContent className="space-y-6">
+              
+              {/* Number of Users */}
+              <div className="bg-gray-900/30 rounded-lg p-4 border border-gray-700">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold text-white text-lg">Number of Users</h3>
+                    <p className="text-sm text-gray-400">Adjust quantity as needed</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                      disabled={quantity <= 1}
+                      className="w-10 h-10 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center font-bold text-xl text-gray-300 hover:border-blue-500 disabled:opacity-50 transition-colors"
+                    >
+                      −
+                    </button>
+                    <span className="text-3xl font-bold text-white min-w-[4ch] text-center">
+                      {quantity}
+                    </span>
+                    <button
+                      onClick={() => setQuantity(quantity + 1)}
+                      className="w-10 h-10 rounded-full bg-gray-700 border-2 border-gray-600 flex items-center justify-center font-bold text-xl text-gray-300 hover:border-blue-500 transition-colors"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Plan Selection */}
+              <div className="bg-gray-900/30 rounded-lg p-4 border border-gray-700">
                 <h4 className="font-bold text-white mb-3">Select Plan & Billing Cycle</h4>
                 
-                <div className="grid md:grid-cols-2 gap-4 mb-4">
+                <div className="grid md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm text-gray-400 mb-2">Choose Plan</label>
                     <select
@@ -464,17 +358,9 @@ export default function CheckoutPage() {
                     </select>
                   </div>
                 </div>
-
-                <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 text-center">
-                  <div className="text-2xl font-bold text-white mb-1">
-                    ${totalPrice}
-                  </div>
-                  <div className="text-sm text-gray-300">
-                    {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} {selectedCycle === 'monthly' ? 'Monthly' : 'Yearly'} × {quantity} user{quantity > 1 ? 's' : ''}
-                  </div>
-                </div>
               </div>
 
+              {/* PayPal Button */}
               <div id="paypal-button-container" className="min-h-[50px]"></div>
               {!paypalLoaded && (
                 <div className="text-center py-4">
@@ -482,6 +368,107 @@ export default function CheckoutPage() {
                   <p className="text-gray-400 text-sm mt-2">Loading PayPal...</p>
                 </div>
               )}
+
+              {/* Estimated Order Summary */}
+              <div className="bg-gray-900/30 rounded-lg p-4 border border-gray-700">
+                <h4 className="font-bold text-white mb-3 text-center">Estimated Order Summary</h4>
+                
+                <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 text-center mb-4">
+                  <div className="text-3xl font-bold text-white mb-1">
+                    ${totalPrice}
+                  </div>
+                  <div className="text-sm text-gray-300">
+                    {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} {selectedCycle === 'monthly' ? 'Monthly' : 'Yearly'} × {quantity} user{quantity > 1 ? 's' : ''}
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-gray-800/50 rounded-lg p-3">
+                    <h5 className="font-semibold text-teal-400 mb-2 text-sm">Monthly Plans</h5>
+                    <div className="space-y-1 text-xs text-gray-300">
+                      <div className="flex justify-between">
+                        <span>Starter:</span>
+                        <span className="font-medium">${PLAN_PRICES.starter.monthly} × {quantity} = ${PLAN_PRICES.starter.monthly * quantity}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Pro:</span>
+                        <span className="font-medium">${PLAN_PRICES.pro.monthly} × {quantity} = ${PLAN_PRICES.pro.monthly * quantity}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Business:</span>
+                        <span className="font-medium">${PLAN_PRICES.business.monthly} × {quantity} = ${PLAN_PRICES.business.monthly * quantity}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-800/50 rounded-lg p-3">
+                    <h5 className="font-semibold text-yellow-400 mb-2 text-sm">Yearly Plans</h5>
+                    <div className="space-y-1 text-xs text-gray-300">
+                      <div className="flex justify-between">
+                        <span>Starter:</span>
+                        <span className="font-medium">${PLAN_PRICES.starter.yearly} × {quantity} = ${PLAN_PRICES.starter.yearly * quantity}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Pro:</span>
+                        <span className="font-medium">${PLAN_PRICES.pro.yearly} × {quantity} = ${PLAN_PRICES.pro.yearly * quantity}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Business:</span>
+                        <span className="font-medium">${PLAN_PRICES.business.yearly} × {quantity} = ${PLAN_PRICES.business.yearly * quantity}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-gray-500 text-center mt-3">
+                  💡 Your charge: {selectedPlan.charAt(0).toUpperCase() + selectedPlan.slice(1)} plan at ${currentPrice}/{selectedCycle === 'monthly' ? 'mo' : 'yr'} for {quantity} user{quantity > 1 ? 's' : ''}
+                </p>
+              </div>
+
+            </CardContent>
+          </Card>
+
+          {/* What's Included Section - Bottom, Full Width */}
+          <Card className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50">
+            <CardHeader>
+              <CardTitle className="text-white text-center text-2xl">What's Included</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-3 gap-6">
+                <div>
+                  <h4 className="font-bold text-teal-400 mb-3 text-lg">Starter</h4>
+                  <ul className="space-y-2">
+                    {PLAN_FEATURES.starter.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm">
+                        <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-300">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-bold text-teal-400 mb-3 text-lg">Pro</h4>
+                  <ul className="space-y-2">
+                    {PLAN_FEATURES.pro.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm">
+                        <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-300">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-bold text-teal-400 mb-3 text-lg">Business</h4>
+                  <ul className="space-y-2">
+                    {PLAN_FEATURES.business.map((feature, idx) => (
+                      <li key={idx} className="flex items-start gap-2 text-sm">
+                        <Check className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-300">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
