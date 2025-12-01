@@ -295,7 +295,9 @@ export default function CheckoutPage() {
           {/* PayPal One-time Payment */}
           <Card className="bg-gray-800/50 backdrop-blur-xl border-2 border-blue-500">
             <CardHeader className="text-center">
-              <CardTitle className="text-2xl font-bold text-white">Alternative Payment: PayPal</CardTitle>
+              <CardTitle className="text-2xl font-bold text-white">
+                Alternative Payment: <span className="text-3xl italic text-[#0070BA]">PayPal</span>
+              </CardTitle>
               <p className="text-gray-400 text-sm">One-time payment • Works worldwide</p>
             </CardHeader>
             <CardContent className="space-y-6">
