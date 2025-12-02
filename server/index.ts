@@ -1,4 +1,4 @@
-// server/index.ts - WITH EMERGENCY FIX
+// server/index.ts - FIXED VERSION
 import 'dotenv/config';
 
 import userTierRoutes from './routes/user-tier-routes';
@@ -8,7 +8,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import path from 'path';
 import { registerRoutes } from "./routes";
 import { setupVite, log } from "./vite";
-import { safeServeStatic } from "./safe-static";  // ← SAFE IMPORT
+import { safeServeStatic } from "./safe-static";
 import { TestPremiumExpiryManager } from "./testPremiumExpiry";
 import { initializeQueueService, shutdownQueueService } from "./queueService";
 import { seedSuperuser } from "./superuser";
@@ -31,17 +31,30 @@ console.log('🛡️  Global error handlers installed');
 const app = express();
 
 app.set('etag', false);
-app.use('/api', instamojoRoutes);
-app.use('/api', paypalPaymentRoutes);
-app.use('/api/payment', paymentRouter);
+
+// ============================================================================
+// CRITICAL FIX: Body parsers MUST come BEFORE routes
+// ============================================================================
 app.use(express.json({ limit: '200mb' }));
 app.use(express.urlencoded({ extended: true, limit: '200mb' }));
+
+// Timeout settings
 app.use((req, res, next) => {
   req.setTimeout(600000);
   res.setTimeout(600000);
   next();
 });
 
+// ============================================================================
+// NOW mount routes (AFTER body parsers)
+// ============================================================================
+// Note: paymentRouter routes are defined as /payment/razorpay/...
+// So we mount at /api (not /api/payment) to avoid /api/payment/payment/...
+app.use('/api', instamojoRoutes);
+app.use('/api', paypalPaymentRoutes);
+app.use('/api', paymentRouter);  // Routes will be /api/payment/razorpay/...
+
+// Security headers + request logging
 app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -144,7 +157,6 @@ app.use((req, res, next) => {
   app.get('/__seo-debug', seoDebugEndpoint);
 
    // TEMPORARILY DISABLE BOT DETECTOR DURING SEO GENERATION
-   // This allows Puppeteer to get the full React-rendered pages instead of empty static files
    const isSeoGenerationMode = process.env.NODE_ENV === 'development' && process.env.PORT === '10000';
    if (!isSeoGenerationMode) {
      app.use(botDetectionMiddleware);
@@ -152,11 +164,11 @@ app.use((req, res, next) => {
      console.log('⚠️  Bot detector DISABLED - SEO generation mode (PORT=10000)');
    }
 
-  // ⚡ EMERGENCY STATIC SERVING - checks ALL locations
+  // Static serving
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    safeServeStatic(app);  // ← USE EMERGENCY VERSION
+    safeServeStatic(app);
   }
 
   const port = parseInt(process.env.PORT || '5000', 10);
@@ -168,6 +180,7 @@ app.use((req, res, next) => {
     ...(isDevelopment ? {} : { reusePort: true }),
   }, () => {
     log(`serving on port ${port}`);
+    console.log('✅ Razorpay endpoint: /api/payment/razorpay/create-order');
     console.log('⏭️  Skipping test-premium expiry checker');
   });
 

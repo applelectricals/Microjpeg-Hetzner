@@ -1,369 +1,321 @@
 /**
- * Payment Routes - Updated with improved Razorpay implementation
+ * Payment Routes - Razorpay Subscriptions + PayPal One-Time
  * 
- * CHANGES MADE:
- * 1. Improved Razorpay create-order route
- * 2. Enhanced verification with proper database updates
- * 3. Added email notifications
- * 4. Better error handling
+ * Razorpay: Recurring subscriptions (USD only based on your setup)
+ * PayPal: One-time payments (USD only)
+ * 
+ * Your Razorpay Plans:
+ * - RAZORPAY_PLAN_STARTER_MONTHLY_USD = Starter-M ($9)
+ * - RAZORPAY_PLAN_STARTER_YEARLY_USD = Starter-Y ($49)
  */
 
-import { Router } from 'express';
-import { razorpayService } from './razorpayService';
-import { paypalService } from './paypalService';
-import { determinePaymentGateway, getPlanPricing } from './paymentRouting';
+import { Router, Request, Response } from 'express';
+import Razorpay from 'razorpay';
+import crypto from 'crypto';
 import { storage } from './storage';
-import { emailService } from './services/emailService'; // Add this import
+import { emailService } from './services/emailService';
 
 const router = Router();
 
-// Payment routing endpoint
-router.post('/payment/routing', async (req, res) => {
+// ============================================================================
+// RAZORPAY
+// ============================================================================
+
+let razorpay: Razorpay | null = null;
+
+function getRazorpay(): Razorpay {
+  if (!razorpay) {
+    razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID!,
+      key_secret: process.env.RAZORPAY_KEY_SECRET!,
+    });
+  }
+  return razorpay;
+}
+
+function getUserId(req: Request): string | null {
+  const session = req.session as any;
+  return session?.userId || session?.user?.id || null;
+}
+
+function getPlanId(tier: string, cycle: string, currency: string = 'USD'): string | null {
+  const envKey = `RAZORPAY_PLAN_${tier.toUpperCase()}_${cycle.toUpperCase()}_${currency.toUpperCase()}`;
+  return process.env[envKey] || null;
+}
+
+const PRICING: Record<string, { inr: number; usd: number }> = {
+  'starter-monthly': { inr: 749, usd: 9 },
+  'starter-yearly': { inr: 4360, usd: 49 },
+  'pro-monthly': { inr: 1599, usd: 19 },
+  'pro-yearly': { inr: 12499, usd: 149 },
+  'business-monthly': { inr: 4099, usd: 49 },
+  'business-yearly': { inr: 28999, usd: 349 },
+};
+
+// ============================================================================
+// CHECK AUTH MIDDLEWARE
+// ============================================================================
+
+router.get('/payment/check-auth', (req: Request, res: Response) => {
+  const userId = getUserId(req);
+  res.json({
+    authenticated: !!userId,
+    userId,
+  });
+});
+
+// ============================================================================
+// RAZORPAY ROUTES
+// ============================================================================
+
+router.get('/payment/razorpay/config', (_req, res) => {
+  res.json({
+    success: true,
+    key_id: process.env.RAZORPAY_KEY_ID || '',
+    is_live: (process.env.RAZORPAY_KEY_ID || '').startsWith('rzp_live'),
+  });
+});
+
+router.post('/payment/razorpay/create-subscription', async (req: Request, res: Response) => {
   try {
-    const { plan, userLocation, userEmail } = req.body;
-    
-    const routing = determinePaymentGateway(undefined, undefined, userLocation);
-    const pricing = getPlanPricing(plan, routing.currency);
-    
-    if (!pricing) {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Invalid plan or pricing not found' 
+    const { tier, cycle, currency = 'USD' } = req.body;
+    const userId = getUserId(req);
+
+    console.log('\n🔄 Create Subscription:', { tier, cycle, currency, userId });
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Please log in to continue',
+        code: 'AUTH_REQUIRED',
+        redirectUrl: '/login?redirect=/checkout',
       });
     }
 
-    let paypalPlanId = '';
+    const planId = getPlanId(tier, cycle, currency);
     
-    if (routing.gateway === 'paypal') {
-      const planMapping = {
-        pro: process.env.PAYPAL_PRO_PLAN_ID || 'P-1234567890',
-        enterprise: process.env.PAYPAL_ENTERPRISE_PLAN_ID || 'P-0987654321'
-      };
-      paypalPlanId = planMapping[plan as keyof typeof planMapping] || '';
+    if (!planId) {
+      return res.status(400).json({
+        success: false,
+        error: `Plan not configured for ${tier}-${cycle}-${currency}`,
+      });
     }
+
+    const user = await storage.getUser(userId);
+    const razorpayInstance = getRazorpay();
+    
+    const subscription = await razorpayInstance.subscriptions.create({
+      plan_id: planId,
+      total_count: 0,
+      quantity: 1,
+      customer_notify: 1,
+      notes: { userId, tier, cycle, currency },
+      ...(user?.email && { notify_info: { notify_email: user.email } }),
+    });
+
+    console.log('✅ Subscription created:', subscription.id);
 
     res.json({
       success: true,
-      gateway: routing.gateway,
-      currency: routing.currency,
-      pricing,
-      paypalPlanId,
-      reason: routing.reason
+      subscription_id: subscription.id,
+      short_url: subscription.short_url,
+      key_id: process.env.RAZORPAY_KEY_ID,
     });
-  } catch (error) {
-    console.error('Payment routing error:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Payment routing failed' 
-    });
-  }
-});
 
-// ========================================
-// RAZORPAY ROUTES (UPDATED)
-// ========================================
-
-router.post('/payment/razorpay/create-order', async (req, res) => {
-  try {
-    const { plan, quantity, amount } = req.body;
-    const sessionData = req.session as any;
-    const userId = sessionData?.userId;
-
-    if (!userId) {
-      return res.status(401).json({ 
-        success: false,
-        error: 'User not authenticated' 
-      });
-    }
-
-    console.log(`📦 Creating Razorpay order:`, { plan, amount, quantity, userId });
-    
-    // Create order with Razorpay
-    const result = await razorpayService.createOrder(
-      amount, 
-      'INR', // Always INR for Razorpay
-      `receipt_${userId}_${Date.now()}`
-    );
-    
-    if (result.success) {
-      console.log('✅ Razorpay order created:', result.orderId);
-      
-      res.json({
-        success: true,
-        order_id: result.orderId,
-        amount: result.amount,
-        currency: result.currency,
-        key_id: process.env.RAZORPAY_KEY_ID
-      });
-    } else {
-      console.error('❌ Razorpay order creation failed:', result.error);
-      res.status(500).json({
-        success: false,
-        error: result.error || 'Failed to create order'
-      });
-    }
   } catch (error: any) {
-    console.error('❌ Razorpay order creation error:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Failed to create order',
-      message: error.message 
-    });
+    console.error('❌ Create subscription error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
-router.post('/payment/razorpay/verify', async (req, res) => {
+router.post('/payment/razorpay/verify-subscription', async (req: Request, res: Response) => {
   try {
-    const { 
-      razorpay_order_id, 
-      razorpay_payment_id, 
-      razorpay_signature,
-      plan,
-      quantity 
-    } = req.body;
-    
-    const sessionData = req.session as any;
-    const userId = sessionData?.userId;
+    const { razorpay_payment_id, razorpay_subscription_id, razorpay_signature, tier, cycle, currency = 'USD' } = req.body;
+    const userId = getUserId(req);
 
     if (!userId) {
-      return res.status(401).json({ 
-        success: false,
-        error: 'User not authenticated' 
-      });
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
     }
 
-    console.log('🔐 Verifying Razorpay payment:', razorpay_payment_id);
-    
     // Verify signature
-    const isValid = razorpayService.verifyPaymentSignature(
-      razorpay_order_id,
-      razorpay_payment_id,
-      razorpay_signature
-    );
-    
-    if (!isValid) {
-      console.error('❌ Invalid payment signature');
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Invalid payment signature' 
-      });
+    const body = razorpay_payment_id + '|' + razorpay_subscription_id;
+    const expected = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!).update(body).digest('hex');
+
+    if (expected !== razorpay_signature) {
+      return res.status(400).json({ success: false, error: 'Invalid signature' });
     }
 
-    console.log('✅ Payment signature verified');
-
-    // Parse plan details
-    const [tier, cycle] = plan.split('-');
-    const duration = cycle === 'monthly' ? 30 : 365;
-
-    // Calculate subscription dates
+    // Activate subscription
     const startDate = new Date();
     const endDate = new Date();
-    if (cycle === 'monthly') {
-      endDate.setMonth(endDate.getMonth() + 1);
-    } else {
-      endDate.setFullYear(endDate.getFullYear() + 1);
-    }
+    cycle === 'yearly' ? endDate.setFullYear(endDate.getFullYear() + 1) : endDate.setMonth(endDate.getMonth() + 1);
 
-    // Update user subscription
+    const pricing = PRICING[`${tier}-${cycle}`] || { usd: 0 };
+
     await storage.updateUser(userId, {
       subscriptionTier: tier,
       subscriptionStatus: 'active',
       subscriptionStartDate: startDate,
       subscriptionEndDate: endDate,
       subscriptionBillingCycle: cycle,
-      paypalOrderId: razorpay_payment_id, // Store Razorpay payment ID
-      updatedAt: new Date()
+      razorpaySubscriptionId: razorpay_subscription_id,
+      razorpayPaymentId: razorpay_payment_id,
+      lastPaymentAmount: pricing.usd,
+      lastPaymentCurrency: currency,
+      updatedAt: new Date(),
     });
 
-    console.log('✅ User subscription updated:', userId);
-
-    // Get user details for email
+    // Send email
     const user = await storage.getUser(userId);
-
-    // Send confirmation email
-    if (user && user.email) {
-      const planPrices = {
-        'starter-monthly': 9,
-        'starter-yearly': 49,
-        'pro-monthly': 19,
-        'pro-yearly': 149,
-        'business-monthly': 49,
-        'business-yearly': 349,
-      };
-
-      const amount = planPrices[plan as keyof typeof planPrices] || 9;
-
-      try {
-        await emailService.sendPaymentConfirmation(
-          user.email,
-          user.firstName || user.email,
-          tier,
-          amount,
-          duration
-        );
-        console.log('✅ Confirmation email sent to:', user.email);
-      } catch (emailError) {
-        console.error('⚠️  Email sending failed:', emailError);
-        // Don't fail the payment if email fails
-      }
+    if (user?.email) {
+      await emailService.sendPaymentConfirmation(user.email, user.firstName || 'there', {
+        tier, cycle, amount: pricing.usd, currency: 'USD', startDate, endDate,
+        subscriptionId: razorpay_subscription_id, paymentId: razorpay_payment_id,
+      }).catch(() => {});
     }
-    
-    res.json({ 
-      success: true, 
-      message: 'Payment verified and subscription activated',
-      paymentId: razorpay_payment_id
-    });
+
+    console.log(`✅ Razorpay subscription activated: ${userId} → ${tier}-${cycle}`);
+
+    res.json({ success: true, subscription_id: razorpay_subscription_id });
 
   } catch (error: any) {
-    console.error('❌ Razorpay verification error:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Payment verification failed',
-      message: error.message 
-    });
+    console.error('❌ Verify error:', error);
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// ========================================
-// PAYPAL ROUTES (Keep existing)
-// ========================================
-
-router.get('/payment/paypal/subscription-success', async (req, res) => {
+router.post('/payment/razorpay/cancel-subscription', async (req: Request, res: Response) => {
   try {
-    const { subscription_id, plan_id } = req.query;
-    
-    const sessionData = req.session as any;
-    if (!subscription_id || !sessionData.userId) {
-      return res.redirect('/simple-pricing?error=missing_subscription');
-    }
-    
-    console.log('PayPal subscription redirect:', { subscription_id, plan_id });
-    
-    const result = await paypalService.getSubscription(subscription_id as string);
-    
-    if (result.success && result.subscription.status === 'ACTIVE') {
-      console.log('PayPal subscription verified as ACTIVE:', result.subscription);
-      
-      const plan = result.subscription.plan_id?.includes('test') ? 'test_premium' :
-                   result.subscription.plan_id?.includes('enterprise') ? 'enterprise' : 'premium';
-      
-      const planPrices = {
-        'test_premium': 1.00,
-        'premium': 29.00,
-        'enterprise': 99.00
-      };
-      
-      const subscriptionEndDate = plan === 'test_premium' 
-        ? new Date(Date.now() + 24 * 60 * 60 * 1000)
-        : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-      
-      await storage.updateUser(sessionData.userId, {
-        subscriptionTier: plan,
-        subscriptionStatus: 'active',
-        subscriptionEndDate: subscriptionEndDate,
-        stripeSubscriptionId: subscription_id as string
-      });
-      
-      const amount = planPrices[plan as keyof typeof planPrices];
-      const planDisplayName = plan.replace('_', '-');
-      
-      console.log('Subscription activated successfully for user:', sessionData.userId);
-      
-      res.redirect(`/subscription-success?plan=${planDisplayName}&amount=${amount}&paypal_subscription_id=${subscription_id}`);
-    } else {
-      console.error('PayPal subscription verification failed:', result);
-      res.redirect('/simple-pricing?error=payment_verification_failed');
-    }
-  } catch (error) {
-    console.error('PayPal subscription verification error:', error);
-    res.redirect('/simple-pricing?error=payment_processing_failed');
-  }
-});
+    const userId = getUserId(req);
+    if (!userId) return res.status(401).json({ success: false, error: 'Not authenticated' });
 
-router.post('/payment/paypal/cancel-subscription', async (req, res) => {
-  try {
-    const { subscriptionId } = req.body;
-    
-    const result = await paypalService.cancelSubscription(subscriptionId);
-    
-    if (result.success) {
-      const sessionData = req.session as any;
-      if (sessionData.userId) {
-        await storage.updateUser(sessionData.userId, {
-          subscriptionStatus: 'cancelled'
-        });
-      }
-      
-      res.json({ 
-        success: true, 
-        message: 'Subscription cancelled successfully' 
-      });
-    } else {
-      res.status(400).json({ 
-        success: false, 
-        error: result.error 
-      });
+    const user = await storage.getUser(userId);
+    if (!user?.razorpaySubscriptionId) {
+      return res.status(400).json({ success: false, error: 'No active subscription' });
     }
-  } catch (error) {
-    console.error('PayPal subscription cancellation error:', error);
-    res.status(500).json({ 
-      success: false, 
-      error: 'Subscription cancellation failed' 
+
+    await getRazorpay().subscriptions.cancel(user.razorpaySubscriptionId, true);
+
+    await storage.updateUser(userId, {
+      subscriptionStatus: 'cancelling',
+      cancelAtPeriodEnd: true,
+      updatedAt: new Date(),
     });
+
+    if (user.email) {
+      await emailService.sendCancellationConfirmation(
+        user.email, user.firstName || 'there',
+        user.subscriptionEndDate || new Date(), user.subscriptionTier || 'starter'
+      ).catch(() => {});
+    }
+
+    res.json({ success: true, message: 'Subscription will end at billing period end' });
+
+  } catch (error: any) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
-// ========================================
-// WEBHOOKS (Keep existing)
-// ========================================
+// ============================================================================
+// PAYPAL ONE-TIME ROUTES
+// ============================================================================
 
-router.post('/payment/razorpay/webhook', async (req, res) => {
+router.post('/payment/paypal/capture', async (req: Request, res: Response) => {
+  try {
+    const { orderID, tier, cycle } = req.body;
+    const userId = getUserId(req);
+
+    console.log('\n💳 PayPal Capture:', { orderID, tier, cycle, userId });
+
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
+    }
+
+    // Activate subscription
+    const startDate = new Date();
+    const endDate = new Date();
+    cycle === 'yearly' ? endDate.setFullYear(endDate.getFullYear() + 1) : endDate.setMonth(endDate.getMonth() + 1);
+
+    const pricing = PRICING[`${tier}-${cycle}`] || { usd: 0 };
+
+    await storage.updateUser(userId, {
+      subscriptionTier: tier,
+      subscriptionStatus: 'active',
+      subscriptionStartDate: startDate,
+      subscriptionEndDate: endDate,
+      subscriptionBillingCycle: cycle,
+      paypalOrderId: orderID,
+      lastPaymentAmount: pricing.usd,
+      lastPaymentCurrency: 'USD',
+      updatedAt: new Date(),
+    });
+
+    // Send email
+    const user = await storage.getUser(userId);
+    if (user?.email) {
+      await emailService.sendPaymentConfirmation(user.email, user.firstName || 'there', {
+        tier, cycle, amount: pricing.usd, currency: 'USD', startDate, endDate, paymentId: orderID,
+      }).catch(() => {});
+    }
+
+    console.log(`✅ PayPal payment activated: ${userId} → ${tier}-${cycle}`);
+
+    res.json({ success: true });
+
+  } catch (error: any) {
+    console.error('❌ PayPal capture error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// ============================================================================
+// WEBHOOK
+// ============================================================================
+
+router.post('/payment/razorpay/webhook', async (req: Request, res: Response) => {
   try {
     const event = req.body;
-    
+    console.log(`📨 Webhook: ${event.event}`);
+
+    const sub = event.payload?.subscription?.entity;
+    const userId = sub?.notes?.userId;
+
+    if (!userId) {
+      return res.status(200).json({ status: 'ok' });
+    }
+
     switch (event.event) {
-      case 'payment.captured':
-        console.log('Payment captured:', event.payload.payment.entity.id);
-        break;
       case 'subscription.activated':
-        console.log('Subscription activated:', event.payload.subscription.entity.id);
+      case 'subscription.charged': {
+        const cycle = sub.notes?.cycle || 'monthly';
+        const endDate = new Date();
+        cycle === 'yearly' ? endDate.setFullYear(endDate.getFullYear() + 1) : endDate.setMonth(endDate.getMonth() + 1);
+        
+        await storage.updateUser(userId, {
+          subscriptionTier: sub.notes?.tier,
+          subscriptionStatus: 'active',
+          subscriptionEndDate: endDate,
+          razorpaySubscriptionId: sub.id,
+        });
         break;
+      }
       case 'subscription.cancelled':
-        console.log('Subscription cancelled:', event.payload.subscription.entity.id);
+        await storage.updateUser(userId, { subscriptionStatus: 'cancelled' });
         break;
-      default:
-        console.log('Unhandled Razorpay event:', event.event);
+      case 'subscription.halted':
+        await storage.updateUser(userId, { subscriptionStatus: 'halted' });
+        const user = await storage.getUser(userId);
+        if (user?.email) {
+          await emailService.sendPaymentFailedNotification(user.email, user.firstName || 'there', sub.notes?.tier).catch(() => {});
+        }
+        break;
     }
-    
-    res.status(200).json({ status: 'success' });
-  } catch (error) {
-    console.error('Razorpay webhook error:', error);
-    res.status(500).json({ error: 'Webhook processing failed' });
-  }
-});
 
-router.post('/payment/paypal/webhook', async (req, res) => {
-  try {
-    const event = req.body;
-    
-    switch (event.event_type) {
-      case 'BILLING.SUBSCRIPTION.ACTIVATED':
-        console.log('PayPal subscription activated:', event.resource.id);
-        break;
-      case 'BILLING.SUBSCRIPTION.CANCELLED':
-        console.log('PayPal subscription cancelled:', event.resource.id);
-        break;
-      case 'BILLING.SUBSCRIPTION.PAYMENT.FAILED':
-        console.log('PayPal payment failed:', event.resource.id);
-        break;
-      default:
-        console.log('Unhandled PayPal event:', event.event_type);
-    }
-    
-    res.status(200).json({ status: 'success' });
-  } catch (error) {
-    console.error('PayPal webhook error:', error);
-    res.status(500).json({ error: 'Webhook processing failed' });
+    res.status(200).json({ status: 'ok' });
+
+  } catch (error: any) {
+    console.error('❌ Webhook error:', error);
+    res.status(500).json({ error: 'Webhook failed' });
   }
 });
 
