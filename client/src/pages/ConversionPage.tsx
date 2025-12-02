@@ -14,6 +14,7 @@ import ConversionOutputModal from '@/components/ConversionOutputModal';
 import { Moon, Sun } from 'lucide-react'; // Add Moon and Sun to existing lucide imports
 import ButtonsSection from "@/components/ButtonsSection";
 import { Upload, Settings, Download, Zap, Shield, Sparkles, X, Check, ArrowRight, ImageIcon, ChevronDown, ChevronUp, Crown, Plus, Minus, Menu, Calendar, Activity } from 'lucide-react';
+import { getConversionFaq, getHowToSchema, getSoftwareAppSchema, getFaqSchema } from "@/data/conversionSchema";
 
 
 // Import conversion matrix and utilities
@@ -290,6 +291,23 @@ export default function ConversionPage() {
   const conversionConfig = urlParams ? getConversionByPair(urlParams.from, urlParams.to) : null;
   const fromFormat = urlParams ? getFormatInfo(urlParams.from) : null;
   const toFormat = urlParams ? getFormatInfo(urlParams.to) : null;
+
+  // Generate canonical URL and structured data for SEO
+  const canonicalUrl =
+    urlParams && fromFormat && toFormat
+      ? `https://microjpeg.com${conversionConfig.operation === "compress"
+          ? `/compress/${urlParams.from}`
+          : `/convert/${urlParams.from}-to-${urlParams.to}`}`
+      : "https://microjpeg.com/tools/convert";
+
+  const structuredData =
+    urlParams && fromFormat && toFormat
+      ? [
+          getHowToSchema(urlParams.from, urlParams.to, canonicalUrl),
+          getSoftwareAppSchema(urlParams.from, urlParams.to, canonicalUrl),
+          getFaqSchema(urlParams.from, urlParams.to, canonicalUrl)
+        ]
+      : undefined;
 
   // If no valid conversion found, show 404
   if (!urlParams || !conversionConfig || !fromFormat || !toFormat) {
@@ -668,13 +686,20 @@ export default function ConversionPage() {
     }));
   };
 
-  // Generate dynamic canonical URL
-  const canonicalUrl = `https://microjpeg.com${location}`;
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-cream via-white to-brand-light dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col transition-colors duration-300">
       {/* ← PERFECT PER-PAGE SEO — Google sees this instantly on SSR */}
-     
+      <SEOHead
+        title={
+          conversionConfig
+            ? `${conversionConfig.operation === 'compress' ? 'Compress' : 'Convert'} ${fromFormat?.displayName} ${conversionConfig.operation === 'compress' ? '' : `to ${toFormat?.displayName}`} | MicroJPEG`
+            : 'Image Converter & Compressor | MicroJPEG'
+        }
+        description={conversionConfig?.description || 'Convert and compress images online with MicroJPEG'}
+        canonicalUrl={canonicalUrl}
+        structuredData={structuredData}
+      />
 
       {/* Header */}
 
