@@ -1101,6 +1101,28 @@ export default function ConversionPage() {
       </section>
       {/* ====== END SEO BLOCK ====== */}
 
+      {/* FAQ Section specific to this conversion */}
+      {urlParams && fromFormat && toFormat && (
+        <section className="py-16 bg-white dark:bg-gray-900">
+          <div className="max-w-4xl mx-auto px-4 text-left">
+            <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
+              {fromFormat.displayName} to {toFormat.displayName} – FAQ
+            </h2>
+            <div className="space-y-4">
+              {getConversionFaq(urlParams.from, urlParams.to).map((item, idx) => (
+                <div key={idx} className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-gray-50 dark:bg-gray-800 hover:border-brand-gold dark:hover:border-brand-gold transition-colors">
+                  <p className="font-semibold text-lg mb-3 text-gray-900 dark:text-white">
+                    {item.question}
+                  </p>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {item.answer}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Footer */}
       <footer className="bg-gray-100 dark:bg-gray-800 text-black dark:text-white py-12">
