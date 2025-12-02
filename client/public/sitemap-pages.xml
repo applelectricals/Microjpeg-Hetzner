@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset 
+ xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+ xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+
+<url>
+    <loc>https://microjpeg.com/</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>1.0</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+<url>
+    <loc>https://microjpeg.com/pricing</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/pricing" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.9</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+<url>
+    <loc>https://microjpeg.com/tools</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/tools" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+
+<url>
+    <loc>https://microjpeg.com/tools/compress</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/tools/compress" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+
+<url>
+    <loc>https://microjpeg.com/tools/convert</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/tools/convert" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+<url>
+    <loc>https://microjpeg.com/tools/optimizer</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/tools/optimizer" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+
+<url>
+    <loc>https://microjpeg.com/api-docs</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/api-docs" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+<url>
+    <loc>https://microjpeg.com/wordpress-plugin</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/wordpress-plugin" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+<url>
+    <loc>https://microjpeg.com/wordpress-plugin/docs</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/wordpress-plugin/docs" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+<url>
+    <loc>https://microjpeg.com/wordpress-plugin/install</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/wordpress-plugin/install" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+<url>
+    <loc>https://microjpeg.com/features</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/features" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+<url>
+    <loc>https://microjpeg.com/about</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/about" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.3</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+<url>
+    <loc>https://microjpeg.com/contact</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/contact" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.4</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+<url>
+    <loc>https://microjpeg.com/support</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/support" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.4</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+<url>
+    <loc>https://microjpeg.com/legal/privacy</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/legal/privacy" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.2</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+
+<url>
+    <loc>https://microjpeg.com/legal/terms</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/legal/terms" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.2</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+
+<url>
+    <loc>https://microjpeg.com/legal/cookies</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/legal/cookies" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.2</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+
+<url>
+    <loc>https://microjpeg.com/legal/cancellation</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/legal/cancellation" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.3</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+
+
+</urlset>

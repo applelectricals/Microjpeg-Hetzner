@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset 
+ xmlns="http://www.sitemaps.org/schemas/sitemap/0.8"
+ xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+<url>
+    <loc>https://microjpeg.com/compress/jpg</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/compress/jpg" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+<url>
+    <loc>https://microjpeg.com/compress/png</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/compress/png" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+<url>
+    <loc>https://microjpeg.com/compress/webp</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/compress/webp" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+
+<url>
+    <loc>https://microjpeg.com/compress/avif</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/compress/avif" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+
+<url>
+    <loc>https://microjpeg.com/compress/tiff</loc>
+     <xhtml:link 
+        rel="alternate" 
+        hreflang="en"
+        href="https://microjpeg.com/compress/tiff" />
+    
+    <lastmod>2025-01-14</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+</url>
+
+
+</urlset>
+
+
+
+
+
+
+
+
+

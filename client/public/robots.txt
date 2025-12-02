@@ -1,42 +1,45 @@
-# Robots.txt for JPEG Compression Tool - Micro JPEG
-# Optimized for search engine crawling and indexing
+# robots.txt for MicroJPEG — Fully Optimized for SEO and Crawling
 
 User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin/
 Disallow: /_next/
-Disallow: /*.json$
+Disallow: /server/
+Disallow: /internal/
 
-# Allow important paths for SEO
+# Allow essential static resources
 Allow: /images/
+Allow: /fonts/
+Allow: /scripts/
+Allow: /styles/
 Allow: /favicon.ico
 Allow: /manifest.json
-Allow: /sitemap.xml
 
-# Sitemap location
+# Sitemap index
 Sitemap: https://microjpeg.com/sitemap.xml
 
-# Crawl-delay for respectful crawling
+# Crawl speed (Google ignores; Bing respects)
 Crawl-delay: 1
 
-# Specific rules for major search engines
+# Googlebot (no crawl delay)
 User-agent: Googlebot
 Allow: /
 Disallow: /api/
-Crawl-delay: 0
 
+# Bingbot
 User-agent: Bingbot
 Allow: /
 Disallow: /api/
 Crawl-delay: 1
 
+# Yahoo / DuckDuckGo (Bing-based)
 User-agent: Slurp
 Allow: /
 Disallow: /api/
 Crawl-delay: 2
 
-# Block spam bots
+# Block spam / scrapers
 User-agent: AhrefsBot
 Disallow: /
 
