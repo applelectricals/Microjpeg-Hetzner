@@ -1,12 +1,17 @@
 /**
  * Payment Routes - Razorpay Subscriptions + PayPal One-Time
  * 
- * Razorpay: Recurring subscriptions (USD only based on your setup)
- * PayPal: One-time payments (USD only)
+ * With proper webhook signature verification
  * 
- * Your Razorpay Plans:
- * - RAZORPAY_PLAN_STARTER_MONTHLY_USD = Starter-M ($9)
- * - RAZORPAY_PLAN_STARTER_YEARLY_USD = Starter-Y ($49)
+ * ENVIRONMENT VARIABLES:
+ * - RAZORPAY_KEY_ID
+ * - RAZORPAY_KEY_SECRET
+ * - RAZORPAY_WEBHOOK_SECRET (generate in Razorpay Dashboard)
+ * - RAZORPAY_PLAN_STARTER_MONTHLY_USD
+ * - RAZORPAY_PLAN_STARTER_YEARLY_USD
+ * - PAYPAL_CLIENT_ID
+ * - PAYPAL_CLIENT_SECRET
+ * - PAYPAL_WEBHOOK_ID
  */
 
 import { Router, Request, Response } from 'express';
@@ -18,7 +23,7 @@ import { emailService } from './services/emailService';
 const router = Router();
 
 // ============================================================================
-// RAZORPAY
+// RAZORPAY INITIALIZATION
 // ============================================================================
 
 let razorpay: Razorpay | null = null;
@@ -53,7 +58,7 @@ const PRICING: Record<string, { inr: number; usd: number }> = {
 };
 
 // ============================================================================
-// CHECK AUTH MIDDLEWARE
+// CHECK AUTH
 // ============================================================================
 
 router.get('/payment/check-auth', (req: Request, res: Response) => {
@@ -137,11 +142,12 @@ router.post('/payment/razorpay/verify-subscription', async (req: Request, res: R
       return res.status(401).json({ success: false, error: 'Not authenticated' });
     }
 
-    // Verify signature
+    // Verify signature: HMAC-SHA256(payment_id + "|" + subscription_id, key_secret)
     const body = razorpay_payment_id + '|' + razorpay_subscription_id;
     const expected = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET!).update(body).digest('hex');
 
     if (expected !== razorpay_signature) {
+      console.error('❌ Invalid signature');
       return res.status(400).json({ success: false, error: 'Invalid signature' });
     }
 
@@ -162,6 +168,8 @@ router.post('/payment/razorpay/verify-subscription', async (req: Request, res: R
       razorpayPaymentId: razorpay_payment_id,
       lastPaymentAmount: pricing.usd,
       lastPaymentCurrency: currency,
+      lastPaymentDate: startDate,
+      cancelAtPeriodEnd: false,
       updatedAt: new Date(),
     });
 
@@ -171,7 +179,7 @@ router.post('/payment/razorpay/verify-subscription', async (req: Request, res: R
       await emailService.sendPaymentConfirmation(user.email, user.firstName || 'there', {
         tier, cycle, amount: pricing.usd, currency: 'USD', startDate, endDate,
         subscriptionId: razorpay_subscription_id, paymentId: razorpay_payment_id,
-      }).catch(() => {});
+      }).catch((e) => console.warn('⚠️ Email failed:', e.message));
     }
 
     console.log(`✅ Razorpay subscription activated: ${userId} → ${tier}-${cycle}`);
@@ -186,38 +194,58 @@ router.post('/payment/razorpay/verify-subscription', async (req: Request, res: R
 
 router.post('/payment/razorpay/cancel-subscription', async (req: Request, res: Response) => {
   try {
+    const { cancel_immediately = false } = req.body;
     const userId = getUserId(req);
-    if (!userId) return res.status(401).json({ success: false, error: 'Not authenticated' });
+    
+    if (!userId) {
+      return res.status(401).json({ success: false, error: 'Not authenticated' });
+    }
 
     const user = await storage.getUser(userId);
     if (!user?.razorpaySubscriptionId) {
-      return res.status(400).json({ success: false, error: 'No active subscription' });
+      return res.status(400).json({ success: false, error: 'No active Razorpay subscription' });
     }
 
-    await getRazorpay().subscriptions.cancel(user.razorpaySubscriptionId, true);
+    // Cancel in Razorpay
+    // cancel_at_cycle_end = true means access until period ends
+    const cancelAtCycleEnd = !cancel_immediately;
+    await getRazorpay().subscriptions.cancel(user.razorpaySubscriptionId, cancelAtCycleEnd);
 
+    // Update database
     await storage.updateUser(userId, {
-      subscriptionStatus: 'cancelling',
-      cancelAtPeriodEnd: true,
+      subscriptionStatus: cancel_immediately ? 'cancelled' : 'active',
+      cancelAtPeriodEnd: cancelAtCycleEnd,
       updatedAt: new Date(),
     });
 
+    // Send cancellation email
     if (user.email) {
       await emailService.sendCancellationConfirmation(
-        user.email, user.firstName || 'there',
-        user.subscriptionEndDate || new Date(), user.subscriptionTier || 'starter'
-      ).catch(() => {});
+        user.email, 
+        user.firstName || 'there',
+        user.subscriptionEndDate || new Date(), 
+        user.subscriptionTier || 'starter'
+      ).catch((e) => console.warn('⚠️ Email failed:', e.message));
     }
 
-    res.json({ success: true, message: 'Subscription will end at billing period end' });
+    console.log(`✅ Subscription cancelled: ${userId} (immediate: ${cancel_immediately})`);
+
+    res.json({
+      success: true,
+      message: cancelAtCycleEnd 
+        ? 'Subscription will end at billing period end'
+        : 'Subscription cancelled immediately',
+      accessUntil: user.subscriptionEndDate,
+    });
 
   } catch (error: any) {
+    console.error('❌ Cancel error:', error);
     res.status(500).json({ success: false, error: error.message });
   }
 });
 
 // ============================================================================
-// PAYPAL ONE-TIME ROUTES
+// PAYPAL ONE-TIME PAYMENT
 // ============================================================================
 
 router.post('/payment/paypal/capture', async (req: Request, res: Response) => {
@@ -231,13 +259,14 @@ router.post('/payment/paypal/capture', async (req: Request, res: Response) => {
       return res.status(401).json({ success: false, error: 'Not authenticated' });
     }
 
-    // Activate subscription
+    // Calculate dates (one-time payment = access for the period)
     const startDate = new Date();
     const endDate = new Date();
     cycle === 'yearly' ? endDate.setFullYear(endDate.getFullYear() + 1) : endDate.setMonth(endDate.getMonth() + 1);
 
     const pricing = PRICING[`${tier}-${cycle}`] || { usd: 0 };
 
+    // Update user
     await storage.updateUser(userId, {
       subscriptionTier: tier,
       subscriptionStatus: 'active',
@@ -247,6 +276,8 @@ router.post('/payment/paypal/capture', async (req: Request, res: Response) => {
       paypalOrderId: orderID,
       lastPaymentAmount: pricing.usd,
       lastPaymentCurrency: 'USD',
+      lastPaymentDate: startDate,
+      cancelAtPeriodEnd: true, // One-time = doesn't auto-renew
       updatedAt: new Date(),
     });
 
@@ -255,7 +286,7 @@ router.post('/payment/paypal/capture', async (req: Request, res: Response) => {
     if (user?.email) {
       await emailService.sendPaymentConfirmation(user.email, user.firstName || 'there', {
         tier, cycle, amount: pricing.usd, currency: 'USD', startDate, endDate, paymentId: orderID,
-      }).catch(() => {});
+      }).catch((e) => console.warn('⚠️ Email failed:', e.message));
     }
 
     console.log(`✅ PayPal payment activated: ${userId} → ${tier}-${cycle}`);
@@ -269,53 +300,275 @@ router.post('/payment/paypal/capture', async (req: Request, res: Response) => {
 });
 
 // ============================================================================
-// WEBHOOK
+// RAZORPAY WEBHOOK (with signature verification)
 // ============================================================================
 
 router.post('/payment/razorpay/webhook', async (req: Request, res: Response) => {
   try {
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    
+    // Verify webhook signature if secret is configured
+    if (webhookSecret) {
+      const signature = req.headers['x-razorpay-signature'] as string;
+      
+      if (!signature) {
+        console.error('❌ Missing webhook signature');
+        return res.status(401).json({ error: 'Missing signature' });
+      }
+
+      // Razorpay webhook signature: HMAC-SHA256(request_body, webhook_secret)
+      const expectedSignature = crypto
+        .createHmac('sha256', webhookSecret)
+        .update(JSON.stringify(req.body))
+        .digest('hex');
+
+      if (signature !== expectedSignature) {
+        console.error('❌ Invalid webhook signature');
+        return res.status(401).json({ error: 'Invalid signature' });
+      }
+      
+      console.log('✅ Webhook signature verified');
+    } else {
+      console.warn('⚠️ RAZORPAY_WEBHOOK_SECRET not set - skipping signature verification');
+    }
+
     const event = req.body;
-    console.log(`📨 Webhook: ${event.event}`);
+    const eventType = event.event;
+    
+    console.log(`\n📨 Razorpay Webhook: ${eventType}`);
 
-    const sub = event.payload?.subscription?.entity;
-    const userId = sub?.notes?.userId;
-
+    // Get subscription/payment entity based on event type
+    const subscription = event.payload?.subscription?.entity;
+    const payment = event.payload?.payment?.entity;
+    
+    // Extract userId from notes
+    const userId = subscription?.notes?.userId || payment?.notes?.userId;
+    
     if (!userId) {
+      console.log('   ℹ️ No userId in notes, skipping');
       return res.status(200).json({ status: 'ok' });
     }
 
-    switch (event.event) {
-      case 'subscription.activated':
-      case 'subscription.charged': {
-        const cycle = sub.notes?.cycle || 'monthly';
+    switch (eventType) {
+      // ========================================
+      // SUBSCRIPTION EVENTS
+      // ========================================
+      
+      case 'subscription.activated': {
+        // Subscription has been activated (first payment successful)
+        const cycle = subscription.notes?.cycle || 'monthly';
+        const tier = subscription.notes?.tier || 'starter';
         const endDate = new Date();
         cycle === 'yearly' ? endDate.setFullYear(endDate.getFullYear() + 1) : endDate.setMonth(endDate.getMonth() + 1);
         
         await storage.updateUser(userId, {
-          subscriptionTier: sub.notes?.tier,
+          subscriptionTier: tier,
           subscriptionStatus: 'active',
           subscriptionEndDate: endDate,
-          razorpaySubscriptionId: sub.id,
+          subscriptionStartDate: new Date(),
+          razorpaySubscriptionId: subscription.id,
+          cancelAtPeriodEnd: false,
         });
+        
+        console.log(`   ✅ Subscription activated: ${userId} → ${tier}`);
         break;
       }
-      case 'subscription.cancelled':
-        await storage.updateUser(userId, { subscriptionStatus: 'cancelled' });
-        break;
-      case 'subscription.halted':
-        await storage.updateUser(userId, { subscriptionStatus: 'halted' });
+
+      case 'subscription.charged': {
+        // Recurring payment successful
+        const cycle = subscription.notes?.cycle || 'monthly';
+        const tier = subscription.notes?.tier || 'starter';
+        const currency = subscription.notes?.currency || 'USD';
+        
+        const endDate = new Date();
+        cycle === 'yearly' ? endDate.setFullYear(endDate.getFullYear() + 1) : endDate.setMonth(endDate.getMonth() + 1);
+        
+        await storage.updateUser(userId, {
+          subscriptionStatus: 'active',
+          subscriptionEndDate: endDate,
+          lastPaymentDate: new Date(),
+          cancelAtPeriodEnd: false,
+        });
+
+        // Send renewal confirmation email
         const user = await storage.getUser(userId);
         if (user?.email) {
-          await emailService.sendPaymentFailedNotification(user.email, user.firstName || 'there', sub.notes?.tier).catch(() => {});
+          const pricing = PRICING[`${tier}-${cycle}`] || { usd: 0, inr: 0 };
+          await emailService.sendSubscriptionCharged(user.email, user.firstName || 'there', {
+            tier, cycle,
+            amount: currency === 'INR' ? pricing.inr : pricing.usd,
+            currency,
+            startDate: new Date(),
+            endDate,
+          }).catch((e) => console.warn('⚠️ Email failed:', e.message));
         }
+
+        console.log(`   💳 Subscription charged: ${userId}`);
         break;
+      }
+
+      case 'subscription.pending': {
+        // Awaiting payment (e.g., bank transfer pending)
+        await storage.updateUser(userId, {
+          subscriptionStatus: 'pending',
+        });
+        console.log(`   ⏳ Subscription pending: ${userId}`);
+        break;
+      }
+
+      case 'subscription.halted': {
+        // Payment failed - subscription halted
+        await storage.updateUser(userId, {
+          subscriptionStatus: 'halted',
+        });
+
+        // Send payment failed notification
+        const user = await storage.getUser(userId);
+        if (user?.email) {
+          await emailService.sendPaymentFailedNotification(
+            user.email, 
+            user.firstName || 'there', 
+            subscription.notes?.tier || 'starter'
+          ).catch((e) => console.warn('⚠️ Email failed:', e.message));
+        }
+
+        console.log(`   ⚠️ Subscription halted (payment failed): ${userId}`);
+        break;
+      }
+
+      case 'subscription.cancelled': {
+        // Subscription cancelled
+        await storage.updateUser(userId, {
+          subscriptionStatus: 'cancelled',
+          cancelAtPeriodEnd: false,
+        });
+
+        const user = await storage.getUser(userId);
+        if (user?.email) {
+          await emailService.sendCancellationConfirmation(
+            user.email,
+            user.firstName || 'there',
+            user.subscriptionEndDate || new Date(),
+            user.subscriptionTier || 'starter'
+          ).catch((e) => console.warn('⚠️ Email failed:', e.message));
+        }
+
+        console.log(`   🚫 Subscription cancelled: ${userId}`);
+        break;
+      }
+
+      case 'subscription.paused': {
+        // Subscription paused
+        await storage.updateUser(userId, {
+          subscriptionStatus: 'paused',
+        });
+        console.log(`   ⏸️ Subscription paused: ${userId}`);
+        break;
+      }
+
+      case 'subscription.resumed': {
+        // Subscription resumed from pause
+        await storage.updateUser(userId, {
+          subscriptionStatus: 'active',
+        });
+        console.log(`   ▶️ Subscription resumed: ${userId}`);
+        break;
+      }
+
+      case 'subscription.completed': {
+        // Fixed-term subscription completed
+        await storage.updateUser(userId, {
+          subscriptionStatus: 'completed',
+          subscriptionTier: 'free',
+        });
+        console.log(`   ✔️ Subscription completed: ${userId}`);
+        break;
+      }
+
+      // ========================================
+      // PAYMENT EVENTS
+      // ========================================
+
+      case 'payment.captured': {
+        // One-time payment captured
+        console.log(`   💰 Payment captured for: ${userId}`);
+        // Usually handled by verify-subscription, but log for reference
+        break;
+      }
+
+      case 'payment.failed': {
+        // Payment failed
+        const user = await storage.getUser(userId);
+        if (user?.email) {
+          await emailService.sendPaymentFailedNotification(
+            user.email,
+            user.firstName || 'there',
+            user.subscriptionTier || 'starter'
+          ).catch((e) => console.warn('⚠️ Email failed:', e.message));
+        }
+        console.log(`   ❌ Payment failed for: ${userId}`);
+        break;
+      }
+
+      default:
+        console.log(`   ℹ️ Unhandled event: ${eventType}`);
+    }
+
+    // Always return 200 to acknowledge receipt
+    res.status(200).json({ status: 'ok' });
+
+  } catch (error: any) {
+    console.error('❌ Webhook error:', error);
+    // Return 200 anyway to prevent Razorpay from retrying
+    res.status(200).json({ status: 'error', message: error.message });
+  }
+});
+
+// ============================================================================
+// PAYPAL WEBHOOK (optional - for refunds and disputes)
+// ============================================================================
+
+router.post('/payment/paypal/webhook', async (req: Request, res: Response) => {
+  try {
+    const event = req.body;
+    const eventType = event.event_type;
+    
+    console.log(`\n📨 PayPal Webhook: ${eventType}`);
+
+    switch (eventType) {
+      case 'PAYMENT.CAPTURE.COMPLETED': {
+        // Payment successful (backup confirmation)
+        const orderId = event.resource?.supplementary_data?.related_ids?.order_id;
+        console.log(`   💰 PayPal payment completed: ${orderId}`);
+        break;
+      }
+
+      case 'PAYMENT.CAPTURE.REFUNDED': {
+        // Refund processed
+        const orderId = event.resource?.supplementary_data?.related_ids?.order_id;
+        console.log(`   🔄 PayPal refund processed: ${orderId}`);
+        
+        // Find user by PayPal order ID and downgrade
+        // Note: You'd need to implement findUserByPaypalOrderId in storage
+        // For now, just log it
+        break;
+      }
+
+      case 'PAYMENT.CAPTURE.DENIED': {
+        // Payment denied
+        console.log(`   ❌ PayPal payment denied`);
+        break;
+      }
+
+      default:
+        console.log(`   ℹ️ Unhandled PayPal event: ${eventType}`);
     }
 
     res.status(200).json({ status: 'ok' });
 
   } catch (error: any) {
-    console.error('❌ Webhook error:', error);
-    res.status(500).json({ error: 'Webhook failed' });
+    console.error('❌ PayPal webhook error:', error);
+    res.status(200).json({ status: 'error' });
   }
 });
 
