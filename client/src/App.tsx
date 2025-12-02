@@ -52,9 +52,6 @@ const Profile = lazy(() => import("@/pages/profile"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
 
 // Payment and subscription pages (medium priority)
-const Subscribe = lazy(() => import("@/pages/subscribe"));
-const SubscriptionSuccess = lazy(() => import("@/pages/subscription-success"));
-const RazorpayCheckout = lazy(() => import("@/pages/razorpay-checkout"));
 const SimplePricing = lazy(() => import("@/pages/simple-pricing"));
 const PricingPage = lazy(() => import("@/pages/PricingPage"));
 const PaymentProtection = lazy(() => import("@/pages/payment-protection"));
@@ -256,10 +253,6 @@ function Router() {
         <Route path="/verify-email" component={EmailVerification} />
         <Route path="/pricing" component={EnhancedPricingPage} />
         <Route path="/checkout" component={CheckoutPage} />
-        <Route path="/subscribe" component={Subscribe} />
-        <Route path="/subscription-success" component={SubscriptionSuccess} />
-        <Route path="/subscription/success" component={SubscriptionSuccess} />
-        <Route path="/payment/razorpay-checkout" component={RazorpayCheckout} />
         <Route path="/simple-pricing" component={SimplePricing} />
         
         {isLoading || !isAuthenticated ? (
