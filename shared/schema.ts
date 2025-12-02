@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, jsonb, index, boolean, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, jsonb, index, boolean, serial, decimal, bigint } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -35,6 +35,34 @@ export const users = pgTable("users", {
   subscriptionBillingCycle: varchar("subscription_billing_cycle"),
   paypalSubscriptionId: varchar("paypal_subscription_id"),
   paypalOrderId: varchar("paypal_order_id"),
+
+  // ============================================================================
+  // NEW: RAZORPAY FIELDS
+  // ============================================================================
+  razorpaySubscriptionId: varchar("razorpay_subscription_id"),
+  razorpayPaymentId: varchar("razorpay_payment_id"),
+  razorpayCustomerId: varchar("razorpay_customer_id"),
+
+  // ============================================================================
+  // NEW: PAYMENT TRACKING
+  // ============================================================================
+  lastPaymentAmount: integer("last_payment_amount"),        // Amount in smallest unit (cents/paise)
+  lastPaymentCurrency: varchar("last_payment_currency"),    // 'USD' or 'INR'
+  lastPaymentDate: timestamp("last_payment_date"),
+
+  // ============================================================================
+  // NEW: CANCELLATION TRACKING
+  // ============================================================================
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
+
+  // ============================================================================
+  // NEW: USAGE STATISTICS (for dashboard)
+  // ============================================================================
+  totalCompressions: integer("total_compressions").default(0),
+  totalConversions: integer("total_conversions").default(0),
+  totalBytesProcessed: bigint("total_bytes_processed", { mode: "number" }).default(0),
+  avgCompressionRatio: decimal("avg_compression_ratio", { precision: 5, scale: 2 }).default("0"),
+
   monthlyOperations: integer("monthly_operations").default(0), // Current month usage
   dailyOperations: integer("daily_operations").default(0), // Current day usage
   hourlyOperations: integer("hourly_operations").default(0), // Current hour usage
@@ -237,6 +265,35 @@ export const compressionJobs = pgTable("compression_jobs", {
 
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// ============================================================================
+// TYPE EXPORTS FOR NEW FIELDS
+// ============================================================================
+
+// Subscription-specific type for API responses
+export type UserSubscription = Pick<User,
+  | 'subscriptionTier'
+  | 'subscriptionStatus'
+  | 'subscriptionStartDate'
+  | 'subscriptionEndDate'
+  | 'subscriptionBillingCycle'
+  | 'razorpaySubscriptionId'
+  | 'paypalSubscriptionId'
+  | 'paypalOrderId'
+  | 'cancelAtPeriodEnd'
+  | 'lastPaymentAmount'
+  | 'lastPaymentCurrency'
+  | 'lastPaymentDate'
+>;
+
+// Usage stats type for dashboard
+export type UserUsageStats = Pick<User,
+  | 'totalCompressions'
+  | 'totalConversions'
+  | 'totalBytesProcessed'
+  | 'avgCompressionRatio'
+  | 'monthlyOperations'
+>;
 
 // Payment transactions table
 export const paymentTransactions = pgTable("payment_transactions", {
