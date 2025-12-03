@@ -25,10 +25,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configuration
-const SERVER_PORT = 10000;
-// Always use localhost for development - production builds should have pre-rendered HTML
-const SERVER_URL = 'https://microjpeg.com';
+const SERVER_PORT = process.env.SEO_SERVER_PORT || 10000;
+
+// If SEO_BUILD=true, we’re running inside a build and want localhost
+// Otherwise (local dev), you can still point to your live domain if you want.
+const IS_BUILD = process.env.SEO_BUILD === 'true';
+
+const SERVER_URL = IS_BUILD
+  ? `http://127.0.0.1:${SERVER_PORT}`
+  : (process.env.SEO_SERVER_URL || 'https://microjpeg.com');
+
+// Adjust as needed – this is your final build output
 const OUTPUT_DIR = path.join(__dirname, '../dist/seo');
+
 const STARTUP_DELAY = 15000; // Wait 15s for server to start (increased for build environment)
 const MAX_RETRIES = 3; // Number of times to retry connecting to server
 
@@ -484,15 +493,19 @@ async function main() {
       console.log(`✅ Created output directory: ${OUTPUT_DIR}\n`);
     }
 
-    // Start server
-    // await startServer();
-    // console.log('✅ Server process started\n');
-    
-    console.log('🔗 Connecting to existing dev server...');
-    console.log(`   URL: ${SERVER_URL}\n`);
-    
-    // Wait for server to be ready
-    await waitForServer();
+if (IS_BUILD) {
+  // Start local server inside the build container
+  await startServer();
+  console.log('✅ Local server started for SEO generation\n');
+} else {
+  console.log('🔗 Connecting to existing server...');
+  console.log(`   URL: ${SERVER_URL}\n`);
+}
+
+// Wait for server to be ready
+await waitForServer();
+console.log('✅ Server is responding\n');
+
     console.log('✅ Server is responding\n');
 
     // Launch Puppeteer with optimized settings
@@ -568,7 +581,9 @@ async function main() {
     console.log('✅ Manifest created: manifest.json\n');
 
     // Stop server
-    // stopServer(); // Don't stop server - it was already running
+if (IS_BUILD) {
+  stopServer();
+}
 
     // Exit
     process.exit(failed > 0 ? 1 : 0);
