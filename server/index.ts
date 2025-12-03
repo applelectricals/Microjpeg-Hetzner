@@ -15,7 +15,8 @@ import { seedSuperuser } from "./superuser";
 import paymentRouter from './paymentRoutes';
 import paypalPaymentRoutes from './routes/paypalPaymentRoutes';
 import instamojoRoutes from './routes/instamojoRoutes';
-import wordpressApiRoutes from './wordpressApiRoutes';
+//import wordpressApiRoutes from './wordpressApiRoutes';
+import wordpressRoutes from './wordpressRoutes';
 import { botDetectionMiddleware, seoDebugEndpoint } from './middleware/bot-detector.js';
 
 // Global error handlers
@@ -51,10 +52,11 @@ app.use((req, res, next) => {
 // ============================================================================
 // Note: paymentRouter routes are defined as /payment/razorpay/...
 // So we mount at /api (not /api/payment) to avoid /api/payment/payment/...
+app.use('/api', wordpressRoutes);
 app.use('/api', instamojoRoutes);
 app.use('/api', paypalPaymentRoutes);
 app.use('/api', paymentRouter);  // Routes will be /api/payment/razorpay/...
-app.use('/api', wordpressApiRoutes);  // WordPress plugin API routes
+//app.use('/api', wordpressApiRoutes);  // WordPress plugin API routes
 
 // Security headers + request logging
 app.use((req, res, next) => {
