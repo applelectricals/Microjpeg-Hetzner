@@ -15,6 +15,7 @@ import { seedSuperuser } from "./superuser";
 import paymentRouter from './paymentRoutes';
 import paypalPaymentRoutes from './routes/paypalPaymentRoutes';
 import instamojoRoutes from './routes/instamojoRoutes';
+import wordpressApiRoutes from './wordpressApiRoutes';
 import { botDetectionMiddleware, seoDebugEndpoint } from './middleware/bot-detector.js';
 
 // Global error handlers
@@ -53,6 +54,7 @@ app.use((req, res, next) => {
 app.use('/api', instamojoRoutes);
 app.use('/api', paypalPaymentRoutes);
 app.use('/api', paymentRouter);  // Routes will be /api/payment/razorpay/...
+app.use('/api', wordpressApiRoutes);  // WordPress plugin API routes
 
 // Security headers + request logging
 app.use((req, res, next) => {
