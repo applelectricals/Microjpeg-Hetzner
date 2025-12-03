@@ -15,13 +15,13 @@ import { Moon, Sun } from 'lucide-react'; // Add Moon and Sun to existing lucide
 import ButtonsSection from "@/components/ButtonsSection";
 import { Upload, Settings, Download, Zap, Shield, Sparkles, X, Check, ArrowRight, ImageIcon, ChevronDown, ChevronUp, Crown, Plus, Minus, Menu, Calendar, Activity } from 'lucide-react';
 import { getConversionFaq, getHowToSchema, getSoftwareAppSchema, getFaqSchema } from "@/data/conversionSchema";
-
+import { getConversionPageContent } from "@/data/conversionContent";
 
 // Import conversion matrix and utilities
-import { 
-  CONVERSIONS, 
-  FORMATS, 
-  getConversionByPair, 
+import {
+  CONVERSIONS,
+  FORMATS,
+  getConversionByPair,
   getFormatInfo, 
   validateFile as validateFileFromMatrix,
   type ConversionConfig,
@@ -70,8 +70,17 @@ function useDarkMode() {
 
 
 // File size limits for free pages
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB per file for regular formats
-const MAX_RAW_FILE_SIZE = 25 * 1024 * 1024; // 25MB per file for RAW formats
+// ============================================================================
+// FREE TIER LIMITS - Conversion Pages (ConversionPage.tsx)
+// - 7MB for Regular files (JPG, PNG, WEBP, AVIF, SVG, TIFF)
+// - 15MB for RAW files (ARW, CR2, CRW, DNG, NEF, ORF, RAF)
+// - 200 processes (conversions or compressions) per month
+// - 1 Concurrent usage
+// ============================================================================
+const MAX_FILE_SIZE = 7 * 1024 * 1024; // 7MB for regular formats
+const MAX_RAW_FILE_SIZE = 15 * 1024 * 1024; // 15MB for RAW formats
+const FREE_MONTHLY_LIMIT = 200;
+const MAX_CONCURRENT = 1;
 
 // Supported file types (same as main landing page)
 const SUPPORTED_FORMATS = [
@@ -291,6 +300,17 @@ export default function ConversionPage() {
   const conversionConfig = urlParams ? getConversionByPair(urlParams.from, urlParams.to) : null;
   const fromFormat = urlParams ? getFormatInfo(urlParams.from) : null;
   const toFormat = urlParams ? getFormatInfo(urlParams.to) : null;
+
+  // Get optimized content for this conversion (CR2-to-JPG gets special treatment)
+  const pageContent =
+    urlParams && fromFormat && toFormat
+      ? getConversionPageContent(
+          urlParams.from,
+          urlParams.to,
+          fromFormat.displayName,
+          toFormat.displayName
+        )
+      : null;
 
   // Generate canonical URL and structured data for SEO
   const canonicalUrl =
@@ -1011,22 +1031,22 @@ export default function ConversionPage() {
                   <div className="w-12 h-12 bg-brand-teal/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Zap className="w-6 h-6 text-brand-teal" />
                   </div>
-                  <h3 className="font-semibold text-black mb-2">Unlimited operations</h3>
-                  <p className="text-sm text-gray-600">Test bulk processing power</p>
+                  <h3 className="font-semibold text-black dark:text-white mb-2">Unlimited operations</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">No monthly limits on conversions</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-brand-gold/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Crown className="w-6 h-6 text-brand-gold" />
                   </div>
-                  <h3 className="font-semibold text-black mb-2">Upto 75MB each image</h3>
-                  <p className="text-sm text-gray-600">Advanced controls, no ads, API access</p>
+                  <h3 className="font-semibold text-black dark:text-white mb-2">Up to 200MB files</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Starter: 75MB, Pro: 150MB, Business: 200MB</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Shield className="w-6 h-6 text-red-500" />
                   </div>
-                  <h3 className="font-semibold text-black mb-2">Access for 1 month</h3>
-                  <p className="text-sm text-gray-600">No recurring charges</p>
+                  <h3 className="font-semibold text-black dark:text-white mb-2">Monthly or Annual</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Save up to 51% with annual plans</p>
                 </div>
               </div>
               
@@ -1068,9 +1088,15 @@ export default function ConversionPage() {
                 <h1 className="text-4xl md:text-5xl font-bold mb-6">
                   Convert <span className="text-brand-gold">{fromFormat.displayName}</span> to <span className="text-brand-teal">{toFormat.displayName}</span> Online – Free & Instant
                 </h1>
-                <p className="text-xl text-gray-700 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed mb-12">
-                  Convert <span className="text-brand-gold">{fromFormat.displayName}</span> to <span className="text-brand-teal">{toFormat.displayName}</span> Free Converter. Supports Canon CR2/CR3, Nikon NEF, Sony ARW, Fujifilm RAF, Olympus ORF, Panasonic RW2 and 60+ RAW formats. No signup required, preserve EXIF data, batch processing, unlimited free conversions for files under 15MB.
-                </p>
+                {pageContent ? (
+                  <p className="text-xl text-gray-700 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed mb-12">
+                    {pageContent.intro}
+                  </p>
+                ) : (
+                  <p className="text-xl text-gray-700 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed mb-12">
+                    Convert <span className="text-brand-gold">{fromFormat.displayName}</span> to <span className="text-brand-teal">{toFormat.displayName}</span> Free Converter. Supports Canon CR2/CR3, Nikon NEF, Sony ARW, Fujifilm RAF, Olympus ORF, Panasonic RW2 and 60+ RAW formats. No signup required, preserve EXIF data. Free: 200 conversions/month (7MB regular, 15MB RAW). Unlimited with paid plans.
+                  </p>
+                )}
               </>
             );
           })()}
@@ -1096,10 +1122,45 @@ export default function ConversionPage() {
             </div>
           </div>
 
-          
+          {/* Detailed sections from optimized content */}
+          {pageContent && pageContent.sections && pageContent.sections.length > 0 && (
+            <div className="mt-16 max-w-5xl mx-auto text-left space-y-8">
+              {pageContent.sections.map((section, idx) => (
+                <div
+                  key={idx}
+                  className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-sm"
+                >
+                  <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
+                    {section.title}
+                  </h3>
+                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
+                    {section.body}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
       {/* ====== END SEO BLOCK ====== */}
+
+      {/* How-To section from optimized content */}
+      {pageContent && urlParams && fromFormat && toFormat && (
+        <section className="py-16 bg-gray-50 dark:bg-gray-800">
+          <div className="max-w-4xl mx-auto px-4 text-left">
+            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+              How to convert {fromFormat.displayName} to {toFormat.displayName}
+            </h2>
+            <ol className="list-decimal list-inside space-y-3 text-gray-700 dark:text-gray-300">
+              {pageContent.howToSteps && pageContent.howToSteps.map((step, idx) => (
+                <li key={idx} className="text-lg leading-relaxed">
+                  {step}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+      )}
 
       {/* FAQ Section specific to this conversion */}
       {urlParams && fromFormat && toFormat && (
