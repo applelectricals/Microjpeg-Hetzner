@@ -1,12 +1,9 @@
 /**
  * WordPress Plugin API Routes
  * 
- * Add this to your server to enable WordPress plugin functionality.
+ * Provides endpoints for the MicroJPEG WordPress plugin.
  * 
- * Endpoints:
- * - POST /api/compress - Compress an image (used by WordPress plugin)
- * 
- * Usage in your index.ts:
+ * Add to your server/index.ts:
  *   import wordpressRoutes from './wordpressRoutes';
  *   app.use('/api', wordpressRoutes);
  */
@@ -15,21 +12,21 @@ import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import path from 'path';
 import sharp from 'sharp';
-import { storage } from './storage';
 import crypto from 'crypto';
+import { db } from './db';
+import { apiKeys, users } from '@shared/schema';
+import { eq } from 'drizzle-orm';
 
 const router = Router();
 
-// Configure multer for file uploads (memory storage)
+// Configure multer
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: {
-    fileSize: 200 * 1024 * 1024, // 200MB max
-  }
+  limits: { fileSize: 200 * 1024 * 1024 } // 200MB
 });
 
 /**
- * Extract API key from Authorization header
+ * Extract Bearer token from Authorization header
  */
 function extractApiKey(req: Request): string | null {
   const auth = req.headers.authorization;
@@ -40,7 +37,8 @@ function extractApiKey(req: Request): string | null {
 }
 
 /**
- * Validate API key and return user info
+ * Validate API key against database
+ * API keys are stored as SHA-256 hash in keyHash column
  */
 async function validateApiKey(apiKey: string): Promise<{
   valid: boolean;
@@ -53,59 +51,79 @@ async function validateApiKey(apiKey: string): Promise<{
   }
 
   try {
-    // Hash the API key to look it up
+    // Hash the incoming API key to compare with stored hash
     const keyHash = crypto.createHash('sha256').update(apiKey).digest('hex');
     
-    // Look up in database - adjust this to match your storage implementation
-    const apiKeyRecord = await storage.getApiKeyByKey(apiKey);
+    console.log('[WordPress API] Looking up key hash:', keyHash.substring(0, 16) + '...');
+    
+    // Find API key by hash
+    const [apiKeyRecord] = await db
+      .select()
+      .from(apiKeys)
+      .where(eq(apiKeys.keyHash, keyHash))
+      .limit(1);
     
     if (!apiKeyRecord) {
-      // Try by hash if direct lookup failed
-      const apiKeyByHash = await storage.getApiKeyByHash(keyHash);
-      if (!apiKeyByHash) {
-        return { valid: false, error: 'Invalid API key' };
-      }
-      
-      if (!apiKeyByHash.isActive) {
-        return { valid: false, error: 'API key is disabled' };
-      }
-      
-      const user = await storage.getUser(apiKeyByHash.userId);
-      return {
-        valid: true,
-        userId: apiKeyByHash.userId,
-        tier: user?.subscriptionTier || 'free'
-      };
+      console.log('[WordPress API] API key not found in database');
+      return { valid: false, error: 'Invalid API key' };
     }
     
     if (!apiKeyRecord.isActive) {
+      console.log('[WordPress API] API key is disabled');
       return { valid: false, error: 'API key is disabled' };
     }
     
-    const user = await storage.getUser(apiKeyRecord.userId);
+    // Get user info
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, apiKeyRecord.userId))
+      .limit(1);
+    
+    if (!user) {
+      return { valid: false, error: 'User not found' };
+    }
+    
+    // Update last used timestamp
+    await db
+      .update(apiKeys)
+      .set({ 
+        lastUsedAt: new Date(),
+        usageCount: (apiKeyRecord.usageCount || 0) + 1
+      })
+      .where(eq(apiKeys.id, apiKeyRecord.id));
+    
+    console.log('[WordPress API] API key valid. User:', user.id, 'Tier:', user.subscriptionTier);
+    
     return {
       valid: true,
-      userId: apiKeyRecord.userId,
-      tier: user?.subscriptionTier || 'free'
+      userId: user.id,
+      tier: user.subscriptionTier || 'free'
     };
     
   } catch (error: any) {
-    console.error('[WordPress API] Key validation error:', error);
-    return { valid: false, error: 'Validation error' };
+    console.error('[WordPress API] Validation error:', error);
+    return { valid: false, error: 'Database error' };
   }
 }
 
 /**
- * Get tier limits
+ * Get file size limits based on subscription tier
  */
-function getTierLimits(tier: string) {
+function getTierLimits(tier: string): { maxSize: number; maxRawSize: number } {
+  // Normalize tier name (handle both 'starter' and 'starter-m' formats)
+  const baseTier = tier?.split('-')[0] || 'free';
+  
   const limits: Record<string, { maxSize: number; maxRawSize: number }> = {
     'free': { maxSize: 7 * 1024 * 1024, maxRawSize: 15 * 1024 * 1024 },
+    'free_registered': { maxSize: 7 * 1024 * 1024, maxRawSize: 15 * 1024 * 1024 },
+    'free_anonymous': { maxSize: 7 * 1024 * 1024, maxRawSize: 15 * 1024 * 1024 },
     'starter': { maxSize: 75 * 1024 * 1024, maxRawSize: 75 * 1024 * 1024 },
     'pro': { maxSize: 150 * 1024 * 1024, maxRawSize: 150 * 1024 * 1024 },
     'business': { maxSize: 200 * 1024 * 1024, maxRawSize: 200 * 1024 * 1024 },
   };
-  return limits[tier] || limits['free'];
+  
+  return limits[baseTier] || limits['free'];
 }
 
 /**
@@ -117,22 +135,22 @@ function isRawFormat(filename: string): boolean {
   return rawExts.includes(ext);
 }
 
-/**
- * POST /api/compress
- * Main compression endpoint for WordPress plugin
- */
+// ============================================
+// POST /api/compress
+// Main compression endpoint for WordPress plugin
+// ============================================
 router.post('/compress', upload.single('image'), async (req: Request, res: Response) => {
-  console.log('[WordPress API] /compress called');
+  console.log('[WordPress API] POST /api/compress');
   
   try {
-    // Get API key
+    // Get API key from header
     const apiKey = extractApiKey(req);
     
     if (!apiKey) {
-      console.log('[WordPress API] No API key provided');
+      console.log('[WordPress API] No Authorization header');
       return res.status(401).json({
         success: false,
-        message: 'API key required. Send in Authorization header as: Bearer YOUR_API_KEY'
+        message: 'API key required. Include header: Authorization: Bearer YOUR_API_KEY'
       });
     }
     
@@ -147,13 +165,11 @@ router.post('/compress', upload.single('image'), async (req: Request, res: Respo
       });
     }
     
-    console.log('[WordPress API] API key valid. User:', validation.userId, 'Tier:', validation.tier);
-    
     // Check file
     if (!req.file) {
       return res.status(400).json({
         success: false,
-        message: 'No image file provided'
+        message: 'No image file provided. Send as multipart/form-data with field name "image"'
       });
     }
     
@@ -167,22 +183,22 @@ router.post('/compress', upload.single('image'), async (req: Request, res: Respo
     if (file.size > maxSize) {
       return res.status(400).json({
         success: false,
-        message: `File too large. Max ${Math.round(maxSize / 1024 / 1024)}MB for ${isRaw ? 'RAW' : 'regular'} files on ${tier} plan.`
+        message: `File too large. Maximum ${Math.round(maxSize / 1024 / 1024)}MB for ${isRaw ? 'RAW' : 'regular'} files on your plan.`
       });
     }
     
-    // Get compression settings
+    // Get settings
     const quality = Math.max(10, Math.min(100, parseInt(req.body.quality as string) || 85));
     let outputFormat = (req.body.outputFormat as string) || 'keep-original';
     
-    // RAW files must be converted
+    // RAW files must convert
     if (isRaw && (outputFormat === 'keep-original' || outputFormat === 'keep')) {
       outputFormat = 'jpeg';
     }
     
     console.log(`[WordPress API] Processing: ${file.originalname}, Size: ${file.size}, Quality: ${quality}, Format: ${outputFormat}`);
     
-    // Process image with Sharp
+    // Process with Sharp
     let sharpInstance = sharp(file.buffer);
     const metadata = await sharpInstance.metadata();
     
@@ -217,19 +233,14 @@ router.post('/compress', upload.single('image'), async (req: Request, res: Respo
     const compressedBuffer = await sharpInstance.toBuffer();
     const compressedSize = compressedBuffer.length;
     const originalSize = file.size;
-    const savingsPercent = Math.round((1 - compressedSize / originalSize) * 100);
+    const savingsPercent = Math.max(0, Math.round((1 - compressedSize / originalSize) * 100));
     
-    console.log(`[WordPress API] Compressed: ${originalSize} → ${compressedSize} (${savingsPercent}% savings)`);
+    console.log(`[WordPress API] Done: ${originalSize} → ${compressedSize} (${savingsPercent}% saved)`);
     
-    // Return Base64 encoded data
-    const base64Data = compressedBuffer.toString('base64');
-    
-    // Track usage (optional - implement if you want)
-    // await storage.incrementApiUsage(validation.userId);
-    
+    // Return as Base64
     return res.json({
       success: true,
-      data: base64Data,
+      data: compressedBuffer.toString('base64'),
       originalSize,
       compressedSize,
       savingsPercent,
@@ -244,6 +255,38 @@ router.post('/compress', upload.single('image'), async (req: Request, res: Respo
       message: error.message || 'Compression failed'
     });
   }
+});
+
+// ============================================
+// GET /api/wordpress/validate-key
+// Endpoint specifically for WordPress plugin to validate API key
+// ============================================
+router.get('/wordpress/validate-key', async (req: Request, res: Response) => {
+  console.log('[WordPress API] GET /api/wordpress/validate-key');
+  
+  const apiKey = extractApiKey(req);
+  
+  if (!apiKey) {
+    return res.status(401).json({
+      success: false,
+      message: 'API key required'
+    });
+  }
+  
+  const validation = await validateApiKey(apiKey);
+  
+  if (!validation.valid) {
+    return res.status(401).json({
+      success: false,
+      message: validation.error
+    });
+  }
+  
+  return res.json({
+    success: true,
+    tier: validation.tier,
+    message: 'API key is valid'
+  });
 });
 
 export default router;
