@@ -10,7 +10,6 @@ const VISIBLE_CONVERSIONS = [
     label: "CR2 → JPG",
     sub: "Canon RAW",
     href: "/convert/cr2-to-jpg",
-    // camera icon (warm)
     icon: (
       <svg className="w-5 h-5 text-amber-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -60,68 +59,84 @@ const VISIBLE_CONVERSIONS = [
   },
 ];
 
-/* RAW buttons - ensure sub (camera brand) assigned consistently */
+/* RAW Camera Files - All 35 RAW conversions */
 const RAW_BUTTONS = [
+  // Canon CR2
   { name: "CR2 → JPG", sub: "Canon", href: "/convert/cr2-to-jpg" },
   { name: "CR2 → PNG", sub: "Canon", href: "/convert/cr2-to-png" },
   { name: "CR2 → TIFF", sub: "Canon", href: "/convert/cr2-to-tiff" },
   { name: "CR2 → WEBP", sub: "Canon", href: "/convert/cr2-to-webp" },
   { name: "CR2 → AVIF", sub: "Canon", href: "/convert/cr2-to-avif" },
 
-  { name: "NEF → JPG", sub: "Nikon", href: "/convert/nef-to-jpg" },
-  { name: "NEF → PNG", sub: "Nikon", href: "/convert/nef-to-png" },
-  { name: "NEF → TIFF", sub: "Nikon", href: "/convert/nef-to-tiff" },
-  { name: "NEF → WEBP", sub: "Nikon", href: "/convert/nef-to-webp" },
-  { name: "NEF → AVIF", sub: "Nikon", href: "/convert/nef-to-avif" },
-
-  { name: "ARW → JPG", sub: "Sony", href: "/convert/arw-to-jpg" },
-  { name: "ARW → PNG", sub: "Sony", href: "/convert/arw-to-png" },
-  { name: "ARW → TIFF", sub: "Sony", href: "/convert/arw-to-tiff" },
-  { name: "ARW → WEBP", sub: "Sony", href: "/convert/arw-to-webp" },
-  { name: "ARW → AVIF", sub: "Sony", href: "/convert/arw-to-avif" },
-
-  { name: "DNG → JPG", sub: "Adobe DNG", href: "/convert/dng-to-jpg" },
-  { name: "DNG → PNG", sub: "Adobe DNG", href: "/convert/dng-to-png" },
-  { name: "DNG → TIFF", sub: "Adobe DNG", href: "/convert/dng-to-tiff" },
-  { name: "DNG → WEBP", sub: "Adobe DNG", href: "/convert/dng-to-webp" },
-  { name: "DNG → AVIF", sub: "Adobe DNG", href: "/convert/dng-to-avif" },
-
-  { name: "ORF → JPG", sub: "Olympus", href: "/convert/orf-to-jpg" },
-  { name: "ORF → PNG", sub: "Olympus", href: "/convert/orf-to-png" },
-  { name: "ORF → TIFF", sub: "Olympus", href: "/convert/orf-to-tiff" },
-  { name: "ORF → WEBP", sub: "Olympus", href: "/convert/orf-to-webp" },
-  { name: "ORF → AVIF", sub: "Olympus", href: "/convert/orf-to-avif" },
-
-  { name: "RAF → JPG", sub: "Fujifilm", href: "/convert/raf-to-jpg" },
-  { name: "RAF → PNG", sub: "Fujifilm", href: "/convert/raf-to-png" },
-  { name: "RAF → TIFF", sub: "Fujifilm", href: "/convert/raf-to-tiff" },
-  { name: "RAF → WEBP", sub: "Fujifilm", href: "/convert/raf-to-webp" },
-  { name: "RAF → AVIF", sub: "Fujifilm", href: "/convert/raf-to-avif" },
-
+  // Canon CRW (legacy)
   { name: "CRW → JPG", sub: "Canon (old)", href: "/convert/crw-to-jpg" },
   { name: "CRW → PNG", sub: "Canon (old)", href: "/convert/crw-to-png" },
   { name: "CRW → TIFF", sub: "Canon (old)", href: "/convert/crw-to-tiff" },
   { name: "CRW → WEBP", sub: "Canon (old)", href: "/convert/crw-to-webp" },
   { name: "CRW → AVIF", sub: "Canon (old)", href: "/convert/crw-to-avif" },
 
-  { name: "RW2 → JPG", sub: "Panasonic", href: "/convert/rw2-to-jpg" },
+  // Nikon NEF
+  { name: "NEF → JPG", sub: "Nikon", href: "/convert/nef-to-jpg" },
+  { name: "NEF → PNG", sub: "Nikon", href: "/convert/nef-to-png" },
+  { name: "NEF → TIFF", sub: "Nikon", href: "/convert/nef-to-tiff" },
+  { name: "NEF → WEBP", sub: "Nikon", href: "/convert/nef-to-webp" },
+  { name: "NEF → AVIF", sub: "Nikon", href: "/convert/nef-to-avif" },
+
+  // Sony ARW
+  { name: "ARW → JPG", sub: "Sony", href: "/convert/arw-to-jpg" },
+  { name: "ARW → PNG", sub: "Sony", href: "/convert/arw-to-png" },
+  { name: "ARW → TIFF", sub: "Sony", href: "/convert/arw-to-tiff" },
+  { name: "ARW → WEBP", sub: "Sony", href: "/convert/arw-to-webp" },
+  { name: "ARW → AVIF", sub: "Sony", href: "/convert/arw-to-avif" },
+
+  // Adobe DNG
+  { name: "DNG → JPG", sub: "Adobe DNG", href: "/convert/dng-to-jpg" },
+  { name: "DNG → PNG", sub: "Adobe DNG", href: "/convert/dng-to-png" },
+  { name: "DNG → TIFF", sub: "Adobe DNG", href: "/convert/dng-to-tiff" },
+  { name: "DNG → WEBP", sub: "Adobe DNG", href: "/convert/dng-to-webp" },
+  { name: "DNG → AVIF", sub: "Adobe DNG", href: "/convert/dng-to-avif" },
+
+  // Olympus ORF
+  { name: "ORF → JPG", sub: "Olympus", href: "/convert/orf-to-jpg" },
+  { name: "ORF → PNG", sub: "Olympus", href: "/convert/orf-to-png" },
+  { name: "ORF → TIFF", sub: "Olympus", href: "/convert/orf-to-tiff" },
+  { name: "ORF → WEBP", sub: "Olympus", href: "/convert/orf-to-webp" },
+  { name: "ORF → AVIF", sub: "Olympus", href: "/convert/orf-to-avif" },
+
+  // Fujifilm RAF
+  { name: "RAF → JPG", sub: "Fujifilm", href: "/convert/raf-to-jpg" },
+  { name: "RAF → PNG", sub: "Fujifilm", href: "/convert/raf-to-png" },
+  { name: "RAF → TIFF", sub: "Fujifilm", href: "/convert/raf-to-tiff" },
+  { name: "RAF → WEBP", sub: "Fujifilm", href: "/convert/raf-to-webp" },
+  { name: "RAF → AVIF", sub: "Fujifilm", href: "/convert/raf-to-avif" },
 ];
 
-/* Web optimized / common / compression / other groups - include short sub labels consistently */
+/* Web-Optimized Format Conversions - 14 pages */
 const WEB_OPTIMIZED = [
+  // To WebP
   { name: "JPG → WEBP", sub: "Web", href: "/convert/jpg-to-webp" },
   { name: "PNG → WEBP", sub: "Web", href: "/convert/png-to-webp" },
+  { name: "TIFF → WEBP", sub: "Web", href: "/convert/tiff-to-webp" },
+  
+  // To AVIF
   { name: "JPG → AVIF", sub: "Web", href: "/convert/jpg-to-avif" },
   { name: "PNG → AVIF", sub: "Web", href: "/convert/png-to-avif" },
+  { name: "TIFF → AVIF", sub: "Web", href: "/convert/tiff-to-avif" },
+  
+  // From WebP
   { name: "WEBP → JPG", sub: "Web", href: "/convert/webp-to-jpg" },
   { name: "WEBP → PNG", sub: "Web", href: "/convert/webp-to-png" },
-  { name: "AVIF → JPG", sub: "Web", href: "/convert/avif-to-jpg" },
-  { name: "AVIF → PNG", sub: "Web", href: "/convert/avif-to-png" },
-
   { name: "WEBP → TIFF", sub: "Web", href: "/convert/webp-to-tiff" },
   { name: "WEBP → AVIF", sub: "Web", href: "/convert/webp-to-avif" },
+  
+  // From AVIF
+  { name: "AVIF → JPG", sub: "Web", href: "/convert/avif-to-jpg" },
+  { name: "AVIF → PNG", sub: "Web", href: "/convert/avif-to-png" },
+  { name: "AVIF → TIFF", sub: "Web", href: "/convert/avif-to-tiff" },
+  { name: "AVIF → WEBP", sub: "Web", href: "/convert/avif-to-webp" },
 ];
 
+/* Common Standard Format Conversions - 6 pages */
 const COMMON_CONVERSIONS = [
   { name: "PNG → JPG", sub: "General", href: "/convert/png-to-jpg" },
   { name: "JPG → PNG", sub: "General", href: "/convert/jpg-to-png" },
@@ -129,60 +144,24 @@ const COMMON_CONVERSIONS = [
   { name: "TIFF → PNG", sub: "General", href: "/convert/tiff-to-png" },
   { name: "JPG → TIFF", sub: "General", href: "/convert/jpg-to-tiff" },
   { name: "PNG → TIFF", sub: "General", href: "/convert/png-to-tiff" },
-  { name: "PNG → AVIF", sub: "General", href: "/convert/png-to-avif" },
 ];
 
+/* SVG Vector Conversions - 5 pages (NEW) */
+const SVG_CONVERSIONS = [
+  { name: "SVG → JPG", sub: "Vector", href: "/convert/svg-to-jpg" },
+  { name: "SVG → PNG", sub: "Vector", href: "/convert/svg-to-png" },
+  { name: "SVG → TIFF", sub: "Vector", href: "/convert/svg-to-tiff" },
+  { name: "SVG → WEBP", sub: "Vector", href: "/convert/svg-to-webp" },
+  { name: "SVG → AVIF", sub: "Vector", href: "/convert/svg-to-avif" },
+];
+
+/* Compression Tools - 5 pages (matches actual routes) */
 const COMPRESSION = [
   { name: "Compress JPG", sub: "Lossy", href: "/compress/jpg" },
   { name: "Compress PNG", sub: "Lossless", href: "/compress/png" },
   { name: "Compress WEBP", sub: "Lossy", href: "/compress/webp" },
   { name: "Compress AVIF", sub: "Lossy", href: "/compress/avif" },
   { name: "Compress TIFF", sub: "Lossy", href: "/compress/tiff" },
-
-  { name: "Compress WEBP → WEBP", sub: "Compress", href: "/compress/webp-to-webp" },
-  { name: "Compress TIFF → TIFF", sub: "Compress", href: "/compress/tiff-to-tiff" },
-  { name: "Compress PNG → PNG", sub: "Compress", href: "/compress/png-to-png" },
-  { name: "Compress JPG → JPG", sub: "Compress", href: "/compress/jpg-to-jpg" },
-  { name: "Compress AVIF → AVIF", sub: "Compress", href: "/compress/avif-to-avif" },
-];
-
-const OTHER_CONVERSIONS = [
-  { name: "CR2 → AVIF", sub: "Canon RAW", href: "/convert/cr2-to-avif" },
-  { name: "CR2 → PNG", sub: "Canon RAW", href: "/convert/cr2-to-png" },
-  { name: "CR2 → TIFF", sub: "Canon RAW", href: "/convert/cr2-to-tiff" },
-
-  { name: "ARW → PNG", sub: "Sony RAW", href: "/convert/arw-to-png" },
-  { name: "ARW → TIFF", sub: "Sony RAW", href: "/convert/arw-to-tiff" },
-
-  { name: "DNG → PNG", sub: "Adobe DNG", href: "/convert/dng-to-png" },
-  { name: "DNG → TIFF", sub: "Adobe DNG", href: "/convert/dng-to-tiff" },
-  { name: "DNG → WEBP", sub: "Adobe DNG", href: "/convert/dng-to-webp" },
-  { name: "DNG → AVIF", sub: "Adobe DNG", href: "/convert/dng-to-avif" },
-
-  { name: "ORF → PNG", sub: "Olympus", href: "/convert/orf-to-png" },
-  { name: "ORF → TIFF", sub: "Olympus", href: "/convert/orf-to-tiff" },
-  { name: "ORF → WEBP", sub: "Olympus", href: "/convert/orf-to-webp" },
-  { name: "ORF → AVIF", sub: "Olympus", href: "/convert/orf-to-avif" },
-
-  { name: "RAF → PNG", sub: "Fujifilm", href: "/convert/raf-to-png" },
-  { name: "RAF → TIFF", sub: "Fujifilm", href: "/convert/raf-to-tiff" },
-  { name: "RAF → WEBP", sub: "Fujifilm", href: "/convert/raf-to-webp" },
-  { name: "RAF → AVIF", sub: "Fujifilm", href: "/convert/raf-to-avif" },
-
-  { name: "CRW → PNG", sub: "Canon (old)", href: "/convert/crw-to-png" },
-  { name: "CRW → TIFF", sub: "Canon (old)", href: "/convert/crw-to-tiff" },
-  { name: "CRW → WEBP", sub: "Canon (old)", href: "/convert/crw-to-webp" },
-  { name: "CRW → AVIF", sub: "Canon (old)", href: "/convert/crw-to-avif" },
-
-  { name: "NEF → WEBP", sub: "Nikon", href: "/convert/nef-to-webp" },
-  { name: "NEF → AVIF", sub: "Nikon", href: "/convert/nef-to-avif" },
-
-  { name: "PNG → AVIF (alt)", sub: "General", href: "/convert/png-to-avif" },
-
-  { name: "AVIF → WEBP", sub: "General", href: "/convert/avif-to-webp" },
-  { name: "AVIF → TIFF", sub: "General", href: "/convert/avif-to-tiff" },
-  { name: "AVIF → JPG", sub: "General", href: "/convert/avif-to-jpg" },
-  { name: "AVIF → PNG", sub: "General", href: "/convert/avif-to-png" },
 ];
 
 /* ---------------------------
@@ -224,13 +203,11 @@ export default function ButtonsSection() {
               <div className="flex flex-col items-center gap-3">
                 <div
                   className={`w-12 h-12 rounded-lg flex items-center justify-center transform transition-transform group-hover:scale-110`}
-                  // subtle gradient matching icon color, inferred by icon color classes used inside
                   style={{
                     background:
                       "linear-gradient(135deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01))",
                   }}
                 >
-                  {/* icon passed inline in data */}
                   {b.icon}
                 </div>
 
@@ -261,13 +238,13 @@ export default function ButtonsSection() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             )}
-            {!showAll && <span className="text-xs text-gray-400 ml-1">(80+ tools)</span>}
+            {!showAll && <span className="text-xs text-gray-400 ml-1">(65 tools)</span>}
           </button>
         </div>
 
         {/* Expandable area */}
         <div
-          className={`overflow-hidden transition-all duration-500 ease-in-out ${showAll ? "max-h-[3000px] opacity-100" : "max-h-0 opacity-0"
+          className={`overflow-hidden transition-all duration-500 ease-in-out ${showAll ? "max-h-[4000px] opacity-100" : "max-h-0 opacity-0"
             }`}
         >
           <div className="space-y-8 pt-4">
@@ -337,18 +314,18 @@ export default function ButtonsSection() {
               </div>
             </div>
 
-            {/* Other Conversions */}
+            {/* SVG Vector Conversions (NEW) */}
             <div>
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-800">
                 <svg className="w-5 h-5 text-teal-300" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485" />
                 </svg>
-                <h3 className="text-sm font-semibold text-white">Other Conversions</h3>
-                <span className="text-xs text-gray-400">(All formats)</span>
+                <h3 className="text-sm font-semibold text-white">SVG Vector Conversions</h3>
+                <span className="text-xs text-gray-400">(Vector to Raster)</span>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
-                {OTHER_CONVERSIONS.map((item) => (
+                {SVG_CONVERSIONS.map((item) => (
                   <a key={item.href} href={item.href} className={cardBase}>
                     <div className="text-center">
                       <div className={titleClass + " mb-1"}>{item.name}</div>
@@ -383,7 +360,7 @@ export default function ButtonsSection() {
           </div>
         </div>
 
-        <p className="text-center mt-6 text-xs text-gray-400">{showAll ? "Showing all conversion tools" : "80+ conversion combinations available"}</p>
+        <p className="text-center mt-6 text-xs text-gray-400">{showAll ? "Showing all 65 conversion tools" : "65 conversion & compression tools available"}</p>
       </div>
     </section>
   );

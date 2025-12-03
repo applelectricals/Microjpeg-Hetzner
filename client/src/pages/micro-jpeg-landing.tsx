@@ -94,17 +94,8 @@ const PAGE_IDENTIFIER = 'free-no-auth'; // Main landing page for anonymous users
 
 // All limits enforced server-side with IP-based tracking
 // Anonymous users: 500 monthly operations (no hourly/daily limits)
-// ============================================================================
-// FREE TIER LIMITS - Landing Page (micro-jpeg-landing.tsx)
-// - 7MB for Regular files (JPG, PNG, WEBP, AVIF, SVG, TIFF)
-// - 15MB for RAW files (ARW, CR2, CRW, DNG, NEF, ORF, RAF)
-// - 200 total processes (100 Regular + 100 RAW) per month
-// - 1 Concurrent usage
-// ============================================================================
-const MAX_FILE_SIZE = 7 * 1024 * 1024; // 7MB for regular formats
-const MAX_RAW_FILE_SIZE = 15 * 1024 * 1024; // 15MB for RAW formats
-const FREE_MONTHLY_LIMIT = 200; // 100 regular + 100 RAW
-const MAX_CONCURRENT = 1;
+const MAX_FILE_SIZE = 7 * 1024 * 1024; // 7MB per file for regular formats
+const MAX_RAW_FILE_SIZE = 15 * 1024 * 1024; // 15MB per file for RAW formats
 
 // FAQ Data Structure
 const FAQ_DATA = {
@@ -155,7 +146,7 @@ const FAQ_DATA = {
     },
     {
       question: "What are the API rate limits?",
-      answer: "Free tier: 200 operations/month. Starter plan: Unlimited operations, 75MB files. Pro plan: Unlimited operations, 150MB files, priority processing. Business plan: Unlimited operations, 200MB files, full API access. All plans support 1 concurrent upload."
+      answer: "Free tier users get 500 operations/month with 25 operations/day and 5 operations/hour limits. Premium users get 50,000 operations/month with higher rate limits. Enterprise users have custom limits based on their needs. All limits reset monthly."
     },
     {
       question: "Do you offer SDKs for different programming languages?",
@@ -169,11 +160,11 @@ const FAQ_DATA = {
   Pricing: [
     {
       question: "Is there a free plan available?",
-      answer: "Yes! Our free plan includes 200 operations per month (compressions + conversions), 7MB limit for regular files (JPG, PNG, WEBP, AVIF, SVG, TIFF), 15MB limit for RAW files (ARW, CR2, CRW, DNG, NEF, ORF, RAF), web interface access, and community support. Perfect for trying our service or small personal projects."
+      answer: "Yes! Our free plan includes 500 compressions per month, web interface access, API access, support for all image formats, and community support. It's perfect for trying our service or small personal projects."
     },
     {
-      question: "What's included in the paid plans?",
-      answer: "Starter ($9/month or $49/year): 75MB files, unlimited operations. Pro ($19/month or $149/year): 150MB files, unlimited operations, priority processing. Business ($49/month or $349/year): 200MB files, unlimited operations, priority processing, API access. All paid plans include all image formats including RAW."
+      question: "What's included in the Premium plan?",
+      answer: "Premium ($20/month) includes 50,000 operations, larger file size limits (100MB), batch processing, priority support, advanced compression settings, multiple output formats, and higher API rate limits. Perfect for professional websites and developers."
     },
     {
       question: "Do you offer Enterprise solutions?",
@@ -199,7 +190,7 @@ const FAQ_DATA = {
     },
     {
       question: "Is the WordPress plugin free?",
-      answer: "The plugin itself is free to install, but it uses your Micro JPEG API quota. Free accounts get 200 operations per month, which works great for small websites. For larger sites, consider our Starter ($9/month) or Pro ($19/month) plans for unlimited operations."
+      answer: "The plugin itself is free to install, but it uses your Micro JPEG API quota. Free accounts get 500 compressions per month, which works great for small to medium websites. For larger sites, you might want to consider our Premium plan for higher limits."
     }
   ]
 };

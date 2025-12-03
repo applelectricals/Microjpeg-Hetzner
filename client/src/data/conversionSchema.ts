@@ -1,3 +1,86 @@
+import { getConversionFAQ } from './conversionFAQs';
+
+// Add this function for FAQ schema
+export function getFAQSchema(sourceFormat: string, targetFormat: string) {
+  const faqs = getConversionFAQ(sourceFormat, targetFormat);
+  
+  if (!faqs || faqs.length === 0) return null;
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  };
+}
+
+// Add this function for Breadcrumb schema
+export function getBreadcrumbSchema(sourceFormat: string, targetFormat: string) {
+  const isCompression = sourceFormat.toLowerCase() === targetFormat.toLowerCase();
+  const path = isCompression 
+    ? `/compress/${sourceFormat.toLowerCase()}`
+    : `/convert/${sourceFormat.toLowerCase()}-to-${targetFormat.toLowerCase()}`;
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://microjpeg.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": isCompression ? "Compress" : "Convert",
+        "item": `https://microjpeg.com/${isCompression ? 'compress' : 'convert'}`
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": isCompression 
+          ? `Compress ${sourceFormat.toUpperCase()}`
+          : `${sourceFormat.toUpperCase()} to ${targetFormat.toUpperCase()}`,
+        "item": `https://microjpeg.com${path}`
+      }
+    ]
+  };
+}
+
+// Add this function for WebPage schema
+export function getWebPageSchema(sourceFormat: string, targetFormat: string, title: string, description: string) {
+  const isCompression = sourceFormat.toLowerCase() === targetFormat.toLowerCase();
+  const path = isCompression 
+    ? `/compress/${sourceFormat.toLowerCase()}`
+    : `/convert/${sourceFormat.toLowerCase()}-to-${targetFormat.toLowerCase()}`;
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": title,
+    "description": description,
+    "url": `https://microjpeg.com${path}`,
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "MicroJPEG",
+      "url": "https://microjpeg.com"
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name": "MicroJPEG",
+      "url": "https://microjpeg.com"
+    }
+  };
+}
+
 // src/data/conversionSchema.ts
 
 export interface FAQItem {
