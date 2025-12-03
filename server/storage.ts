@@ -6,6 +6,7 @@ import {
   userReferrals,
   rewardTransactions,
   leadMagnetSignups,
+  apiKeys,
   type CompressionJob,
   type InsertCompressionJob,
   type User,
@@ -16,6 +17,7 @@ import {
   type RewardTransaction,
   type LeadMagnetSignup,
   type InsertLeadMagnetSignup,
+  type ApiKey,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, inArray, and, gte } from "drizzle-orm";
@@ -62,10 +64,14 @@ export interface IStorage {
   checkLeadMagnetCredits(email: string): Promise<{ hasCredits: boolean; creditsRemaining: number; expiresAt: Date | null }>;
   useLeadMagnetCredits(email: string, creditsToUse: number): Promise<boolean>;
   
-  // Launch offer operations  
+  // Launch offer operations
   claimLaunchOffer(userId: string): Promise<{ success: boolean; alreadyClaimed?: boolean }>;
   hasClaimedLaunchOffer(userId: string): Promise<boolean>;
-  
+
+  // API key operations
+  getApiKeyByKey(apiKey: string): Promise<ApiKey | null>;
+  getApiKeyByHash(keyHash: string): Promise<ApiKey | null>;
+
 }
 
 export class DatabaseStorage implements IStorage {
@@ -521,6 +527,39 @@ export class DatabaseStorage implements IStorage {
   async hasClaimedBonusOperations(userId: string): Promise<boolean> {
     const user = await this.getUser(userId);
     return (user?.purchasedCredits || 0) > 0;
+  }
+
+  // Launch offer operations
+  async claimLaunchOffer(userId: string): Promise<{ success: boolean; alreadyClaimed?: boolean }> {
+    // TODO: Implement when launch_offers table is added to schema
+    return { success: false };
+  }
+
+  async hasClaimedLaunchOffer(userId: string): Promise<boolean> {
+    // TODO: Implement when launch_offers table is added to schema
+    return false;
+  }
+
+  // API key operations
+  async getApiKeyByKey(apiKey: string): Promise<ApiKey | null> {
+    // Look up by the unhashed key (for API requests with plain text key)
+    // Note: In production, you should hash the key before querying
+    const result = await db
+      .select()
+      .from(apiKeys)
+      .where(eq(apiKeys.keyHash, apiKey))
+      .limit(1);
+    return result[0] || null;
+  }
+
+  async getApiKeyByHash(keyHash: string): Promise<ApiKey | null> {
+    // Look up by the hashed key (stored in database)
+    const result = await db
+      .select()
+      .from(apiKeys)
+      .where(eq(apiKeys.keyHash, keyHash))
+      .limit(1);
+    return result[0] || null;
   }
 
 }
