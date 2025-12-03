@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, Download, X, Check, Crown, Plus, Minus } from 'lucide-react';
+import { Upload, Download, X, Check, Crown, Plus, Minus, Moon, Sun, Settings, Zap, Shield, Sparkles, ArrowRight, ImageIcon, ChevronDown, ChevronUp, Menu, Calendar, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -11,9 +11,7 @@ import Header from '@/components/header';
 import { SEOHead } from '@/components/SEOHead';
 import { useLocation, useParams } from 'wouter';
 import ConversionOutputModal from '@/components/ConversionOutputModal';
-import { Moon, Sun } from 'lucide-react'; // Add Moon and Sun to existing lucide imports
 import ButtonsSection from "@/components/ButtonsSection";
-import { Upload, Settings, Download, Zap, Shield, Sparkles, X, Check, ArrowRight, ImageIcon, ChevronDown, ChevronUp, Crown, Plus, Minus, Menu, Calendar, Activity } from 'lucide-react';
 import { getConversionFaq, getHowToSchema, getSoftwareAppSchema, getFaqSchema } from "@/data/conversionSchema";
 import { getConversionPageContent } from "@/data/conversionContent";
 
@@ -314,14 +312,20 @@ export default function ConversionPage() {
 
   // Generate canonical URL and structured data for SEO
   const canonicalUrl =
-    urlParams && fromFormat && toFormat
+    urlParams && fromFormat && toFormat && conversionConfig
       ? `https://microjpeg.com${conversionConfig.operation === "compress"
           ? `/compress/${urlParams.from}`
           : `/convert/${urlParams.from}-to-${urlParams.to}`}`
       : "https://microjpeg.com/tools/convert";
 
+  // Use optimized intro for meta description if available
+  const metaDescription =
+    pageContent?.intro
+      ? pageContent.intro.slice(0, 155) // Google typically shows 155-160 characters
+      : conversionConfig?.description || "Convert and compress images online with MicroJPEG";
+
   const structuredData =
-    urlParams && fromFormat && toFormat
+    urlParams && fromFormat && toFormat && conversionConfig
       ? [
           getHowToSchema(urlParams.from, urlParams.to, canonicalUrl),
           getSoftwareAppSchema(urlParams.from, urlParams.to, canonicalUrl),
@@ -716,7 +720,7 @@ export default function ConversionPage() {
             ? `${conversionConfig.operation === 'compress' ? 'Compress' : 'Convert'} ${fromFormat?.displayName} ${conversionConfig.operation === 'compress' ? '' : `to ${toFormat?.displayName}`} | MicroJPEG`
             : 'Image Converter & Compressor | MicroJPEG'
         }
-        description={conversionConfig?.description || 'Convert and compress images online with MicroJPEG'}
+        description={metaDescription}
         canonicalUrl={canonicalUrl}
         structuredData={structuredData}
       />
@@ -1085,9 +1089,9 @@ export default function ConversionPage() {
 
             return (
               <>
-                <h1 className="text-4xl md:text-5xl font-bold mb-6">
+                <h2 className="text-4xl md:text-5xl font-bold mb-6">
                   Convert <span className="text-brand-gold">{fromFormat.displayName}</span> to <span className="text-brand-teal">{toFormat.displayName}</span> Online – Free & Instant
-                </h1>
+                </h2>
                 {pageContent ? (
                   <p className="text-xl text-gray-700 dark:text-gray-300 max-w-4xl mx-auto leading-relaxed mb-12">
                     {pageContent.intro}
