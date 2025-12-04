@@ -1443,6 +1443,15 @@ export default function MicroJPEGLanding() {
                   >
                     Plans & Pricing
                   </Button>
+
+                  <Button 
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-teal-400 text-teal-400 hover:bg-teal-400/10 px-8 py-6 text-lg rounded-xl backdrop-blur-sm"
+                    onClick={() => window.location.href = '/checkout?plan=starter'}
+                  >
+                    Try Now
+                  </Button>
                   
                 </div>
 
