@@ -1,4 +1,4 @@
-// server/index.ts - FIXED VERSION
+// server/index.ts - WITH EMERGENCY FIX
 import 'dotenv/config';
 
 import userTierRoutes from './routes/user-tier-routes';
@@ -15,8 +15,6 @@ import { seedSuperuser } from "./superuser";
 import paymentRouter from './paymentRoutes';
 import paypalPaymentRoutes from './routes/paypalPaymentRoutes';
 import instamojoRoutes from './routes/instamojoRoutes';
-//import wordpressApiRoutes from './wordpressApiRoutes';
-import wordpressRoutes from './wordpressRoutes';
 import { botDetectionMiddleware, seoDebugEndpoint } from './middleware/bot-detector.js';
 
 // Global error handlers
@@ -33,44 +31,36 @@ console.log('🛡️  Global error handlers installed');
 const app = express();
 
 app.set('etag', false);
+app.use('/api', instamojoRoutes);
+app.use('/api', paypalPaymentRoutes);
+app.use('/api/payment', paymentRouter);
 
 // ============================================================================
-// CRITICAL FIX: Body parsers MUST come BEFORE routes
+// CRITICAL FIX: Skip body parsing for multipart/form-data (file uploads)
 // ============================================================================
-// Parse JSON bodies (exclude multipart for file uploads)
 app.use((req, res, next) => {
-  if (req.headers['content-type']?.includes('multipart/form-data')) {
-    return next(); // Skip body parsing for multipart - let multer handle it
+  const contentType = req.headers['content-type'] || '';
+  if (contentType.includes('multipart/form-data')) {
+    return next();
   }
   express.json({ limit: '200mb' })(req, res, next);
 });
 
 app.use((req, res, next) => {
-  if (req.headers['content-type']?.includes('multipart/form-data')) {
-    return next(); // Skip body parsing for multipart - let multer handle it
+  const contentType = req.headers['content-type'] || '';
+  if (contentType.includes('multipart/form-data')) {
+    return next();
   }
   express.urlencoded({ extended: true, limit: '200mb' })(req, res, next);
 });
+// ============================================================================
 
-// Timeout settings
 app.use((req, res, next) => {
   req.setTimeout(600000);
   res.setTimeout(600000);
   next();
 });
 
-// ============================================================================
-// NOW mount routes (AFTER body parsers)
-// ============================================================================
-// Note: paymentRouter routes are defined as /payment/razorpay/...
-// So we mount at /api (not /api/payment) to avoid /api/payment/payment/...
-app.use('/api', wordpressRoutes);
-app.use('/api', instamojoRoutes);
-app.use('/api', paypalPaymentRoutes);
-app.use('/api', paymentRouter);  // Routes will be /api/payment/razorpay/...
-//app.use('/api', wordpressApiRoutes);  // WordPress plugin API routes
-
-// Security headers + request logging
 app.use((req, res, next) => {
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -169,10 +159,8 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // Debug endpoint
   app.get('/__seo-debug', seoDebugEndpoint);
 
-   // TEMPORARILY DISABLE BOT DETECTOR DURING SEO GENERATION
    const isSeoGenerationMode = process.env.NODE_ENV === 'development' && process.env.PORT === '10000';
    if (!isSeoGenerationMode) {
      app.use(botDetectionMiddleware);
@@ -180,7 +168,6 @@ app.use((req, res, next) => {
      console.log('⚠️  Bot detector DISABLED - SEO generation mode (PORT=10000)');
    }
 
-  // Static serving
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
@@ -196,7 +183,6 @@ app.use((req, res, next) => {
     ...(isDevelopment ? {} : { reusePort: true }),
   }, () => {
     log(`serving on port ${port}`);
-    console.log('✅ Razorpay endpoint: /api/payment/razorpay/create-order');
     console.log('⏭️  Skipping test-premium expiry checker');
   });
 
