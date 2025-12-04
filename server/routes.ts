@@ -5,7 +5,6 @@ import { createServer, type Server } from "http";
 import { randomUUID } from "crypto";
 import multer from "multer";
 import sharp from "sharp";
-import path from "path";
 import compression from "compression";
 import fs from "fs/promises";
 import { createReadStream } from "fs";
@@ -38,7 +37,7 @@ import paypalCheckout from './routes/paypalCheckout';
 import paypalApprovals from './routes/paypalApprovals';
 import PaymentSuccessPage from './pages/PaymentSuccess';
 import { promises as fs } from 'fs';
-import path from 'path';import instamojoRoutes from './routes/instamojoRoutes';
+import instamojoRoutes from './routes/instamojoRoutes';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
