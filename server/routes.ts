@@ -1170,7 +1170,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
 
   // Upload-only endpoint - stores files without compression
-  app.post("/api/upload", checkConcurrentSessions, upload.any, async (req, res) => {
+  app.post("/api/upload", checkConcurrentSessions, upload.array('files', 20), async (req, res) => {
     try {
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {
@@ -5229,7 +5229,7 @@ return res.json({
   });
 
   // Special Format Conversion endpoint - ACCESSIBLE VERSION
-  app.post("/api/convert-special", specialUpload.any, async (req, res) => {
+  app.post("/api/convert-special", specialUpload.array('files', 20), async (req, res) => {
     try {
       const files = req.files as Express.Multer.File[];
       if (!files || files.length === 0) {

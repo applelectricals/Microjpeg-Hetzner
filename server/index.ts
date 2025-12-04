@@ -37,8 +37,20 @@ app.set('etag', false);
 // ============================================================================
 // CRITICAL FIX: Body parsers MUST come BEFORE routes
 // ============================================================================
-app.use(express.json({ limit: '200mb' }));
-app.use(express.urlencoded({ extended: true, limit: '200mb' }));
+// Parse JSON bodies (exclude multipart for file uploads)
+app.use((req, res, next) => {
+  if (req.headers['content-type']?.includes('multipart/form-data')) {
+    return next(); // Skip body parsing for multipart - let multer handle it
+  }
+  express.json({ limit: '200mb' })(req, res, next);
+});
+
+app.use((req, res, next) => {
+  if (req.headers['content-type']?.includes('multipart/form-data')) {
+    return next(); // Skip body parsing for multipart - let multer handle it
+  }
+  express.urlencoded({ extended: true, limit: '200mb' })(req, res, next);
+});
 
 // Timeout settings
 app.use((req, res, next) => {
