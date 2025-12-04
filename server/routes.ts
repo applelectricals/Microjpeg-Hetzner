@@ -1538,77 +1538,7 @@ const files = filesObj['files'] || [];
       const trackingId = user?.id || `ip_${clientIP}`;
       const finalSessionId = sessionId || req.sessionID;
       
-      // Create DualUsageTracker with correct userType
-      const dualTracker = new DualUsageTracker(trackingId, finalSessionId, userType, {
-        ipAddress: clientIP
-      });
-      
-      // Check limits for each file BEFORE processing
-      for (const file of files) {
-        console.log(`📁 Checking: ${file.originalname} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
-        
-        const canPerform = await dualTracker.canPerformOperation(
-          file.originalname,
-          file.size,
-          pageIdentifier
-        );
-        
-        if (!canPerform.allowed) {
-          console.log('❌ LIMIT EXCEEDED:', canPerform.reason);
-          return res.status(429).json({
-            error: "Usage limit exceeded",
-            message: canPerform.reason,
-            pageIdentifier,
-            userType,
-            usage: canPerform.usage,
-            limits: canPerform.limits,
-            upgradeRequired: canPerform.upgradeRequired
-          });
-        }
-        
-        console.log('✅ File passed limit check');
-      }
-      
-      console.log('✅ All files passed checks, proceeding with compression\n');
-      
-      // ============================================================================
-      // END OF NEW CODE - Continue with existing compression logic below
-      // ============================================================================
-
-      // Check page-specific usage limits BEFORE processing
-      
-
-    
-
-      // ✅ Check usage limits using DualUsageTracker (single source of truth)
-      
-
-      // First check if user is authenticated
-      if (user) {
-        const userData = await storage.getUser((user as any)?.claims?.sub);
-        userType = userData?.subscriptionTier || 'free';
-        console.log('✅ User authenticated, userType from DB:', userType);
-      }
-      // If not authenticated, infer from pageIdentifier
-      else if (pageIdentifier) {
-        console.log('🔍 User not authenticated, checking pageIdentifier:', pageIdentifier);
-
-        if (pageIdentifier === 'premium-29' || pageIdentifier.includes('premium') || pageIdentifier.includes('starter')) {
-          userType = 'premium';
-          console.log('✅ Set userType to PREMIUM based on pageIdentifier');
-        } else if (pageIdentifier.includes('pro')) {
-          userType = 'pro';
-          console.log('✅ Set userType to PRO based on pageIdentifier');
-        } else if (pageIdentifier.includes('business')) {
-          userType = 'business';
-          console.log('✅ Set userType to BUSINESS based on pageIdentifier');
-        } else {
-          userType = 'anonymous';
-          console.log('⚠️ PageIdentifier does not match any paid plan, defaulting to anonymous');
-        }
-      } else {
-        console.log('⚠️ No user and no pageIdentifier, defaulting to anonymous');
-      }
+   
 
       console.log('🎯 FINAL userType:', userType);
       console.log('🎯 pageIdentifier:', pageIdentifier);
