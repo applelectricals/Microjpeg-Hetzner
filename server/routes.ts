@@ -697,6 +697,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     threshold: 1024, // Only compress files larger than 1KB
   }));
 
+
+
   // Cache control headers for static assets
   app.use('/assets', (req, res, next) => {
     // Cache static assets for 1 year
@@ -731,6 +733,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register all 78 conversion page routes with middleware
   registerConversionRoutes(app); // Conversion middleware for 78 pages
 
+  // MINIMAL TEST ENDPOINT - bypasses all middleware
+app.post("/api/test-compress", upload.any(), async (req, res) => {
+  console.log('=== TEST COMPRESS ===');
+  try {
+    const files = req.files as Express.Multer.File[];
+    if (!files || files.length === 0) {
+      return res.status(400).json({ error: "No files" });
+    }
+    
+    const file = files[0];
+    console.log('File received:', file.originalname, file.size);
+    
+    const outputPath = `compressed/test_${Date.now()}.jpg`;
+    
+    console.log('Starting Sharp...');
+    await sharp(file.path)
+      .jpeg({ quality: 80 })
+      .toFile(outputPath);
+    
+    console.log('Sharp completed!');
+    
+    const stats = await fs.stat(outputPath);
+    
+    return res.json({
+      success: true,
+      original: file.size,
+      compressed: stats.size,
+      ratio: Math.round((1 - stats.size / file.size) * 100) + '%'
+    });
+  } catch (error: any) {
+    console.error('TEST ERROR:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
   // Test route for tier system
   app.get('/api/test-tiers', async (req, res) => {
     try {
