@@ -1577,7 +1577,39 @@ const files = filesObj['files'] || [];
       console.log('🎯 FINAL userType:', userType);
       console.log('🎯 pageIdentifier:', pageIdentifier);
       
+      // Get client IP address for anonymous user tracking
       
+                       req.headers['x-real-ip']?.toString() || 
+                       req.socket.remoteAddress || 
+                       'unknown';
+      
+      
+      // Check limits for each file
+for (const file of files) {
+  console.log('=== DUAL TRACKER CHECK ===');
+  console.log('File:', file.originalname);
+  console.log('Size:', file.size, 'bytes (', (file.size / 1024 / 1024).toFixed(2), 'MB)');
+  console.log('Page:', pageIdentifier);
+  
+  const canPerform = await dualTracker.canPerformOperation(file.originalname, file.size, pageIdentifier);
+  
+  console.log('Check result:', canPerform);
+  console.log('Allowed:', canPerform.allowed);
+  console.log('Reason:', canPerform.reason);
+  console.log('Usage:', canPerform.usage);
+  console.log('Limits:', canPerform.limits);
+  console.log('========================');
+  
+  if (!canPerform.allowed) {
+    return res.status(429).json({
+      error: 'Usage limit exceeded',
+      message: canPerform.reason,
+      pageIdentifier,
+      usage: canPerform.usage,
+      limits: canPerform.limits
+    });
+  }
+}
 
       console.log(`✅ DualUsageTracker check passed for ${pageIdentifier}: ${files.length} operations allowed`);
 

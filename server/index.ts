@@ -8,7 +8,7 @@ import express, { type Request, Response, NextFunction } from "express";
 import path from 'path';
 import { registerRoutes } from "./routes";
 import { setupVite, log } from "./vite";
-import { safeServeStatic } from "./safe-static";
+import { safeServeStatic } from "./safe-static";  // ← SAFE IMPORT
 import { TestPremiumExpiryManager } from "./testPremiumExpiry";
 import { initializeQueueService, shutdownQueueService } from "./queueService";
 import { seedSuperuser } from "./superuser";
@@ -34,27 +34,8 @@ app.set('etag', false);
 app.use('/api', instamojoRoutes);
 app.use('/api', paypalPaymentRoutes);
 app.use('/api/payment', paymentRouter);
-
-// ============================================================================
-// CRITICAL FIX: Skip body parsing for multipart/form-data (file uploads)
-// ============================================================================
-app.use((req, res, next) => {
-  const contentType = req.headers['content-type'] || '';
-  if (contentType.includes('multipart/form-data')) {
-    return next();
-  }
-  express.json({ limit: '200mb' })(req, res, next);
-});
-
-app.use((req, res, next) => {
-  const contentType = req.headers['content-type'] || '';
-  if (contentType.includes('multipart/form-data')) {
-    return next();
-  }
-  express.urlencoded({ extended: true, limit: '200mb' })(req, res, next);
-});
-// ============================================================================
-
+app.use(express.json({ limit: '200mb' }));
+app.use(express.urlencoded({ extended: true, limit: '200mb' }));
 app.use((req, res, next) => {
   req.setTimeout(600000);
   res.setTimeout(600000);
@@ -159,8 +140,11 @@ app.use((req, res, next) => {
     throw err;
   });
 
+  // Debug endpoint
   app.get('/__seo-debug', seoDebugEndpoint);
 
+   // TEMPORARILY DISABLE BOT DETECTOR DURING SEO GENERATION
+   // This allows Puppeteer to get the full React-rendered pages instead of empty static files
    const isSeoGenerationMode = process.env.NODE_ENV === 'development' && process.env.PORT === '10000';
    if (!isSeoGenerationMode) {
      app.use(botDetectionMiddleware);
@@ -168,10 +152,11 @@ app.use((req, res, next) => {
      console.log('⚠️  Bot detector DISABLED - SEO generation mode (PORT=10000)');
    }
 
+  // ⚡ EMERGENCY STATIC SERVING - checks ALL locations
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    safeServeStatic(app);
+    safeServeStatic(app);  // ← USE EMERGENCY VERSION
   }
 
   const port = parseInt(process.env.PORT || '5000', 10);
