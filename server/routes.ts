@@ -732,7 +732,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register all 78 conversion page routes with middleware
   registerConversionRoutes(app); // Conversion middleware for 78 pages
-
+// DEBUG: Minimal compress with logging
+app.post("/api/debug-compress", upload.any(), async (req, res) => {
+  const logs: string[] = [];
+  const log = (msg: string) => { console.log(msg); logs.push(msg); };
+  
+  try {
+    log('1. Request received');
+    const files = req.files as Express.Multer.File[];
+    if (!files?.length) return res.status(400).json({ error: "No files", logs });
+    
+    log(`2. File: ${files[0].originalname} (${files[0].size} bytes)`);
+    
+    log('3. Creating output path');
+    const outputPath = `compressed/debug_${Date.now()}.jpg`;
+    
+    log('4. Starting Sharp');
+    const startTime = Date.now();
+    
+    await sharp(files[0].path)
+      .jpeg({ quality: 80 })
+      .toFile(outputPath);
+    
+    log(`5. Sharp done in ${Date.now() - startTime}ms`);
+    
+    const stats = await fs.stat(outputPath);
+    log(`6. Output size: ${stats.size}`);
+    
+    return res.json({ success: true, logs, compressed: stats.size });
+  } catch (err: any) {
+    log(`ERROR: ${err.message}`);
+    return res.status(500).json({ error: err.message, logs });
+  }
+});
   // MINIMAL TEST ENDPOINT - bypasses all middleware
 app.post("/api/test-compress", upload.any(), async (req, res) => {
   console.log('=== TEST COMPRESS ===');
