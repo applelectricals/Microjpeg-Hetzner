@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, jsonb, index, boolean, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, jsonb, index, boolean, serial, bigint } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -15,6 +15,7 @@ export const sessions = pgTable(
 );
 
 // User storage table with email/password authentication
+// UPDATED: Now includes all 49 columns from database
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique().notNull(),
@@ -27,25 +28,47 @@ export const users = pgTable("users", {
   emailVerificationExpires: timestamp("email_verification_expires"),
   stripeCustomerId: varchar("stripe_customer_id"),
   stripeSubscriptionId: varchar("stripe_subscription_id"),
-  // New unified pricing structure
-  subscriptionTier: varchar("subscription_tier").default("free_registered"), // free_anonymous, free_registered, pro, enterprise  
-  subscriptionStatus: varchar("subscription_status").default("inactive"), // inactive, active, past_due, canceled
+  // Unified pricing structure
+  subscriptionTier: varchar("subscription_tier").default("free_registered"),
+  subscriptionStatus: varchar("subscription_status").default("inactive"),
   subscriptionEndDate: timestamp("subscription_end_date"),
   subscriptionStartDate: timestamp("subscription_start_date"),
   subscriptionBillingCycle: varchar("subscription_billing_cycle"),
+  // PayPal integration
   paypalSubscriptionId: varchar("paypal_subscription_id"),
   paypalOrderId: varchar("paypal_order_id"),
-  monthlyOperations: integer("monthly_operations").default(0), // Current month usage
-  dailyOperations: integer("daily_operations").default(0), // Current day usage
-  hourlyOperations: integer("hourly_operations").default(0), // Current hour usage
-  lastOperationAt: timestamp("last_operation_at"), // When last operation was performed
-  bytesProcessed: integer("bytes_processed").default(0), // Total bytes processed this month
-  isPremium: boolean("is_premium").default(false), // For development testing and manual premium grants
-  purchasedCredits: integer("purchased_credits").default(0), // Prepaid credits purchased
-  totalCreditsUsed: integer("total_credits_used").default(0), // Lifetime credits consumed
-  accountStatus: varchar("account_status").default("active"), // active, suspended, cancelled
-  suspendedAt: timestamp("suspended_at"), // When account was suspended
-  suspensionReason: text("suspension_reason"), // Reason for suspension
+  // Razorpay integration
+  razorpaySubscriptionId: varchar("razorpay_subscription_id"),
+  razorpayPaymentId: varchar("razorpay_payment_id"),
+  razorpayCustomerId: varchar("razorpay_customer_id"),
+  // Payment tracking
+  lastPaymentAmount: integer("last_payment_amount"),
+  lastPaymentCurrency: varchar("last_payment_currency"),
+  lastPaymentDate: timestamp("last_payment_date"),
+  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
+  // Usage tracking
+  monthlyOperations: integer("monthly_operations").default(0),
+  dailyOperations: integer("daily_operations").default(0),
+  hourlyOperations: integer("hourly_operations").default(0),
+  lastOperationAt: timestamp("last_operation_at"),
+  bytesProcessed: integer("bytes_processed").default(0),
+  // Lifetime stats
+  totalCompressions: integer("total_compressions").default(0),
+  totalConversions: integer("total_conversions").default(0),
+  totalBytesProcessed: bigint("total_bytes_processed", { mode: "number" }).default(0),
+  avgCompressionRatio: integer("avg_compression_ratio").default(0),
+  // Plan limits
+  concurrentUploads: integer("concurrent_uploads").default(1),
+  maxRawFileSize: integer("max_raw_file_size").default(25),
+  maxFileSize: integer("max_file_size").default(10),
+  // Premium and credits
+  isPremium: boolean("is_premium").default(false),
+  purchasedCredits: integer("purchased_credits").default(0),
+  totalCreditsUsed: integer("total_credits_used").default(0),
+  // Account status
+  accountStatus: varchar("account_status").default("active"),
+  suspendedAt: timestamp("suspended_at"),
+  suspensionReason: text("suspension_reason"),
   // Superuser capabilities
   isSuperuser: boolean("is_superuser").default(false),
   superPermissions: jsonb("super_permissions").default('{"bypassLimits":true,"accessAllPages":true}'),
