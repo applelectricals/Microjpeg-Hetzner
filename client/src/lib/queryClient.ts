@@ -31,7 +31,7 @@ export async function apiRequest(
   // For FormData, also add session ID and page identifier to the form data
   if (isFormData && data instanceof FormData) {
     data.append('sessionId', sessionId); // CRITICAL: Use exact field name as requested
-    data.append('pageIdentifier', pageIdentifier);
+    
   }
   
   const res = await fetch(url, {

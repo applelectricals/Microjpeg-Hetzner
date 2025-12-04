@@ -88,7 +88,7 @@ export function useCompression(settings: CompressionSettings) {
       // CRITICAL: Add pageIdentifier and sessionId for proper tracking
       const sessionId = sessionManager.getSessionId();
       const pageIdentifier = getCurrentPageIdentifier();
-      formData.append('pageIdentifier', pageIdentifier);
+      
       formData.append('sessionId', sessionId); // CRITICAL: Use exact field name as requested
       
       // ✅ Add page-aware settings with required tracking parameters

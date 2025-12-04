@@ -23,7 +23,7 @@ window.fetch = async (input: RequestInfo | URL, init: RequestInit = {}) => {
     // For FormData bodies, also add pageIdentifier as a field (for multipart requests)
     let body = init.body;
     if (body instanceof FormData && !body.has('pageIdentifier')) {
-      body.append('pageIdentifier', pageIdentifier);
+
     }
     
     init = {

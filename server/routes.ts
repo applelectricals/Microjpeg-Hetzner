@@ -1348,14 +1348,17 @@ const results = [];
 
 
 // Compression endpoint for both guest and authenticated users  
-app.post("/api/compress", checkConcurrentSessions, upload.array('files', 20), requireScopeFromAuth, async (req, res) => {
+app.post("/api/compress", checkConcurrentSessions, upload.fields([
+  { name: 'files', maxCount: 20 }
+]), requireScopeFromAuth, async (req, res) => {
   console.log('=== COMPRESS REQUEST STARTED ===');
   console.log('Timestamp:', new Date().toISOString());
   console.log('User:', req.user?.email || 'anonymous');
   console.log('Files count:', req.files?.length);
   console.log('Files sizes:', req.files?.map(f => `${f.originalname}: ${f.size} bytes`));
   try {
-    const files = req.files as Express.Multer.File[];
+    const filesObj = req.files as { [fieldname: string]: Express.Multer.File[] };
+const files = filesObj['files'] || [];
     if (!files || files.length === 0) {
       return res.status(400).json({ error: "No files uploaded" });
     }
