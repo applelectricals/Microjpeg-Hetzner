@@ -1578,8 +1578,6 @@ const files = filesObj['files'] || [];
       console.log('🎯 pageIdentifier:', pageIdentifier);
       
       
-  }
-}
 
       console.log(`✅ DualUsageTracker check passed for ${pageIdentifier}: ${files.length} operations allowed`);
 
