@@ -1187,6 +1187,156 @@ export default function ConversionPage() {
         </section>
       )}
 
+      {/* Intro Section from pageContent */}
+      {pageContent?.intro && urlParams && (
+        <section className="py-16 bg-gradient-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
+          <div className="max-w-4xl mx-auto px-4">
+            <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+              {pageContent.intro}
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* What Is Section */}
+      {pageContent?.whatIsContent && urlParams && (
+        <section className="py-16 bg-white dark:bg-gray-800">
+          <div className="max-w-4xl mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+              {pageContent.whatIsTitle}
+            </h2>
+            <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+              {pageContent.whatIsContent}
+            </p>
+          </div>
+        </section>
+      )}
+
+      {/* Why Convert Section */}
+      {pageContent?.whyConvertReasons && urlParams && (
+        <section className="py-16 bg-gray-50 dark:bg-gray-900">
+          <div className="max-w-4xl mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
+              {pageContent.whyConvertTitle}
+            </h2>
+            <ul className="space-y-4">
+              {pageContent.whyConvertReasons.map((reason, i) => (
+                <li key={i} className="flex items-start gap-4 text-gray-700 dark:text-gray-300">
+                  <span className="flex-shrink-0 text-brand-gold text-xl mt-1">✓</span>
+                  <span className="text-lg leading-relaxed">{reason}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      {/* How To Section */}
+      {pageContent?.howToSteps && urlParams && (
+        <section className="py-16 bg-white dark:bg-gray-800">
+          <div className="max-w-4xl mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
+              {pageContent.howToTitle}
+            </h2>
+            <ol className="space-y-4">
+              {pageContent.howToSteps.map((step, i) => (
+                <li key={i} className="flex items-start gap-4">
+                  <span className="flex-shrink-0 w-8 h-8 rounded-full bg-brand-gold text-white flex items-center justify-center font-bold text-sm">
+                    {i + 1}
+                  </span>
+                  <span className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed pt-1">{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+      )}
+
+      {/* Comparison Table Section */}
+      {pageContent?.sourceInfo && pageContent?.targetInfo && urlParams && (
+        <section className="py-16 bg-gray-50 dark:bg-gray-900">
+          <div className="max-w-4xl mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">
+              {pageContent.comparisonTitle}
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-200 dark:bg-gray-800">
+                    <th className="px-4 py-3 text-left text-gray-900 dark:text-white font-semibold">Feature</th>
+                    <th className="px-4 py-3 text-left text-brand-gold font-semibold">{urlParams.from.toUpperCase()}</th>
+                    <th className="px-4 py-3 text-left text-brand-teal font-semibold">{urlParams.to.toUpperCase()}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pageContent.sourceInfo.map((item, i) => (
+                    <tr key={i} className="border-b border-gray-200 dark:border-gray-700">
+                      <td className="px-4 py-3 text-gray-900 dark:text-white font-medium">{item.label}</td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{item.value}</td>
+                      <td className="px-4 py-3 text-gray-700 dark:text-gray-300">{pageContent.targetInfo[i]?.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Features Section */}
+      {pageContent?.features && urlParams && (
+        <section className="py-16 bg-white dark:bg-gray-800">
+          <div className="max-w-4xl mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Features</h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              {pageContent.features.map((feature, i) => (
+                <div key={i} className="flex items-start gap-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-brand-gold dark:hover:border-brand-gold transition-colors">
+                  <span className="flex-shrink-0 text-brand-teal text-xl mt-1">✓</span>
+                  <span className="text-gray-700 dark:text-gray-300">{feature}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Device Support Section */}
+      {pageContent?.deviceSupportText && urlParams && (
+        <section className="py-16 bg-gray-50 dark:bg-gray-900">
+          <div className="max-w-4xl mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Device Support</h2>
+            <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed mb-6">
+              {pageContent.deviceSupportText}
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {['Windows', 'macOS', 'Linux', 'iOS', 'Android'].map(device => (
+                <span key={device} className="px-4 py-2 bg-gray-200 dark:bg-gray-800 rounded-full text-sm text-gray-900 dark:text-gray-100 border border-gray-300 dark:border-gray-700">
+                  {device}
+                </span>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Additional Content Sections */}
+      {pageContent?.sections && pageContent.sections.length > 0 && urlParams && (
+        <>
+          {pageContent.sections.map((section, i) => (
+            <section key={i} className={`py-16 ${i % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'}`}>
+              <div className="max-w-4xl mx-auto px-4">
+                <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                  {section.title}
+                </h2>
+                <p className="text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+                  {section.body}
+                </p>
+              </div>
+            </section>
+          ))}
+        </>
+      )}
+
       {/* FAQ Section specific to this conversion */}
       {urlParams && fromFormat && toFormat && faqItems.length > 0 && (
         <section className="py-16 bg-white dark:bg-gray-900">
@@ -1204,6 +1354,26 @@ export default function ConversionPage() {
                     {item.answer}
                   </p>
                 </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Related Conversions Section */}
+      {pageContent?.relatedConversions && pageContent.relatedConversions.length > 0 && urlParams && (
+        <section className="py-16 bg-gray-50 dark:bg-gray-900">
+          <div className="max-w-4xl mx-auto px-4">
+            <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Related Conversions</h2>
+            <div className="flex flex-wrap gap-4">
+              {pageContent.relatedConversions.map((conv, i) => (
+                <a
+                  key={i}
+                  href={conv.href}
+                  className="px-6 py-3 bg-brand-gold/10 hover:bg-brand-gold/20 border border-brand-gold/30 rounded-lg text-brand-gold hover:text-brand-gold-dark transition-all duration-200 font-medium"
+                >
+                  {conv.label} →
+                </a>
               ))}
             </div>
           </div>
