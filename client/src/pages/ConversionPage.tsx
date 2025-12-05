@@ -1056,22 +1056,22 @@ export default function ConversionPage() {
                   <div className="w-12 h-12 bg-brand-teal/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Zap className="w-6 h-6 text-brand-teal" />
                   </div>
-                  <h3 className="font-semibold text-black dark:text-white mb-2">Unlimited operations</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">No monthly limits on conversions</p>
+                  <h3 className="font-bold text-lg sm:text-xl lg:text-2xl text-black dark:text-white mb-2">Unlimited operations</h3>
+                  <p className="text-base sm:text-lg font-semibold text-black dark:text-gray-200">No monthly limits on conversions</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-brand-gold/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Crown className="w-6 h-6 text-brand-gold" />
                   </div>
-                  <h3 className="font-semibold text-black dark:text-white mb-2">Up to 200MB files</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Starter: 75MB, Pro: 150MB, Business: 200MB</p>
+                  <h3 className="font-bold text-lg sm:text-xl lg:text-2xl text-black dark:text-white mb-2">Up to 200MB files</h3>
+                  <p className="text-base sm:text-lg font-semibold text-black dark:text-gray-200">Starter: 75MB, Pro: 150MB, Business: 200MB</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Shield className="w-6 h-6 text-red-500" />
                   </div>
-                  <h3 className="font-semibold text-black dark:text-white mb-2">Monthly or Annual</h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Save up to 51% with annual plans</p>
+                  <h3 className="font-bold text-lg sm:text-xl lg:text-2xl text-black dark:text-white mb-2">Monthly or Annual</h3>
+                  <p className="text-base sm:text-lg font-semibold text-black dark:text-gray-200">Save up to 51% with annual plans</p>
                 </div>
               </div>
               
