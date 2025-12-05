@@ -1342,26 +1342,6 @@ export default function ConversionPage() {
         </section>
       )}
 
-      {/* Related Conversions Section */}
-      {pageContent?.relatedConversions && pageContent.relatedConversions.length > 0 && urlParams && (
-        <section className="py-16 bg-gray-50 dark:bg-gray-900">
-          <div className="max-w-4xl mx-auto px-4">
-            <h2 className="text-3xl font-bold mb-8 text-gray-900 dark:text-white">Related Conversions</h2>
-            <div className="flex flex-wrap gap-4">
-              {pageContent.relatedConversions.map((conv, i) => (
-                <a
-                  key={i}
-                  href={conv.href}
-                  className="px-6 py-3 bg-brand-gold/10 hover:bg-brand-gold/20 border border-brand-gold/30 rounded-lg text-brand-gold hover:text-brand-gold-dark transition-all duration-200 font-medium"
-                >
-                  {conv.label} →
-                </a>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* Footer */}
       <footer className="bg-gray-100 dark:bg-gray-800 text-black dark:text-white py-12">
         <div className="max-w-7xl mx-auto px-4">
