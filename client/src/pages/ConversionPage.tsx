@@ -316,6 +316,12 @@ export default function ConversionPage() {
         )
       : null;
 
+  // Get FAQ content early in the component
+  const faqItems =
+    urlParams && fromFormat && toFormat
+      ? getConversionFAQ(urlParams.from, urlParams.to)
+      : [];
+
   // Generate canonical URL and structured data for SEO
   const canonicalUrl =
     urlParams && fromFormat && toFormat && conversionConfig
@@ -1173,14 +1179,14 @@ export default function ConversionPage() {
       )}
 
       {/* FAQ Section specific to this conversion */}
-      {urlParams && fromFormat && toFormat && (
+      {urlParams && fromFormat && toFormat && faqItems.length > 0 && (
         <section className="py-16 bg-white dark:bg-gray-900">
           <div className="max-w-4xl mx-auto px-4 text-left">
             <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center">
               {fromFormat.displayName} to {toFormat.displayName} – FAQ
             </h2>
             <div className="space-y-4">
-              {getConversionFaq(urlParams.from, urlParams.to).map((item, idx) => (
+              {faqItems.map((item, idx) => (
                 <div key={idx} className="border border-gray-200 dark:border-gray-700 rounded-lg p-6 bg-gray-50 dark:bg-gray-800 hover:border-brand-gold dark:hover:border-brand-gold transition-colors">
                   <p className="font-semibold text-lg mb-3 text-gray-900 dark:text-white">
                     {item.question}
