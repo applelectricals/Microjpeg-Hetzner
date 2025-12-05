@@ -330,19 +330,32 @@ export default function ConversionPage() {
           : `/convert/${urlParams.from}-to-${urlParams.to}`}`
       : "https://microjpeg.com/tools/convert";
 
+  // Use optimized meta title if available
+  const metaTitle =
+    pageContent?.metaTitle
+      ? pageContent.metaTitle
+      : conversionConfig?.operation === "compress"
+      ? `Compress ${fromFormat?.displayName} Images Online - Free | MicroJPEG`
+      : `Convert ${fromFormat?.displayName} to ${toFormat?.displayName} - Free Online | MicroJPEG`;
+
   // Use optimized intro for meta description if available
   const metaDescription =
-    pageContent?.intro
+    pageContent?.metaDescription
+      ? pageContent.metaDescription
+      : pageContent?.intro
       ? pageContent.intro.slice(0, 155) // Google typically shows 155-160 characters
       : conversionConfig?.description || "Convert and compress images online with MicroJPEG";
 
+  // Build comprehensive structured data array
   const structuredData =
     urlParams && fromFormat && toFormat && conversionConfig
       ? [
           getHowToSchema(urlParams.from, urlParams.to, canonicalUrl),
           getSoftwareAppSchema(urlParams.from, urlParams.to, canonicalUrl),
-          getFaqSchema(urlParams.from, urlParams.to, canonicalUrl)
-        ]
+          getFaqSchema(urlParams.from, urlParams.to, canonicalUrl),
+          getBreadcrumbSchema(urlParams.from, urlParams.to),
+          getWebPageSchema(urlParams.from, urlParams.to, metaTitle, metaDescription)
+        ].filter(Boolean)
       : undefined;
 
   // If no valid conversion found, show 404
@@ -727,11 +740,7 @@ export default function ConversionPage() {
     <div className="min-h-screen bg-gradient-to-br from-brand-cream via-white to-brand-light dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col transition-colors duration-300">
       {/* ← PERFECT PER-PAGE SEO — Google sees this instantly on SSR */}
       <SEOHead
-        title={
-          conversionConfig
-            ? `${conversionConfig.operation === 'compress' ? 'Compress' : 'Convert'} ${fromFormat?.displayName} ${conversionConfig.operation === 'compress' ? '' : `to ${toFormat?.displayName}`} | MicroJPEG`
-            : 'Image Converter & Compressor | MicroJPEG'
-        }
+        title={metaTitle}
         description={metaDescription}
         canonicalUrl={canonicalUrl}
         structuredData={structuredData}
