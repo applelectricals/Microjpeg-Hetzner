@@ -12,8 +12,12 @@ import { SEOHead } from '@/components/SEOHead';
 import { useLocation, useParams } from 'wouter';
 import ConversionOutputModal from '@/components/ConversionOutputModal';
 import ButtonsSection from "@/components/ButtonsSection";
-import { getConversionFaq, getHowToSchema, getSoftwareAppSchema, getFaqSchema } from "@/data/conversionSchema";
-import { getConversionPageContent } from "@/data/conversionContent";
+import { getHowToSchema, getSoftwareAppSchema, getFaqSchema } from "@/data/conversionSchema";
+
+
+import { getConversionPageContent, hasConversionContent, PageContent } from '@/data/conversionContent';
+import { getConversionFAQ, FAQItem } from '@/data/conversionFAQs';
+import { getFAQSchema, getBreadcrumbSchema, getWebPageSchema } from '@/data/conversionSchema';
 
 // Import conversion matrix and utilities
 import {

@@ -732,7 +732,7 @@ export default function MicroJPEGLanding() {
 
       // Prepare compression settings
       const settings = {
-        quality: 90, // Balanced quality for good compression ratios
+        quality: 100, // Balanced quality for good compression ratios
         outputFormat: conversionEnabled && selectedFormats.length > 0 ? selectedFormats : 'keep-original',
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
@@ -987,7 +987,7 @@ export default function MicroJPEGLanding() {
 
       // Prepare compression settings for specific format
       const settings = {
-        quality: 90,
+        quality: 100,
         outputFormat: [format], // Only process this specific format
         resizeOption: 'keep-original',
         compressionAlgorithm: 'standard',
