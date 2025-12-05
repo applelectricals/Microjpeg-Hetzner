@@ -5,6 +5,7 @@ import { createServer, type Server } from "http";
 import { randomUUID } from "crypto";
 import multer from "multer";
 import sharp from "sharp";
+import path from "path";
 import compression from "compression";
 import fs from "fs/promises";
 import { createReadStream } from "fs";
@@ -37,7 +38,7 @@ import paypalCheckout from './routes/paypalCheckout';
 import paypalApprovals from './routes/paypalApprovals';
 import PaymentSuccessPage from './pages/PaymentSuccess';
 import { promises as fs } from 'fs';
-import instamojoRoutes from './routes/instamojoRoutes';
+import path from 'path';import instamojoRoutes from './routes/instamojoRoutes';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 
@@ -697,8 +698,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     threshold: 1024, // Only compress files larger than 1KB
   }));
 
-
-
   // Cache control headers for static assets
   app.use('/assets', (req, res, next) => {
     // Cache static assets for 1 year
@@ -732,73 +731,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register all 78 conversion page routes with middleware
   registerConversionRoutes(app); // Conversion middleware for 78 pages
-// DEBUG: Minimal compress with logging
-app.post("/api/debug-compress", upload.any(), async (req, res) => {
-  const logs: string[] = [];
-  const log = (msg: string) => { console.log(msg); logs.push(msg); };
-  
-  try {
-    log('1. Request received');
-    const files = req.files as Express.Multer.File[];
-    if (!files?.length) return res.status(400).json({ error: "No files", logs });
-    
-    log(`2. File: ${files[0].originalname} (${files[0].size} bytes)`);
-    
-    log('3. Creating output path');
-    const outputPath = `compressed/debug_${Date.now()}.jpg`;
-    
-    log('4. Starting Sharp');
-    const startTime = Date.now();
-    
-    await sharp(files[0].path)
-      .jpeg({ quality: 80 })
-      .toFile(outputPath);
-    
-    log(`5. Sharp done in ${Date.now() - startTime}ms`);
-    
-    const stats = await fs.stat(outputPath);
-    log(`6. Output size: ${stats.size}`);
-    
-    return res.json({ success: true, logs, compressed: stats.size });
-  } catch (err: any) {
-    log(`ERROR: ${err.message}`);
-    return res.status(500).json({ error: err.message, logs });
-  }
-});
-  // MINIMAL TEST ENDPOINT - bypasses all middleware
-app.post("/api/test-compress", upload.any(), async (req, res) => {
-  console.log('=== TEST COMPRESS ===');
-  try {
-    const files = req.files as Express.Multer.File[];
-    if (!files || files.length === 0) {
-      return res.status(400).json({ error: "No files" });
-    }
-    
-    const file = files[0];
-    console.log('File received:', file.originalname, file.size);
-    
-    const outputPath = `compressed/test_${Date.now()}.jpg`;
-    
-    console.log('Starting Sharp...');
-    await sharp(file.path)
-      .jpeg({ quality: 80 })
-      .toFile(outputPath);
-    
-    console.log('Sharp completed!');
-    
-    const stats = await fs.stat(outputPath);
-    
-    return res.json({
-      success: true,
-      original: file.size,
-      compressed: stats.size,
-      ratio: Math.round((1 - stats.size / file.size) * 100) + '%'
-    });
-  } catch (error: any) {
-    console.error('TEST ERROR:', error);
-    return res.status(500).json({ error: error.message });
-  }
-});
+
   // Test route for tier system
   app.get('/api/test-tiers', async (req, res) => {
     try {
@@ -1414,19 +1347,16 @@ const results = [];
     }
   });
 
-/*
+
 // Compression endpoint for both guest and authenticated users  
-app.post("/api/compress", checkConcurrentSessions, upload.fields([
-  { name: 'files', maxCount: 20 }
-]), requireScopeFromAuth, async (req, res) => {
+app.post("/api/compress", checkConcurrentSessions, upload.array('files', 20), requireScopeFromAuth, async (req, res) => {
   console.log('=== COMPRESS REQUEST STARTED ===');
   console.log('Timestamp:', new Date().toISOString());
   console.log('User:', req.user?.email || 'anonymous');
   console.log('Files count:', req.files?.length);
   console.log('Files sizes:', req.files?.map(f => `${f.originalname}: ${f.size} bytes`));
   try {
-    const filesObj = req.files as { [fieldname: string]: Express.Multer.File[] };
-const files = filesObj['files'] || [];
+    const files = req.files as Express.Multer.File[];
     if (!files || files.length === 0) {
       return res.status(400).json({ error: "No files uploaded" });
     }
@@ -1520,547 +1450,544 @@ const files = filesObj['files'] || [];
           allowedPages: ALLOWED_PAGE_IDENTIFIERS
         });
       }
-*/
-// TEMPORARY WORKING COMPRESS ENDPOINT
-app.post("/api/compress", checkConcurrentSessions, upload.any(), async (req, res) => {
-  console.log('=== SIMPLE COMPRESS ===');
-  try {
-    const files = req.files as Express.Multer.File[];
-    if (!files?.length) {
-      return res.status(400).json({ error: "No files uploaded" });
-    }
 
-    // Parse settings
-    let settings = { quality: 85, outputFormat: 'jpeg' };
-    if (req.body.settings) {
-      try {
-        const parsed = JSON.parse(req.body.settings);
-        settings = { ...settings, ...parsed };
-      } catch (e) {}
-    }
-
-    const results = [];
-
-    for (const file of files) {
-      const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const ext = settings.outputFormat === 'keep-original' 
-        ? (file.originalname.split('.').pop() || 'jpg')
-        : (settings.outputFormat === 'jpeg' ? 'jpg' : settings.outputFormat);
-      const outputPath = `compressed/${jobId}.${ext}`;
-
-      console.log(`Processing: ${file.originalname} -> ${outputPath}`);
-
-      // Simple Sharp processing
-      let sharpInstance = sharp(file.path);
+      // ============================================================================
+      // ADD THIS ENTIRE SECTION HERE (AFTER LINE 1295)
+      // ============================================================================
       
-      const quality = settings.quality || 85;
+      // Determine userType from pageIdentifier for usage tracking
+      let userType = 'anonymous';
       
-      if (ext === 'jpg' || ext === 'jpeg') {
-        await sharpInstance.jpeg({ quality }).toFile(outputPath);
-      } else if (ext === 'png') {
-        await sharpInstance.png({ compressionLevel: 8 }).toFile(outputPath);
-      } else if (ext === 'webp') {
-        await sharpInstance.webp({ quality }).toFile(outputPath);
+      if (user && user.id) {
+        // Authenticated user - get subscription tier from database
+        try {
+          const userData = await storage.getUser(user.id);
+          userType = userData?.subscriptionTier || 'free';
+          console.log('✅ Authenticated user, userType from DB:', userType);
+        } catch (err) {
+          console.error('⚠️ Failed to get user subscription:', err);
+          userType = 'free';
+        }
       } else {
-        await sharpInstance.jpeg({ quality }).toFile(outputPath);
+        // Not authenticated - infer from pageIdentifier
+        console.log('🔍 Not authenticated, inferring userType from pageIdentifier:', pageIdentifier);
+        
+        if (pageIdentifier === 'premium-29' || 
+            pageIdentifier.includes('premium') || 
+            pageIdentifier.includes('starter') ||
+            pageIdentifier === 'paid') {
+          userType = 'premium';
+          console.log('✅ SET userType = PREMIUM (75MB limit)');
+        } else if (pageIdentifier.includes('pro')) {
+          userType = 'pro';
+          console.log('✅ SET userType = PRO (150MB limit)');
+        } else if (pageIdentifier.includes('business') || pageIdentifier.includes('enterprise')) {
+          userType = 'business';
+          console.log('✅ SET userType = BUSINESS (200MB limit)');
+        } else {
+          console.log('⚠️ Free/anonymous page, userType = anonymous');
+        }
+      }
+      
+      console.log('🎯 FINAL userType:', userType, '| pageIdentifier:', pageIdentifier);
+      
+      // Get client IP for tracking
+      const clientIP = req.headers['x-forwarded-for']?.toString().split(',')[0].trim() || 
+                       req.headers['x-real-ip']?.toString() || 
+                       req.socket.remoteAddress || 
+                       'unknown';
+      
+      const trackingId = user?.id || `ip_${clientIP}`;
+      const finalSessionId = sessionId || req.sessionID;
+      
+      // Create DualUsageTracker with correct userType
+      const dualTracker = new DualUsageTracker(trackingId, finalSessionId, userType, {
+        ipAddress: clientIP
+      });
+      
+      // Check limits for each file BEFORE processing
+      for (const file of files) {
+        console.log(`📁 Checking: ${file.originalname} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+        
+        const canPerform = await dualTracker.canPerformOperation(
+          file.originalname,
+          file.size,
+          pageIdentifier
+        );
+        
+        if (!canPerform.allowed) {
+          console.log('❌ LIMIT EXCEEDED:', canPerform.reason);
+          return res.status(429).json({
+            error: "Usage limit exceeded",
+            message: canPerform.reason,
+            pageIdentifier,
+            userType,
+            usage: canPerform.usage,
+            limits: canPerform.limits,
+            upgradeRequired: canPerform.upgradeRequired
+          });
+        }
+        
+        console.log('✅ File passed limit check');
+      }
+      
+      console.log('✅ All files passed checks, proceeding with compression\n');
+      
+      // ============================================================================
+      // END OF NEW CODE - Continue with existing compression logic below
+      // ============================================================================
+
+      // Check page-specific usage limits BEFORE processing
+      
+
+    
+
+      // ✅ Check usage limits using DualUsageTracker (single source of truth)
+      
+
+      // First check if user is authenticated
+      if (user) {
+        const userData = await storage.getUser((user as any)?.claims?.sub);
+        userType = userData?.subscriptionTier || 'free';
+        console.log('✅ User authenticated, userType from DB:', userType);
+      }
+      // If not authenticated, infer from pageIdentifier
+      else if (pageIdentifier) {
+        console.log('🔍 User not authenticated, checking pageIdentifier:', pageIdentifier);
+
+        if (pageIdentifier === 'premium-29' || pageIdentifier.includes('premium') || pageIdentifier.includes('starter')) {
+          userType = 'premium';
+          console.log('✅ Set userType to PREMIUM based on pageIdentifier');
+        } else if (pageIdentifier.includes('pro')) {
+          userType = 'pro';
+          console.log('✅ Set userType to PRO based on pageIdentifier');
+        } else if (pageIdentifier.includes('business')) {
+          userType = 'business';
+          console.log('✅ Set userType to BUSINESS based on pageIdentifier');
+        } else {
+          userType = 'anonymous';
+          console.log('⚠️ PageIdentifier does not match any paid plan, defaulting to anonymous');
+        }
+      } else {
+        console.log('⚠️ No user and no pageIdentifier, defaulting to anonymous');
       }
 
-      const originalStats = await fs.stat(file.path);
-      const compressedStats = await fs.stat(outputPath);
+      console.log('🎯 FINAL userType:', userType);
+      console.log('🎯 pageIdentifier:', pageIdentifier);
       
-      results.push({
-        id: jobId,
-        originalName: file.originalname,
-        originalSize: originalStats.size,
-        compressedSize: compressedStats.size,
-        compressionRatio: Math.round((1 - compressedStats.size / originalStats.size) * 100),
-        downloadUrl: `/api/download/${jobId}`,
-        originalFormat: file.originalname.split('.').pop()?.toUpperCase() || 'JPG',
-        outputFormat: ext.toUpperCase(),
-        wasConverted: settings.outputFormat !== 'keep-original'
-      });
+      // Get client IP address for anonymous user tracking
+      
+                       req.headers['x-real-ip']?.toString() || 
+                       req.socket.remoteAddress || 
+                       'unknown';
+      
+      
+      // Check limits for each file
+for (const file of files) {
+  console.log('=== DUAL TRACKER CHECK ===');
+  console.log('File:', file.originalname);
+  console.log('Size:', file.size, 'bytes (', (file.size / 1024 / 1024).toFixed(2), 'MB)');
+  console.log('Page:', pageIdentifier);
+  
+  const canPerform = await dualTracker.canPerformOperation(file.originalname, file.size, pageIdentifier);
+  
+  console.log('Check result:', canPerform);
+  console.log('Allowed:', canPerform.allowed);
+  console.log('Reason:', canPerform.reason);
+  console.log('Usage:', canPerform.usage);
+  console.log('Limits:', canPerform.limits);
+  console.log('========================');
+  
+  if (!canPerform.allowed) {
+    return res.status(429).json({
+      error: 'Usage limit exceeded',
+      message: canPerform.reason,
+      pageIdentifier,
+      usage: canPerform.usage,
+      limits: canPerform.limits
+    });
+  }
+}
 
-      // Cleanup original
+      console.log(`✅ DualUsageTracker check passed for ${pageIdentifier}: ${files.length} operations allowed`);
+
+      // Apply Free user optimizations for speed
+      if (!user) { // Guest/Free user
+        // Maintain quality but optimize algorithm for speed instead
+        settings.compressionAlgorithm = 'standard'; // Use standard instead of aggressive compression
+      }
+
+      const results = [];
+      const jobs = [];
+      
+      console.log("Compression settings received:", settings);
+      console.log("Files to process:", files.map(f => ({ name: f.originalname, ext: f.originalname.split('.').pop() })));
+      console.log("=== PROCESSING FILES WITH SHARP + IMAGEMAGICK ===");
+      
+      // Create database jobs for each file and format combination
+      for (const file of files) {
+        // Handle multiple output formats
+        const fileExtension = file.originalname.split('.').pop()?.toLowerCase() || 'jpg';
+        console.log(`File: ${file.originalname}, extension: ${fileExtension}, settings.outputFormat: ${settings.outputFormat}`);
+        
+        let outputFormats = Array.isArray(settings.outputFormat) 
+          ? settings.outputFormat 
+          : settings.outputFormat === 'keep-original' 
+            ? [fileExtension] 
+            : [settings.outputFormat];
+            
+        console.log(`Determined outputFormats: [${outputFormats.join(', ')}]`);
+
+        // Create a separate job for each format
+        console.log(`File: ${file.originalname}, outputFormats array: [${outputFormats.join(', ')}], settings.outputFormat: ${settings.outputFormat}`);
+        for (const outputFormat of outputFormats) {
+          console.log(`Creating compression job for user ${user?.id}, file: ${file.originalname}, format: ${outputFormat}`);
+          const job = await storage.createCompressionJob({
+            userId: user?.id || null,
+            sessionId: req.sessionID, // For guest users
+            originalFilename: file.originalname,
+            originalSize: file.size,
+            status: "pending",
+            qualityLevel: "custom",
+            resizeOption: settings.resizeOption,
+            outputFormat: outputFormat,
+            originalPath: file.path,
+            originalFormat: file.mimetype.split('/')[1], // Add required field
+            compressedSize: null,
+            compressionRatio: null,
+            errorMessage: null,
+            compressedPath: null,
+          });
+          
+          console.log(`Created job ${job.id} for user ${user?.id || 'guest'}`);
+          jobs.push({ job, file, outputFormat });
+        }
+      }
+      
+      // Process jobs and update them
+      for (const { job, file, outputFormat } of jobs) {
+        try {
+          // PNG conversion is now enabled for all users including free users
+          // Leveraging our optimized compression engine for fast processing
+          
+          // Map format names to proper file extensions
+          const getFileExtension = (format: string) => {
+            switch (format) {
+              case 'jpeg':
+              case 'jpg': return 'jpg';
+              case 'png': return 'png';
+              case 'webp': return 'webp';
+              case 'avif': return 'avif';
+              case 'tiff': return 'tiff';
+              case 'dng': return 'dng';
+              case 'cr2': return 'cr2';
+              case 'nef': return 'nef';
+              case 'arw': return 'arw';
+              case 'orf': return 'orf';
+              case 'raf': return 'raf';
+              case 'rw2': return 'rw2';
+              default: return format;
+            }
+          };
+          
+          const fileExtension = getFileExtension(outputFormat);
+          const outputPath = path.join("compressed", `${job.id}.${fileExtension}`);
+          
+          console.log(`Processing ${file.originalname} -> ${outputFormat.toUpperCase()} (parallel)`);
+          
+          // Check if this is a RAW file that needs special processing
+          const inputFormat = getFileFormat(file.originalname);
+          const fileExtName = file.originalname.split('.').pop()?.toLowerCase() || '';
+          const isRawFile = ['dng', 'cr2', 'nef', 'arw', 'orf', 'raf', 'rw2'].includes(fileExtName);
+          console.log(`File: ${file.originalname}, inputFormat: ${inputFormat}, fileExt: ${fileExtName}, isRawFile: ${isRawFile}`);
+          
+          let result;
+          if (isRawFile || inputFormat === 'svg' || (inputFormat === 'svg' && outputFormat === 'tiff')) {
+            // Use the EXACT same engine as /professional-formats/convert for RAW files and SVG conversions
+            // SVG needs special handling for rasterization, especially when converting to TIFF
+            console.log(`Using professional formats conversion engine for ${file.originalname} -> ${outputFormat}`);
+            try {
+              // Calculate resize dimensions if needed  
+              // Handle both premium page format (resizeOption) and CR2 page format (direct resize parameter)
+              const shouldResize = (settings.resizeOption === 'resize-percentage' && settings.resizePercentage && settings.resizePercentage < 100) ||
+                                   (settings.resize && settings.resizePercentage && settings.resizePercentage < 100);
+              
+              result = await processSpecialFormatConversion(
+                file.path,
+                outputPath,
+                isRawFile ? 'raw' : fileExtName, // Professional formats engine expects 'raw' for all RAW files
+                outputFormat,
+                {
+                  quality: settings.quality,
+                  resize: shouldResize,
+                  resizePercentage: settings.resizePercentage,
+                  width: 0, // Will be calculated dynamically from actual image dimensions
+                  height: 0, // Will be calculated dynamically from actual image dimensions
+                  maintainAspect: true
+                }
+              );
+              console.log(`RAW conversion result:`, result);
+            } catch (error) {
+              console.error(`RAW conversion failed for ${file.originalname}:`, error);
+              throw error; // Re-throw to be caught by the outer error handler
+            }
+          } else {
+            // Use Sharp for standard image formats (JPEG, PNG, WEBP, etc.) - much faster
+            let sharpOperation = sharp(file.path);
+            
+            // Apply resize if specified
+            if (settings.resizeOption === 'resize-percentage' && settings.resizePercentage && settings.resizePercentage < 100) {
+              const metadata = await sharpOperation.metadata();
+              console.log(`Original dimensions: ${metadata.width}x${metadata.height}, Resize to: ${settings.resizePercentage}%`);
+              if (metadata.width && metadata.height) {
+                const targetWidth = Math.round(metadata.width * (settings.resizePercentage / 100));
+                const targetHeight = Math.round(metadata.height * (settings.resizePercentage / 100));
+                console.log(`Target dimensions: ${targetWidth}x${targetHeight}`);
+                sharpOperation = sharpOperation.resize(targetWidth, targetHeight, {
+                  fit: 'inside',
+                  withoutEnlargement: true
+                });
+              }
+            }
+            
+            // CRITICAL FIX: Handle TIFF compression properly with LZW
+            const formatOptions: any = {
+                quality: settings.quality,
+                ...(outputFormat === 'png' && { compressionLevel: 8 }),
+                ...(outputFormat === 'webp' && { effort: 4 }),
+                ...(outputFormat === 'avif' && { effort: 2 }), // Faster AVIF processing
+                ...(outputFormat === 'tiff' && { 
+                  compression: 'lzw', // LZW compression for TIFF
+                  predictor: 'horizontal', // Better compression for photos
+                  quality: settings.quality // Quality setting for TIFF
+                })
+              };
+            
+            console.log(`🖼️ Sharp compression: ${file.originalname} -> ${outputFormat} with options:`, formatOptions);
+            sharpOperation = sharpOperation.toFormat(outputFormat as keyof sharp.FormatEnum, formatOptions)
+              .toFile(outputPath);
+            
+            // Apply 30-second timeout
+            await Promise.race([
+              sharpOperation,
+              new Promise((_, reject) => 
+                setTimeout(() => reject(new Error(`Processing timeout after 30 seconds for ${outputFormat}`)), 30000)
+              )
+            ]);
+            
+            const stats = await fs.stat(outputPath);
+            result = { success: true, outputSize: stats.size };
+          }
+          
+          // Get file stats - enhanced validation for RAW files
+          const originalStats = await fs.stat(file.path);
+          
+          // Check if output file was actually created and has reasonable size
+          const outputExists = await fs.access(outputPath).then(() => true).catch(() => false);
+          if (!outputExists) {
+            throw new Error(`Output file was not created: ${outputPath}`);
+          }
+          
+          const compressedStats = await fs.stat(outputPath);
+          
+          // CRITICAL: Check for suspiciously small files (likely conversion failures)
+          if (compressedStats.size < 100) { // Less than 100 bytes is likely a failure
+            console.error(`⚠️  Suspiciously small output file: ${compressedStats.size} bytes for ${file.originalname}`);
+            console.error(`Original size: ${originalStats.size} bytes`);
+            console.error(`Output path: ${outputPath}`);
+            
+            // For RAW files, this is likely a dcraw failure
+            if (isRawFile) {
+              throw new Error(`RAW conversion failed: Output file too small (${compressedStats.size} bytes). Check dcraw.js installation.`);
+            }
+          }
+          
+          // CRITICAL: Ensure file sizes are valid numbers
+          const originalSize = originalStats.size && !isNaN(originalStats.size) && originalStats.size > 0 ? originalStats.size : 1;
+          const compressedSize = compressedStats.size && !isNaN(compressedStats.size) && compressedStats.size > 0 ? compressedStats.size : 1;
+          
+          // Calculate compression ratio with validation - prevent NaN
+          let compressionRatio = 0;
+          if (originalSize > 0 && compressedSize > 0) {
+            compressionRatio = Math.round((1 - compressedSize / originalSize) * 100);
+            // Ensure compressionRatio is valid
+            if (isNaN(compressionRatio) || !isFinite(compressionRatio)) {
+              compressionRatio = 0;
+            }
+          }
+          
+          console.log(`📊 File stats for ${file.originalname}:`, {
+            originalSize,
+            compressedSize,
+            compressionRatio,
+            isRawFile,
+            outputFormat
+          });
+          
+          // Update job with compression results - wrap in try/catch to prevent database crashes
+          try {
+            await storage.updateCompressionJob(job.id, {
+              status: "completed",
+              compressedPath: outputPath,
+              compressedSize: compressedSize, // Use validated size
+              compressionRatio: compressionRatio, // Use validated ratio
+              outputFormat: outputFormat, // Store the actual output format
+            });
+          } catch (dbError) {
+            console.error(`Database update failed for job ${job.id}:`, dbError);
+            // Continue processing even if database update fails
+          }
+
+          const resultData = {
+            id: job.id, // Use actual job ID
+            originalName: file.originalname,
+            originalSize: originalSize, // Use validated size
+            compressedSize: compressedSize, // Use validated size
+            compressionRatio: compressionRatio, // Use validated ratio
+            downloadUrl: `/api/download/${job.id}`,
+            originalFormat: file.mimetype.split('/')[1].toUpperCase(),
+            outputFormat: outputFormat.toUpperCase(),
+            wasConverted: settings.outputFormat !== 'keep-original',
+            compressedFileName: path.basename(outputPath),
+            settings: {
+              quality: settings.quality,
+              outputFormat: settings.outputFormat,
+              resizeOption: settings.resizeOption,
+              compressionAlgorithm: settings.compressionAlgorithm || 'standard',
+              webOptimization: settings.webOptimization || 'optimize-web'
+            }
+          };
+
+          console.log(`${outputFormat.toUpperCase()} compression result for ${file.originalname}:`, {
+            size: `${originalStats.size} -> ${compressedStats.size}`,
+            ratio: `${compressionRatio}%`,
+            quality: result?.qualityUsed || settings.quality // Use actual quality used
+          });
+          results.push(resultData);
+          
+        } catch (jobError) {
+  console.error(`Error processing job for ${file.originalname}:`, jobError);
+
+  // Clean up file on job error
+  try {
+    if (file.path) {
       await fs.unlink(file.path).catch(() => {});
     }
-
-    console.log(`✅ Processed ${results.length} files`);
-    return res.json({ success: true, results });
-
-  } catch (error: any) {
-    console.error('Compress error:', error);
-    return res.status(500).json({ error: error.message });
+  } catch (e) {
+    // Ignore cleanup errors
   }
+          // Update job with error - wrap in try/catch to prevent secondary crashes
+          try {
+            await storage.updateCompressionJob(job.id, {
+              status: "failed",
+              errorMessage: jobError instanceof Error ? jobError.message : "Compression failed",
+            });
+          } catch (dbError) {
+            console.error(`Database update failed for failed job ${job.id}:`, dbError);
+          }
+          
+          results.push({
+            id: job.id,
+            originalName: file.originalname,
+            error: "Compression failed"
+          });
+        }
+      }
+      
+      // Clean up original uploaded files (only after processing all formats)
+      const processedFiles = new Set();
+      for (const { file } of jobs) {
+        if (!processedFiles.has(file.path)) {
+          try {
+            await fs.unlink(file.path);
+            processedFiles.add(file.path);
+          } catch (unlinkError) {
+            console.log(`Could not clean up ${file.path}:`, unlinkError);
+          }
+        }
+      }
+      
+      // Track usage for successful compressions using DualUsageTracker
+      const successfulJobs = results.filter(r => !r.error);
+      if (successfulJobs.length > 0) {
+        // Record each successful operation with DualUsageTracker
+        for (const result of successfulJobs) {
+          try {
+            console.log(`🔧 Recording operation: ${result.originalName} (${result.originalSize} bytes) on page ${pageIdentifier}`);
+            await dualTracker.recordOperation(result.originalName, result.originalSize, pageIdentifier);
+            console.log(`✅ Operation recorded successfully for ${result.originalName}`);
+          } catch (recordError) {
+            console.error(`❌ Failed to record operation for ${result.originalName}:`, recordError);
+          }
+        }
+        
+        console.log(`✅ Recorded ${successfulJobs.length} successful operations via DualUsageTracker`);
+      }
+      
+      // Generate batch ID and store file list for ZIP download
+      const batchId = randomUUID();
+      const successfulFiles = results
+        .filter(r => !r.error && r.compressedFileName)
+        .map(r => r.compressedFileName);
+      // ADD THESE DEBUG LOGS HERE:
+console.log(`🔍 Total results: ${results.length}`);
+console.log(`🔍 Successful jobs: ${successfulJobs.length}`);
+console.log(`🔍 Results array:`, JSON.stringify(results, null, 2));
+
+if (successfulJobs.length > 0) {
+  // Record each successful operation with DualUsageTracker
+  for (const result of successfulJobs) {
+    try {
+      console.log(`🔧 DualTracker info: userId=${userId}, sessionId=${sessionId}, userType=${userType}`);
+      console.log(`🔧 Recording operation: ${result.originalName} (${result.originalSize} bytes) on page ${pageIdentifier}`);
+      await dualTracker.recordOperation(result.originalName, result.originalSize, pageIdentifier);
+      console.log(`✅ Operation recorded successfully for ${result.originalName}`);
+    } catch (recordError) {
+      console.error(`❌ Failed to record operation for ${result.originalName}:`, recordError);
+    }
+  }
+  
+  console.log(`✅ Recorded ${successfulJobs.length} successful operations via DualUsageTracker`);
+} else {
+  console.log(`⚠️ No successful jobs to record!`);
+}
+      // Store batch info in memory (you could use Redis in production)
+      global.batchFiles = global.batchFiles || {};
+      global.batchFiles[batchId] = {
+        files: successfulFiles,
+        timestamp: Date.now()
+      };
+      
+      res.json({ 
+        results,
+        batchId: batchId,
+        batchDownloadUrl: `/api/download-zip/${batchId}`
+      });
+      
+    } catch (error) {
+  console.error('Compression error:', error);
+
+  // Clean up uploaded files on error
+  try {
+    const files = req.files as Express.Multer.File[];
+    if (files && files.length > 0) {
+      for (const file of files) {
+        if (file.path) {
+          await fs.unlink(file.path).catch(() => {});
+          console.log(`🗑️ Cleaned up file after error: ${file.originalname}`);
+        }
+      }
+    }
+  } catch (cleanupError) {
+    console.log('Could not clean up files after error:', cleanupError.message);
+  }
+
+  res.status(500).json({
+    error: 'Compression failed',
+    message: error.message
+  });
+}  // ← ADD THIS CLOSING BRACE
 });
-// ORPHANED: 
-// ORPHANED:       // ============================================================================
-// ORPHANED:       // ADD THIS ENTIRE SECTION HERE (AFTER LINE 1295)
-// ORPHANED:       // ============================================================================
-// ORPHANED:       
-// ORPHANED:       // Determine userType from pageIdentifier for usage tracking
-// ORPHANED:       let userType = 'anonymous';
-// ORPHANED:       
-// ORPHANED:       if (user && user.id) {
-// ORPHANED:         // Authenticated user - get subscription tier from database
-// ORPHANED:         try {
-// ORPHANED:           const userData = await storage.getUser(user.id);
-// ORPHANED:           userType = userData?.subscriptionTier || 'free';
-// ORPHANED:           console.log('✅ Authenticated user, userType from DB:', userType);
-// ORPHANED:         } catch (err) {
-// ORPHANED:           console.error('⚠️ Failed to get user subscription:', err);
-// ORPHANED:           userType = 'free';
-// ORPHANED:         }
-// ORPHANED:       } else {
-// ORPHANED:         // Not authenticated - infer from pageIdentifier
-// ORPHANED:         console.log('🔍 Not authenticated, inferring userType from pageIdentifier:', pageIdentifier);
-// ORPHANED:         
-// ORPHANED:         if (pageIdentifier === 'premium-29' || 
-// ORPHANED:             pageIdentifier.includes('premium') || 
-// ORPHANED:             pageIdentifier.includes('starter') ||
-// ORPHANED:             pageIdentifier === 'paid') {
-// ORPHANED:           userType = 'premium';
-// ORPHANED:           console.log('✅ SET userType = PREMIUM (75MB limit)');
-// ORPHANED:         } else if (pageIdentifier.includes('pro')) {
-// ORPHANED:           userType = 'pro';
-// ORPHANED:           console.log('✅ SET userType = PRO (150MB limit)');
-// ORPHANED:         } else if (pageIdentifier.includes('business') || pageIdentifier.includes('enterprise')) {
-// ORPHANED:           userType = 'business';
-// ORPHANED:           console.log('✅ SET userType = BUSINESS (200MB limit)');
-// ORPHANED:         } else {
-// ORPHANED:           console.log('⚠️ Free/anonymous page, userType = anonymous');
-// ORPHANED:         }
-// ORPHANED:       }
-// ORPHANED:       
-// ORPHANED:       console.log('🎯 FINAL userType:', userType, '| pageIdentifier:', pageIdentifier);
-// ORPHANED:       
-// ORPHANED:       // Get client IP for tracking
-// ORPHANED:       const clientIP = req.headers['x-forwarded-for']?.toString().split(',')[0].trim() || 
-// ORPHANED:                        req.headers['x-real-ip']?.toString() || 
-// ORPHANED:                        req.socket.remoteAddress || 
-// ORPHANED:                        'unknown';
-// ORPHANED:       
-// ORPHANED:       const trackingId = user?.id || `ip_${clientIP}`;
-// ORPHANED:       const finalSessionId = sessionId || req.sessionID;
-// ORPHANED:       
-// ORPHANED:    
-// ORPHANED: 
-// ORPHANED:       console.log('🎯 FINAL userType:', userType);
-// ORPHANED:       console.log('🎯 pageIdentifier:', pageIdentifier);
-// ORPHANED:       
-// ORPHANED:       // Get client IP address for anonymous user tracking
-// ORPHANED:       
-// ORPHANED:                        req.headers['x-real-ip']?.toString() || 
-// ORPHANED:                        req.socket.remoteAddress || 
-// ORPHANED:                        'unknown';
-// ORPHANED:       
-// ORPHANED:       
-// ORPHANED:       // Check limits for each file
-// ORPHANED: for (const file of files) {
-// ORPHANED:   console.log('=== DUAL TRACKER CHECK ===');
-// ORPHANED:   console.log('File:', file.originalname);
-// ORPHANED:   console.log('Size:', file.size, 'bytes (', (file.size / 1024 / 1024).toFixed(2), 'MB)');
-// ORPHANED:   console.log('Page:', pageIdentifier);
-// ORPHANED:   
-// ORPHANED:   const canPerform = await dualTracker.canPerformOperation(file.originalname, file.size, pageIdentifier);
-// ORPHANED:   
-// ORPHANED:   console.log('Check result:', canPerform);
-// ORPHANED:   console.log('Allowed:', canPerform.allowed);
-// ORPHANED:   console.log('Reason:', canPerform.reason);
-// ORPHANED:   console.log('Usage:', canPerform.usage);
-// ORPHANED:   console.log('Limits:', canPerform.limits);
-// ORPHANED:   console.log('========================');
-// ORPHANED:   
-// ORPHANED:   if (!canPerform.allowed) {
-// ORPHANED:     return res.status(429).json({
-// ORPHANED:       error: 'Usage limit exceeded',
-// ORPHANED:       message: canPerform.reason,
-// ORPHANED:       pageIdentifier,
-// ORPHANED:       usage: canPerform.usage,
-// ORPHANED:       limits: canPerform.limits
-// ORPHANED:     });
-// ORPHANED:   }
-// ORPHANED: }
-// ORPHANED: 
-// ORPHANED:       console.log(`✅ DualUsageTracker check passed for ${pageIdentifier}: ${files.length} operations allowed`);
-// ORPHANED: 
-// ORPHANED:       // Apply Free user optimizations for speed
-// ORPHANED:       if (!user) { // Guest/Free user
-// ORPHANED:         // Maintain quality but optimize algorithm for speed instead
-// ORPHANED:         settings.compressionAlgorithm = 'standard'; // Use standard instead of aggressive compression
-// ORPHANED:       }
-// ORPHANED: 
-// ORPHANED:       const results = [];
-// ORPHANED:       const jobs = [];
-// ORPHANED:       
-// ORPHANED:       console.log("Compression settings received:", settings);
-// ORPHANED:       console.log("Files to process:", files.map(f => ({ name: f.originalname, ext: f.originalname.split('.').pop() })));
-// ORPHANED:       console.log("=== PROCESSING FILES WITH SHARP + IMAGEMAGICK ===");
-// ORPHANED:       
-// ORPHANED:       // Create database jobs for each file and format combination
-// ORPHANED:       for (const file of files) {
-// ORPHANED:         // Handle multiple output formats
-// ORPHANED:         const fileExtension = file.originalname.split('.').pop()?.toLowerCase() || 'jpg';
-// ORPHANED:         console.log(`File: ${file.originalname}, extension: ${fileExtension}, settings.outputFormat: ${settings.outputFormat}`);
-// ORPHANED:         
-// ORPHANED:         let outputFormats = Array.isArray(settings.outputFormat) 
-// ORPHANED:           ? settings.outputFormat 
-// ORPHANED:           : settings.outputFormat === 'keep-original' 
-// ORPHANED:             ? [fileExtension] 
-// ORPHANED:             : [settings.outputFormat];
-// ORPHANED:             
-// ORPHANED:         console.log(`Determined outputFormats: [${outputFormats.join(', ')}]`);
-// ORPHANED: 
-// ORPHANED:         // Create a separate job for each format
-// ORPHANED:         console.log(`File: ${file.originalname}, outputFormats array: [${outputFormats.join(', ')}], settings.outputFormat: ${settings.outputFormat}`);
-// ORPHANED:         for (const outputFormat of outputFormats) {
-// ORPHANED:           console.log(`Creating compression job for user ${user?.id}, file: ${file.originalname}, format: ${outputFormat}`);
-// ORPHANED:           const job = await storage.createCompressionJob({
-// ORPHANED:             userId: user?.id || null,
-// ORPHANED:             sessionId: req.sessionID, // For guest users
-// ORPHANED:             originalFilename: file.originalname,
-// ORPHANED:             originalSize: file.size,
-// ORPHANED:             status: "pending",
-// ORPHANED:             qualityLevel: "custom",
-// ORPHANED:             resizeOption: settings.resizeOption,
-// ORPHANED:             outputFormat: outputFormat,
-// ORPHANED:             originalPath: file.path,
-// ORPHANED:             originalFormat: file.mimetype.split('/')[1], // Add required field
-// ORPHANED:             compressedSize: null,
-// ORPHANED:             compressionRatio: null,
-// ORPHANED:             errorMessage: null,
-// ORPHANED:             compressedPath: null,
-// ORPHANED:           });
-// ORPHANED:           
-// ORPHANED:           console.log(`Created job ${job.id} for user ${user?.id || 'guest'}`);
-// ORPHANED:           jobs.push({ job, file, outputFormat });
-// ORPHANED:         }
-// ORPHANED:       }
-// ORPHANED:       
-// ORPHANED:       // Process jobs and update them
-// ORPHANED:       for (const { job, file, outputFormat } of jobs) {
-// ORPHANED:         try {
-// ORPHANED:           // PNG conversion is now enabled for all users including free users
-// ORPHANED:           // Leveraging our optimized compression engine for fast processing
-// ORPHANED:           
-// ORPHANED:           // Map format names to proper file extensions
-// ORPHANED:           const getFileExtension = (format: string) => {
-// ORPHANED:             switch (format) {
-// ORPHANED:               case 'jpeg':
-// ORPHANED:               case 'jpg': return 'jpg';
-// ORPHANED:               case 'png': return 'png';
-// ORPHANED:               case 'webp': return 'webp';
-// ORPHANED:               case 'avif': return 'avif';
-// ORPHANED:               case 'tiff': return 'tiff';
-// ORPHANED:               case 'dng': return 'dng';
-// ORPHANED:               case 'cr2': return 'cr2';
-// ORPHANED:               case 'nef': return 'nef';
-// ORPHANED:               case 'arw': return 'arw';
-// ORPHANED:               case 'orf': return 'orf';
-// ORPHANED:               case 'raf': return 'raf';
-// ORPHANED:               case 'rw2': return 'rw2';
-// ORPHANED:               default: return format;
-// ORPHANED:             }
-// ORPHANED:           };
-// ORPHANED:           
-// ORPHANED:           const fileExtension = getFileExtension(outputFormat);
-// ORPHANED:           const outputPath = path.join("compressed", `${job.id}.${fileExtension}`);
-// ORPHANED:           
-// ORPHANED:           console.log(`Processing ${file.originalname} -> ${outputFormat.toUpperCase()} (parallel)`);
-// ORPHANED:           
-// ORPHANED:           // Check if this is a RAW file that needs special processing
-// ORPHANED:           const inputFormat = getFileFormat(file.originalname);
-// ORPHANED:           const fileExtName = file.originalname.split('.').pop()?.toLowerCase() || '';
-// ORPHANED:           const isRawFile = ['dng', 'cr2', 'nef', 'arw', 'orf', 'raf', 'rw2'].includes(fileExtName);
-// ORPHANED:           console.log(`File: ${file.originalname}, inputFormat: ${inputFormat}, fileExt: ${fileExtName}, isRawFile: ${isRawFile}`);
-// ORPHANED:           
-// ORPHANED:           let result;
-// ORPHANED:           if (isRawFile || inputFormat === 'svg' || (inputFormat === 'svg' && outputFormat === 'tiff')) {
-// ORPHANED:             // Use the EXACT same engine as /professional-formats/convert for RAW files and SVG conversions
-// ORPHANED:             // SVG needs special handling for rasterization, especially when converting to TIFF
-// ORPHANED:             console.log(`Using professional formats conversion engine for ${file.originalname} -> ${outputFormat}`);
-// ORPHANED:             try {
-// ORPHANED:               // Calculate resize dimensions if needed  
-// ORPHANED:               // Handle both premium page format (resizeOption) and CR2 page format (direct resize parameter)
-// ORPHANED:               const shouldResize = (settings.resizeOption === 'resize-percentage' && settings.resizePercentage && settings.resizePercentage < 100) ||
-// ORPHANED:                                    (settings.resize && settings.resizePercentage && settings.resizePercentage < 100);
-// ORPHANED:               
-// ORPHANED:               result = await processSpecialFormatConversion(
-// ORPHANED:                 file.path,
-// ORPHANED:                 outputPath,
-// ORPHANED:                 isRawFile ? 'raw' : fileExtName, // Professional formats engine expects 'raw' for all RAW files
-// ORPHANED:                 outputFormat,
-// ORPHANED:                 {
-// ORPHANED:                   quality: settings.quality,
-// ORPHANED:                   resize: shouldResize,
-// ORPHANED:                   resizePercentage: settings.resizePercentage,
-// ORPHANED:                   width: 0, // Will be calculated dynamically from actual image dimensions
-// ORPHANED:                   height: 0, // Will be calculated dynamically from actual image dimensions
-// ORPHANED:                   maintainAspect: true
-// ORPHANED:                 }
-// ORPHANED:               );
-// ORPHANED:               console.log(`RAW conversion result:`, result);
-// ORPHANED:             } catch (error) {
-// ORPHANED:               console.error(`RAW conversion failed for ${file.originalname}:`, error);
-// ORPHANED:               throw error; // Re-throw to be caught by the outer error handler
-// ORPHANED:             }
-// ORPHANED:           } else {
-// ORPHANED:             // Use Sharp for standard image formats (JPEG, PNG, WEBP, etc.) - much faster
-// ORPHANED:             let sharpOperation = sharp(file.path);
-// ORPHANED:             
-// ORPHANED:             // Apply resize if specified
-// ORPHANED:             if (settings.resizeOption === 'resize-percentage' && settings.resizePercentage && settings.resizePercentage < 100) {
-// ORPHANED:               const metadata = await sharpOperation.metadata();
-// ORPHANED:               console.log(`Original dimensions: ${metadata.width}x${metadata.height}, Resize to: ${settings.resizePercentage}%`);
-// ORPHANED:               if (metadata.width && metadata.height) {
-// ORPHANED:                 const targetWidth = Math.round(metadata.width * (settings.resizePercentage / 100));
-// ORPHANED:                 const targetHeight = Math.round(metadata.height * (settings.resizePercentage / 100));
-// ORPHANED:                 console.log(`Target dimensions: ${targetWidth}x${targetHeight}`);
-// ORPHANED:                 sharpOperation = sharpOperation.resize(targetWidth, targetHeight, {
-// ORPHANED:                   fit: 'inside',
-// ORPHANED:                   withoutEnlargement: true
-// ORPHANED:                 });
-// ORPHANED:               }
-// ORPHANED:             }
-// ORPHANED:             
-// ORPHANED:             // CRITICAL FIX: Handle TIFF compression properly with LZW
-// ORPHANED:             const formatOptions: any = {
-// ORPHANED:                 quality: settings.quality,
-// ORPHANED:                 ...(outputFormat === 'png' && { compressionLevel: 8 }),
-// ORPHANED:                 ...(outputFormat === 'webp' && { effort: 4 }),
-// ORPHANED:                 ...(outputFormat === 'avif' && { effort: 2 }), // Faster AVIF processing
-// ORPHANED:                 ...(outputFormat === 'tiff' && { 
-// ORPHANED:                   compression: 'lzw', // LZW compression for TIFF
-// ORPHANED:                   predictor: 'horizontal', // Better compression for photos
-// ORPHANED:                   quality: settings.quality // Quality setting for TIFF
-// ORPHANED:                 })
-// ORPHANED:               };
-// ORPHANED:             
-// ORPHANED:             console.log(`🖼️ Sharp compression: ${file.originalname} -> ${outputFormat} with options:`, formatOptions);
-// ORPHANED:             sharpOperation = sharpOperation.toFormat(outputFormat as keyof sharp.FormatEnum, formatOptions)
-// ORPHANED:               .toFile(outputPath);
-// ORPHANED:             
-// ORPHANED:             // Apply 30-second timeout
-// ORPHANED:             await Promise.race([
-// ORPHANED:               sharpOperation,
-// ORPHANED:               new Promise((_, reject) => 
-// ORPHANED:                 setTimeout(() => reject(new Error(`Processing timeout after 30 seconds for ${outputFormat}`)), 30000)
-// ORPHANED:               )
-// ORPHANED:             ]);
-// ORPHANED:             
-// ORPHANED:             const stats = await fs.stat(outputPath);
-// ORPHANED:             result = { success: true, outputSize: stats.size };
-// ORPHANED:           }
-// ORPHANED:           
-// ORPHANED:           // Get file stats - enhanced validation for RAW files
-// ORPHANED:           const originalStats = await fs.stat(file.path);
-// ORPHANED:           
-// ORPHANED:           // Check if output file was actually created and has reasonable size
-// ORPHANED:           const outputExists = await fs.access(outputPath).then(() => true).catch(() => false);
-// ORPHANED:           if (!outputExists) {
-// ORPHANED:             throw new Error(`Output file was not created: ${outputPath}`);
-// ORPHANED:           }
-// ORPHANED:           
-// ORPHANED:           const compressedStats = await fs.stat(outputPath);
-// ORPHANED:           
-// ORPHANED:           // CRITICAL: Check for suspiciously small files (likely conversion failures)
-// ORPHANED:           if (compressedStats.size < 100) { // Less than 100 bytes is likely a failure
-// ORPHANED:             console.error(`⚠️  Suspiciously small output file: ${compressedStats.size} bytes for ${file.originalname}`);
-// ORPHANED:             console.error(`Original size: ${originalStats.size} bytes`);
-// ORPHANED:             console.error(`Output path: ${outputPath}`);
-// ORPHANED:             
-// ORPHANED:             // For RAW files, this is likely a dcraw failure
-// ORPHANED:             if (isRawFile) {
-// ORPHANED:               throw new Error(`RAW conversion failed: Output file too small (${compressedStats.size} bytes). Check dcraw.js installation.`);
-// ORPHANED:             }
-// ORPHANED:           }
-// ORPHANED:           
-// ORPHANED:           // CRITICAL: Ensure file sizes are valid numbers
-// ORPHANED:           const originalSize = originalStats.size && !isNaN(originalStats.size) && originalStats.size > 0 ? originalStats.size : 1;
-// ORPHANED:           const compressedSize = compressedStats.size && !isNaN(compressedStats.size) && compressedStats.size > 0 ? compressedStats.size : 1;
-// ORPHANED:           
-// ORPHANED:           // Calculate compression ratio with validation - prevent NaN
-// ORPHANED:           let compressionRatio = 0;
-// ORPHANED:           if (originalSize > 0 && compressedSize > 0) {
-// ORPHANED:             compressionRatio = Math.round((1 - compressedSize / originalSize) * 100);
-// ORPHANED:             // Ensure compressionRatio is valid
-// ORPHANED:             if (isNaN(compressionRatio) || !isFinite(compressionRatio)) {
-// ORPHANED:               compressionRatio = 0;
-// ORPHANED:             }
-// ORPHANED:           }
-// ORPHANED:           
-// ORPHANED:           console.log(`📊 File stats for ${file.originalname}:`, {
-// ORPHANED:             originalSize,
-// ORPHANED:             compressedSize,
-// ORPHANED:             compressionRatio,
-// ORPHANED:             isRawFile,
-// ORPHANED:             outputFormat
-// ORPHANED:           });
-// ORPHANED:           
-// ORPHANED:           // Update job with compression results - wrap in try/catch to prevent database crashes
-// ORPHANED:           try {
-// ORPHANED:             await storage.updateCompressionJob(job.id, {
-// ORPHANED:               status: "completed",
-// ORPHANED:               compressedPath: outputPath,
-// ORPHANED:               compressedSize: compressedSize, // Use validated size
-// ORPHANED:               compressionRatio: compressionRatio, // Use validated ratio
-// ORPHANED:               outputFormat: outputFormat, // Store the actual output format
-// ORPHANED:             });
-// ORPHANED:           } catch (dbError) {
-// ORPHANED:             console.error(`Database update failed for job ${job.id}:`, dbError);
-// ORPHANED:             // Continue processing even if database update fails
-// ORPHANED:           }
-// ORPHANED: 
-// ORPHANED:           const resultData = {
-// ORPHANED:             id: job.id, // Use actual job ID
-// ORPHANED:             originalName: file.originalname,
-// ORPHANED:             originalSize: originalSize, // Use validated size
-// ORPHANED:             compressedSize: compressedSize, // Use validated size
-// ORPHANED:             compressionRatio: compressionRatio, // Use validated ratio
-// ORPHANED:             downloadUrl: `/api/download/${job.id}`,
-// ORPHANED:             originalFormat: file.mimetype.split('/')[1].toUpperCase(),
-// ORPHANED:             outputFormat: outputFormat.toUpperCase(),
-// ORPHANED:             wasConverted: settings.outputFormat !== 'keep-original',
-// ORPHANED:             compressedFileName: path.basename(outputPath),
-// ORPHANED:             settings: {
-// ORPHANED:               quality: settings.quality,
-// ORPHANED:               outputFormat: settings.outputFormat,
-// ORPHANED:               resizeOption: settings.resizeOption,
-// ORPHANED:               compressionAlgorithm: settings.compressionAlgorithm || 'standard',
-// ORPHANED:               webOptimization: settings.webOptimization || 'optimize-web'
-// ORPHANED:             }
-// ORPHANED:           };
-// ORPHANED: 
-// ORPHANED:           console.log(`${outputFormat.toUpperCase()} compression result for ${file.originalname}:`, {
-// ORPHANED:             size: `${originalStats.size} -> ${compressedStats.size}`,
-// ORPHANED:             ratio: `${compressionRatio}%`,
-// ORPHANED:             quality: result?.qualityUsed || settings.quality // Use actual quality used
-// ORPHANED:           });
-// ORPHANED:           results.push(resultData);
-// ORPHANED:           
-// ORPHANED:         } catch (jobError) {
-// ORPHANED:   console.error(`Error processing job for ${file.originalname}:`, jobError);
-// ORPHANED: 
-// ORPHANED:   // Clean up file on job error
-// ORPHANED:   try {
-// ORPHANED:     if (file.path) {
-// ORPHANED:       await fs.unlink(file.path).catch(() => {});
-// ORPHANED:     }
-// ORPHANED:   } catch (e) {
-// ORPHANED:     // Ignore cleanup errors
-// ORPHANED:   }
-// ORPHANED:           // Update job with error - wrap in try/catch to prevent secondary crashes
-// ORPHANED:           try {
-// ORPHANED:             await storage.updateCompressionJob(job.id, {
-// ORPHANED:               status: "failed",
-// ORPHANED:               errorMessage: jobError instanceof Error ? jobError.message : "Compression failed",
-// ORPHANED:             });
-// ORPHANED:           } catch (dbError) {
-// ORPHANED:             console.error(`Database update failed for failed job ${job.id}:`, dbError);
-// ORPHANED:           }
-// ORPHANED:           
-// ORPHANED:           results.push({
-// ORPHANED:             id: job.id,
-// ORPHANED:             originalName: file.originalname,
-// ORPHANED:             error: "Compression failed"
-// ORPHANED:           });
-// ORPHANED:         }
-// ORPHANED:       }
-// ORPHANED:       
-// ORPHANED:       // Clean up original uploaded files (only after processing all formats)
-// ORPHANED:       const processedFiles = new Set();
-// ORPHANED:       for (const { file } of jobs) {
-// ORPHANED:         if (!processedFiles.has(file.path)) {
-// ORPHANED:           try {
-// ORPHANED:             await fs.unlink(file.path);
-// ORPHANED:             processedFiles.add(file.path);
-// ORPHANED:           } catch (unlinkError) {
-// ORPHANED:             console.log(`Could not clean up ${file.path}:`, unlinkError);
-// ORPHANED:           }
-// ORPHANED:         }
-// ORPHANED:       }
-// ORPHANED:       
-// ORPHANED:       // Track usage for successful compressions using DualUsageTracker
-// ORPHANED:       const successfulJobs = results.filter(r => !r.error);
-// ORPHANED:       if (successfulJobs.length > 0) {
-// ORPHANED:         // Record each successful operation with DualUsageTracker
-// ORPHANED:         for (const result of successfulJobs) {
-// ORPHANED:           try {
-// ORPHANED:             console.log(`🔧 Recording operation: ${result.originalName} (${result.originalSize} bytes) on page ${pageIdentifier}`);
-// ORPHANED:             await dualTracker.recordOperation(result.originalName, result.originalSize, pageIdentifier);
-// ORPHANED:             console.log(`✅ Operation recorded successfully for ${result.originalName}`);
-// ORPHANED:           } catch (recordError) {
-// ORPHANED:             console.error(`❌ Failed to record operation for ${result.originalName}:`, recordError);
-// ORPHANED:           }
-// ORPHANED:         }
-// ORPHANED:         
-// ORPHANED:         console.log(`✅ Recorded ${successfulJobs.length} successful operations via DualUsageTracker`);
-// ORPHANED:       }
-// ORPHANED:       
-// ORPHANED:       // Generate batch ID and store file list for ZIP download
-// ORPHANED:       const batchId = randomUUID();
-// ORPHANED:       const successfulFiles = results
-// ORPHANED:         .filter(r => !r.error && r.compressedFileName)
-// ORPHANED:         .map(r => r.compressedFileName);
-// ORPHANED:       // ADD THESE DEBUG LOGS HERE:
-// ORPHANED: console.log(`🔍 Total results: ${results.length}`);
-// ORPHANED: console.log(`🔍 Successful jobs: ${successfulJobs.length}`);
-// ORPHANED: console.log(`🔍 Results array:`, JSON.stringify(results, null, 2));
-// ORPHANED: 
-// ORPHANED:       if (successfulJobs.length > 0) {
-// ORPHANED:         // Record each successful operation with DualUsageTracker
-// ORPHANED:         for (const result of successfulJobs) {
-// ORPHANED:           try {
-// ORPHANED:             console.log(`🔧 DualTracker info: userId=${userId}, sessionId=${sessionId}, userType=${userType}`);
-// ORPHANED:             console.log(`🔧 Recording operation: ${result.originalName} (${result.originalSize} bytes) on page ${pageIdentifier}`);
-// ORPHANED:             await dualTracker.recordOperation(result.originalName, result.originalSize, pageIdentifier);
-// ORPHANED:             console.log(`✅ Operation recorded successfully for ${result.originalName}`);
-// ORPHANED:           } catch (recordError) {
-// ORPHANED:             console.error(`❌ Failed to record operation for ${result.originalName}:`, recordError);
-// ORPHANED:           }
-// ORPHANED:         }
-// ORPHANED: 
-// ORPHANED:         console.log(`✅ Recorded ${successfulJobs.length} successful operations via DualUsageTracker`);
-// ORPHANED:       } else {
-// ORPHANED:         console.log(`⚠️ No successful jobs to record!`);
-// ORPHANED:       }
-// ORPHANED: 
-// ORPHANED:       // Store batch info in memory (you could use Redis in production)
-// ORPHANED:       global.batchFiles = global.batchFiles || {};
-// ORPHANED:       global.batchFiles[batchId] = {
-// ORPHANED:         files: successfulFiles,
-// ORPHANED:         timestamp: Date.now()
-// ORPHANED:       };
-// ORPHANED: 
-// ORPHANED:       res.json({
-// ORPHANED:         results,
-// ORPHANED:         batchId: batchId,
-// ORPHANED:         batchDownloadUrl: `/api/download-zip/${batchId}`
-// ORPHANED:       });
-// ORPHANED: 
-// ORPHANED:     } catch (error) {
-// ORPHANED:       console.error('Compression error:', error);
-// ORPHANED: 
-// ORPHANED:       // Clean up uploaded files on error
-// ORPHANED:       try {
-// ORPHANED:         const files = req.files as Express.Multer.File[];
-// ORPHANED:         if (files && files.length > 0) {
-// ORPHANED:           for (const file of files) {
-// ORPHANED:             if (file.path) {
-// ORPHANED:               await fs.unlink(file.path).catch(() => {});
-// ORPHANED:               console.log(`🗑️ Cleaned up file after error: ${file.originalname}`);
-// ORPHANED:             }
-// ORPHANED:           }
-// ORPHANED:         }
-// ORPHANED:       } catch (cleanupError) {
-// ORPHANED:         console.log('Could not clean up files after error:', cleanupError.message);
-// ORPHANED:       }
-// ORPHANED: 
-// ORPHANED:       res.status(500).json({
-// ORPHANED:         error: 'Compression failed',
-// ORPHANED:         message: error.message
-// ORPHANED:       });
-// ORPHANED:     }
-// ORPHANED:   });
 
   // Download endpoint for compressed files by job ID
   app.get("/api/download/compressed/:jobId", async (req, res) => {
