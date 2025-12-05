@@ -998,14 +998,14 @@ export default function ConversionPage() {
                 className="flex-1 text-xs"
                 onClick={() => window.location.href = '/checkout?plan=starter'}
               >
-                Try $1
+                Try $9
               </Button>
             </div>
           </Card>
         </div>
       )}
 
-{/* Test Premium for $1 Section */}
+{/* Test Premium for $9 Section */}
       <section className="py-16 bg-gradient-to-r from-gray-800 via-gray-900 to-gray-800 relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 text-center relative">
           
@@ -1056,22 +1056,22 @@ export default function ConversionPage() {
                   <div className="w-12 h-12 bg-brand-teal/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Zap className="w-6 h-6 text-brand-teal" />
                   </div>
-                  <h3 className="font-bold text-lg sm:text-xl lg:text-2xl text-black dark:text-white mb-2">Unlimited operations</h3>
-                  <p className="text-base sm:text-lg font-semibold text-black dark:text-gray-200">No monthly limits on conversions</p>
+                  <h3 className="font-bold text-lg sm:text-xl lg:text-2xl text-black dark:text-black mb-2">Unlimited operations</h3>
+                  <p className="text-base sm:text-lg font-semibold text-black dark:text-black">No monthly limits on conversions</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-brand-gold/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Crown className="w-6 h-6 text-brand-gold" />
                   </div>
-                  <h3 className="font-bold text-lg sm:text-xl lg:text-2xl text-black dark:text-white mb-2">Up to 200MB files</h3>
-                  <p className="text-base sm:text-lg font-semibold text-black dark:text-gray-200">Starter: 75MB, Pro: 150MB, Business: 200MB</p>
+                  <h3 className="font-bold text-lg sm:text-xl lg:text-2xl text-black dark:text-black mb-2">Up to 200MB files</h3>
+                  <p className="text-base sm:text-lg font-semibold text-black dark:text-black">Starter: 75MB, Pro: 150MB, Business: 200MB</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Shield className="w-6 h-6 text-red-500" />
                   </div>
-                  <h3 className="font-bold text-lg sm:text-xl lg:text-2xl text-black dark:text-white mb-2">Monthly or Annual</h3>
-                  <p className="text-base sm:text-lg font-semibold text-black dark:text-gray-200">Save up to 51% with annual plans</p>
+                  <h3 className="font-bold text-lg sm:text-xl lg:text-2xl text-black dark:text-black mb-2">Monthly or Annual</h3>
+                  <p className="text-base sm:text-lg font-semibold text-black dark:text-black">Save up to 51% with annual plans</p>
                 </div>
               </div>
               
@@ -1146,26 +1146,6 @@ export default function ConversionPage() {
               </p>
             </div>
           </div>
-
-          {/* Detailed sections from optimized content */}
-          {pageContent && pageContent.sections && pageContent.sections.length > 0 && (
-            <div className="mt-16 max-w-5xl mx-auto text-left space-y-8">
-              {pageContent.sections.map((section, idx) => (
-                <div
-                  key={idx}
-                  className="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl shadow-sm"
-                >
-                  <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
-                    {section.title}
-                  </h3>
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-                    {section.body}
-                  </p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
       </section>
       {/* ====== END SEO BLOCK ====== */}
 
