@@ -4705,21 +4705,10 @@ return res.json({
             throw new Error('Empty file buffer');
           }
           
-          // Compress the image with optimized settings for speed
-const compressedBuffer = await sharp(fileBuffer, {
-  sequentialRead: true, // Better performance for sequential reading
-  limitInputPixels: 268402689 // Safety limit (~16k x 16k)
-})
-  .jpeg({ 
-    quality: GUEST_QUALITY,
-    mozjpeg: false, // Faster than mozjpeg (default, but explicit)
-    progressive: false, // Disable progressive for 20-30% speed increase
-    optimizeScans: false, // Skip scan optimization for speed
-    trellisQuantisation: false, // Skip advanced quantisation
-    overshootDeringing: false, // Skip deringing
-    optimizeQuantizationTable: false // Skip table optimization
-  })
-  .toBuffer();
+          // Compress the image
+          const compressedBuffer = await sharp(fileBuffer)
+            .jpeg({ quality: GUEST_QUALITY, progressive: true })
+            .toBuffer();
 
           // Store the compressed file temporarily (in memory for guests)
           storage.setGuestFile(jobId, compressedBuffer, file.originalname);
@@ -5861,11 +5850,12 @@ async function compressImage(
       }
     }
 
-   let sharpInstance = sharp(file.path, {
-  unlimited: true,
-  sequentialRead: true, // ⚡ Better sequential performance
-  limitInputPixels: 268402689 // Safety limit (~16k x 16k)
-});
+    // Set up Sharp pipeline with advanced options
+    let sharpInstance = sharp(file.path, {
+      // Enable advanced processing
+      unlimited: true,
+      sequentialRead: true
+    });
 
     // Get original image metadata
     const metadata = await sharpInstance.metadata();
@@ -5931,12 +5921,13 @@ async function compressImage(
     if (options.outputFormat === "png") {
       // PNG compression with optimization
       const pngOptions: any = {
-  compressionLevel: 6, // ⚡ Fixed at 6 for speed (2-3x faster than 9)
-  adaptiveFiltering: false, // ⚡ Disable for speed
-  palette: quality < 80,
-  effort: 1, // ⚡ Minimum effort (was 4-10)
-  quality: quality >= 95 ? undefined : quality
-};
+        compressionLevel: options.pngCompressionLevel || 6, // 0-9, 6 is default
+        quality: quality >= 95 ? undefined : quality, // Only use quality for lossy PNG
+        effort: options.pngOptimization === 'size' ? 10 : 4, // Higher effort for smaller files
+        palette: quality < 80, // Use palette for aggressive compression
+        colors: quality < 60 ? 64 : quality < 80 ? 128 : 256, // Reduce colors for smaller files
+        dither: 1.0 // Add dithering to reduce banding
+      };
       
       // Progressive PNG for larger images
       if (metadata.width && metadata.height && metadata.width * metadata.height > 500000) {
@@ -5973,13 +5964,13 @@ async function compressImage(
     webpEffort = 4; // Default to faster setting for safety
   }
   
-sharpInstance = sharpInstance.webp({
-  quality,
-  effort: Math.min(webpEffort, 3), // ⚡ Cap at 3 (was up to 6)
-  lossless: quality >= 95,
-  nearLossless: false, // ⚡ Disable for speed
-  smartSubsample: false // ⚡ Disable for speed
-});
+  sharpInstance = sharpInstance.webp({
+    quality,
+    effort: webpEffort, // Dynamic effort based on file size (was always 6)
+    lossless: quality >= 95,
+    nearLossless: quality >= 90 && quality < 95,
+    smartSubsample: true
+  });
     } else if (options.outputFormat === "avif") {
   // AVIF optimization: Check file size and adjust settings
   let avifEffort = 6;  // Default effort
@@ -6009,23 +6000,22 @@ sharpInstance = sharpInstance.webp({
     console.log('⚠️ Could not check file size, using default AVIF settings');
   }
   
-sharpInstance = sharpInstance.avif({
-  quality: avifQuality,
-  effort: Math.min(avifEffort, 2), // ⚡ Cap at 2 (was up to 6)
-  lossless: false, // ⚡ Always false for speed
-  chromaSubsampling: '4:2:0'
-});
+  sharpInstance = sharpInstance.avif({
+    quality: avifQuality,
+    effort: avifEffort, // Dynamic effort based on file size
+    lossless: false, // Disable lossless for speed
+    chromaSubsampling: '4:2:0' // Always 4:2:0 for speed
+  });
     } else {
+      // JPEG compression options (optimized for fast mode)
       const jpegOptions: any = {
-  quality,
-  mozjpeg: false, // ⚡ Always false for speed (20-30% faster)
-  progressive: false, // ⚡ Always false for speed (20-30% faster)
-  optimiseScans: false, // ⚡ Skip optimization
-  optimizeCoding: false, // ⚡ Skip coding optimization
-  trellisQuantisation: false, // ⚡ Skip trellis
-  overshootDeringing: false, // ⚡ Skip deringing
-  optimizeQuantizationTable: false // ⚡ Skip table optimization
-};
+        quality,
+        mozjpeg: options.fastMode ? false : (options.compressionAlgorithm === "mozjpeg"), // Skip MozJPEG for speed
+        progressive: options.fastMode ? false : (options.progressiveJpeg || options.compressionAlgorithm === "progressive"),
+        optimiseScans: options.fastMode ? false : options.optimizeScans,
+        overshootDeringing: true, // Reduce ringing artifacts
+        trellisQuantisation: options.compressionAlgorithm === "mozjpeg"
+      };
       
       // Advanced JPEG features
       if (options.arithmeticCoding && options.compressionAlgorithm === "mozjpeg") {
@@ -6325,20 +6315,20 @@ async function processSpecialFormatConversion(
       
       switch (outputFormat) {
         case 'jpeg':
-  convertCommand = `convert "${tempTiffPath}" -quality ${options.quality} -strip ${resizeParam} "${outputPath}"`;
-  break;
+          convertCommand = `convert "${tempTiffPath}" -quality ${options.quality} ${resizeParam} "${outputPath}"`;
+          break;
         case 'png':
-  convertCommand = `convert "${tempTiffPath}" -define png:compression-level=6 -define png:compression-strategy=1 ${resizeParam} "${outputPath}"`;
-  break;
+          convertCommand = `convert "${tempTiffPath}" -define png:compression-level=8 ${resizeParam} "${outputPath}"`;
+          break;
         case 'webp':
-  convertCommand = `convert "${tempTiffPath}" -quality ${options.quality} -define webp:method=0 ${resizeParam} "${outputPath}"`;
-  break;
+          convertCommand = `convert "${tempTiffPath}" -quality ${options.quality} ${resizeParam} "${outputPath}"`;
+          break;
         case 'tiff':
-  convertCommand = `convert "${tempTiffPath}" -compress lzw ${resizeParam} "${outputPath}"`;
-  break;
+          convertCommand = `convert "${tempTiffPath}" -compress jpeg -quality ${options.quality} ${resizeParam} "${outputPath}"`;
+          break;
         case 'avif':
-  convertCommand = `convert "${tempTiffPath}" -quality ${Math.min(options.quality, 70)} -define heic:speed=8 ${resizeParam} "${outputPath}"`;
-  break;
+          convertCommand = `convert "${tempTiffPath}" -quality ${options.quality} ${resizeParam} "${outputPath}"`;
+          break;
           
         default:
           throw new Error(`Unsupported output format: ${outputFormat}`);
@@ -6442,63 +6432,53 @@ help      // Clean up temp file after processing (we'll do this in finally block
     // Apply output format conversion
     switch (outputFormat) {
       case 'jpeg':
-  await sharpInstance
-    .jpeg({ 
-      quality: options.quality,
-      mozjpeg: false, // ⚡ Disable for speed
-      progressive: false, // ⚡ Disable for speed
-      optimizeScans: false,
-      trellisQuantisation: false,
-      overshootDeringing: false,
-      optimizeQuantizationTable: false
-    })
-    .toFile(outputPath);
-  break;
+        await sharpInstance
+          .jpeg({ 
+            quality: options.quality,
+            progressive: true,
+            mozjpeg: true
+          })
+          .toFile(outputPath);
+        break;
         
       case 'png':
-  await sharpInstance
-    .png({ 
-      compressionLevel: 6, // ⚡ 6 instead of 8
-      adaptiveFiltering: false, // ⚡ Disable for speed
-      palette: true,
-      effort: 1,
-      quality: options.quality >= 95 ? undefined : options.quality
-    })
-    .toFile(outputPath);
-  break;
+        await sharpInstance
+          .png({ 
+            quality: options.quality,
+            compressionLevel: 8,
+            adaptiveFiltering: true
+          })
+          .toFile(outputPath);
+        break;
         
       case 'webp':
-  await sharpInstance
-    .webp({ 
-      quality: options.quality,
-      effort: 2, // ⚡ 2 instead of 4
-      smartSubsample: false,
-      nearLossless: false,
-      lossless: options.quality >= 95
-    })
-    .toFile(outputPath);
-  break;
+        await sharpInstance
+          .webp({ 
+            quality: options.quality,
+            effort: 4
+          })
+          .toFile(outputPath);
+        break;
         
       case 'tiff':
-  await sharpInstance
-    .tiff({ 
-      compression: 'lzw', // ⚡ LZW is faster than JPEG
-      quality: options.quality,
-      predictor: 'horizontal'
-    })
-    .toFile(outputPath);
-  break;
+        await sharpInstance
+          .tiff({ 
+            compression: 'jpeg',
+            quality: options.quality,
+            predictor: 'horizontal'
+          })
+          .toFile(outputPath);
+        break;
         
       case 'avif':
-  await sharpInstance
-    .avif({ 
-      quality: options.quality,
-      effort: 2, // ⚡ 2 instead of 4
-      lossless: false,
-      chromaSubsampling: '4:2:0'
-    })
-    .toFile(outputPath);
-  break;
+        await sharpInstance
+          .avif({ 
+            quality: 70,  // Slightly lower quality for speed
+            effort: 4,    // 0-9, lower = faster (default is 4)
+            chromaSubsampling: '4:2:0'  // Reduces quality slightly but much faster
+          })
+          .toFile(outputPath);
+        break;
         
       default:
         throw new Error(`Unsupported output format: ${outputFormat}`);
