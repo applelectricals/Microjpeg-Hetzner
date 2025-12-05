@@ -1169,24 +1169,6 @@ export default function ConversionPage() {
       </section>
       {/* ====== END SEO BLOCK ====== */}
 
-      {/* How-To section from optimized content */}
-      {pageContent && urlParams && fromFormat && toFormat && (
-        <section className="py-16 bg-gray-50 dark:bg-gray-800">
-          <div className="max-w-4xl mx-auto px-4 text-left">
-            <h2 className="text-2xl md:text-3xl font-bold mb-6 text-gray-900 dark:text-white">
-              How to convert {fromFormat.displayName} to {toFormat.displayName}
-            </h2>
-            <ol className="list-decimal list-inside space-y-3 text-gray-700 dark:text-gray-300">
-              {pageContent.howToSteps && pageContent.howToSteps.map((step, idx) => (
-                <li key={idx} className="text-lg leading-relaxed">
-                  {step}
-                </li>
-              ))}
-            </ol>
-          </div>
-        </section>
-      )}
-
       {/* Intro Section from pageContent */}
       {pageContent?.intro && urlParams && (
         <section className="py-16 bg-gradient-to-br from-gray-50 to-white dark:from-gray-950 dark:to-gray-900">
