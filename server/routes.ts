@@ -1414,7 +1414,7 @@ const results = [];
     }
   });
 
-
+/*
 // Compression endpoint for both guest and authenticated users  
 app.post("/api/compress", checkConcurrentSessions, upload.fields([
   { name: 'files', maxCount: 20 }
@@ -1520,6 +1520,78 @@ const files = filesObj['files'] || [];
           allowedPages: ALLOWED_PAGE_IDENTIFIERS
         });
       }
+*/
+// TEMPORARY WORKING COMPRESS ENDPOINT
+app.post("/api/compress", checkConcurrentSessions, upload.any(), async (req, res) => {
+  console.log('=== SIMPLE COMPRESS ===');
+  try {
+    const files = req.files as Express.Multer.File[];
+    if (!files?.length) {
+      return res.status(400).json({ error: "No files uploaded" });
+    }
+
+    // Parse settings
+    let settings = { quality: 85, outputFormat: 'jpeg' };
+    if (req.body.settings) {
+      try {
+        const parsed = JSON.parse(req.body.settings);
+        settings = { ...settings, ...parsed };
+      } catch (e) {}
+    }
+
+    const results = [];
+
+    for (const file of files) {
+      const jobId = `job_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const ext = settings.outputFormat === 'keep-original' 
+        ? (file.originalname.split('.').pop() || 'jpg')
+        : (settings.outputFormat === 'jpeg' ? 'jpg' : settings.outputFormat);
+      const outputPath = `compressed/${jobId}.${ext}`;
+
+      console.log(`Processing: ${file.originalname} -> ${outputPath}`);
+
+      // Simple Sharp processing
+      let sharpInstance = sharp(file.path);
+      
+      const quality = settings.quality || 85;
+      
+      if (ext === 'jpg' || ext === 'jpeg') {
+        await sharpInstance.jpeg({ quality }).toFile(outputPath);
+      } else if (ext === 'png') {
+        await sharpInstance.png({ compressionLevel: 8 }).toFile(outputPath);
+      } else if (ext === 'webp') {
+        await sharpInstance.webp({ quality }).toFile(outputPath);
+      } else {
+        await sharpInstance.jpeg({ quality }).toFile(outputPath);
+      }
+
+      const originalStats = await fs.stat(file.path);
+      const compressedStats = await fs.stat(outputPath);
+      
+      results.push({
+        id: jobId,
+        originalName: file.originalname,
+        originalSize: originalStats.size,
+        compressedSize: compressedStats.size,
+        compressionRatio: Math.round((1 - compressedStats.size / originalStats.size) * 100),
+        downloadUrl: `/api/download/${jobId}`,
+        originalFormat: file.originalname.split('.').pop()?.toUpperCase() || 'JPG',
+        outputFormat: ext.toUpperCase(),
+        wasConverted: settings.outputFormat !== 'keep-original'
+      });
+
+      // Cleanup original
+      await fs.unlink(file.path).catch(() => {});
+    }
+
+    console.log(`✅ Processed ${results.length} files`);
+    return res.json({ success: true, results });
+
+  } catch (error: any) {
+    console.error('Compress error:', error);
+    return res.status(500).json({ error: error.message });
+  }
+});
 
       // ============================================================================
       // ADD THIS ENTIRE SECTION HERE (AFTER LINE 1295)
