@@ -738,91 +738,92 @@ const CONTENT: Record<string, PageContent> = {
       { label: 'PNG to WebP', href: '/convert/png-to-webp' },
       { label: 'PNG to JPG', href: '/convert/png-to-jpg' }
     ]
+  },
+
+// =========================================================================
+ // Convert WEBP TO TIFF
+// =========================================================================
+'webp-tiff': {
+  metaTitle: 'Convert WebP to TIFF Online – Fast, High-Quality WebP to TIFF Converter | MicroJPEG',
+  metaDescription:
+    'Convert WebP images to TIFF instantly with MicroJPEG. High-quality, lossless output ideal for print and archival use. Free online WebP to TIFF converter — no signup required. Works on all devices.',
+
+  headline: 'Convert WebP to TIFF Online',
+  subheadline: 'Up to 70% Smaller',
+  heroDescription:
+    'High-quality, lossless TIFF output for printing, editing, and archiving — fast, secure, and free on MicroJPEG.',
+  intro:
+    'WebP images are great for the web, but sometimes you need a high-quality, lossless format for printing, editing, or long-term storage. MicroJPEG makes this easy with a fast, reliable WebP to TIFF converter directly in your browser. No installation, no account required — just upload your WebP file and download a clean TIFF image in seconds. Explore all features at microjpeg.com and learn more at microjpeg.com/features.',
+
+  whatIsTitle: 'What Is a WebP File?',
+  whatIsContent:
+    'WebP is a modern image format designed for efficient web performance. It supports both lossy and lossless compression, allowing websites to deliver smaller file sizes without sacrificing visual quality. Because it’s optimized for browsing speed, WebP is widely used for images that need to load quickly across devices.',
+
+  whyConvertTitle: 'Why Convert WebP to TIFF?',
+  whyConvertReasons: [
+    'Maximum image quality with no compression artifacts.',
+    'Print-ready output for magazines, brochures, or professional prints.',
+    'Editable format for design tools that rely on lossless data.',
+    'Accurate color representation in pre-press workflows.',
+    'Long-term archiving where stability and retention of detail are essential.'
+  ],
+
+  howToTitle: 'How to Convert WebP to TIFF on MicroJPEG',
+  howToSteps: [
+    'Visit https://microjpeg.com/convert/webp-to-tiff.',
+    'Drag and drop your WebP file into the upload area (or select it manually).',
+    'MicroJPEG automatically processes and converts your image to TIFF.',
+    'Wait a moment for the conversion to complete.',
+    'Download your ready-to-use TIFF file.',
+    'For more tools and options, visit https://microjpeg.com/pricing or check https://microjpeg.com/api-docs.'
+  ],
+
+  comparisonTitle: 'WebP vs TIFF – Comparison Table',
+  sourceInfo: [
+    { label: 'Compression', value: 'Lossy & lossless' },
+    { label: 'Transparency', value: 'Preserved' },
+    { label: 'Best for', value: 'Websites, online images' },
+    { label: 'Color Depth', value: 'Good' },
+    { label: 'Metadata', value: 'Basic' },
+    { label: 'Quality Priority', value: 'Balanced' }
+  ],
+
+  targetInfo: [
+    { label: 'Compression', value: 'Lossless' },
+    { label: 'Transparency', value: 'Full Support' },
+    { label: 'Best for', value: 'Printing, editing, archiving' },
+    { label: 'Color Depth', value: 'Excellent' },
+    { label: 'Metadata', value: 'Advanced' },
+    { label: 'Quality Priority', value: 'Maximum' }
+  ],
+
+  features: [
+    'Lossless TIFF output with excellent detail retention.',
+    'Fast browser-based conversion with optimized performance.',
+    'Secure, temporary processing — files auto-delete after conversion.',
+    'Works for small and large WebP images.',
+    'Batch upload support for multiple images.',
+    'No installation required — fully online.',
+    'API availability for automated workflows at https://microjpeg.com/api-docs.'
+  ],
+
+  deviceSupportText: [
+    'MicroJPEG works across all major devices and browsers. Convert WebP to TIFF seamlessly on:',
+    'Windows PCs',
+    'macOS laptops',
+    'Linux systems',
+    'iPhones and iPads',
+    'Android phones and tablets',
+    'Chrome, Safari, Firefox, and Edge'
+  ],
+
+  relatedConversions: [
+    { label: 'WebP to JPG', href: '/convert/webp-to-jpg' },
+    { label: 'WebP to PNG', href: '/convert/webp-to-png' },
+    { label: 'WebP to AVIF', href: '/convert/webp-to-avif' }
+      ]
   }
 };
-
- // =========================================================================
-  // Convert WEB TO TIFF
-  // =========================================================================
-  'webp-tiff': {
-    metaTitle: 'Convert WebP to TIFF Online – Fast, High-Quality WebP to TIFF Converter | MicroJPEG'
-    metaDescription: 'Convert WebP images to TIFF instantly with MicroJPEG. High-quality, lossless output ideal for print and archival use. Free online WebP to TIFF converter — no signup required. Works on all devices.'
-    
-    headline: 'Convert WebP to TIFF Online'
-    subheadline: 'Up to 70% Smaller'
-    heroDescription: 'High-quality, lossless TIFF output for printing, editing, and archiving — fast, secure, and free on MicroJPEG.'
-    intro: 'WebP images are great for the web, but sometimes you need a high-quality, lossless format for printing, editing, or long-term storage. MicroJPEG makes this easy with a fast, reliable WebP to TIFF converter directly in your browser. No installation, no account required — just upload your WebP file and download a clean TIFF image in seconds. Explore all features at microjpeg.com and learn more at microjpeg.com/features.'
-    
-    whatIsTitle: 'What Is a WebP File?'
-    whatIsContent: 'WebP is a modern image format designed for efficient web performance. It supports both lossy and lossless compression, allowing websites to deliver smaller file sizes without sacrificing visual quality. Because it’s optimized for browsing speed, WebP is widely used for images that need to load quickly across devices.'
-    
-    whyConvertTitle: 'Why Convert WebP to TIFF?'
-    whyConvertReasons: [
-      'Converting WebP to TIFF on MicroJPEG takes only a few seconds:',
-      '1. Maximum image quality with no compression artifacts.',
-      '2. Print-ready output for magazines, brochures, or professional prints.',
-      '3. Editable format for design tools that rely on lossless data.',
-      '4. Accurate color representation in pre-press workflows.',
-      '5. Long-term archiving where stability and retention of detail are essential.',
-      '6. Long-term archiving where stability and retention of detail are essential.'
-    ]
-    
-    howToTitle: 'How to Convert WebP to TIFF on MicroJPEG'
-    howToSteps: [
-      'Converting WebP to TIFF on MicroJPEG takes only a few seconds:',
-      '1. Visit https://microjpeg.com/convert/webp-to-tiff',
-      '2. Drag and drop your WebP file into the upload area (or select it manually).',
-      '3. MicroJPEG automatically processes and converts your image to TIFF.',
-      '4. Wait a moment for the conversion to complete.',
-      '5. WDownload your ready-to-use TIFF file.',
-      'For more tools and options, see https://microjpeg.com/pricing or explore the https://microjpeg.com/api-docs.'
-      ]
-    
-    comparisonTitle: 'WebP vs TIFF – Comparison Table'
-    sourceInfo: [
-      { label: 'Compression', value: 'Lossy & lossless' },
-      { label: 'Transparency', value: 'Preserved' },
-      { label: 'Best for', value: 'Websites, online images' },
-      { label: 'Color Depth', value: 'Good'},
-      { label: 'Metadata', value: 'Basic'},
-      { label: 'Quality Priority', value: 'Balanced'}
-    ]
-    targetInfo: [
-       { label: 'Compression', value: 'Lossless' },
-      { label: 'Transparency', value:  'Large' },
-      { label: 'Best for', value: 'Printing, editing, archiving' },
-      { label: 'Color Depth', value: 'Excellent'},
-      { label: 'Metadata', value: 'Advanced'},
-      { label: 'Quality Priority', value: 'Maximum'}
-    ]
-    
-    features: [
-      'Lossless TIFF output with excellent detail retention',
-      'Fast browser-based conversion with optimized performance',
-      'Secure, temporary processing — files auto-delete after conversion',
-      'Works for small and large WebP images',
-      'Batch upload support for multiple images',
-      'No installation required — fully online',
-      'API availability for automated workflows https://microjpeg.com/api-docs'
-   ]
-    
-    deviceSupportText: [
-    'MicroJPEG works across all major devices and browsers. Convert WebP to TIFF seamlessly on:',
-                       'Windows PCs',
-                       'macOS laptops',
-                       'Linux systems',
-                       'iPhones and iPads',
-                       'Android phones and tablets',
-                       'Chrome, Safari, Firefox, and Edge'
-    ]
-
-    
-    relatedConversions: [
-      { label: 'WebP to JPG', href: '/convert/webp-to-jpg' },
-      { label: 'WebP to PNG', href: '/convert/webp-to-png' },
-      { label: 'WebP to AVIF', href: '/convert/webp-to-avif' },
-   ]
-  },
 
 // ============================================================================
 // HELPER FUNCTIONS
