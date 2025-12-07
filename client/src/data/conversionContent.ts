@@ -741,7 +741,7 @@ const CONTENT: Record<string, PageContent> = {
   },
 
 // =========================================================================
- // Convert WEBP TO TIFF
+// Convert WEBP TO TIFF
 // =========================================================================
 'webp-tiff': {
   metaTitle: 'Convert WebP to TIFF Online – Fast, High-Quality WebP to TIFF Converter | MicroJPEG',
@@ -822,8 +822,177 @@ const CONTENT: Record<string, PageContent> = {
     { label: 'WebP to PNG', href: '/convert/webp-to-png' },
     { label: 'WebP to AVIF', href: '/convert/webp-to-avif' }
       ]
+  },
+
+// =========================================================================
+// Convert WEBP TO PNG
+// =========================================================================
+'webp-to-png': {
+  metaTitle: 'Convert WebP to PNG Online – High-Quality WebP to PNG Converter | MicroJPEG',
+  metaDescription:
+    'Convert WebP images to PNG instantly with MicroJPEG. Preserve transparency and quality with a fast, free WebP to PNG converter. Works on all devices without installation.',
+
+  headline: 'Convert WebP to PNG Online',
+  subheadline: 'High-Quality PNG Output',
+  heroDescription:
+    'Convert your WebP images to PNG with full transparency and high visual fidelity — fast, free, and secure on MicroJPEG.',
+  intro:
+    'WebP is widely used for web optimization, but PNG remains one of the best formats for preserving sharp details and transparency. MicroJPEG offers a fast, online WebP to PNG converter that works directly in your browser. No installation or account is needed — just upload your WebP file and download a clean PNG instantly. Explore more tools at microjpeg.com and discover premium features at microjpeg.com/features.',
+
+  whatIsTitle: 'What Is a WebP File?',
+  whatIsContent:
+    'WebP is a next-generation image format designed for the web, offering both lossy and lossless compression with smaller file sizes. It provides fast load times and supports transparency, making it ideal for online images.',
+
+  whyConvertTitle: 'Why Convert WebP to PNG?',
+  whyConvertReasons: [
+    'PNG provides lossless quality with no compression artifacts.',
+    'PNG fully supports alpha-channel transparency.',
+    'Easier compatibility with all design tools and editing software.',
+    'Better suited for high-detail graphics, icons, and UI assets.',
+    'Ideal for exporting clean images for presentations or documents.'
+  ],
+
+  howToTitle: 'How to Convert WebP to PNG on MicroJPEG',
+  howToSteps: [
+    'Visit https://microjpeg.com/convert/webp-to-png.',
+    'Upload your WebP file by dragging it into the drop zone.',
+    'MicroJPEG instantly converts your image to PNG.',
+    'Wait briefly as the conversion completes.',
+    'Download your high-quality PNG file.',
+    'Learn more or upgrade at https://microjpeg.com/pricing or explore https://microjpeg.com/api-docs.'
+  ],
+
+  comparisonTitle: 'WebP vs PNG – Comparison Table',
+  sourceInfo: [
+    { label: 'Compression', value: 'Lossy & Lossless' },
+    { label: 'Transparency', value: 'Supported' },
+    { label: 'Best for', value: 'Web graphics, small file sizes' },
+    { label: 'Color Depth', value: 'Good' },
+    { label: 'Metadata', value: 'Basic' },
+    { label: 'Quality Priority', value: 'Balanced' }
+  ],
+
+  targetInfo: [
+    { label: 'Compression', value: 'Lossless' },
+    { label: 'Transparency', value: 'Full Alpha Support' },
+    { label: 'Best for', value: 'Design, editing, graphics export' },
+    { label: 'Color Depth', value: 'Excellent' },
+    { label: 'Metadata', value: 'Standard' },
+    { label: 'Quality Priority', value: 'Maximum' }
+  ],
+
+  features: [
+    'Preserves transparency perfectly.',
+    'Lossless PNG output for high-detail graphics.',
+    'Fast online conversion with no software required.',
+    'Secure, temporary processing — files auto-delete after conversion.',
+    'Handles both small and large WebP images.',
+    'Batch conversion supported.',
+    'API available for automation at https://microjpeg.com/api-docs.'
+  ],
+
+  deviceSupportText: [
+    'MicroJPEG works on all major browsers and devices:',
+    'Windows PCs',
+    'macOS laptops',
+    'Linux systems',
+    'iPhones and iPads',
+    'Android phones and tablets',
+    'Chrome, Safari, Firefox, and Edge'
+  ],
+
+  relatedConversions: [
+    { label: 'WebP to JPG', href: '/convert/webp-to-jpg' },
+    { label: 'WebP to TIFF', href: '/convert/webp-to-tiff' },
+    { label: 'WebP to AVIF', href: '/convert/webp-to-avif' }
+ ]
+  },
+
+// =========================================================================
+// Convert WEBP TO AVIF
+// =========================================================================
+'webp-to-avif': {
+  metaTitle: 'Convert WebP to AVIF Online – High-Compression WebP to AVIF Converter | MicroJPEG',
+  metaDescription:
+    'Convert WebP images to AVIF instantly with MicroJPEG. Get smaller file sizes with superior visual quality. Free online WebP to AVIF converter — works on all devices.',
+
+  headline: 'Convert WebP to AVIF Online',
+  subheadline: 'Superior Compression & Quality',
+  heroDescription:
+    'Transform your WebP images into highly efficient AVIF format — smaller file sizes, excellent quality, and fast online conversion using MicroJPEG.',
+  intro:
+    'AVIF is one of the most advanced modern image formats, offering exceptional compression and stunning visual quality. MicroJPEG gives you a fast, online WebP to AVIF converter that runs directly in your browser. Simply upload your WebP file and download a compact, high-quality AVIF image. Try more tools at microjpeg.com and explore advanced options at microjpeg.com/features.',
+
+  whatIsTitle: 'What Is a WebP File?',
+  whatIsContent:
+    'WebP is a modern image format created for efficient online delivery. It supports both lossy and lossless compression and offers transparency, making it ideal for fast-loading web images.',
+
+  whyConvertTitle: 'Why Convert WebP to AVIF?',
+  whyConvertReasons: [
+    'AVIF produces significantly smaller file sizes compared to WebP.',
+    'Superior visual quality, even at high compression levels.',
+    'Efficient for web developers optimizing image-heavy websites.',
+    'Supports HDR, deep color, and modern compression algorithms.',
+    'Ideal for long-term storage with minimal file size footprint.'
+  ],
+
+  howToTitle: 'How to Convert WebP to AVIF on MicroJPEG',
+  howToSteps: [
+    'Visit https://microjpeg.com/convert/webp-to-avif.',
+    'Drag and drop your WebP image into the upload area.',
+    'MicroJPEG automatically converts it to AVIF.',
+    'Wait briefly for the processing to complete.',
+    'Download your optimized AVIF file.',
+    'Upgrade or automate conversions at https://microjpeg.com/pricing and https://microjpeg.com/api-docs.'
+  ],
+
+  comparisonTitle: 'WebP vs AVIF – Comparison Table',
+  sourceInfo: [
+    { label: 'Compression', value: 'Lossy & Lossless' },
+    { label: 'File Size', value: 'Small' },
+    { label: 'Quality', value: 'Good' },
+    { label: 'Transparency', value: 'Supported' },
+    { label: 'Encoding Speed', value: 'Fast' },
+    { label: 'Use Case', value: 'Web images' }
+  ],
+
+  targetInfo: [
+    { label: 'Compression', value: 'Highly Efficient (Better than WebP)' },
+    { label: 'File Size', value: 'Very Small' },
+    { label: 'Quality', value: 'Excellent, even at low bitrates' },
+    { label: 'Transparency', value: 'Full Support' },
+    { label: 'Encoding Speed', value: 'Moderate' },
+    { label: 'Use Case', value: 'Web optimization, modern apps, storage' }
+  ],
+
+  features: [
+    'Ultra-efficient AVIF compression for tiny file sizes.',
+    'High-quality output suitable for modern web use.',
+    'Fast online conversion with no installation.',
+    'Secure, temporary file handling with auto-deletion.',
+    'Works with both small and large WebP images.',
+    'Batch conversions supported.',
+    'API available for developers at https://microjpeg.com/api-docs.'
+  ],
+
+  deviceSupportText: [
+    'MicroJPEG runs smoothly on all major devices:',
+    'Windows PCs',
+    'macOS systems',
+    'Linux machines',
+    'Android phones and tablets',
+    'iPhones and iPads',
+    'All modern browsers including Chrome, Firefox, Edge, and Safari'
+  ],
+
+  relatedConversions: [
+    { label: 'WebP to JPG', href: '/convert/webp-to-jpg' },
+    { label: 'WebP to PNG', href: '/convert/webp-to-png' },
+    { label: 'WebP to TIFF', href: '/convert/webp-to-tiff' }
+ ]
   }
 };
+
 
 // ============================================================================
 // HELPER FUNCTIONS
