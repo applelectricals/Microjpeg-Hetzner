@@ -67,8 +67,9 @@ export default function Tools() {
               <Settings className="w-10 h-10 text-white" />
             </div>
             <h1 className="text-5xl font-bold bg-gradient-to-r from-teal-400 to-yellow-400 bg-clip-text text-transparent mb-6">
-              Professional Image Tools
+              Professional Image Tools 65+ Conversions & Compressions
             </h1>
+            </ButtonsSection>
             <p className="text-xl text-gray-300 max-w-4xl mx-auto mb-8">
               Comprehensive suite of professional image processing tools. Compress, convert, optimize, and process your images 
               with advanced algorithms and support for upto 200MB RAW (ARW, CR2, CRW, DNG, NEF, ORF, RAF) & Regular (JPG, PNG, WEBP, AVIF, TIFF, SVG) formats.
