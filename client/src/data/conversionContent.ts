@@ -5272,6 +5272,8 @@ const CONTENT: Record<string, PageContent> = {
     'Additional 50-70% file size reduction.',
     'Maintain excellent'
 
+    ],
+
     
      relatedConversions: [
     { label: 'Compress JPG', href: '/compress/jpg' },
