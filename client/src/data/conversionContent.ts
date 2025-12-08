@@ -5272,16 +5272,7 @@ const CONTENT: Record<string, PageContent> = {
     'Additional 50-70% file size reduction.',
     'Maintain excellent'
 
-    deviceSupportText: [
-    'Compress TIFF images on any device including:',
-    'Windows PCs',
-    'macOS systems',
-    'Linux computers',
-    'Android phones and tablets',
-    'iPhones and iPads',
-    'All modern browsers'
-  ],
-
+    
      relatedConversions: [
     { label: 'Compress JPG', href: '/compress/jpg' },
     { label: 'Compress PNG', href: '/compress/png' },
