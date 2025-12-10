@@ -1,14 +1,13 @@
 // client/src/pages/enhance-image.tsx
-// AI Image Enhancer Page - Upscale to 4K/8K with Real-ESRGAN
-// Updated: Shows resize warnings for large images
+// AI Image Enhancer Page with Before/After Comparison Slider
+// Updated: 15MB limit, vertical comparison slider
 
 import React, { useState, useCallback, useRef } from 'react';
-import { Upload, Download, Loader2, X, ZoomIn, User, AlertCircle, AlertTriangle, Info } from 'lucide-react';
+import { Upload, Download, Loader2, X, ZoomIn, User, AlertCircle, AlertTriangle, Info, GripVertical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/header';
 import { SEOHead } from '@/components/SEOHead';
-import logoUrl from '@assets/mascot-logo-optimized.png';
 
 // Types
 interface ProcessedImage {
@@ -26,12 +25,129 @@ interface ProcessedImage {
   downloadUrl: string;
 }
 
+// Before/After Comparison Slider Component
+interface ComparisonSliderProps {
+  beforeImage: string;
+  afterImage: string;
+  beforeLabel?: string;
+  afterLabel?: string;
+}
+
+function ComparisonSlider({ beforeImage, afterImage, beforeLabel = "Before", afterLabel = "After" }: ComparisonSliderProps) {
+  const [sliderPosition, setSliderPosition] = useState(50);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
+
+  const handleMove = useCallback((clientX: number) => {
+    if (!containerRef.current) return;
+    
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    setSliderPosition(percentage);
+  }, []);
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    isDragging.current = true;
+    handleMove(e.clientX);
+  }, [handleMove]);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!isDragging.current) return;
+    handleMove(e.clientX);
+  }, [handleMove]);
+
+  const handleMouseUp = useCallback(() => {
+    isDragging.current = false;
+  }, []);
+
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    isDragging.current = true;
+    handleMove(e.touches[0].clientX);
+  }, [handleMove]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (!isDragging.current) return;
+    handleMove(e.touches[0].clientX);
+  }, [handleMove]);
+
+  const handleTouchEnd = useCallback(() => {
+    isDragging.current = false;
+  }, []);
+
+  return (
+    <div 
+      ref={containerRef}
+      className="relative w-full h-80 rounded-lg overflow-hidden cursor-ew-resize select-none bg-gray-800"
+      onMouseDown={handleMouseDown}
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+      onMouseLeave={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+    >
+      {/* After Image (Full width, behind) */}
+      <div className="absolute inset-0">
+        <img 
+          src={afterImage} 
+          alt="Enhanced" 
+          className="w-full h-full object-contain"
+          draggable={false}
+        />
+        {/* After label */}
+        <div className="absolute top-2 right-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">
+          {afterLabel}
+        </div>
+      </div>
+      
+      {/* Before Image (Clipped) */}
+      <div 
+        className="absolute inset-0 overflow-hidden"
+        style={{ width: `${sliderPosition}%` }}
+      >
+        <img 
+          src={beforeImage} 
+          alt="Original" 
+          className="w-full h-full object-contain"
+          style={{ 
+            width: containerRef.current ? `${containerRef.current.offsetWidth}px` : '100%',
+            maxWidth: 'none'
+          }}
+          draggable={false}
+        />
+        {/* Before label */}
+        <div className="absolute top-2 left-2 bg-gray-700 text-white text-xs font-bold px-2 py-1 rounded">
+          {beforeLabel}
+        </div>
+      </div>
+      
+      {/* Slider Line */}
+      <div 
+        className="absolute top-0 bottom-0 w-1 bg-white shadow-lg cursor-ew-resize"
+        style={{ left: `${sliderPosition}%`, transform: 'translateX(-50%)' }}
+      >
+        {/* Slider Handle */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center">
+          <GripVertical className="w-5 h-5 text-gray-600" />
+        </div>
+      </div>
+
+      {/* Instructions */}
+      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/50 text-white text-xs px-3 py-1 rounded-full">
+        Drag to compare
+      </div>
+    </div>
+  );
+}
+
 // SEO Content
 const SEO_TITLE = "AI Image Enhancer - Upscale to 4K & 8K Free Online | MicroJPEG";
 const SEO_DESCRIPTION = "Enhance and upscale images to 4K or 8K resolution with AI. Real-ESRGAN powered upscaler with face enhancement. Save as WebP, AVIF, PNG or JPG.";
 
-// Limits (must match backend)
-const MAX_INPUT_PIXELS = 2000000; // 2 megapixels
+// Limits
+const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
+const MAX_INPUT_PIXELS = 2000000;
 const MAX_INPUT_DIMENSION = 1500;
 
 // Supported formats
@@ -57,7 +173,7 @@ export default function EnhanceImagePage() {
   const [outputFormat, setOutputFormat] = useState<'png' | 'webp' | 'avif' | 'jpg'>('png');
   const [quality, setQuality] = useState(90);
 
-  // Calculate if image needs resize and preview dimensions
+  // Calculate preview dimensions
   const calculatePreview = () => {
     if (!originalDimensions) return null;
 
@@ -68,7 +184,6 @@ export default function EnhanceImagePage() {
     let inputHeight = height;
     let needsResize = false;
 
-    // Check if resize will be needed
     if (pixels > MAX_INPUT_PIXELS || width > MAX_INPUT_DIMENSION || height > MAX_INPUT_DIMENSION) {
       needsResize = true;
       
@@ -90,14 +205,7 @@ export default function EnhanceImagePage() {
     const outputHeight = inputHeight * scale;
     const megapixels = ((outputWidth * outputHeight) / 1000000).toFixed(1);
 
-    return {
-      needsResize,
-      inputWidth,
-      inputHeight,
-      outputWidth,
-      outputHeight,
-      megapixels
-    };
+    return { needsResize, inputWidth, inputHeight, outputWidth, outputHeight, megapixels };
   };
 
   const previewInfo = calculatePreview();
@@ -118,10 +226,10 @@ export default function EnhanceImagePage() {
       return;
     }
 
-    if (file.size > 15 * 1024 * 1024) {
+    if (file.size > MAX_FILE_SIZE) {
       toast({
         title: "File too large",
-        description: "Maximum file size is 15MB for enhancement",
+        description: `Maximum file size is 15MB. Your file is ${(file.size / 1024 / 1024).toFixed(1)}MB.`,
         variant: "destructive",
       });
       return;
@@ -131,13 +239,11 @@ export default function EnhanceImagePage() {
     setResult(null);
     setResultPreview(null);
 
-    // Create preview and get dimensions
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUrl = e.target?.result as string;
       setPreviewUrl(dataUrl);
       
-      // Get image dimensions
       const img = new Image();
       img.onload = () => {
         setOriginalDimensions({ width: img.width, height: img.height });
@@ -183,7 +289,6 @@ export default function EnhanceImagePage() {
 
       setProgress(20);
 
-      // Enhancement takes longer, simulate progress
       const progressInterval = setInterval(() => {
         setProgress(prev => Math.min(prev + 3, 85));
       }, 1500);
@@ -198,7 +303,7 @@ export default function EnhanceImagePage() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Processing failed');
+        throw new Error(error.error || error.message || 'Processing failed');
       }
 
       const data = await response.json();
@@ -207,24 +312,19 @@ export default function EnhanceImagePage() {
       if (data.success) {
         setResult(data.result);
         
-        // Fetch preview of result
         const previewResponse = await fetch(data.result.downloadUrl);
         if (previewResponse.ok) {
           const blob = await previewResponse.blob();
           setResultPreview(URL.createObjectURL(blob));
         }
 
-        const wasResized = data.result.wasResized;
         toast({
           title: "Image enhanced!",
-          description: wasResized 
-            ? `Image was resized before enhancement. Output: ${data.result.newDimensions.width}x${data.result.newDimensions.height}`
-            : `Upscaled ${scale}x to ${data.result.newDimensions.width}x${data.result.newDimensions.height}`,
+          description: `Upscaled ${scale}x to ${data.result.newDimensions.width}x${data.result.newDimensions.height}`,
         });
       }
     } catch (error: any) {
       console.error('Enhancement error:', error);
-      
       toast({
         title: "Enhancement failed",
         description: error.message,
@@ -292,7 +392,7 @@ export default function EnhanceImagePage() {
             {/* Upload / Preview Section */}
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
               <h2 className="text-lg font-semibold mb-4 text-white">
-                {result ? 'Original Image' : 'Upload Image'}
+                {result ? 'Before & After Comparison' : 'Upload Image'}
               </h2>
 
               {!selectedFile ? (
@@ -319,9 +419,6 @@ export default function EnhanceImagePage() {
                       <Info className="w-3 h-3" />
                       <span>Best results with images under 1500×1500px</span>
                     </div>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Larger images will be automatically resized before enhancement
-                    </p>
                   </div>
                   <input
                     ref={fileInputRef}
@@ -331,73 +428,17 @@ export default function EnhanceImagePage() {
                     onChange={handleFileSelect}
                   />
                 </div>
-              ) : (
-                <div className="relative">
-                  <img
-                    src={previewUrl!}
-                    alt="Original"
-                    className="w-full rounded-lg max-h-96 object-contain bg-gray-700/50"
-                  />
-                  <button
-                    onClick={handleReset}
-                    className="absolute top-2 right-2 p-2 bg-gray-800/80 rounded-full hover:bg-gray-700 transition-colors"
-                  >
-                    <X className="w-4 h-4 text-gray-300" />
-                  </button>
-                  <div className="mt-3 flex justify-between text-sm text-gray-400">
-                    <span>{selectedFile.name}</span>
-                    {originalDimensions && (
-                      <span>{originalDimensions.width} × {originalDimensions.height}px</span>
-                    )}
-                  </div>
-                  
-                  {/* Size warning */}
-                  {previewInfo?.needsResize && (
-                    <div className="mt-3 p-3 bg-amber-500/10 rounded-lg border border-amber-500/30">
-                      <div className="flex items-start gap-2">
-                        <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
-                        <div className="text-xs">
-                          <p className="text-amber-400 font-medium">Large image detected</p>
-                          <p className="text-gray-400 mt-1">
-                            Image will be resized to {previewInfo.inputWidth}×{previewInfo.inputHeight}px before enhancement 
-                            (GPU memory limit). Final output: {previewInfo.outputWidth}×{previewInfo.outputHeight}px
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Result / Options Section */}
-            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
-              <h2 className="text-lg font-semibold mb-4 text-white">
-                {result ? 'Enhanced Result' : 'Enhancement Options'}
-              </h2>
-
-              {result && resultPreview ? (
+              ) : result && resultPreview && previewUrl ? (
+                /* Before/After Comparison Slider */
                 <div>
-                  <div className="relative rounded-lg overflow-hidden bg-gray-700/50">
-                    <img
-                      src={resultPreview}
-                      alt="Enhanced"
-                      className="w-full max-h-80 object-contain"
-                    />
-                    <div className="absolute top-2 left-2 bg-yellow-500 text-black text-xs font-bold px-2 py-1 rounded">
-                      {result.scale}x ENHANCED
-                    </div>
-                  </div>
+                  <ComparisonSlider 
+                    beforeImage={previewUrl}
+                    afterImage={resultPreview}
+                    beforeLabel="Original"
+                    afterLabel={`${result.scale}x Enhanced`}
+                  />
                   
-                  {/* Show resize info if applicable */}
-                  {result.wasResized && result.inputDimensions && (
-                    <div className="mt-3 p-2 bg-amber-500/10 rounded-lg border border-amber-500/20 text-xs text-amber-400">
-                      <AlertTriangle className="w-3 h-3 inline mr-1" />
-                      Image was resized from {result.originalDimensions.width}×{result.originalDimensions.height} 
-                      to {result.inputDimensions.width}×{result.inputDimensions.height} before enhancement
-                    </div>
-                  )}
-                  
+                  {/* Stats below slider */}
                   <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                     <div className="bg-gray-700/30 rounded-lg p-3">
                       <div className="text-gray-400 text-xs mb-1">Original</div>
@@ -419,28 +460,97 @@ export default function EnhanceImagePage() {
                     </div>
                   </div>
 
-                  <div className="mt-3 text-xs text-gray-500 text-center">
+                  {result.wasResized && result.inputDimensions && (
+                    <div className="mt-3 p-2 bg-amber-500/10 rounded-lg border border-amber-500/20 text-xs text-amber-400">
+                      <AlertTriangle className="w-3 h-3 inline mr-1" />
+                      Input was resized to {result.inputDimensions.width}×{result.inputDimensions.height} before enhancement
+                    </div>
+                  )}
+
+                  <div className="mt-2 text-xs text-gray-500 text-center">
                     Processing time: {(result.processingTime / 1000).toFixed(1)}s
                   </div>
+                </div>
+              ) : (
+                /* Preview before processing */
+                <div className="relative">
+                  <img
+                    src={previewUrl!}
+                    alt="Original"
+                    className="w-full rounded-lg max-h-96 object-contain bg-gray-700/50"
+                  />
+                  <button
+                    onClick={handleReset}
+                    className="absolute top-2 right-2 p-2 bg-gray-800/80 rounded-full hover:bg-gray-700 transition-colors"
+                  >
+                    <X className="w-4 h-4 text-gray-300" />
+                  </button>
+                  <div className="mt-3 flex justify-between text-sm text-gray-400">
+                    <span className="truncate max-w-[200px]">{selectedFile.name}</span>
+                    {originalDimensions && (
+                      <span>{originalDimensions.width} × {originalDimensions.height}px</span>
+                    )}
+                  </div>
+                  
+                  {previewInfo?.needsResize && (
+                    <div className="mt-3 p-3 bg-amber-500/10 rounded-lg border border-amber-500/30">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                        <div className="text-xs">
+                          <p className="text-amber-400 font-medium">Large image detected</p>
+                          <p className="text-gray-400 mt-1">
+                            Will be resized to {previewInfo.inputWidth}×{previewInfo.inputHeight}px before enhancement
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
-                  <div className="mt-6 flex gap-3">
+            {/* Options / Download Section */}
+            <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
+              <h2 className="text-lg font-semibold mb-4 text-white">
+                {result ? 'Download Enhanced Image' : 'Enhancement Options'}
+              </h2>
+
+              {result && resultPreview ? (
+                /* Download Section */
+                <div className="space-y-6">
+                  <div className="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
+                    <div className="flex items-center gap-2 text-green-400 mb-2">
+                      <ZoomIn className="w-5 h-5" />
+                      <span className="font-semibold">Enhancement Complete!</span>
+                    </div>
+                    <p className="text-sm text-gray-300">
+                      Your image has been upscaled {result.scale}x from {result.originalDimensions.width}×{result.originalDimensions.height} to {result.newDimensions.width}×{result.newDimensions.height} pixels.
+                    </p>
+                  </div>
+
+                  <div className="flex gap-3">
                     <Button 
                       onClick={handleDownload} 
-                      className="flex-1 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold"
+                      className="flex-1 h-12 bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold"
                     >
-                      <Download className="w-4 h-4 mr-2" />
-                      Download {result.scale}x {outputFormat.toUpperCase()}
+                      <Download className="w-5 h-5 mr-2" />
+                      Download {result.format}
                     </Button>
                     <Button 
                       variant="outline" 
                       onClick={handleReset}
-                      className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
+                      className="h-12 border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
                     >
                       New Image
                     </Button>
                   </div>
+
+                  <div className="text-xs text-gray-500 text-center">
+                    Drag the slider on the left to compare before & after
+                  </div>
                 </div>
               ) : (
+                /* Options Form */
                 <div className="space-y-6">
                   {/* Scale Selection */}
                   <div>
@@ -468,7 +578,6 @@ export default function EnhanceImagePage() {
                       ))}
                     </div>
                     
-                    {/* Preview dimensions */}
                     {previewInfo && (
                       <div className={`mt-3 p-3 rounded-lg text-center ${
                         previewInfo.needsResize 
@@ -482,45 +591,36 @@ export default function EnhanceImagePage() {
                         <span className="text-gray-500 text-sm ml-2">
                           ({previewInfo.megapixels} MP)
                         </span>
-                        {previewInfo.needsResize && (
-                          <p className="text-xs text-amber-400 mt-1">
-                            Input will be resized to {previewInfo.inputWidth}×{previewInfo.inputHeight}
-                          </p>
-                        )}
                       </div>
                     )}
                   </div>
 
-                  {/* Face Enhancement Toggle */}
-                  <div>
-                    <button
-                      onClick={() => setFaceEnhance(!faceEnhance)}
-                      className={`w-full p-4 rounded-lg border-2 flex items-center justify-between transition-all duration-200 ${
-                        faceEnhance
-                          ? 'border-yellow-500 bg-yellow-500/20'
-                          : 'border-gray-600 hover:border-gray-500'
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <User className={`w-5 h-5 ${faceEnhance ? 'text-yellow-400' : 'text-gray-400'}`} />
-                        <div className="text-left">
-                          <div className={`font-medium ${faceEnhance ? 'text-yellow-400' : 'text-gray-200'}`}>
-                            Face Enhancement
-                          </div>
-                          <div className="text-xs text-gray-500">
-                            Use GFPGAN to improve facial details
-                          </div>
+                  {/* Face Enhancement */}
+                  <button
+                    onClick={() => setFaceEnhance(!faceEnhance)}
+                    className={`w-full p-4 rounded-lg border-2 flex items-center justify-between transition-all ${
+                      faceEnhance
+                        ? 'border-yellow-500 bg-yellow-500/20'
+                        : 'border-gray-600 hover:border-gray-500'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <User className={`w-5 h-5 ${faceEnhance ? 'text-yellow-400' : 'text-gray-400'}`} />
+                      <div className="text-left">
+                        <div className={`font-medium ${faceEnhance ? 'text-yellow-400' : 'text-gray-200'}`}>
+                          Face Enhancement
                         </div>
+                        <div className="text-xs text-gray-500">GFPGAN for facial details</div>
                       </div>
-                      <div className={`w-12 h-6 rounded-full p-1 transition-colors ${
-                        faceEnhance ? 'bg-yellow-500' : 'bg-gray-600'
-                      }`}>
-                        <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
-                          faceEnhance ? 'translate-x-6' : 'translate-x-0'
-                        }`} />
-                      </div>
-                    </button>
-                  </div>
+                    </div>
+                    <div className={`w-12 h-6 rounded-full p-1 transition-colors ${
+                      faceEnhance ? 'bg-yellow-500' : 'bg-gray-600'
+                    }`}>
+                      <div className={`w-4 h-4 rounded-full bg-white transition-transform ${
+                        faceEnhance ? 'translate-x-6' : 'translate-x-0'
+                      }`} />
+                    </div>
+                  </button>
 
                   {/* Output Format */}
                   <div>
@@ -532,7 +632,7 @@ export default function EnhanceImagePage() {
                         <button
                           key={fmt}
                           onClick={() => setOutputFormat(fmt)}
-                          className={`p-2 rounded-lg border-2 text-center transition-all duration-200 ${
+                          className={`p-2 rounded-lg border-2 text-center transition-all ${
                             outputFormat === fmt
                               ? 'border-yellow-500 bg-yellow-500/20 text-yellow-400'
                               : 'border-gray-600 hover:border-gray-500 text-gray-300'
@@ -561,10 +661,6 @@ export default function EnhanceImagePage() {
                           background: `linear-gradient(to right, #eab308 0%, #eab308 ${(quality - 50) * 2}%, #374151 ${(quality - 50) * 2}%, #374151 100%)`
                         }}
                       />
-                      <div className="flex justify-between text-xs text-gray-500 mt-2">
-                        <span>50% (Smaller)</span>
-                        <span>100% (Best)</span>
-                      </div>
                     </div>
                   )}
 
@@ -572,7 +668,7 @@ export default function EnhanceImagePage() {
                   <Button
                     onClick={handleEnhanceImage}
                     disabled={!selectedFile || isProcessing}
-                    className="w-full h-12 text-lg bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full h-12 text-lg bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold disabled:opacity-50"
                   >
                     {isProcessing ? (
                       <>
@@ -606,8 +702,7 @@ export default function EnhanceImagePage() {
                   <div className="flex items-start gap-2 p-3 bg-gray-700/30 rounded-lg text-xs text-gray-400">
                     <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <span>
-                      Enhancement uses Real-ESRGAN AI. Large images (&gt;1500px) are automatically resized 
-                      to fit GPU memory limits before processing.
+                      Large images (&gt;1500px) are automatically resized before processing. Max file size: 15MB.
                     </span>
                   </div>
                 </div>
@@ -623,7 +718,7 @@ export default function EnhanceImagePage() {
               </div>
               <h3 className="font-semibold mb-2 text-white">Up to 8x Upscale</h3>
               <p className="text-sm text-gray-400">
-                Transform small images into stunning high resolution with AI-powered super-resolution
+                Transform small images into stunning high resolution with AI
               </p>
             </div>
 
@@ -633,7 +728,7 @@ export default function EnhanceImagePage() {
               </div>
               <h3 className="font-semibold mb-2 text-white">Face Enhancement</h3>
               <p className="text-sm text-gray-400">
-                GFPGAN integration to restore and enhance facial details in portraits
+                GFPGAN to restore and enhance facial details in portraits
               </p>
             </div>
 
@@ -643,106 +738,13 @@ export default function EnhanceImagePage() {
               </div>
               <h3 className="font-semibold mb-2 text-white">Modern Formats</h3>
               <p className="text-sm text-gray-400">
-                Save enhanced images as PNG, WebP, AVIF, or JPG for optimal quality
+                Save as PNG, WebP, AVIF, or JPG for optimal quality
               </p>
             </div>
-          </div>
-
-          {/* SEO Content */}
-          <div className="mt-16 max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold text-white mb-4">
-              AI-Powered Image Enhancement
-            </h2>
-            
-            <p className="text-gray-300 mb-4">
-              MicroJPEG's AI Image Enhancer uses <strong className="text-yellow-400">Real-ESRGAN</strong>, 
-              the same technology trusted by professionals for upscaling images while preserving detail.
-            </p>
-            
-            <h3 className="text-xl font-bold text-white mb-3 mt-6">
-              Perfect For:
-            </h3>
-            <ul className="list-disc list-inside text-gray-300 space-y-2 ml-4">
-              <li>Upscaling old photos and memories</li>
-              <li>Enhancing product images for e-commerce</li>
-              <li>Preparing images for large prints</li>
-              <li>Restoring low-quality social media downloads</li>
-              <li>Improving AI-generated images</li>
-            </ul>
-
-            <h3 className="text-xl font-bold text-white mb-3 mt-6">
-              How It Works
-            </h3>
-            <ol className="list-decimal list-inside text-gray-300 space-y-2 ml-4">
-              <li>Upload your image (JPG, PNG, or WebP)</li>
-              <li>Choose your upscale factor (2x, 4x, or 8x)</li>
-              <li>Enable face enhancement for portraits (optional)</li>
-              <li>Select output format and quality</li>
-              <li>Download your enhanced high-resolution image</li>
-            </ol>
           </div>
         </main>
 
         <div className="h-16"></div>
-              {/* Footer */}
-      <footer className="bg-gray-100 text-black py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            {/* Brand */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <img src={logoUrl} alt="MicroJPEG Logo" className="w-10 h-10" />
-                <span className="text-xl font-bold font-poppins">MicroJPEG</span>
-              </div>
-              <p className="text-gray-600 font-opensans">
-                The smartest way to compress and optimize your images for the web.
-              </p>
-            </div>
-
-            {/* Product */}
-            <div>
-              <h4 className="font-semibold font-poppins mb-4">Product</h4>
-              <ul className="space-y-2 text-gray-600 font-opensans">
-                <li><a href="/features" className="hover:text-black">Features</a></li>
-                <li><a href="/pricing" className="hover:text-black">Pricing</a></li>
-                <li><a href="/api-docs" className="hover:text-black">API</a></li>
-                <li><a href="/api-docs" className="hover:text-black">Documentation</a></li>
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h4 className="font-semibold font-poppins mb-4">Company</h4>
-              <ul className="space-y-2 text-gray-600 font-opensans">
-                <li><a href="/about" className="hover:text-black">About</a></li>
-                <li><a href="/blog" className="hover:text-black">Blog</a></li>
-                <li><a href="/contact" className="hover:text-black">Contact</a></li>
-                <li><a href="/support" className="hover:text-black">Support</a></li>
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <h4 className="font-semibold font-poppins mb-4">Legal</h4>
-              <ul className="space-y-2 text-gray-600 font-opensans">
-                <li><a href="/privacy-policy" className="hover:text-black">Privacy Policy</a></li>
-                <li><a href="/terms-of-service" className="hover:text-black">Terms of Service</a></li>
-                <li><a href="/cookie-policy" className="hover:text-black">Cookie Policy</a></li>
-                <li><a href="/cancellation-policy" className="hover:text-black">Cancellation Policy</a></li>
-                <li><a href="/privacy-policy" className="hover:text-black">GDPR</a></li>
-              </ul>
-            </div>
-          </div>
-
-
-          <div className="border-t border-gray-300 pt-8 text-center text-gray-500 font-opensans">
-            <p>© 2025 MicroJPEG. All rights reserved. Making the web faster, one image at a time.</p>
-            <p className="text-xs mt-2 opacity-75">
-              Background photo by <a href="https://www.pexels.com/photo/selective-focus-photo-of-white-petaled-flowers-96627/" target="_blank" rel="noopener noreferrer" className="hover:underline">AS Photography</a>
-            </p>
-          </div>
-        </div>
-      </footer>
       </div>
     </>
   );

@@ -1131,6 +1131,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         '4x': 'Quadruple resolution - Recommended',
         '8x': '8x resolution - Best quality (slower)',
       },
+      maxFileSize: '15MB',
       note: 'Costs are approximate and may vary based on image size',
     });
   });
@@ -1183,11 +1184,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`📁 File: ${file.originalname} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
         console.log(`⚙️ Options:`, options);
 
-        // File size limit check (10MB for enhancement)
-        if (file.size > 10 * 1024 * 1024) {
+        // File size limit check - 15MB for enhancement
+        const maxSize = 15 * 1024 * 1024; // 15MB
+        if (file.size > maxSize) {
           return res.status(400).json({
             error: 'File too large',
-            message: 'Maximum file size for enhancement is 10MB'
+            message: `Maximum file size is 15MB. Your file is ${(file.size / 1024 / 1024).toFixed(1)}MB.`
           });
         }
 
@@ -1214,9 +1216,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             originalSize: result.originalSize,
             processedSize: result.processedSize,
             originalDimensions: result.originalDimensions,
+            inputDimensions: result.inputDimensions,
             newDimensions: result.newDimensions,
             format: result.format,
             scale: result.scale,
+            wasResized: result.wasResized,
             processingTime: result.processingTime,
             downloadUrl: `/api/download/${jobId}`,
           },
@@ -1263,10 +1267,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log(`⚙️ Options:`, options);
 
         const results = [];
+        const maxSize = 15 * 1024 * 1024; // 15MB
 
-        // Process files sequentially (enhancement is resource-intensive)
         for (const file of files) {
           try {
+            // Check file size
+            if (file.size > maxSize) {
+              results.push({
+                success: false,
+                originalName: file.originalname,
+                error: `File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Max is 15MB.`,
+              });
+              continue;
+            }
+
             const result = await enhanceImage(file.path, 'compressed', options);
 
             if (result.success) {
@@ -1277,9 +1291,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 originalSize: result.originalSize,
                 processedSize: result.processedSize,
                 originalDimensions: result.originalDimensions,
+                inputDimensions: result.inputDimensions,
                 newDimensions: result.newDimensions,
                 format: result.format,
                 scale: result.scale,
+                wasResized: result.wasResized,
                 processingTime: result.processingTime,
                 downloadUrl: `/api/download/${jobId}`,
               });
@@ -1297,7 +1313,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               error: err.message,
             });
           } finally {
-            // Cleanup
             await fs.unlink(file.path).catch(() => {});
           }
         }
