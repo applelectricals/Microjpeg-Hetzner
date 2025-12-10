@@ -1,6 +1,6 @@
 // server/services/imageEnhancer.ts
 // AI Image Enhancement/Upscaling Service using Replicate API
-// Updated: Auto-resize large images to fit GPU memory limits
+// Fixed: Handle all Replicate output formats properly
 
 import Replicate from 'replicate';
 import fs from 'fs/promises';
@@ -32,7 +32,7 @@ export interface EnhanceImageResult {
   originalSize?: number;
   processedSize?: number;
   originalDimensions?: { width: number; height: number };
-  inputDimensions?: { width: number; height: number }; // After resize (if needed)
+  inputDimensions?: { width: number; height: number };
   newDimensions?: { width: number; height: number };
   format?: string;
   scale?: number;
@@ -43,7 +43,6 @@ export interface EnhanceImageResult {
 
 /**
  * Resize image if it exceeds GPU memory limits
- * Returns the resized buffer and new dimensions
  */
 async function prepareImageForEnhancement(
   inputPath: string
@@ -74,14 +73,12 @@ async function prepareImageForEnhancement(
   let newWidth = originalWidth;
   let newHeight = originalHeight;
   
-  // First, check if any dimension exceeds the max
   if (newWidth > MAX_INPUT_DIMENSION || newHeight > MAX_INPUT_DIMENSION) {
     const ratio = Math.min(MAX_INPUT_DIMENSION / newWidth, MAX_INPUT_DIMENSION / newHeight);
     newWidth = Math.floor(newWidth * ratio);
     newHeight = Math.floor(newHeight * ratio);
   }
   
-  // Then check total pixels
   const newPixels = newWidth * newHeight;
   if (newPixels > MAX_INPUT_PIXELS) {
     const ratio = Math.sqrt(MAX_INPUT_PIXELS / newPixels);
@@ -97,7 +94,7 @@ async function prepareImageForEnhancement(
       fit: 'inside',
       withoutEnlargement: true,
     })
-    .png() // Use PNG for best quality during processing
+    .png()
     .toBuffer();
 
   return { 
@@ -111,8 +108,96 @@ async function prepareImageForEnhancement(
 }
 
 /**
+ * Download result from Replicate - handles all output formats
+ */
+async function downloadReplicateOutput(output: any): Promise<Buffer> {
+  console.log('📥 Replicate output type:', typeof output);
+  console.log('📥 Replicate output:', JSON.stringify(output).substring(0, 200));
+
+  // Case 1: Output is a URL string
+  if (typeof output === 'string') {
+    console.log('📥 Output is URL string, fetching...');
+    const response = await fetch(output);
+    if (!response.ok) {
+      throw new Error(`Failed to download result: ${response.status}`);
+    }
+    return Buffer.from(await response.arrayBuffer());
+  }
+
+  // Case 2: Output is an array (some models return array of URLs)
+  if (Array.isArray(output)) {
+    console.log('📥 Output is array, fetching first element...');
+    if (output.length === 0) {
+      throw new Error('Replicate returned empty array');
+    }
+    const url = output[0];
+    if (typeof url === 'string') {
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error(`Failed to download result: ${response.status}`);
+      }
+      return Buffer.from(await response.arrayBuffer());
+    }
+    throw new Error('Array element is not a URL string');
+  }
+
+  // Case 3: Output is a ReadableStream
+  if (output instanceof ReadableStream) {
+    console.log('📥 Output is ReadableStream, reading...');
+    const chunks: Uint8Array[] = [];
+    const reader = output.getReader();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (value) chunks.push(value);
+    }
+    return Buffer.concat(chunks);
+  }
+
+  // Case 4: Output is an object with a URL property
+  if (typeof output === 'object' && output !== null) {
+    console.log('📥 Output is object, checking properties...');
+    
+    // Check common property names
+    const urlProps = ['url', 'output', 'image', 'result', 'uri'];
+    for (const prop of urlProps) {
+      if (output[prop] && typeof output[prop] === 'string') {
+        console.log(`📥 Found URL in property: ${prop}`);
+        const response = await fetch(output[prop]);
+        if (!response.ok) {
+          throw new Error(`Failed to download result: ${response.status}`);
+        }
+        return Buffer.from(await response.arrayBuffer());
+      }
+    }
+
+    // Check if it's a Buffer-like object
+    if (output.type === 'Buffer' && Array.isArray(output.data)) {
+      console.log('📥 Output is Buffer-like object');
+      return Buffer.from(output.data);
+    }
+  }
+
+  // Case 5: Output might be base64 encoded
+  if (typeof output === 'string' && output.length > 100) {
+    try {
+      // Try to decode as base64
+      const buffer = Buffer.from(output, 'base64');
+      if (buffer.length > 0) {
+        console.log('📥 Output decoded as base64');
+        return buffer;
+      }
+    } catch (e) {
+      // Not base64
+    }
+  }
+
+  console.error('📥 Unhandled output format:', output);
+  throw new Error(`Unexpected output format from Replicate: ${typeof output}`);
+}
+
+/**
  * Enhance/Upscale an image using Real-ESRGAN AI
- * Automatically resizes large images to fit GPU memory
  */
 export async function enhanceImage(
   inputPath: string,
@@ -147,7 +232,7 @@ export async function enhanceImage(
     const base64Image = `data:image/png;base64,${buffer.toString('base64')}`;
 
     console.log(`🔍 Starting image enhancement...`);
-    console.log(`📁 Input: ${inputPath} (${width}x${height}, ${(inputStats.size / 1024).toFixed(2)} KB)`);
+    console.log(`📁 Input: ${inputPath} (${width}x${height}, ${(buffer.length / 1024).toFixed(2)} KB)`);
     console.log(`📐 Scale: ${scale}x | Face enhance: ${faceEnhance}`);
 
     // Call Replicate API with Real-ESRGAN
@@ -163,18 +248,10 @@ export async function enhanceImage(
       throw new Error('No output from Replicate API');
     }
 
-    // Download the result
-    let resultBuffer: Buffer;
+    // Download the result using flexible handler
+    const resultBuffer = await downloadReplicateOutput(output);
     
-    if (typeof output === 'string') {
-      const response = await fetch(output);
-      if (!response.ok) {
-        throw new Error(`Failed to download result: ${response.status}`);
-      }
-      resultBuffer = Buffer.from(await response.arrayBuffer());
-    } else {
-      throw new Error('Unexpected output format from Replicate');
-    }
+    console.log(`📥 Downloaded result: ${resultBuffer.length} bytes`);
 
     // Generate output filename
     const jobId = `enhance_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -243,16 +320,18 @@ export async function enhanceImage(
 
   } catch (error: any) {
     console.error('❌ Image enhancement failed:', error.message);
+    console.error('❌ Full error:', error);
     
     let errorMessage = error.message || 'Unknown error';
     
-    // Parse Replicate error messages
     if (errorMessage.includes('total number of pixels') || errorMessage.includes('GPU memory')) {
       errorMessage = 'Image is too large for the AI model. Please try a smaller image (under 1500x1500 pixels).';
     } else if (errorMessage.includes('CUDA out of memory')) {
       errorMessage = 'GPU memory exceeded. Please try a smaller image or lower scale.';
     } else if (errorMessage.includes('Invalid API token')) {
       errorMessage = 'AI service configuration error. Please contact support.';
+    } else if (errorMessage.includes('Unexpected output format')) {
+      errorMessage = 'AI service returned unexpected response. Please try again.';
     }
     
     return {
@@ -287,11 +366,9 @@ export function calculateOutputDimensions(
   let inputHeight = height;
   let needsResize = false;
 
-  // Check if resize will be needed
   if (pixels > MAX_INPUT_PIXELS || width > MAX_INPUT_DIMENSION || height > MAX_INPUT_DIMENSION) {
     needsResize = true;
     
-    // Calculate resized dimensions
     if (width > MAX_INPUT_DIMENSION || height > MAX_INPUT_DIMENSION) {
       const ratio = Math.min(MAX_INPUT_DIMENSION / width, MAX_INPUT_DIMENSION / height);
       inputWidth = Math.floor(width * ratio);
