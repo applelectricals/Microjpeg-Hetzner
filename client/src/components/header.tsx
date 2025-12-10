@@ -111,8 +111,8 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
             
             {/* Navigation */}
             <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
-              <a href="/web/overview" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
-                Web
+              <a href="/tools/convert" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
+                Convert
               </a>
               <a href="/api-docs#overview" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
                 API
@@ -123,6 +123,9 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
               </a>
               <a href="/remove-background" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
                 Remove Background
+              </a>
+              <a href="/blog" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
+                Blogs
               </a>
               <button
                 onClick={() => window.location.href = "/pricing"}
@@ -211,11 +214,11 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
               {/* Navigation Links */}
               <div>
                 <a
-                  href="/web/overview"
+                  href="/tools/convert"
                   className="block py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Web
+                  Convert
                 </a>
                 <a
                   href="/api-docs#overview"
@@ -240,6 +243,13 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Remove Background
+                </a>
+                <a
+                  href="/blog"
+                  className="block py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Blogs
                 </a>
                 <button
                   onClick={() => {
