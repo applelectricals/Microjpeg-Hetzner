@@ -121,8 +121,11 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
                 <SiWordpress className="w-4 h-4" />
                 Plugin
               </a>
-              <button 
-                onClick={() => window.location.href = "/pricing"} 
+              <a href="/remove-background" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
+                Remove Background
+              </a>
+              <button
+                onClick={() => window.location.href = "/pricing"}
                 className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium bg-transparent border-none cursor-pointer transition-colors"
               >
                 Pricing
@@ -207,23 +210,23 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
             <div className="px-4 pb-4 space-y-3">
               {/* Navigation Links */}
               <div>
-                <a 
-                  href="/web/overview" 
-                  className="block py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2" 
+                <a
+                  href="/web/overview"
+                  className="block py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Web
                 </a>
-                <a 
-                  href="/api-docs#overview" 
-                  className="block py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2" 
+                <a
+                  href="/api-docs#overview"
+                  className="block py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   API
                 </a>
-                <a 
-                  href="/wordpress-plugin" 
-                  className="block py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2" 
+                <a
+                  href="/wordpress-plugin"
+                  className="block py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   <div className="flex items-center gap-2">
@@ -231,11 +234,18 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
                     <span>Plugin</span>
                   </div>
                 </a>
-                <button 
-                  onClick={() => { 
-                    setIsMobileMenuOpen(false); 
-                    window.location.href = "/pricing"; 
-                  }} 
+                <a
+                  href="/remove-background"
+                  className="block py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Remove Background
+                </a>
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    window.location.href = "/pricing";
+                  }}
                   className="block w-full text-left py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2 bg-transparent border-none cursor-pointer"
                 >
                   Pricing
