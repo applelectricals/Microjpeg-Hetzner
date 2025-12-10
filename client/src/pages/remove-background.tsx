@@ -9,6 +9,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/header';
 import { SEOHead } from '@/components/SEOHead';
+import logoUrl from '@assets/mascot-logo-optimized.png';
 
 // Types
 interface ProcessedImage {
