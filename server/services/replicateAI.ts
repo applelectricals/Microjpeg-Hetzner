@@ -11,19 +11,12 @@ const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
 });
 
-// Model options for background removal
-const MODELS = {
-  // Best quality - $0.00041 per run
-  REMOVE_BG: 'lucataco/remove-bg:95fcc2a26d3899cd6c2691c900465aaeff466285a65c14638cc5f36f34befaf1',
-  // Good quality, cheaper - $0.00036 per run
-  REMBG: 'ilkerc/rembg:7fa358a133d92eec65e60d5f52b3c8db58f9f41e58e4b1f4c47b6097f5c62d51',
-  // Enhanced quality - $0.002 per run
-  REMBG_ENHANCE: 'smoretalk/rembg-enhance:4067ee2a58f6c161d434a9c077cfa012820b8e076efa2772aa171e26557da919',
-};
+// Model for background removal - using only the standard model
+// Enhanced model (rembg-enhance) causes CUDA out of memory errors
+const REMOVE_BG_MODEL = 'lucataco/remove-bg:95fcc2a26d3899cd6c2691c900465aaeff466285a65c14638cc5f36f34befaf1';
 
 export interface RemoveBackgroundOptions {
-  model?: 'standard' | 'enhanced';
-  outputFormat?: 'png' | 'webp' | 'avif';
+  outputFormat?: 'png' | 'webp' | 'avif' | 'jpg';
   outputQuality?: number;
 }
 
@@ -39,8 +32,32 @@ export interface RemoveBackgroundResult {
 }
 
 /**
+ * Convert input image to PNG for Replicate API
+ * Replicate can't handle AVIF or HEIC, so we convert first
+ */
+async function prepareInputImage(inputPath: string): Promise<{ buffer: Buffer; cleanup?: string }> {
+  const ext = inputPath.split('.').pop()?.toLowerCase();
+  
+  // Check if we need to convert the input
+  const needsConversion = ['avif', 'heic', 'heif'].includes(ext || '');
+  
+  if (needsConversion) {
+    // Convert to PNG first using Sharp
+    console.log(`Converting ${ext} to PNG for AI processing...`);
+    const pngBuffer = await sharp(inputPath)
+      .png()
+      .toBuffer();
+    return { buffer: pngBuffer };
+  }
+  
+  // Read the file directly
+  const buffer = await fs.readFile(inputPath);
+  return { buffer };
+}
+
+/**
  * Remove background from an image using Replicate AI
- * UNIQUE FEATURE: Output to WebP/AVIF (competitors only output PNG!)
+ * UNIQUE FEATURE: Output to WebP/AVIF/JPG (competitors only output PNG!)
  */
 export async function removeBackground(
   inputPath: string,
@@ -50,7 +67,6 @@ export async function removeBackground(
   const startTime = Date.now();
   
   const {
-    model = 'standard',
     outputFormat = 'png',
     outputQuality = 90,
   } = options;
@@ -62,18 +78,16 @@ export async function removeBackground(
       throw new Error('Input file not found');
     }
 
-    // Read input file and convert to base64
-    const inputBuffer = await fs.readFile(inputPath);
+    // Prepare input image (convert if necessary)
+    const { buffer: inputBuffer } = await prepareInputImage(inputPath);
     const base64Image = `data:image/png;base64,${inputBuffer.toString('base64')}`;
 
-    // Select model based on quality preference
-    const modelId = model === 'enhanced' ? MODELS.REMBG_ENHANCE : MODELS.REMOVE_BG;
-
-    console.log(`🎨 Starting background removal with ${model} model...`);
+    console.log(`🎨 Starting background removal...`);
     console.log(`📁 Input: ${inputPath} (${(inputStats.size / 1024).toFixed(2)} KB)`);
+    console.log(`📤 Output format: ${outputFormat}`);
 
     // Call Replicate API
-    const output = await replicate.run(modelId, {
+    const output = await replicate.run(REMOVE_BG_MODEL, {
       input: {
         image: base64Image,
       },
@@ -121,17 +135,31 @@ export async function removeBackground(
 
     switch (outputFormat) {
       case 'webp':
+        // WebP with alpha channel for transparency
         await sharpInstance
           .webp({ quality: outputQuality, alphaQuality: 100 })
           .toFile(outputPath);
         break;
+        
       case 'avif':
+        // AVIF with alpha channel for transparency
         await sharpInstance
           .avif({ quality: outputQuality })
           .toFile(outputPath);
         break;
+        
+      case 'jpg':
+      case 'jpeg':
+        // JPG doesn't support transparency - flatten with white background
+        await sharpInstance
+          .flatten({ background: { r: 255, g: 255, b: 255 } })
+          .jpeg({ quality: outputQuality })
+          .toFile(outputPath);
+        break;
+        
       case 'png':
       default:
+        // PNG with full transparency support
         await sharpInstance
           .png({ compressionLevel: 8 })
           .toFile(outputPath);
@@ -157,9 +185,21 @@ export async function removeBackground(
 
   } catch (error: any) {
     console.error('❌ Background removal failed:', error.message);
+    
+    // Provide better error messages
+    let errorMessage = error.message || 'Unknown error';
+    
+    if (errorMessage.includes('CUDA out of memory')) {
+      errorMessage = 'Image is too large to process. Please try a smaller image or use Standard model.';
+    } else if (errorMessage.includes('cannot identify image file')) {
+      errorMessage = 'This image format is not supported. Please use JPG, PNG, or WebP.';
+    } else if (errorMessage.includes('Invalid API token')) {
+      errorMessage = 'AI service configuration error. Please contact support.';
+    }
+    
     return {
       success: false,
-      error: error.message || 'Unknown error',
+      error: errorMessage,
       processingTime: Date.now() - startTime,
     };
   }
@@ -174,8 +214,12 @@ export async function checkReplicateHealth(): Promise<{ healthy: boolean; error?
       return { healthy: false, error: 'REPLICATE_API_TOKEN not configured' };
     }
 
-    // Simple health check - list models
-    const models = await replicate.models.list();
+    // Simple validation - token format check
+    const token = process.env.REPLICATE_API_TOKEN;
+    if (!token.startsWith('r8_') && !token.startsWith('r8-')) {
+      return { healthy: false, error: 'Invalid API token format' };
+    }
+
     return { healthy: true };
   } catch (error: any) {
     return { healthy: false, error: error.message };
@@ -185,12 +229,10 @@ export async function checkReplicateHealth(): Promise<{ healthy: boolean; error?
 /**
  * Get estimated cost for background removal
  */
-export function getEstimatedCost(model: 'standard' | 'enhanced' = 'standard'): {
+export function getEstimatedCost(): {
   costPerImage: number;
   runsPerDollar: number;
 } {
-  if (model === 'enhanced') {
-    return { costPerImage: 0.002, runsPerDollar: 500 };
-  }
+  // Standard model pricing
   return { costPerImage: 0.00041, runsPerDollar: 2439 };
 }
