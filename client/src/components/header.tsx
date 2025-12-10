@@ -124,6 +124,9 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
               <a href="/remove-background" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
                 Remove Background
               </a>
+              <a href="/enhance-image" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
+                AI Enhancer
+              </a>
               <a href="/blog" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
                 Blogs
               </a>
@@ -243,6 +246,13 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Remove Background
+                </a>
+                <a
+                  href="/enhance-image"
+                  className="block py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  AI Enhancer
                 </a>
                 <a
                   href="/blog"
