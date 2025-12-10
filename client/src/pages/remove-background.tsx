@@ -2,13 +2,13 @@
 // AI Background Removal Page - UNIQUE: Output to WebP/AVIF!
 
 import React, { useState, useCallback, useRef } from 'react';
-import { Helmet } from 'react-helmet-async';
 import { Upload, Download, Sparkles, Image as ImageIcon, Loader2, Check, X, Wand2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/header';
+import { SEOHead } from '@/components/SEOHead';
 
 // Types
 interface ProcessedImage {
@@ -177,13 +177,12 @@ export default function RemoveBackgroundPage() {
 
   return (
     <>
-      <Helmet>
-        <title>{SEO_TITLE}</title>
-        <meta name="description" content={SEO_DESCRIPTION} />
-        <meta property="og:title" content={SEO_TITLE} />
-        <meta property="og:description" content={SEO_DESCRIPTION} />
-        <link rel="canonical" href="https://microjpeg.com/remove-background" />
-      </Helmet>
+      <SEOHead
+        title={SEO_TITLE}
+        description={SEO_DESCRIPTION}
+        canonicalUrl="https://microjpeg.com/remove-background"
+        keywords="remove background, AI background removal, webp transparent, avif transparent, product photos, e-commerce images"
+      />
 
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
         <Header />
