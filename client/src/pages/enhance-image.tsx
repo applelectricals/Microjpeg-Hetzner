@@ -1,13 +1,14 @@
 // client/src/pages/enhance-image.tsx
 // AI Image Enhancer Page - Upscale to 4K/8K with Real-ESRGAN
+// Updated: Shows resize warnings for large images
 
-import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Upload, Download, Sparkles, Image as ImageIcon, Loader2, Check, X, ZoomIn, User, AlertCircle } from 'lucide-react';
+import React, { useState, useCallback, useRef } from 'react';
+import { Upload, Download, Loader2, X, ZoomIn, User, AlertCircle, AlertTriangle, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/header';
 import { SEOHead } from '@/components/SEOHead';
+import logoUrl from '@assets/mascot-logo-optimized.png';
 
 // Types
 interface ProcessedImage {
@@ -16,9 +17,11 @@ interface ProcessedImage {
   originalSize: number;
   processedSize: number;
   originalDimensions: { width: number; height: number };
+  inputDimensions?: { width: number; height: number };
   newDimensions: { width: number; height: number };
   format: string;
   scale: number;
+  wasResized?: boolean;
   processingTime: number;
   downloadUrl: string;
 }
@@ -26,6 +29,10 @@ interface ProcessedImage {
 // SEO Content
 const SEO_TITLE = "AI Image Enhancer - Upscale to 4K & 8K Free Online | MicroJPEG";
 const SEO_DESCRIPTION = "Enhance and upscale images to 4K or 8K resolution with AI. Real-ESRGAN powered upscaler with face enhancement. Save as WebP, AVIF, PNG or JPG.";
+
+// Limits (must match backend)
+const MAX_INPUT_PIXELS = 2000000; // 2 megapixels
+const MAX_INPUT_DIMENSION = 1500;
 
 // Supported formats
 const SUPPORTED_FORMATS = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
@@ -45,19 +52,55 @@ export default function EnhanceImagePage() {
   const [isDragging, setIsDragging] = useState(false);
   
   // Options
-  const [scale, setScale] = useState<2 | 4 | 8>(4);
+  const [scale, setScale] = useState<2 | 4 | 8>(2);
   const [faceEnhance, setFaceEnhance] = useState(false);
   const [outputFormat, setOutputFormat] = useState<'png' | 'webp' | 'avif' | 'jpg'>('png');
   const [quality, setQuality] = useState(90);
 
-  // Calculate preview dimensions
-  const previewDimensions = originalDimensions 
-    ? { 
-        width: originalDimensions.width * scale, 
-        height: originalDimensions.height * scale,
-        megapixels: ((originalDimensions.width * scale * originalDimensions.height * scale) / 1000000).toFixed(1)
+  // Calculate if image needs resize and preview dimensions
+  const calculatePreview = () => {
+    if (!originalDimensions) return null;
+
+    const { width, height } = originalDimensions;
+    const pixels = width * height;
+    
+    let inputWidth = width;
+    let inputHeight = height;
+    let needsResize = false;
+
+    // Check if resize will be needed
+    if (pixels > MAX_INPUT_PIXELS || width > MAX_INPUT_DIMENSION || height > MAX_INPUT_DIMENSION) {
+      needsResize = true;
+      
+      if (width > MAX_INPUT_DIMENSION || height > MAX_INPUT_DIMENSION) {
+        const ratio = Math.min(MAX_INPUT_DIMENSION / width, MAX_INPUT_DIMENSION / height);
+        inputWidth = Math.floor(width * ratio);
+        inputHeight = Math.floor(height * ratio);
       }
-    : null;
+      
+      const newPixels = inputWidth * inputHeight;
+      if (newPixels > MAX_INPUT_PIXELS) {
+        const ratio = Math.sqrt(MAX_INPUT_PIXELS / newPixels);
+        inputWidth = Math.floor(inputWidth * ratio);
+        inputHeight = Math.floor(inputHeight * ratio);
+      }
+    }
+
+    const outputWidth = inputWidth * scale;
+    const outputHeight = inputHeight * scale;
+    const megapixels = ((outputWidth * outputHeight) / 1000000).toFixed(1);
+
+    return {
+      needsResize,
+      inputWidth,
+      inputHeight,
+      outputWidth,
+      outputHeight,
+      megapixels
+    };
+  };
+
+  const previewInfo = calculatePreview();
 
   // Handle file selection
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -75,10 +118,10 @@ export default function EnhanceImagePage() {
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > 15 * 1024 * 1024) {
       toast({
         title: "File too large",
-        description: "Maximum file size is 10MB for enhancement",
+        description: "Maximum file size is 15MB for enhancement",
         variant: "destructive",
       });
       return;
@@ -142,8 +185,8 @@ export default function EnhanceImagePage() {
 
       // Enhancement takes longer, simulate progress
       const progressInterval = setInterval(() => {
-        setProgress(prev => Math.min(prev + 5, 85));
-      }, 2000);
+        setProgress(prev => Math.min(prev + 3, 85));
+      }, 1500);
 
       const response = await fetch('/api/enhance-image', {
         method: 'POST',
@@ -171,22 +214,20 @@ export default function EnhanceImagePage() {
           setResultPreview(URL.createObjectURL(blob));
         }
 
+        const wasResized = data.result.wasResized;
         toast({
           title: "Image enhanced!",
-          description: `Upscaled ${scale}x to ${data.result.newDimensions.width}x${data.result.newDimensions.height}`,
+          description: wasResized 
+            ? `Image was resized before enhancement. Output: ${data.result.newDimensions.width}x${data.result.newDimensions.height}`
+            : `Upscaled ${scale}x to ${data.result.newDimensions.width}x${data.result.newDimensions.height}`,
         });
       }
     } catch (error: any) {
       console.error('Enhancement error:', error);
       
-      let errorMessage = error.message;
-      if (error.message.includes('too large')) {
-        errorMessage = 'Image is too large for this scale. Try a smaller image or lower scale.';
-      }
-      
       toast({
         title: "Enhancement failed",
-        description: errorMessage,
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -271,11 +312,17 @@ export default function EnhanceImagePage() {
                     Drop your image here
                   </p>
                   <p className="text-sm text-gray-400">
-                    JPG, PNG, or WebP - Max 10MB
+                    JPG, PNG, or WebP - Max 15MB
                   </p>
-                  <p className="text-xs text-gray-500 mt-2">
-                    Best results with images 500px - 2000px
-                  </p>
+                  <div className="mt-4 p-3 bg-blue-500/10 rounded-lg border border-blue-500/20">
+                    <div className="flex items-center justify-center gap-2 text-xs text-blue-400">
+                      <Info className="w-3 h-3" />
+                      <span>Best results with images under 1500×1500px</span>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Larger images will be automatically resized before enhancement
+                    </p>
+                  </div>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -303,6 +350,22 @@ export default function EnhanceImagePage() {
                       <span>{originalDimensions.width} × {originalDimensions.height}px</span>
                     )}
                   </div>
+                  
+                  {/* Size warning */}
+                  {previewInfo?.needsResize && (
+                    <div className="mt-3 p-3 bg-amber-500/10 rounded-lg border border-amber-500/30">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+                        <div className="text-xs">
+                          <p className="text-amber-400 font-medium">Large image detected</p>
+                          <p className="text-gray-400 mt-1">
+                            Image will be resized to {previewInfo.inputWidth}×{previewInfo.inputHeight}px before enhancement 
+                            (GPU memory limit). Final output: {previewInfo.outputWidth}×{previewInfo.outputHeight}px
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -325,6 +388,15 @@ export default function EnhanceImagePage() {
                       {result.scale}x ENHANCED
                     </div>
                   </div>
+                  
+                  {/* Show resize info if applicable */}
+                  {result.wasResized && result.inputDimensions && (
+                    <div className="mt-3 p-2 bg-amber-500/10 rounded-lg border border-amber-500/20 text-xs text-amber-400">
+                      <AlertTriangle className="w-3 h-3 inline mr-1" />
+                      Image was resized from {result.originalDimensions.width}×{result.originalDimensions.height} 
+                      to {result.inputDimensions.width}×{result.inputDimensions.height} before enhancement
+                    </div>
+                  )}
                   
                   <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
                     <div className="bg-gray-700/30 rounded-lg p-3">
@@ -397,15 +469,24 @@ export default function EnhanceImagePage() {
                     </div>
                     
                     {/* Preview dimensions */}
-                    {previewDimensions && (
-                      <div className="mt-3 p-3 bg-gray-700/30 rounded-lg text-center">
+                    {previewInfo && (
+                      <div className={`mt-3 p-3 rounded-lg text-center ${
+                        previewInfo.needsResize 
+                          ? 'bg-amber-500/10 border border-amber-500/20' 
+                          : 'bg-gray-700/30'
+                      }`}>
                         <span className="text-gray-400 text-sm">Output: </span>
                         <span className="text-yellow-400 font-medium">
-                          {previewDimensions.width} × {previewDimensions.height}px
+                          {previewInfo.outputWidth} × {previewInfo.outputHeight}px
                         </span>
                         <span className="text-gray-500 text-sm ml-2">
-                          ({previewDimensions.megapixels} MP)
+                          ({previewInfo.megapixels} MP)
                         </span>
+                        {previewInfo.needsResize && (
+                          <p className="text-xs text-amber-400 mt-1">
+                            Input will be resized to {previewInfo.inputWidth}×{previewInfo.inputHeight}
+                          </p>
+                        )}
                       </div>
                     )}
                   </div>
@@ -496,7 +577,7 @@ export default function EnhanceImagePage() {
                     {isProcessing ? (
                       <>
                         <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                        Enhancing... (may take 10-30s)
+                        Enhancing... (10-30s)
                       </>
                     ) : (
                       <>
@@ -516,7 +597,7 @@ export default function EnhanceImagePage() {
                         />
                       </div>
                       <p className="text-xs text-center text-gray-400">
-                        {progress < 20 ? 'Uploading...' : progress < 85 ? 'AI enhancing (this takes time)...' : 'Finalizing...'}
+                        {progress < 20 ? 'Uploading...' : progress < 85 ? 'AI enhancing...' : 'Finalizing...'}
                       </p>
                     </div>
                   )}
@@ -525,7 +606,8 @@ export default function EnhanceImagePage() {
                   <div className="flex items-start gap-2 p-3 bg-gray-700/30 rounded-lg text-xs text-gray-400">
                     <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
                     <span>
-                      Enhancement uses Real-ESRGAN AI and typically takes 10-30 seconds depending on image size and scale factor.
+                      Enhancement uses Real-ESRGAN AI. Large images (&gt;1500px) are automatically resized 
+                      to fit GPU memory limits before processing.
                     </span>
                   </div>
                 </div>
@@ -541,7 +623,7 @@ export default function EnhanceImagePage() {
               </div>
               <h3 className="font-semibold mb-2 text-white">Up to 8x Upscale</h3>
               <p className="text-sm text-gray-400">
-                Transform small images into stunning 4K or 8K resolution with AI-powered super-resolution
+                Transform small images into stunning high resolution with AI-powered super-resolution
               </p>
             </div>
 
@@ -551,17 +633,17 @@ export default function EnhanceImagePage() {
               </div>
               <h3 className="font-semibold mb-2 text-white">Face Enhancement</h3>
               <p className="text-sm text-gray-400">
-                GFPGAN integration to restore and enhance facial details in portraits and photos
+                GFPGAN integration to restore and enhance facial details in portraits
               </p>
             </div>
 
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 text-center border border-gray-700/50">
               <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <ImageIcon className="w-6 h-6 text-blue-400" />
+                <Download className="w-6 h-6 text-blue-400" />
               </div>
               <h3 className="font-semibold mb-2 text-white">Modern Formats</h3>
               <p className="text-sm text-gray-400">
-                Save enhanced images as PNG, WebP, AVIF, or JPG for optimal quality and file size
+                Save enhanced images as PNG, WebP, AVIF, or JPG for optimal quality
               </p>
             </div>
           </div>
@@ -574,8 +656,7 @@ export default function EnhanceImagePage() {
             
             <p className="text-gray-300 mb-4">
               MicroJPEG's AI Image Enhancer uses <strong className="text-yellow-400">Real-ESRGAN</strong>, 
-              the same technology trusted by professionals for upscaling low-resolution images to stunning 
-              4K and 8K quality without losing detail.
+              the same technology trusted by professionals for upscaling images while preserving detail.
             </p>
             
             <h3 className="text-xl font-bold text-white mb-3 mt-6">
@@ -603,6 +684,65 @@ export default function EnhanceImagePage() {
         </main>
 
         <div className="h-16"></div>
+              {/* Footer */}
+      <footer className="bg-gray-100 text-black py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-8">
+            {/* Brand */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <img src={logoUrl} alt="MicroJPEG Logo" className="w-10 h-10" />
+                <span className="text-xl font-bold font-poppins">MicroJPEG</span>
+              </div>
+              <p className="text-gray-600 font-opensans">
+                The smartest way to compress and optimize your images for the web.
+              </p>
+            </div>
+
+            {/* Product */}
+            <div>
+              <h4 className="font-semibold font-poppins mb-4">Product</h4>
+              <ul className="space-y-2 text-gray-600 font-opensans">
+                <li><a href="/features" className="hover:text-black">Features</a></li>
+                <li><a href="/pricing" className="hover:text-black">Pricing</a></li>
+                <li><a href="/api-docs" className="hover:text-black">API</a></li>
+                <li><a href="/api-docs" className="hover:text-black">Documentation</a></li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h4 className="font-semibold font-poppins mb-4">Company</h4>
+              <ul className="space-y-2 text-gray-600 font-opensans">
+                <li><a href="/about" className="hover:text-black">About</a></li>
+                <li><a href="/blog" className="hover:text-black">Blog</a></li>
+                <li><a href="/contact" className="hover:text-black">Contact</a></li>
+                <li><a href="/support" className="hover:text-black">Support</a></li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="font-semibold font-poppins mb-4">Legal</h4>
+              <ul className="space-y-2 text-gray-600 font-opensans">
+                <li><a href="/privacy-policy" className="hover:text-black">Privacy Policy</a></li>
+                <li><a href="/terms-of-service" className="hover:text-black">Terms of Service</a></li>
+                <li><a href="/cookie-policy" className="hover:text-black">Cookie Policy</a></li>
+                <li><a href="/cancellation-policy" className="hover:text-black">Cancellation Policy</a></li>
+                <li><a href="/privacy-policy" className="hover:text-black">GDPR</a></li>
+              </ul>
+            </div>
+          </div>
+
+
+          <div className="border-t border-gray-300 pt-8 text-center text-gray-500 font-opensans">
+            <p>© 2025 MicroJPEG. All rights reserved. Making the web faster, one image at a time.</p>
+            <p className="text-xs mt-2 opacity-75">
+              Background photo by <a href="https://www.pexels.com/photo/selective-focus-photo-of-white-petaled-flowers-96627/" target="_blank" rel="noopener noreferrer" className="hover:underline">AS Photography</a>
+            </p>
+          </div>
+        </div>
+      </footer>
       </div>
     </>
   );
