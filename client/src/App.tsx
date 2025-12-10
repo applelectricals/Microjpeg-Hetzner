@@ -76,6 +76,7 @@ const ToolsConvert = lazy(() => import("@/pages/tools-convert"));
 const ToolsBatch = lazy(() => import("@/pages/tools-batch"));
 const ToolsOptimizer = lazy(() => import("@/pages/tools-optimizer"));
 const RemoveBackgroundPage = lazy(() => import("@/pages/remove-background"));
+const EnhanceImagePage = lazy(() => import("@/pages/enhance-image"));
 
 // WordPress integration pages (lower priority)
 const WordPressDetails = lazy(() => import("@/pages/wordpress-details"));
@@ -200,7 +201,8 @@ function Router() {
         <Route path="/tools/batch" component={ToolsBatch} />
         <Route path="/tools/optimizer" component={ToolsOptimizer} />
         <Route path="/remove-background" component={RemoveBackgroundPage} />
-        
+        <Route path="/enhance-image" component={EnhanceImagePage} />
+
         {/* LEGACY: Web tools - Redirect to new hierarchy */}
         <Route path="/web/overview" component={() => <WebToolsRedirect to="/tools" />} />
         <Route path="/web/compress" component={() => <WebToolsRedirect to="/tools/compress" />} />
