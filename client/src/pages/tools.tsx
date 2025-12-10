@@ -6,6 +6,7 @@ import { ArrowRight, Zap, Shield, Globe, Star, FileImage, Download, Upload, Came
 import { Link } from 'wouter';
 import Header from '@/components/header';
 import { SEOHead } from '@/components/SEOHead';
+import ButtonsSection from '@/components/ButtonsSection';
 import logoUrl from '@assets/mascot-logo-optimized.png';
 
 export default function Tools() {
@@ -69,9 +70,11 @@ export default function Tools() {
             <h1 className="text-5xl font-bold bg-gradient-to-r from-teal-400 to-yellow-400 bg-clip-text text-transparent mb-6">
               Professional Image Tools 65+ Conversions & Compressions
             </h1>
-            </ButtonsSection>
+
+            <ButtonsSection />
+
             <p className="text-xl text-gray-300 max-w-4xl mx-auto mb-8">
-              Comprehensive suite of professional image processing tools. Compress, convert, optimize, and process your images 
+              Comprehensive suite of professional image processing tools. Compress, convert, optimize, and process your images
               with advanced algorithms and support for upto 200MB RAW (ARW, CR2, CRW, DNG, NEF, ORF, RAF) & Regular (JPG, PNG, WEBP, AVIF, TIFF, SVG) formats.
               Only App in the Internet with 13+ Formats, offering Web, API, CDN, Wordpress & Integrations for All Imaging Needs.
             </p>
