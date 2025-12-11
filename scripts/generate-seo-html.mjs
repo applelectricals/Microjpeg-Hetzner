@@ -27,7 +27,7 @@ const __dirname = path.dirname(__filename);
 // Configuration
 const SERVER_PORT = process.env.SEO_SERVER_PORT || 10000;
 
-// If SEO_BUILD=true, we’re running inside a build and want localhost
+// If SEO_BUILD=true, we're running inside a build and want localhost
 // Otherwise (local dev), you can still point to your live domain if you want.
 const IS_BUILD = process.env.SEO_BUILD === 'true';
 
@@ -142,6 +142,19 @@ const SEO_PAGES = [
     url: '/legal/cookies',
     output: 'legal-cookies.html',
     name: 'Cookie Policy'
+  },
+  // ========================================
+  // AI TOOLS PAGES - NEW
+  // ========================================
+  {
+    url: '/remove-background',
+    output: 'remove-background.html',
+    name: 'AI Background Remover'
+  },
+  {
+    url: '/enhance-image',
+    output: 'enhance-image.html',
+    name: 'AI Image Enhancer'
   }
 ];
 
@@ -207,24 +220,25 @@ CONVERSION_PAGES.forEach(conversion => {
                            conversion === 'webp-to-webp' || conversion === 'avif-to-avif' ||
                            conversion === 'tiff-to-tiff';
 
-  const path = isSelfCompression ? '/compress/' : '/convert/';
+  const pagePath = isSelfCompression ? '/compress/' : '/convert/';
 
   // Extract format name from conversion (e.g., 'jpg-to-jpg' -> 'jpg')
   const format = isSelfCompression ? conversion.split('-')[0] : null;
   const outputFile = isSelfCompression ? `compress-${format}.html` : `convert-${conversion}.html`;
 
   SEO_PAGES.push({
-    url: `${path}${conversion}`,
+    url: `${pagePath}${conversion}`,
     output: outputFile,
     name: `${isSelfCompression ? 'Compress' : 'Convert'}: ${conversion}`
   });
 });
 
 console.log(`\n📊 Total SEO pages to generate: ${SEO_PAGES.length}`);
-console.log(`   - Core pages: 20 (includes tools, pricing, features, WordPress, API docs, legal)`);
+console.log(`   - Core pages: 22 (includes tools, pricing, features, WordPress, API docs, legal, AI tools)`);
 console.log(`   - Blog posts: ${BLOG_POSTS.length}`);
 console.log(`   - Conversion pages: 60 (includes svg-to-tiff)`);
 console.log(`   - Compression pages: 5`);
+console.log(`   - AI Tool pages: 2 (remove-background, enhance-image)`);
 console.log(`   - Grand total: ${SEO_PAGES.length}\n`);
 
 
@@ -258,36 +272,36 @@ function startServer() {
     console.log('🚀 Starting development server...');
     
     // Start the dev server (tsx already loads .env)
-    serverProcess = spawn('npm', ['run', 'dev'], {
-      env: { 
-        ...process.env,
-        PORT: SERVER_PORT,
-        NODE_ENV: 'development'
-      },
-      stdio: 'pipe',
-      shell: true
+    serverProcess = spawn('node', ['dist/index.js'], {
+      env: { ...process.env, PORT: SERVER_PORT },
+      stdio: ['ignore', 'pipe', 'pipe']
     });
 
     serverProcess.stdout.on('data', (data) => {
       const output = data.toString();
-      console.log(`   Server: ${output.trim()}`);
-      
-      // Wait for server to be ready
-      if (output.includes('listening') || output.includes('started')) {
-        setTimeout(resolve, STARTUP_DELAY);
+      if (output.includes('serving on') || output.includes('listening') || output.includes('ready')) {
+        console.log(`   ✅ Server started`);
       }
     });
 
     serverProcess.stderr.on('data', (data) => {
-      console.error(`   Server Error: ${data.toString().trim()}`);
+      // Only log errors, not warnings
+      const output = data.toString();
+      if (output.includes('error') || output.includes('Error')) {
+        console.error(`   Server error: ${output}`);
+      }
     });
 
     serverProcess.on('error', (error) => {
-      reject(new Error(`Failed to start server: ${error.message}`));
+      console.error(`   ❌ Failed to start server: ${error.message}`);
+      reject(error);
     });
 
-    // Also resolve after delay even if we don't see the message
-    setTimeout(resolve, STARTUP_DELAY + 2000);
+    // Give server time to start
+    console.log(`   ⏳ Waiting ${STARTUP_DELAY / 1000}s for server to initialize...`);
+    setTimeout(() => {
+      resolve();
+    }, STARTUP_DELAY);
   });
 }
 
@@ -297,59 +311,24 @@ function startServer() {
 function stopServer() {
   if (serverProcess) {
     console.log('🛑 Stopping server...');
-    serverProcess.kill();
+    serverProcess.kill('SIGTERM');
     serverProcess = null;
   }
 }
 
 /**
- * Wait for React app to fully render with content
- * This is the KEY FIX - we need to wait for actual content, not just the shell
+ * Wait for React to render the page
  */
 async function waitForReactRender(page, pageConfig) {
-  // Define selectors that indicate the page has fully loaded
-  // These should be elements that only appear AFTER React renders the content
-  const contentSelectors = [
-    // Common content indicators - at least one should exist on every page
-    'main',
-    '[data-testid="page-content"]',
-    'article',
-    '.content',
-    '#content',
-    // Specific page indicators
-    'h1',
-    'h2',
-    // Footer usually loads last
-    'footer',
-  ];
-
-  // Wait for network to be idle (no pending requests for 500ms)
+  // Wait for common React render indicators
   try {
-    await page.waitForNetworkIdle({ 
-      idleTime: 500,
-      timeout: 10000 
-    });
+    // Wait for the root div to have content
+    await page.waitForSelector('#root > *', { timeout: 10000 });
   } catch (e) {
-    console.log(`   ⚠️  Network idle timeout, continuing...`);
+    console.log(`   ⚠️  Root element not found, continuing anyway...`);
   }
 
-  // Wait for at least one content selector to appear
-  let foundContent = false;
-  for (const selector of contentSelectors) {
-    try {
-      await page.waitForSelector(selector, { timeout: 2000 });
-      foundContent = true;
-      break;
-    } catch (e) {
-      // Continue to next selector
-    }
-  }
-
-  if (!foundContent) {
-    console.log(`   ⚠️  No content selectors found, waiting extra time...`);
-  }
-
-  // Additional wait for any lazy-loaded content or animations
+  // Additional wait for dynamic content
   await new Promise(resolve => setTimeout(resolve, 2000));
 
   // Check if the page has meaningful content (not just empty shell)
@@ -493,19 +472,17 @@ async function main() {
       console.log(`✅ Created output directory: ${OUTPUT_DIR}\n`);
     }
 
-if (IS_BUILD) {
-  // Start local server inside the build container
-  await startServer();
-  console.log('✅ Local server started for SEO generation\n');
-} else {
-  console.log('🔗 Connecting to existing server...');
-  console.log(`   URL: ${SERVER_URL}\n`);
-}
+    if (IS_BUILD) {
+      // Start local server inside the build container
+      await startServer();
+      console.log('✅ Local server started for SEO generation\n');
+    } else {
+      console.log('🔗 Connecting to existing server...');
+      console.log(`   URL: ${SERVER_URL}\n`);
+    }
 
-// Wait for server to be ready
-await waitForServer();
-console.log('✅ Server is responding\n');
-
+    // Wait for server to be ready
+    await waitForServer();
     console.log('✅ Server is responding\n');
 
     // Launch Puppeteer with optimized settings
@@ -581,16 +558,18 @@ console.log('✅ Server is responding\n');
     console.log('✅ Manifest created: manifest.json\n');
 
     // Stop server
-if (IS_BUILD) {
-  stopServer();
-}
+    if (IS_BUILD) {
+      stopServer();
+    }
 
     // Exit
     process.exit(failed > 0 ? 1 : 0);
 
   } catch (error) {
     console.error('\n❌ Fatal error:', error);
-    // stopServer(); // Don't stop server - it was already running
+    if (IS_BUILD) {
+      stopServer();
+    }
     process.exit(1);
   }
 }
@@ -598,13 +577,17 @@ if (IS_BUILD) {
 // Handle interrupts
 process.on('SIGINT', () => {
   console.log('\n\n⚠️  Interrupted by user');
-  // stopServer(); // Don't stop server - it was already running
+  if (IS_BUILD) {
+    stopServer();
+  }
   process.exit(1);
 });
 
 process.on('SIGTERM', () => {
   console.log('\n\n⚠️  Terminated');
-  // stopServer(); // Don't stop server - it was already running
+  if (IS_BUILD) {
+    stopServer();
+  }
   process.exit(1);
 });
 

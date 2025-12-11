@@ -3,6 +3,8 @@
  * 
  * Handles fetching and caching tier limits from database
  * Uses Upstash Redis for caching to reduce database load
+ * 
+ * UPDATED: Added AI Background Removal and AI Enhancement limits
  */
 
 import { Redis } from '@upstash/redis';
@@ -30,6 +32,8 @@ export interface TierLimits {
   tier_name: string;
   tier_display_name: string;
   tier_description: string | null;
+  
+  // Compress/Convert limits
   monthly_operations: number;
   daily_operations: number | null;
   hourly_operations: number | null;
@@ -38,20 +42,86 @@ export interface TierLimits {
   max_concurrent_uploads: number;
   max_batch_size: number;
   processing_timeout_seconds: number;
+  
+  // AI Background Removal limits (NEW)
+  ai_bg_removal_monthly: number;
+  ai_bg_output_formats: string; // 'png' or 'png,webp,avif,jpg'
+  ai_bg_max_file_size: number;
+  
+  // AI Image Enhancement limits (NEW)
+  ai_enhance_monthly: number;
+  ai_enhance_max_upscale: number; // 2, 4, or 8
+  ai_enhance_face_enhancement: boolean;
+  ai_enhance_max_file_size: number;
+  
+  // Other features
   priority_processing: boolean;
+  api_access_level: string; // 'none', 'basic', 'full'
+  support_level: string; // 'community', 'email', 'priority', 'dedicated'
+  
+  // Legacy fields
   api_calls_monthly: number;
   team_seats: number;
   has_analytics: boolean;
   has_webhooks: boolean;
   has_custom_profiles: boolean;
   has_white_label: boolean;
+  
+  // Pricing
   price_monthly: number;
   price_yearly: number;
   stripe_price_id_monthly: string | null;
   stripe_price_id_yearly: string | null;
+  razorpay_plan_id_monthly: string | null;
+  razorpay_plan_id_yearly: string | null;
+  paypal_plan_id_monthly: string | null;
+  paypal_plan_id_yearly: string | null;
+  
+  // Status
   is_active: boolean;
   is_visible_on_pricing: boolean;
 }
+
+// Default free tier limits (fallback)
+const DEFAULT_FREE_LIMITS: TierLimits = {
+  tier_name: 'free',
+  tier_display_name: 'Free',
+  tier_description: 'Basic access for casual users',
+  monthly_operations: 200,
+  daily_operations: 50,
+  hourly_operations: 10,
+  max_file_size_regular: 7,
+  max_file_size_raw: 15,
+  max_concurrent_uploads: 1,
+  max_batch_size: 1,
+  processing_timeout_seconds: 60,
+  ai_bg_removal_monthly: 5,
+  ai_bg_output_formats: 'png',
+  ai_bg_max_file_size: 10,
+  ai_enhance_monthly: 3,
+  ai_enhance_max_upscale: 2,
+  ai_enhance_face_enhancement: false,
+  ai_enhance_max_file_size: 10,
+  priority_processing: false,
+  api_access_level: 'none',
+  support_level: 'community',
+  api_calls_monthly: 0,
+  team_seats: 1,
+  has_analytics: false,
+  has_webhooks: false,
+  has_custom_profiles: false,
+  has_white_label: false,
+  price_monthly: 0,
+  price_yearly: 0,
+  stripe_price_id_monthly: null,
+  stripe_price_id_yearly: null,
+  razorpay_plan_id_monthly: null,
+  razorpay_plan_id_yearly: null,
+  paypal_plan_id_monthly: null,
+  paypal_plan_id_yearly: null,
+  is_active: true,
+  is_visible_on_pricing: true,
+};
 
 class TierLimitService {
   private readonly CACHE_TTL = 3600; // 1 hour in seconds
@@ -88,7 +158,16 @@ class TierLimitService {
           max_concurrent_uploads,
           max_batch_size,
           processing_timeout_seconds,
-          priority_processing,
+          COALESCE(ai_bg_removal_monthly, 0) as ai_bg_removal_monthly,
+          COALESCE(ai_bg_output_formats, 'png') as ai_bg_output_formats,
+          COALESCE(ai_bg_max_file_size, 10) as ai_bg_max_file_size,
+          COALESCE(ai_enhance_monthly, 0) as ai_enhance_monthly,
+          COALESCE(ai_enhance_max_upscale, 2) as ai_enhance_max_upscale,
+          COALESCE(ai_enhance_face_enhancement, FALSE) as ai_enhance_face_enhancement,
+          COALESCE(ai_enhance_max_file_size, 10) as ai_enhance_max_file_size,
+          COALESCE(priority_processing, FALSE) as priority_processing,
+          COALESCE(api_access_level, 'none') as api_access_level,
+          COALESCE(support_level, 'community') as support_level,
           api_calls_monthly,
           team_seats,
           has_analytics,
@@ -99,6 +178,10 @@ class TierLimitService {
           price_yearly,
           stripe_price_id_monthly,
           stripe_price_id_yearly,
+          razorpay_plan_id_monthly,
+          razorpay_plan_id_yearly,
+          paypal_plan_id_monthly,
+          paypal_plan_id_yearly,
           is_active,
           is_visible_on_pricing
         FROM tier_limits
@@ -108,7 +191,12 @@ class TierLimitService {
 
       if (result.rows.length === 0) {
         // Default to free tier if not found
-        console.warn(`[TierLimitService] Tier ${tierName} not found, defaulting to free`);
+        console.warn(`[TierLimitService] Tier ${tierName} not found, using defaults`);
+        
+        if (tierName === 'free' || tierName === 'free_registered') {
+          return DEFAULT_FREE_LIMITS;
+        }
+        
         return this.getTierLimits('free');
       }
 
@@ -120,6 +208,12 @@ class TierLimitService {
       return tierLimits;
     } catch (error) {
       console.error('[TierLimitService] Error fetching tier limits:', error);
+      
+      // Return defaults on error
+      if (tierName === 'free' || tierName === 'free_registered') {
+        return DEFAULT_FREE_LIMITS;
+      }
+      
       throw new Error('Failed to fetch tier limits');
     }
   }
@@ -143,9 +237,43 @@ class TierLimitService {
 
       // Fetch from database
       const result = await pool.query<TierLimits>(
-        `SELECT * FROM tier_limits 
-         WHERE is_active = TRUE AND is_visible_on_pricing = TRUE
-         ORDER BY price_monthly ASC`
+        `SELECT 
+          tier_name,
+          tier_display_name,
+          tier_description,
+          monthly_operations,
+          daily_operations,
+          hourly_operations,
+          max_file_size_regular,
+          max_file_size_raw,
+          max_concurrent_uploads,
+          max_batch_size,
+          processing_timeout_seconds,
+          COALESCE(ai_bg_removal_monthly, 0) as ai_bg_removal_monthly,
+          COALESCE(ai_bg_output_formats, 'png') as ai_bg_output_formats,
+          COALESCE(ai_bg_max_file_size, 10) as ai_bg_max_file_size,
+          COALESCE(ai_enhance_monthly, 0) as ai_enhance_monthly,
+          COALESCE(ai_enhance_max_upscale, 2) as ai_enhance_max_upscale,
+          COALESCE(ai_enhance_face_enhancement, FALSE) as ai_enhance_face_enhancement,
+          COALESCE(ai_enhance_max_file_size, 10) as ai_enhance_max_file_size,
+          COALESCE(priority_processing, FALSE) as priority_processing,
+          COALESCE(api_access_level, 'none') as api_access_level,
+          COALESCE(support_level, 'community') as support_level,
+          api_calls_monthly,
+          team_seats,
+          has_analytics,
+          has_webhooks,
+          has_custom_profiles,
+          has_white_label,
+          price_monthly,
+          price_yearly,
+          stripe_price_id_monthly,
+          stripe_price_id_yearly,
+          is_active,
+          is_visible_on_pricing
+        FROM tier_limits 
+        WHERE is_active = TRUE AND is_visible_on_pricing = TRUE
+        ORDER BY price_monthly ASC`
       );
 
       const tierLimits = result.rows;
@@ -157,6 +285,193 @@ class TierLimitService {
     } catch (error) {
       console.error('[TierLimitService] Error fetching all tier limits:', error);
       throw new Error('Failed to fetch all tier limits');
+    }
+  }
+
+  /**
+   * Check if user can use AI Background Removal
+   */
+  async canUseBgRemoval(userId: string | null, sessionId: string | null, tierName: string): Promise<{
+    allowed: boolean;
+    remaining: number;
+    limit: number;
+    outputFormats: string[];
+  }> {
+    const limits = await this.getTierLimits(tierName);
+    const usage = await this.getAIUsage(userId, sessionId);
+    
+    const remaining = Math.max(0, limits.ai_bg_removal_monthly - usage.bg_removal_used);
+    const outputFormats = limits.ai_bg_output_formats.split(',').map(f => f.trim());
+    
+    return {
+      allowed: remaining > 0,
+      remaining,
+      limit: limits.ai_bg_removal_monthly,
+      outputFormats,
+    };
+  }
+
+  /**
+   * Check if user can use AI Enhancement
+   */
+  async canUseEnhancement(userId: string | null, sessionId: string | null, tierName: string): Promise<{
+    allowed: boolean;
+    remaining: number;
+    limit: number;
+    maxUpscale: number;
+    faceEnhancement: boolean;
+  }> {
+    const limits = await this.getTierLimits(tierName);
+    const usage = await this.getAIUsage(userId, sessionId);
+    
+    const remaining = Math.max(0, limits.ai_enhance_monthly - usage.enhance_used);
+    
+    return {
+      allowed: remaining > 0,
+      remaining,
+      limit: limits.ai_enhance_monthly,
+      maxUpscale: limits.ai_enhance_max_upscale,
+      faceEnhancement: limits.ai_enhance_face_enhancement,
+    };
+  }
+
+  /**
+   * Get AI usage for user/session
+   */
+  async getAIUsage(userId: string | null, sessionId: string | null): Promise<{
+    bg_removal_used: number;
+    enhance_used: number;
+    period_start: Date;
+  }> {
+    try {
+      let query: string;
+      let params: (string | null)[];
+
+      if (userId) {
+        query = `SELECT bg_removal_monthly_used, enhance_monthly_used, current_period_start 
+                 FROM ai_usage WHERE user_id = $1`;
+        params = [userId];
+      } else if (sessionId) {
+        query = `SELECT bg_removal_monthly_used, enhance_monthly_used, current_period_start 
+                 FROM ai_usage WHERE session_id = $1`;
+        params = [sessionId];
+      } else {
+        return { bg_removal_used: 0, enhance_used: 0, period_start: new Date() };
+      }
+
+      const result = await pool.query(query, params);
+      
+      if (result.rows.length === 0) {
+        return { bg_removal_used: 0, enhance_used: 0, period_start: new Date() };
+      }
+
+      const row = result.rows[0];
+      
+      // Check if we need to reset (new month)
+      const periodStart = new Date(row.current_period_start);
+      const now = new Date();
+      
+      if (periodStart.getMonth() !== now.getMonth() || periodStart.getFullYear() !== now.getFullYear()) {
+        // Reset counters for new month
+        await this.resetAIUsage(userId, sessionId);
+        return { bg_removal_used: 0, enhance_used: 0, period_start: now };
+      }
+
+      return {
+        bg_removal_used: row.bg_removal_monthly_used || 0,
+        enhance_used: row.enhance_monthly_used || 0,
+        period_start: periodStart,
+      };
+    } catch (error) {
+      console.error('[TierLimitService] Error getting AI usage:', error);
+      return { bg_removal_used: 0, enhance_used: 0, period_start: new Date() };
+    }
+  }
+
+  /**
+   * Increment AI Background Removal usage
+   */
+  async incrementBgRemovalUsage(userId: string | null, sessionId: string | null): Promise<void> {
+    try {
+      if (userId) {
+        await pool.query(`
+          INSERT INTO ai_usage (user_id, bg_removal_monthly_used)
+          VALUES ($1, 1)
+          ON CONFLICT (user_id) 
+          DO UPDATE SET 
+            bg_removal_monthly_used = ai_usage.bg_removal_monthly_used + 1,
+            updated_at = CURRENT_TIMESTAMP
+        `, [userId]);
+      } else if (sessionId) {
+        await pool.query(`
+          INSERT INTO ai_usage (session_id, bg_removal_monthly_used)
+          VALUES ($1, 1)
+          ON CONFLICT (session_id) 
+          DO UPDATE SET 
+            bg_removal_monthly_used = ai_usage.bg_removal_monthly_used + 1,
+            updated_at = CURRENT_TIMESTAMP
+        `, [sessionId]);
+      }
+    } catch (error) {
+      console.error('[TierLimitService] Error incrementing BG removal usage:', error);
+    }
+  }
+
+  /**
+   * Increment AI Enhancement usage
+   */
+  async incrementEnhanceUsage(userId: string | null, sessionId: string | null): Promise<void> {
+    try {
+      if (userId) {
+        await pool.query(`
+          INSERT INTO ai_usage (user_id, enhance_monthly_used)
+          VALUES ($1, 1)
+          ON CONFLICT (user_id) 
+          DO UPDATE SET 
+            enhance_monthly_used = ai_usage.enhance_monthly_used + 1,
+            updated_at = CURRENT_TIMESTAMP
+        `, [userId]);
+      } else if (sessionId) {
+        await pool.query(`
+          INSERT INTO ai_usage (session_id, enhance_monthly_used)
+          VALUES ($1, 1)
+          ON CONFLICT (session_id) 
+          DO UPDATE SET 
+            enhance_monthly_used = ai_usage.enhance_monthly_used + 1,
+            updated_at = CURRENT_TIMESTAMP
+        `, [sessionId]);
+      }
+    } catch (error) {
+      console.error('[TierLimitService] Error incrementing enhance usage:', error);
+    }
+  }
+
+  /**
+   * Reset AI usage for new month
+   */
+  async resetAIUsage(userId: string | null, sessionId: string | null): Promise<void> {
+    try {
+      if (userId) {
+        await pool.query(`
+          UPDATE ai_usage 
+          SET bg_removal_monthly_used = 0, 
+              enhance_monthly_used = 0,
+              current_period_start = CURRENT_TIMESTAMP,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE user_id = $1
+        `, [userId]);
+      } else if (sessionId) {
+        await pool.query(`
+          UPDATE ai_usage 
+          SET bg_removal_monthly_used = 0, 
+              enhance_monthly_used = 0,
+              current_period_start = CURRENT_TIMESTAMP,
+              updated_at = CURRENT_TIMESTAMP
+          WHERE session_id = $1
+        `, [sessionId]);
+      }
+    } catch (error) {
+      console.error('[TierLimitService] Error resetting AI usage:', error);
     }
   }
 

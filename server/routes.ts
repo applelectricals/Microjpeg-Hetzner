@@ -935,6 +935,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ============================================================================
+  // AI HELPER FUNCTIONS
+  // ============================================================================
+
+  async function getUserTier(req: any): Promise<{
+    userId: string | null;
+    sessionId: string | null;
+    tierName: string;
+  }> {
+    // Check if user is authenticated
+    if (req.user?.id) {
+      const user = req.user;
+      return {
+        userId: user.id,
+        sessionId: null,
+        tierName: user.subscriptionTier || 'free_registered',
+      };
+    }
+
+    // Anonymous user - use session
+    const sessionId = req.sessionID || req.cookies?.sessionId ||
+      `anon_${req.ip}_${Date.now()}`;
+
+    return {
+      userId: null,
+      sessionId,
+      tierName: 'free',
+    };
+  }
+
+  // ============================================================================
   // AI BACKGROUND REMOVAL ROUTES
   // ============================================================================
 
@@ -948,23 +978,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get pricing info
-  app.get('/api/ai/pricing', (req, res) => {
-    res.json({
-      backgroundRemoval: {
-        standard: getEstimatedCost('standard'),
-        enhanced: getEstimatedCost('enhanced'),
-      },
-      note: 'Costs are approximate and may vary based on image size',
-    });
+  // Check AI BG removal limits before processing
+  app.get('/api/ai/bg-removal/limits', async (req, res) => {
+    try {
+      const { userId, sessionId, tierName } = await getUserTier(req);
+      const limits = await tierLimitService.canUseBgRemoval(userId, sessionId, tierName);
+
+      res.json({
+        ...limits,
+        tier: tierName,
+      });
+    } catch (error: any) {
+      console.error('Error checking BG removal limits:', error);
+      res.status(500).json({ error: 'Failed to check limits' });
+    }
   });
 
-  // Background removal endpoint
+  // AI Background Removal endpoint with limit enforcement
   app.post('/api/remove-background',
     checkConcurrentSessions,
     upload.single('file'),
     async (req, res) => {
-      console.log('=== BACKGROUND REMOVAL REQUEST ===');
+      console.log('=== AI BACKGROUND REMOVAL REQUEST ===');
 
       try {
         const file = req.file;
@@ -972,43 +1007,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ error: 'No file uploaded' });
         }
 
-        // Parse options from request
-        const options = {
-          model: (req.body.model || 'standard') as 'standard' | 'enhanced',
-          outputFormat: (req.body.outputFormat || 'png') as 'png' | 'webp' | 'avif',
-          outputQuality: parseInt(req.body.quality) || 90,
-        };
+        // Get user tier and check limits
+        const { userId, sessionId, tierName } = await getUserTier(req);
+        const limits = await tierLimitService.canUseBgRemoval(userId, sessionId, tierName);
+
+        console.log(`📊 User tier: ${tierName}, Remaining: ${limits.remaining}/${limits.limit}`);
+
+        // Check if user has remaining operations
+        if (!limits.allowed) {
+          return res.status(429).json({
+            error: 'Monthly limit reached',
+            message: `You've used all ${limits.limit} background removals this month. Upgrade for more.`,
+            limit: limits.limit,
+            remaining: 0,
+            upgradeUrl: '/pricing',
+          });
+        }
+
+        // Check output format permission
+        const outputFormat = (req.body.outputFormat || 'png').toLowerCase();
+        if (!limits.outputFormats.includes(outputFormat)) {
+          return res.status(403).json({
+            error: 'Format not available',
+            message: `${outputFormat.toUpperCase()} output is not available on your plan. Upgrade to access all formats.`,
+            allowedFormats: limits.outputFormats,
+            upgradeUrl: '/pricing',
+          });
+        }
+
+        // Get tier limits for file size check
+        const tierLimits = await tierLimitService.getTierLimits(tierName);
+        const maxFileSize = tierLimits.ai_bg_max_file_size * 1024 * 1024;
+
+        if (file.size > maxFileSize) {
+          return res.status(400).json({
+            error: 'File too large',
+            message: `Max file size is ${tierLimits.ai_bg_max_file_size}MB for your plan.`,
+            maxSize: tierLimits.ai_bg_max_file_size,
+          });
+        }
 
         console.log(`📁 File: ${file.originalname} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
-        console.log(`⚙️ Options:`, options);
 
-        // Check user tier for access (premium feature)
-        const user = req.user;
-        const session = req.session as any;
-
-        // For now, allow all users (you can restrict to paid tiers later)
-        // if (!user || !user.isPremium) {
-        //   return res.status(403).json({
-        //     error: 'Premium feature',
-        //     message: 'Background removal requires a paid subscription'
-        //   });
-        // }
-
-        // Process background removal
-        const result = await removeBackground(
-          file.path,
-          'compressed', // Output directory
-          options
-        );
+        // Process image
+        const result = await removeBackground(file.path, 'compressed', {
+          outputFormat: outputFormat as 'png' | 'webp' | 'avif' | 'jpg',
+          outputQuality: parseInt(req.body.quality) || 90,
+        });
 
         if (!result.success) {
           return res.status(500).json({ error: result.error });
         }
 
+        // Increment usage AFTER successful processing
+        await tierLimitService.incrementBgRemovalUsage(userId, sessionId);
+
         // Generate job ID for download
         const jobId = path.basename(result.outputPath!, path.extname(result.outputPath!));
 
-        // Return result
         res.json({
           success: true,
           result: {
@@ -1017,8 +1073,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             originalSize: result.originalSize,
             processedSize: result.processedSize,
             format: result.format,
+            hasTransparency: result.hasTransparency,
             processingTime: result.processingTime,
             downloadUrl: `/api/download/${jobId}`,
+          },
+          usage: {
+            remaining: limits.remaining - 1,
+            limit: limits.limit,
           },
         });
 
@@ -1027,7 +1088,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       } catch (error: any) {
         console.error('❌ Background removal error:', error);
-        res.status(500).json({ error: error.message || 'Background removal failed' });
+        res.status(500).json({ error: error.message || 'Processing failed' });
       }
     }
   );
@@ -1122,6 +1183,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // AI IMAGE ENHANCEMENT ROUTES
   // ============================================================================
 
+  // Check AI enhancement limits before processing
+  app.get('/api/ai/enhance/limits', async (req, res) => {
+    try {
+      const { userId, sessionId, tierName } = await getUserTier(req);
+      const limits = await tierLimitService.canUseEnhancement(userId, sessionId, tierName);
+
+      res.json({
+        ...limits,
+        tier: tierName,
+      });
+    } catch (error: any) {
+      console.error('Error checking enhancement limits:', error);
+      res.status(500).json({ error: 'Failed to check limits' });
+    }
+  });
+
   // Get enhancement pricing info
   app.get('/api/ai/enhance-pricing', (req, res) => {
     res.json({
@@ -1153,12 +1230,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(result);
   });
 
-  // Image enhancement endpoint
+  // AI Image Enhancement endpoint with limit enforcement
   app.post('/api/enhance-image',
     checkConcurrentSessions,
     upload.single('file'),
     async (req, res) => {
-      console.log('=== IMAGE ENHANCEMENT REQUEST ===');
+      console.log('=== AI IMAGE ENHANCEMENT REQUEST ===');
 
       try {
         const file = req.file;
@@ -1166,48 +1243,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ error: 'No file uploaded' });
         }
 
-        // Parse options from request
-        const scale = parseInt(req.body.scale) || 4;
-        const validScales = [2, 4, 8];
+        // Get user tier and check limits
+        const { userId, sessionId, tierName } = await getUserTier(req);
+        const limits = await tierLimitService.canUseEnhancement(userId, sessionId, tierName);
 
-        if (!validScales.includes(scale)) {
-          return res.status(400).json({ error: 'Scale must be 2, 4, or 8' });
-        }
+        console.log(`📊 User tier: ${tierName}, Remaining: ${limits.remaining}/${limits.limit}`);
 
-        const options = {
-          scale: scale as 2 | 4 | 8,
-          faceEnhance: req.body.faceEnhance === 'true',
-          outputFormat: (req.body.outputFormat || 'png') as 'png' | 'webp' | 'avif' | 'jpg',
-          outputQuality: parseInt(req.body.quality) || 90,
-        };
-
-        console.log(`📁 File: ${file.originalname} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
-        console.log(`⚙️ Options:`, options);
-
-        // File size limit check - 15MB for enhancement
-        const maxSize = 15 * 1024 * 1024; // 15MB
-        if (file.size > maxSize) {
-          return res.status(400).json({
-            error: 'File too large',
-            message: `Maximum file size is 15MB. Your file is ${(file.size / 1024 / 1024).toFixed(1)}MB.`
+        // Check if user has remaining operations
+        if (!limits.allowed) {
+          return res.status(429).json({
+            error: 'Monthly limit reached',
+            message: `You've used all ${limits.limit} image enhancements this month. Upgrade for more.`,
+            limit: limits.limit,
+            remaining: 0,
+            upgradeUrl: '/pricing',
           });
         }
 
-        // Process image enhancement
-        const result = await enhanceImage(
-          file.path,
-          'compressed', // Output directory
-          options
-        );
+        // Parse options
+        const requestedScale = parseInt(req.body.scale) || 4;
+        const faceEnhance = req.body.faceEnhance === 'true';
+
+        // Check scale permission
+        if (requestedScale > limits.maxUpscale) {
+          return res.status(403).json({
+            error: 'Scale not available',
+            message: `${requestedScale}x upscale is not available on your plan. Max is ${limits.maxUpscale}x.`,
+            maxUpscale: limits.maxUpscale,
+            upgradeUrl: '/pricing',
+          });
+        }
+
+        // Check face enhancement permission
+        if (faceEnhance && !limits.faceEnhancement) {
+          return res.status(403).json({
+            error: 'Face enhancement not available',
+            message: 'Face enhancement is not available on your plan. Upgrade to access this feature.',
+            upgradeUrl: '/pricing',
+          });
+        }
+
+        // Get tier limits for file size check
+        const tierLimits = await tierLimitService.getTierLimits(tierName);
+        const maxFileSize = tierLimits.ai_enhance_max_file_size * 1024 * 1024;
+
+        if (file.size > maxFileSize) {
+          return res.status(400).json({
+            error: 'File too large',
+            message: `Max file size is ${tierLimits.ai_enhance_max_file_size}MB for your plan.`,
+            maxSize: tierLimits.ai_enhance_max_file_size,
+          });
+        }
+
+        console.log(`📁 File: ${file.originalname} (${(file.size / 1024 / 1024).toFixed(2)} MB)`);
+
+        // Process image
+        const result = await enhanceImage(file.path, 'compressed', {
+          scale: requestedScale as 2 | 4 | 8,
+          faceEnhance,
+          outputFormat: (req.body.outputFormat || 'png') as 'png' | 'webp' | 'avif' | 'jpg',
+          outputQuality: parseInt(req.body.quality) || 90,
+        });
 
         if (!result.success) {
           return res.status(500).json({ error: result.error });
         }
 
+        // Increment usage AFTER successful processing
+        await tierLimitService.incrementEnhanceUsage(userId, sessionId);
+
         // Generate job ID for download
         const jobId = path.basename(result.outputPath!, path.extname(result.outputPath!));
 
-        // Return result
         res.json({
           success: true,
           result: {
@@ -1224,6 +1331,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             processingTime: result.processingTime,
             downloadUrl: `/api/download/${jobId}`,
           },
+          usage: {
+            remaining: limits.remaining - 1,
+            limit: limits.limit,
+          },
         });
 
         // Cleanup original upload
@@ -1231,7 +1342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       } catch (error: any) {
         console.error('❌ Image enhancement error:', error);
-        res.status(500).json({ error: error.message || 'Image enhancement failed' });
+        res.status(500).json({ error: error.message || 'Processing failed' });
       }
     }
   );
@@ -1334,6 +1445,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
     }
   );
+
+  // ============================================================================
+  // COMBINED AI USAGE & PRICING ENDPOINTS
+  // ============================================================================
+
+  // Combined AI usage endpoint (for dashboard)
+  app.get('/api/ai/usage', async (req, res) => {
+    try {
+      const { userId, sessionId, tierName } = await getUserTier(req);
+
+      const [bgLimits, enhanceLimits, tierLimits] = await Promise.all([
+        tierLimitService.canUseBgRemoval(userId, sessionId, tierName),
+        tierLimitService.canUseEnhancement(userId, sessionId, tierName),
+        tierLimitService.getTierLimits(tierName),
+      ]);
+
+      res.json({
+        tier: tierName,
+        tierDisplayName: tierLimits.tier_display_name,
+        backgroundRemoval: {
+          used: bgLimits.limit - bgLimits.remaining,
+          remaining: bgLimits.remaining,
+          limit: bgLimits.limit,
+          outputFormats: bgLimits.outputFormats,
+        },
+        imageEnhancement: {
+          used: enhanceLimits.limit - enhanceLimits.remaining,
+          remaining: enhanceLimits.remaining,
+          limit: enhanceLimits.limit,
+          maxUpscale: enhanceLimits.maxUpscale,
+          faceEnhancement: enhanceLimits.faceEnhancement,
+        },
+        upgradeUrl: tierName === 'free' || tierName === 'free_registered' ? '/pricing' : null,
+      });
+    } catch (error: any) {
+      console.error('Error getting AI usage:', error);
+      res.status(500).json({ error: 'Failed to get usage' });
+    }
+  });
+
+  // AI features pricing info (for all tiers)
+  app.get('/api/ai/pricing', async (req, res) => {
+    try {
+      const tiers = await tierLimitService.getAllTierLimits();
+
+      const aiPricing = tiers.map(tier => ({
+        tier: tier.tier_name,
+        displayName: tier.tier_display_name,
+        priceMonthly: tier.price_monthly / 100, // Convert cents to dollars
+        priceYearly: tier.price_yearly / 100,
+        backgroundRemoval: {
+          limit: tier.ai_bg_removal_monthly,
+          outputFormats: tier.ai_bg_output_formats.split(','),
+          maxFileSize: tier.ai_bg_max_file_size,
+        },
+        imageEnhancement: {
+          limit: tier.ai_enhance_monthly,
+          maxUpscale: tier.ai_enhance_max_upscale,
+          faceEnhancement: tier.ai_enhance_face_enhancement,
+          maxFileSize: tier.ai_enhance_max_file_size,
+        },
+        priorityProcessing: tier.priority_processing,
+        apiAccess: tier.api_access_level,
+        support: tier.support_level,
+      }));
+
+      res.json(aiPricing);
+    } catch (error: any) {
+      console.error('Error getting AI pricing:', error);
+      res.status(500).json({ error: 'Failed to get pricing' });
+    }
+  });
 
   // Register API v1 routes
   app.use('/api/v1', apiRouter);
