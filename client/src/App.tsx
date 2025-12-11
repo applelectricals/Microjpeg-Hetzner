@@ -236,11 +236,12 @@ function Router() {
         
         {/* New unified compression structure - MUST come before dynamic routes */}
         {/* Removed /free route - now using unified root page */}
+        <Route path="/free" component={() => <CompressRedirect to="/" />} />
         <Route path="/premium" component={PremiumCompress} />
         <Route path="/enterprise" component={EnterpriseCompress} />
         <Route path="/tools/bulk" component={BulkImageCompression} />
         <Route path="/tools/raw" component={CompressRawFiles} />
-        
+
         {/* LEGACY: Compression pages - Redirect to unified root page */}
         <Route path="/compress-free" component={() => <CompressRedirect to="/" />} />
         <Route path="/compress-premium" component={() => <CompressRedirect to="/premium" />} />

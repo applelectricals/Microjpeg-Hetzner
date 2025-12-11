@@ -9,6 +9,13 @@ import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/header';
 import { SEOHead } from '@/components/SEOHead';
 import logoUrl from '@assets/mascot-logo-optimized.png';
+import { useQuery } from '@tanstack/react-query';
+import {
+  UpgradePrompt,
+  useUpgradePrompt,
+  UsageIndicator,
+  LimitReachedBanner
+} from '@/components/UpgradePrompt';
 
 // Types
 interface ProcessedImage {
@@ -24,6 +31,12 @@ interface ProcessedImage {
   wasResized?: boolean;
   processingTime: number;
   downloadUrl: string;
+}
+
+interface LimitsResponse {
+  limit: number;
+  remaining: number;
+  tier: string;
 }
 
 // Before/After Comparison Slider Component - Full Width Version
@@ -176,6 +189,23 @@ export default function EnhanceImagePage() {
   const [outputFormat, setOutputFormat] = useState<'png' | 'webp' | 'avif' | 'jpg'>('png');
   const [quality, setQuality] = useState(90);
 
+  // Fetch usage limits
+  const { data: enhanceLimits, refetch: refetchLimits } = useQuery<LimitsResponse>({
+    queryKey: ['/api/ai/enhance/limits'],
+    retry: false,
+  }) as { data: LimitsResponse | undefined; refetch: () => void };
+
+  // Setup upgrade prompt
+  const upgradePrompt = useUpgradePrompt({
+    feature: 'image_enhancement',
+    usageStats: enhanceLimits ? {
+      used: enhanceLimits.limit - enhanceLimits.remaining,
+      remaining: enhanceLimits.remaining,
+      limit: enhanceLimits.limit,
+    } : null,
+    tierName: enhanceLimits?.tier || 'free',
+  });
+
   // Calculate preview dimensions
   const calculatePreview = () => {
     if (!originalDimensions) return null;
@@ -279,6 +309,12 @@ export default function EnhanceImagePage() {
   const handleEnhanceImage = async () => {
     if (!selectedFile) return;
 
+    // Check limits before processing
+    if (enhanceLimits && enhanceLimits.remaining <= 0) {
+      upgradePrompt.setIsOpen(true);
+      return;
+    }
+
     setIsProcessing(true);
     setProgress(10);
 
@@ -304,21 +340,53 @@ export default function EnhanceImagePage() {
       clearInterval(progressInterval);
       setProgress(90);
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || error.message || 'Processing failed');
+        // Check if it's a limit or feature restriction error
+        if (data.error === 'limit_reached' || data.showUpgradePrompt) {
+          upgradePrompt.checkAndShowPrompt(data);
+          return;
+        }
+
+        if (data.error === 'format_restricted') {
+          upgradePrompt.showRestrictedFeaturePrompt(`${outputFormat.toUpperCase()} output`);
+          return;
+        }
+
+        if (data.error === 'scale_restricted') {
+          upgradePrompt.showRestrictedFeaturePrompt(`${scale}x upscale`);
+          return;
+        }
+
+        if (data.error === 'feature_restricted') {
+          upgradePrompt.showRestrictedFeaturePrompt('Face Enhancement');
+          return;
+        }
+
+        throw new Error(data.error || data.message || 'Processing failed');
       }
 
-      const data = await response.json();
       setProgress(100);
 
       if (data.success) {
         setResult(data.result);
-        
+
         const previewResponse = await fetch(data.result.downloadUrl);
         if (previewResponse.ok) {
           const blob = await previewResponse.blob();
           setResultPreview(URL.createObjectURL(blob));
+        }
+
+        // Refetch limits to update UI
+        refetchLimits();
+
+        // Check if should show upgrade prompt after successful operation
+        if (data.usage?.showUpgradePrompt) {
+          // Small delay so user can see the result first
+          setTimeout(() => {
+            upgradePrompt.checkAndShowPrompt(data.usage);
+          }, 1500);
         }
 
         toast({
@@ -363,29 +431,49 @@ export default function EnhanceImagePage() {
 
   return (
     <>
-      <SEOHead 
+      <SEOHead
         title={SEO_TITLE}
         description={SEO_DESCRIPTION}
-        canonical="https://microjpeg.com/enhance-image"
+        canonicalUrl="https://microjpeg.com/enhance-image"
       />
 
       <div className="min-h-screen bg-gray-900">
         <Header />
 
         <main className="max-w-7xl mx-auto px-4 py-8">
+          {/* Usage Indicator */}
+          {enhanceLimits && (
+            <div className="mb-6">
+              <UsageIndicator
+                feature="image_enhancement"
+                used={enhanceLimits.limit - enhanceLimits.remaining}
+                limit={enhanceLimits.limit}
+                onUpgradeClick={() => upgradePrompt.setIsOpen(true)}
+              />
+            </div>
+          )}
+
+          {/* Limit Reached Banner */}
+          {enhanceLimits && enhanceLimits.remaining <= 0 && (
+            <LimitReachedBanner
+              feature="image_enhancement"
+              onUpgradeClick={() => upgradePrompt.setIsOpen(true)}
+            />
+          )}
+
           {/* Hero Section */}
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 bg-yellow-500/20 text-yellow-400 px-4 py-2 rounded-full mb-4 border border-yellow-500/30">
               <ZoomIn className="w-4 h-4" />
               <span className="text-sm font-medium">AI-Powered • Up to 8x Upscale</span>
             </div>
-            
+
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
               AI Image Enhancer
             </h1>
-            
+
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Upscale your images to <strong className="text-yellow-400">4K or 8K resolution</strong> using 
+              Upscale your images to <strong className="text-yellow-400">4K or 8K resolution</strong> using
               Real-ESRGAN AI. Enhance faces, sharpen details, and save in modern formats.
             </p>
           </div>
@@ -666,11 +754,13 @@ export default function EnhanceImagePage() {
                   <div className="text-center">
                     <Button
                       onClick={handleEnhanceImage}
-                      disabled={!selectedFile || isProcessing}
+                      disabled={!selectedFile || isProcessing || (enhanceLimits?.remaining || 0) <= 0}
                       size="lg"
                       className="px-12 h-14 text-lg bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-semibold disabled:opacity-50"
                     >
-                      {isProcessing ? (
+                      {(enhanceLimits?.remaining || 0) <= 0 ? (
+                        'Limit Reached - Upgrade to Continue'
+                      ) : isProcessing ? (
                         <>
                           <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                           Enhancing... (10-30s)
@@ -874,6 +964,9 @@ export default function EnhanceImagePage() {
                 </div>
               </footer>
       </div>
+
+      {/* Upgrade Prompt Modal */}
+      <UpgradePrompt {...upgradePrompt.promptProps} />
     </>
   );
 }

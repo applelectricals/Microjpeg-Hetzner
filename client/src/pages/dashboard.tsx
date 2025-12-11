@@ -1,504 +1,580 @@
-/**
- * User Dashboard - Subscription Management
- * 
- * Features:
- * - View current subscription status
- * - Usage statistics
- * - Cancel/pause subscription
- * - Update payment method (redirect to Razorpay/PayPal)
- * - Billing history
- */
-
-import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { useLocation } from 'wouter';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import Header from '@/components/header';
+import { useState, useEffect } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { isUnauthorizedError } from "@/lib/authUtils";
 import { 
   Crown, 
   Calendar, 
   CreditCard, 
   CheckCircle, 
-  AlertCircle,
+  AlertCircle, 
+  X,
   Settings,
   Download,
   BarChart3,
   Zap,
-  ArrowUpRight,
-  Loader2,
-  XCircle,
-  RefreshCw,
-  Clock,
-  FileImage,
-  HardDrive
-} from 'lucide-react';
+  Eraser,
+  Sparkles,
+  Image,
+  TrendingUp,
+  ArrowRight,
+  RefreshCw
+} from "lucide-react";
 
-// Types
 interface SubscriptionInfo {
-  tier: string;
-  status: 'active' | 'cancelled' | 'halted' | 'paused' | 'free';
-  billingCycle: 'monthly' | 'yearly';
-  startDate: string;
-  endDate: string;
-  razorpaySubscriptionId?: string;
-  paypalSubscriptionId?: string;
+  isPremium: boolean;
+  stripeCustomerId?: string;
+  stripeSubscriptionId?: string;
+  subscriptionStatus?: string;
+  subscriptionTier?: string;
+  currentPeriodEnd?: string;
   cancelAtPeriodEnd?: boolean;
 }
 
-interface UsageStats {
+interface AIUsageStats {
+  tier: string;
+  tierDisplayName: string;
+  backgroundRemoval: {
+    used: number;
+    remaining: number;
+    limit: number;
+    percentUsed: number;
+    outputFormats: string[];
+    maxFileSize: number;
+  };
+  imageEnhancement: {
+    used: number;
+    remaining: number;
+    limit: number;
+    percentUsed: number;
+    maxUpscale: number;
+    faceEnhancement: boolean;
+    maxFileSize: number;
+  };
+  features: {
+    priorityProcessing: boolean;
+    apiAccess: string;
+    supportLevel: string;
+  };
+  upgradeUrl: string | null;
+}
+
+interface CompressionStats {
   compressions: number;
-  conversions: number;
-  totalSize: number;
-  avgCompression: number;
+  limit: number;
+  isPremium: boolean;
 }
-
-// Dark mode hook
-function useDarkMode() {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('darkMode');
-      return saved ? saved === 'true' : true;
-    }
-    return true;
-  });
-
-  return { isDark, setIsDark: (v: boolean) => {
-    localStorage.setItem('darkMode', String(v));
-    document.documentElement.classList.toggle('dark', v);
-    setIsDark(v);
-  }};
-}
-
-// Plan limits
-const PLAN_LIMITS = {
-  free: { fileSize: '10MB', concurrent: 1, priority: false },
-  starter: { fileSize: '75MB', concurrent: 1, priority: false },
-  pro: { fileSize: '150MB', concurrent: 3, priority: true },
-  business: { fileSize: '200MB', concurrent: 5, priority: true },
-};
 
 export default function Dashboard() {
-  const { isDark, setIsDark } = useDarkMode();
   const { user } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const [showCancelDialog, setShowCancelDialog] = useState(false);
-  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancellingSubscription, setCancellingSubscription] = useState(false);
 
-  // Fetch subscription info
-  const { data: subscription, isLoading: subLoading, refetch: refetchSub } = useQuery<SubscriptionInfo>({
-    queryKey: ['/api/user/subscription'],
+  // Fetch subscription information
+  const { data: subscriptionInfo, isLoading: subscriptionLoading } = useQuery<SubscriptionInfo>({
+    queryKey: ["/api/subscription-info"],
     retry: false,
   });
 
-  // Fetch usage stats
-  const { data: usage, isLoading: usageLoading } = useQuery<UsageStats>({
-    queryKey: ['/api/user/usage-stats'],
+  // Fetch AI usage statistics
+  const { data: aiUsage, isLoading: aiLoading, refetch: refetchAI } = useQuery<AIUsageStats>({
+    queryKey: ["/api/ai/usage"],
+    retry: false,
+  });
+
+  // Fetch compression statistics
+  const { data: compressionStats, isLoading: compressionLoading } = useQuery<CompressionStats>({
+    queryKey: ["/api/compression-limits"],
     retry: false,
   });
 
   // Cancel subscription mutation
-  const cancelMutation = useMutation({
+  const cancelSubscriptionMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('POST', '/api/payment/razorpay/cancel-subscription', {
-        cancel_at_cycle_end: true,
-      });
+      await apiRequest("POST", "/api/cancel-subscription");
     },
     onSuccess: () => {
       toast({
-        title: 'Subscription Cancelled',
-        description: 'Your subscription will remain active until the end of the billing period.',
+        title: "Subscription Cancelled",
+        description: "Your subscription will remain active until the end of the current billing period.",
       });
-      setShowCancelDialog(false);
-      refetchSub();
-      queryClient.invalidateQueries({ queryKey: ['/api/user/subscription'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/subscription-info"] });
     },
-    onError: (error: any) => {
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+        return;
+      }
       toast({
-        title: 'Cancellation Failed',
-        description: error.message || 'Please try again or contact support.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to cancel subscription. Please try again.",
+        variant: "destructive",
       });
     },
   });
 
-  const handleCancelSubscription = async () => {
-    setCancelLoading(true);
-    await cancelMutation.mutateAsync();
-    setCancelLoading(false);
+  const handleCancelSubscription = () => {
+    setCancellingSubscription(true);
+    cancelSubscriptionMutation.mutate();
+    setCancellingSubscription(false);
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-  };
-
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    if (!dateString) return "N/A";
+    return new Date(dateString).toLocaleDateString();
   };
 
   const getStatusBadge = (status?: string) => {
     switch (status) {
-      case 'active':
-        return (
-          <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-            <CheckCircle className="w-3 h-3 mr-1" /> Active
-          </Badge>
-        );
-      case 'cancelled':
-        return (
-          <Badge className="bg-red-500/20 text-red-400 border-red-500/30">
-            <XCircle className="w-3 h-3 mr-1" /> Cancelled
-          </Badge>
-        );
-      case 'halted':
-        return (
-          <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-            <AlertCircle className="w-3 h-3 mr-1" /> Payment Failed
-          </Badge>
-        );
-      case 'paused':
-        return (
-          <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-            <Clock className="w-3 h-3 mr-1" /> Paused
-          </Badge>
-        );
+      case "active":
+        return <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200">Active</Badge>;
+      case "canceled":
+        return <Badge className="bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">Cancelled</Badge>;
+      case "past_due":
+        return <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200">Past Due</Badge>;
       default:
-        return (
-          <Badge variant="secondary">Free Plan</Badge>
-        );
+        return <Badge variant="secondary">Free</Badge>;
     }
   };
 
-  const tier = subscription?.tier || 'free';
-  const limits = PLAN_LIMITS[tier as keyof typeof PLAN_LIMITS] || PLAN_LIMITS.free;
-  const isPremium = tier !== 'free';
+  const getProgressColor = (percent: number) => {
+    if (percent >= 90) return "bg-red-500";
+    if (percent >= 70) return "bg-amber-500";
+    return "bg-emerald-500";
+  };
 
-  if (subLoading) {
+  const getTierBadgeColor = (tier: string) => {
+    if (tier.includes('business')) return "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
+    if (tier.includes('pro')) return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+    if (tier.includes('starter')) return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+    return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200";
+  };
+
+  if (subscriptionLoading || aiLoading || compressionLoading) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <Loader2 className="w-8 h-8 text-teal-400 animate-spin" />
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center py-20">
+              <RefreshCw className="w-10 h-10 animate-spin text-blue-600 mx-auto" />
+              <p className="mt-4 text-slate-600 dark:text-slate-400">Loading your dashboard...</p>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
+  const isFreeTier = aiUsage?.tier === 'free' || aiUsage?.tier === 'free_registered';
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      <Header isDark={isDark} onToggleDark={() => setIsDark(!isDark)} />
-
-      <div className="container mx-auto px-4 py-8 max-w-5xl">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-            <p className="text-gray-400 mt-1">
-              Manage your subscription and view usage
-            </p>
-          </div>
-          <div className="flex items-center gap-3">
-            {isPremium ? (
-              <Badge className="bg-gradient-to-r from-teal-500/20 to-emerald-500/20 text-teal-400 border-teal-500/30 px-4 py-2">
-                <Crown className="w-4 h-4 mr-2 text-yellow-400" />
-                {tier.charAt(0).toUpperCase() + tier.slice(1)} Plan
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+                Dashboard
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 mt-1">
+                Monitor your usage and manage your subscription
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Badge className={getTierBadgeColor(aiUsage?.tier || 'free')}>
+                {aiUsage?.tier === 'free' || aiUsage?.tier === 'free_registered' ? (
+                  'Free Plan'
+                ) : (
+                  <>
+                    <Crown className="w-3 h-3 mr-1" />
+                    {aiUsage?.tierDisplayName || 'Premium'}
+                  </>
+                )}
               </Badge>
-            ) : (
-              <Badge variant="secondary" className="px-4 py-2">Free Plan</Badge>
-            )}
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => refetchAI()}
+                className="gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </Button>
+            </div>
           </div>
-        </div>
 
-        {/* Subscription Warning */}
-        {subscription?.cancelAtPeriodEnd && (
-          <Alert className="mb-6 bg-yellow-500/10 border-yellow-500/30">
-            <AlertCircle className="h-4 w-4 text-yellow-400" />
-            <AlertDescription className="text-yellow-200">
-              Your subscription will end on {formatDate(subscription.endDate)}. 
-              <button 
-                onClick={() => setLocation('/pricing')}
-                className="ml-2 underline hover:text-yellow-100"
-              >
-                Reactivate
-              </button>
-            </AlertDescription>
-          </Alert>
-        )}
+          {/* Upgrade Banner for Free Users */}
+          {isFreeTier && (
+            <Card className="mb-6 border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/50 dark:to-indigo-950/50 dark:border-blue-800">
+              <CardContent className="py-4">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
+                      <Zap className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-slate-900 dark:text-white">Unlock More AI Features</h3>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        Get 200+ AI operations, all output formats, 8x upscaling & more
+                      </p>
+                    </div>
+                  </div>
+                  <Button 
+                    onClick={() => setLocation("/pricing")}
+                    className="bg-blue-600 hover:bg-blue-700 gap-2"
+                  >
+                    Upgrade from $9/mo
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-        {subscription?.status === 'halted' && (
-          <Alert className="mb-6 bg-red-500/10 border-red-500/30">
-            <AlertCircle className="h-4 w-4 text-red-400" />
-            <AlertDescription className="text-red-200">
-              Payment failed. Please update your payment method to continue using premium features.
-              <button 
-                onClick={() => setLocation('/checkout?plan=' + tier)}
-                className="ml-2 underline hover:text-red-100"
-              >
-                Update Payment
-              </button>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        <div className="grid gap-6">
-          {/* Current Plan Card */}
-          <Card className="bg-gray-800/50 border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <CreditCard className="w-5 h-5 text-teal-400" />
-                Current Plan
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-6">
+          {/* AI Usage Cards */}
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            {/* Background Removal Usage */}
+            <Card className="overflow-hidden">
+              <div className="h-1 bg-gradient-to-r from-pink-500 to-rose-500" />
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <div className="p-2 bg-pink-100 dark:bg-pink-900/30 rounded-lg">
+                      <Eraser className="w-4 h-4 text-pink-600 dark:text-pink-400" />
+                    </div>
+                    Background Removal
+                  </CardTitle>
+                  <Badge variant="outline" className="font-mono">
+                    {aiUsage?.backgroundRemoval.remaining}/{aiUsage?.backgroundRemoval.limit}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Plan</span>
-                    <span className="font-semibold text-white flex items-center gap-2">
-                      {isPremium && <Crown className="w-4 h-4 text-yellow-400" />}
-                      {tier.charAt(0).toUpperCase() + tier.slice(1)}
-                    </span>
+                  <div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-slate-600 dark:text-slate-400">Monthly Usage</span>
+                      <span className={`font-medium ${
+                        (aiUsage?.backgroundRemoval.percentUsed || 0) >= 80 
+                          ? 'text-red-600' 
+                          : 'text-slate-900 dark:text-white'
+                      }`}>
+                        {aiUsage?.backgroundRemoval.percentUsed || 0}%
+                      </span>
+                    </div>
+                    <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full transition-all duration-500 ${getProgressColor(aiUsage?.backgroundRemoval.percentUsed || 0)}`}
+                        style={{ width: `${Math.min(aiUsage?.backgroundRemoval.percentUsed || 0, 100)}%` }}
+                      />
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Status</span>
-                    {getStatusBadge(subscription?.status)}
+                  
+                  <div className="grid grid-cols-2 gap-4 pt-2">
+                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <div className="text-2xl font-bold text-pink-600">
+                        {aiUsage?.backgroundRemoval.used || 0}
+                      </div>
+                      <div className="text-xs text-slate-500">Used</div>
+                    </div>
+                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <div className="text-2xl font-bold text-emerald-600">
+                        {aiUsage?.backgroundRemoval.remaining || 0}
+                      </div>
+                      <div className="text-xs text-slate-500">Remaining</div>
+                    </div>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-400">Billing Cycle</span>
-                    <span className="text-white">
-                      {subscription?.billingCycle === 'yearly' ? 'Annual' : 'Monthly'}
-                    </span>
+
+                  <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+                    <div className="flex flex-wrap gap-1">
+                      <span className="text-xs text-slate-500">Output formats:</span>
+                      {aiUsage?.backgroundRemoval.outputFormats.map(format => (
+                        <Badge key={format} variant="secondary" className="text-xs">
+                          {format.toUpperCase()}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <Button 
+                    onClick={() => setLocation("/remove-background")}
+                    className="w-full bg-pink-600 hover:bg-pink-700"
+                    disabled={(aiUsage?.backgroundRemoval.remaining || 0) <= 0}
+                  >
+                    {(aiUsage?.backgroundRemoval.remaining || 0) <= 0 
+                      ? 'Limit Reached - Upgrade' 
+                      : 'Remove Background'
+                    }
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Image Enhancement Usage */}
+            <Card className="overflow-hidden">
+              <div className="h-1 bg-gradient-to-r from-violet-500 to-purple-500" />
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <div className="p-2 bg-violet-100 dark:bg-violet-900/30 rounded-lg">
+                      <Sparkles className="w-4 h-4 text-violet-600 dark:text-violet-400" />
+                    </div>
+                    Image Enhancement
+                  </CardTitle>
+                  <Badge variant="outline" className="font-mono">
+                    {aiUsage?.imageEnhancement.remaining}/{aiUsage?.imageEnhancement.limit}
+                  </Badge>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div>
+                    <div className="flex justify-between text-sm mb-2">
+                      <span className="text-slate-600 dark:text-slate-400">Monthly Usage</span>
+                      <span className={`font-medium ${
+                        (aiUsage?.imageEnhancement.percentUsed || 0) >= 80 
+                          ? 'text-red-600' 
+                          : 'text-slate-900 dark:text-white'
+                      }`}>
+                        {aiUsage?.imageEnhancement.percentUsed || 0}%
+                      </span>
+                    </div>
+                    <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full transition-all duration-500 ${getProgressColor(aiUsage?.imageEnhancement.percentUsed || 0)}`}
+                        style={{ width: `${Math.min(aiUsage?.imageEnhancement.percentUsed || 0, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4 pt-2">
+                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <div className="text-2xl font-bold text-violet-600">
+                        {aiUsage?.imageEnhancement.used || 0}
+                      </div>
+                      <div className="text-xs text-slate-500">Used</div>
+                    </div>
+                    <div className="text-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                      <div className="text-2xl font-bold text-emerald-600">
+                        {aiUsage?.imageEnhancement.remaining || 0}
+                      </div>
+                      <div className="text-xs text-slate-500">Remaining</div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-200 dark:border-slate-700 space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500">Max upscale:</span>
+                      <Badge variant="secondary">{aiUsage?.imageEnhancement.maxUpscale}x</Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-slate-500">Face enhancement:</span>
+                      {aiUsage?.imageEnhancement.faceEnhancement ? (
+                        <CheckCircle className="w-4 h-4 text-emerald-500" />
+                      ) : (
+                        <X className="w-4 h-4 text-slate-400" />
+                      )}
+                    </div>
+                  </div>
+
+                  <Button 
+                    onClick={() => setLocation("/enhance-image")}
+                    className="w-full bg-violet-600 hover:bg-violet-700"
+                    disabled={(aiUsage?.imageEnhancement.remaining || 0) <= 0}
+                  >
+                    {(aiUsage?.imageEnhancement.remaining || 0) <= 0 
+                      ? 'Limit Reached - Upgrade' 
+                      : 'Enhance Image'
+                    }
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Compression & Plan Details */}
+          <div className="grid md:grid-cols-3 gap-6 mb-6">
+            {/* Compression Stats */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <Image className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  </div>
+                  Compression
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-4">
+                  <div className="text-4xl font-bold text-blue-600">
+                    {compressionStats?.compressions?.toLocaleString() || 0}
+                  </div>
+                  <div className="text-sm text-slate-500 mt-1">Total Compressions</div>
+                </div>
+                <div className="text-center py-2 bg-slate-50 dark:bg-slate-800/50 rounded-lg">
+                  <div className="text-sm text-slate-600 dark:text-slate-400">
+                    {aiUsage?.tier?.includes('free') ? '200/month limit' : 'Unlimited'}
                   </div>
                 </div>
+                <Button 
+                  onClick={() => setLocation("/")}
+                  variant="outline"
+                  className="w-full mt-4"
+                >
+                  Compress Images
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Current Plan */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                    <CreditCard className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  Current Plan
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="space-y-4">
-                  {isPremium && (
-                    <>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-400">Started</span>
-                        <span className="text-white">{formatDate(subscription?.startDate)}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-gray-400">
-                          {subscription?.cancelAtPeriodEnd ? 'Ends On' : 'Next Billing'}
-                        </span>
-                        <span className="text-white">{formatDate(subscription?.endDate)}</span>
-                      </div>
-                    </>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-600 dark:text-slate-400">Plan</span>
+                    <span className="font-semibold">{aiUsage?.tierDisplayName || 'Free'}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-slate-600 dark:text-slate-400">Status</span>
+                    {getStatusBadge(subscriptionInfo?.subscriptionStatus)}
+                  </div>
+                  {subscriptionInfo?.currentPeriodEnd && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-600 dark:text-slate-400">Renews</span>
+                      <span className="text-sm">{formatDate(subscriptionInfo.currentPeriodEnd)}</span>
+                    </div>
+                  )}
+                  {subscriptionInfo?.cancelAtPeriodEnd && (
+                    <Alert className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
+                      <AlertCircle className="h-4 w-4 text-amber-600" />
+                      <AlertDescription className="text-amber-800 dark:text-amber-200 text-xs">
+                        Cancels on {formatDate(subscriptionInfo.currentPeriodEnd)}
+                      </AlertDescription>
+                    </Alert>
                   )}
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
 
-          {/* Usage Statistics */}
-          <Card className="bg-gray-800/50 border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <BarChart3 className="w-5 h-5 text-teal-400" />
-                Usage Statistics
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-gray-900/50 rounded-xl p-4 text-center">
-                  <FileImage className="w-6 h-6 text-teal-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">
-                    {usage?.compressions?.toLocaleString() || 0}
+            {/* Features */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                    <Zap className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   </div>
-                  <p className="text-xs text-gray-400">Compressions</p>
-                </div>
-                <div className="bg-gray-900/50 rounded-xl p-4 text-center">
-                  <RefreshCw className="w-6 h-6 text-emerald-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">
-                    {usage?.conversions?.toLocaleString() || 0}
-                  </div>
-                  <p className="text-xs text-gray-400">Conversions</p>
-                </div>
-                <div className="bg-gray-900/50 rounded-xl p-4 text-center">
-                  <HardDrive className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">
-                    {formatBytes(usage?.totalSize || 0)}
-                  </div>
-                  <p className="text-xs text-gray-400">Processed</p>
-                </div>
-                <div className="bg-gray-900/50 rounded-xl p-4 text-center">
-                  <Zap className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-white">
-                    {usage?.avgCompression || 0}%
-                  </div>
-                  <p className="text-xs text-gray-400">Avg Compression</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Plan Features */}
-          <Card className="bg-gray-800/50 border-gray-700">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <Zap className="w-5 h-5 text-teal-400" />
-                Your Plan Limits
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="bg-gray-900/50 rounded-xl p-4">
-                  <p className="text-gray-400 text-sm mb-1">Max File Size</p>
-                  <p className="text-xl font-bold text-white">{limits.fileSize}</p>
-                </div>
-                <div className="bg-gray-900/50 rounded-xl p-4">
-                  <p className="text-gray-400 text-sm mb-1">Concurrent Uploads</p>
-                  <p className="text-xl font-bold text-white">{limits.concurrent}</p>
-                </div>
-                <div className="bg-gray-900/50 rounded-xl p-4">
-                  <p className="text-gray-400 text-sm mb-1">Priority Processing</p>
-                  <p className="text-xl font-bold text-white">
-                    {limits.priority ? (
-                      <span className="text-green-400">✓ Enabled</span>
-                    ) : (
-                      <span className="text-gray-500">Not Available</span>
-                    )}
-                  </p>
-                </div>
-              </div>
-
-              {!isPremium && (
-                <div className="mt-6 p-4 bg-gradient-to-r from-teal-500/10 to-emerald-500/10 rounded-xl border border-teal-500/20">
+                  Features
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-white">Upgrade for More</p>
-                      <p className="text-sm text-gray-400">Get larger files, priority processing, and more</p>
-                    </div>
-                    <Button 
-                      onClick={() => setLocation('/pricing')}
-                      className="bg-teal-600 hover:bg-teal-700"
-                    >
-                      View Plans <ArrowUpRight className="w-4 h-4 ml-1" />
-                    </Button>
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Priority Processing</span>
+                    {aiUsage?.features.priorityProcessing ? (
+                      <CheckCircle className="w-4 h-4 text-emerald-500" />
+                    ) : (
+                      <X className="w-4 h-4 text-slate-400" />
+                    )}
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-600 dark:text-slate-400">API Access</span>
+                    <Badge variant="secondary" className="text-xs capitalize">
+                      {aiUsage?.features.apiAccess || 'none'}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Support</span>
+                    <Badge variant="secondary" className="text-xs capitalize">
+                      {aiUsage?.features.supportLevel || 'community'}
+                    </Badge>
                   </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Actions */}
-          <Card className="bg-gray-800/50 border-gray-700">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-white">
-                <Settings className="w-5 h-5 text-teal-400" />
-                Manage Subscription
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                Manage Account
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-4">
-                <Button 
-                  onClick={() => setLocation('/compress')}
-                  className="bg-teal-600 hover:bg-teal-700"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Start Compressing
-                </Button>
-
-                {!isPremium ? (
+                {isFreeTier ? (
                   <Button 
-                    onClick={() => setLocation('/pricing')}
-                    variant="outline"
-                    className="border-teal-500/50 text-teal-400 hover:bg-teal-500/10"
+                    onClick={() => setLocation("/pricing")}
+                    className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
                   >
                     <Crown className="w-4 h-4 mr-2" />
                     Upgrade Plan
                   </Button>
                 ) : (
                   <>
-                    {subscription?.status === 'active' && !subscription?.cancelAtPeriodEnd && (
+                    {!subscriptionInfo?.cancelAtPeriodEnd && (
                       <Button 
-                        onClick={() => setShowCancelDialog(true)}
+                        onClick={handleCancelSubscription}
                         variant="outline"
-                        className="border-red-500/50 text-red-400 hover:bg-red-500/10"
+                        disabled={cancellingSubscription}
+                        className="border-red-200 text-red-600 hover:bg-red-50 dark:border-red-800 dark:text-red-400 dark:hover:bg-red-900/20"
                       >
-                        Cancel Subscription
-                      </Button>
-                    )}
-                    
-                    {subscription?.cancelAtPeriodEnd && (
-                      <Button 
-                        onClick={() => setLocation('/pricing')}
-                        variant="outline"
-                        className="border-teal-500/50 text-teal-400 hover:bg-teal-500/10"
-                      >
-                        Reactivate Subscription
+                        {cancellingSubscription ? "Cancelling..." : "Cancel Subscription"}
                       </Button>
                     )}
                   </>
                 )}
+                <Button 
+                  onClick={() => setLocation("/")}
+                  variant="outline"
+                >
+                  <Download className="w-4 h-4 mr-2" />
+                  Start Processing
+                </Button>
+                <Button 
+                  onClick={() => setLocation("/api-keys")}
+                  variant="outline"
+                  disabled={aiUsage?.features.apiAccess === 'none'}
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  API Keys
+                </Button>
               </div>
             </CardContent>
           </Card>
-        </div>
 
-        {/* Cancel Dialog */}
-        <Dialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
-          <DialogContent className="bg-gray-800 border-gray-700">
-            <DialogHeader>
-              <DialogTitle className="text-white">Cancel Subscription?</DialogTitle>
-              <DialogDescription className="text-gray-400">
-                Your subscription will remain active until {formatDate(subscription?.endDate)}. 
-                After that, your account will revert to the Free plan.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="bg-gray-900/50 rounded-lg p-4 my-4">
-              <p className="text-sm text-gray-300">You'll lose access to:</p>
-              <ul className="mt-2 space-y-1 text-sm text-gray-400">
-                <li>• Large file uploads ({limits.fileSize})</li>
-                <li>• Priority processing</li>
-                <li>• {limits.concurrent} concurrent uploads</li>
-              </ul>
-            </div>
-            <DialogFooter>
-              <Button 
-                variant="outline" 
-                onClick={() => setShowCancelDialog(false)}
-                className="border-gray-600"
-              >
-                Keep Subscription
-              </Button>
-              <Button 
-                onClick={handleCancelSubscription}
-                disabled={cancelLoading}
-                className="bg-red-600 hover:bg-red-700"
-              >
-                {cancelLoading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Cancelling...
-                  </>
-                ) : (
-                  'Yes, Cancel'
-                )}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+          {/* Usage Reset Notice */}
+          <div className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
+            <Calendar className="w-4 h-4 inline mr-1" />
+            Usage limits reset on the 1st of each month
+          </div>
+        </div>
       </div>
     </div>
   );

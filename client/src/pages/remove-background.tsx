@@ -10,6 +10,13 @@ import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/header';
 import { SEOHead } from '@/components/SEOHead';
 import logoUrl from '@assets/mascot-logo-optimized.png';
+import { useQuery } from '@tanstack/react-query';
+import {
+  UpgradePrompt,
+  useUpgradePrompt,
+  UsageIndicator,
+  LimitReachedBanner
+} from '@/components/UpgradePrompt';
 
 // Types
 interface ProcessedImage {
@@ -21,6 +28,12 @@ interface ProcessedImage {
   processingTime: number;
   downloadUrl: string;
   previewUrl?: string;
+}
+
+interface LimitsResponse {
+  limit: number;
+  remaining: number;
+  tier: string;
 }
 
 // SEO Content
@@ -47,6 +60,23 @@ export default function RemoveBackgroundPage() {
   // Options
   const [outputFormat, setOutputFormat] = useState<'png' | 'webp' | 'avif' | 'jpg'>('png');
   const [quality, setQuality] = useState(90);
+
+  // Fetch usage limits
+  const { data: bgLimits, refetch: refetchLimits } = useQuery<LimitsResponse>({
+    queryKey: ['/api/ai/bg-removal/limits'],
+    retry: false,
+  }) as { data: LimitsResponse | undefined; refetch: () => void };
+
+  // Setup upgrade prompt
+  const upgradePrompt = useUpgradePrompt({
+    feature: 'background_removal',
+    usageStats: bgLimits ? {
+      used: bgLimits.limit - bgLimits.remaining,
+      remaining: bgLimits.remaining,
+      limit: bgLimits.limit,
+    } : null,
+    tierName: bgLimits?.tier || 'free',
+  });
 
   // Handle file selection
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,6 +146,12 @@ export default function RemoveBackgroundPage() {
   const handleRemoveBackground = async () => {
     if (!selectedFile) return;
 
+    // Check limits before processing
+    if (bgLimits && bgLimits.remaining <= 0) {
+      upgradePrompt.setIsOpen(true);
+      return;
+    }
+
     setIsProcessing(true);
     setProgress(10);
 
@@ -135,21 +171,43 @@ export default function RemoveBackgroundPage() {
 
       setProgress(80);
 
+      const data = await response.json();
+
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Processing failed');
+        // Check if it's a limit or feature restriction error
+        if (data.error === 'limit_reached' || data.showUpgradePrompt) {
+          upgradePrompt.checkAndShowPrompt(data);
+          return;
+        }
+
+        if (data.error === 'format_restricted') {
+          upgradePrompt.showRestrictedFeaturePrompt(`${outputFormat.toUpperCase()} output`);
+          return;
+        }
+
+        throw new Error(data.message || data.error || 'Processing failed');
       }
 
-      const data = await response.json();
       setProgress(100);
 
       if (data.success) {
         setResult(data.result);
-        
+
         const previewResponse = await fetch(data.result.downloadUrl);
         if (previewResponse.ok) {
           const blob = await previewResponse.blob();
           setResultPreview(URL.createObjectURL(blob));
+        }
+
+        // Refetch limits to update UI
+        refetchLimits();
+
+        // Check if should show upgrade prompt after successful operation
+        if (data.usage?.showUpgradePrompt) {
+          // Small delay so user can see the result first
+          setTimeout(() => {
+            upgradePrompt.checkAndShowPrompt(data.usage);
+          }, 1500);
         }
 
         toast({
@@ -159,14 +217,14 @@ export default function RemoveBackgroundPage() {
       }
     } catch (error: any) {
       console.error('Background removal error:', error);
-      
+
       let errorMessage = error.message;
       if (error.message.includes('cannot identify image file')) {
         errorMessage = 'This image format is not supported. Please use JPG, PNG, or WebP.';
       } else if (error.message.includes('CUDA out of memory')) {
         errorMessage = 'Image is too large to process. Please try a smaller image.';
       }
-      
+
       toast({
         title: "Processing failed",
         description: errorMessage,
@@ -201,10 +259,10 @@ export default function RemoveBackgroundPage() {
 
   return (
     <>
-      <SEOHead 
+      <SEOHead
         title={SEO_TITLE}
         description={SEO_DESCRIPTION}
-        canonical="https://microjpeg.com/remove-background"
+        canonicalUrl="https://microjpeg.com/remove-background"
       />
 
       {/* Dark theme matching landing page */}
@@ -212,19 +270,39 @@ export default function RemoveBackgroundPage() {
         <Header />
 
         <main className="max-w-6xl mx-auto px-4 py-12">
+          {/* Usage Indicator */}
+          {bgLimits && (
+            <div className="mb-6">
+              <UsageIndicator
+                feature="background_removal"
+                used={bgLimits.limit - bgLimits.remaining}
+                limit={bgLimits.limit}
+                onUpgradeClick={() => upgradePrompt.setIsOpen(true)}
+              />
+            </div>
+          )}
+
+          {/* Limit Reached Banner */}
+          {bgLimits && bgLimits.remaining <= 0 && (
+            <LimitReachedBanner
+              feature="background_removal"
+              onUpgradeClick={() => upgradePrompt.setIsOpen(true)}
+            />
+          )}
+
           {/* Hero Section */}
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-teal-500/20 text-teal-400 px-4 py-2 rounded-full mb-4 border border-teal-500/30">
               <Sparkles className="w-4 h-4" />
               <span className="text-sm font-medium">AI-Powered • WebP & AVIF Output</span>
             </div>
-            
+
             <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">
               Remove Background from Image
             </h1>
-            
+
             <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-              Instantly remove backgrounds with AI. <strong className="text-teal-400">Unlike remove.bg</strong>, 
+              Instantly remove backgrounds with AI. <strong className="text-teal-400">Unlike remove.bg</strong>,
               save directly as WebP or AVIF for smaller files and faster websites.
             </p>
           </div>
@@ -424,10 +502,12 @@ export default function RemoveBackgroundPage() {
                   {/* Process Button */}
                   <Button
                     onClick={handleRemoveBackground}
-                    disabled={!selectedFile || isProcessing}
+                    disabled={!selectedFile || isProcessing || (bgLimits?.remaining || 0) <= 0}
                     className="w-full h-12 text-lg bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {isProcessing ? (
+                    {(bgLimits?.remaining || 0) <= 0 ? (
+                      'Limit Reached - Upgrade to Continue'
+                    ) : isProcessing ? (
                       <>
                         <Loader2 className="w-5 h-5 mr-2 animate-spin" />
                         Processing...
@@ -599,6 +679,9 @@ export default function RemoveBackgroundPage() {
                 </div>
               </footer>
       </div>
+
+      {/* Upgrade Prompt Modal */}
+      <UpgradePrompt {...upgradePrompt.promptProps} />
     </>
   );
 }

@@ -1,4 +1,3 @@
-import { SiWordpress } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import { Menu, X } from "lucide-react";
@@ -117,10 +116,6 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
               <a href="/api-docs#overview" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
                 API
               </a>
-              <a href="/wordpress-plugin" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors flex items-center gap-1">
-                <SiWordpress className="w-4 h-4" />
-                Plugin
-              </a>
               <a href="/remove-background" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
                 AI Remove Background
               </a>
@@ -229,16 +224,6 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   API
-                </a>
-                <a
-                  href="/wordpress-plugin"
-                  className="block py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <div className="flex items-center gap-2">
-                    <SiWordpress className="w-4 h-4" />
-                    <span>Plugin</span>
-                  </div>
                 </a>
                 <a
                   href="/remove-background"
