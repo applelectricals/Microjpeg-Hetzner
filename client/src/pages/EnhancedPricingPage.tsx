@@ -114,8 +114,8 @@ function WebPricing({ billingCycle, setBillingCycle }: {
         'Max Upscale: 2x',
         'Face Enhancement: No',
         'Priority Processing: No',
-        'API Access: None'
-        'Support: Community'
+        'API Access: None',
+        'Support: Community',
       ],
       cta: 'Current Plan',
       popular: false,
@@ -137,8 +137,8 @@ function WebPricing({ billingCycle, setBillingCycle }: {
         'Max Upscale: 8x',
         'Face Enhancement: Yes',
         'Priority Processing: No',
-        'API Access: Basic'
-        'Support: Email'
+        'API Access: Basic',
+        'Support: Email',
       ],
       cta: 'Get Starter',
       popular: false,
@@ -159,8 +159,8 @@ function WebPricing({ billingCycle, setBillingCycle }: {
         'Max Upscale: 8x',
         'Face Enhancement: Yes',
         'Priority Processing: Yes',
-        'API Access: Full'
-        'Support: Priority'
+        'API Access: Full',
+        'Support: Priority',
       ],
       cta: 'Get Pro',
       popular: true,
@@ -181,8 +181,8 @@ function WebPricing({ billingCycle, setBillingCycle }: {
         'Max Upscale: 8x',
         'Face Enhancement: Yes',
         'Priority Processing: Yes',
-        'API Access: Full'
-        'Support: Priority'
+        'API Access: Full',
+        'Support: Priority',
       ],
       cta: 'Get Business',
       popular: false,
