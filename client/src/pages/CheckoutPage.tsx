@@ -25,9 +25,42 @@ const PAYPAL_CLIENT_ID = 'BAA6hsJNpHbcTBMWxqcfbZs22QgzO7knIaUhASkWYLR-u6AtMlYgib
 
 // Plan details for display
 const PLAN_FEATURES = {
-  starter: ['Unlimited compressions', '75MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Standard processing', '1 concurrent upload'],
-  pro: ['Unlimited compressions', '150MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Priority processing', '1 concurrent upload'],
-  business: ['Unlimited compressions', '200MB max file size', 'All formats including RAW', 'Unlimited conversions', 'Priority processing', '1 concurrent upload'],
+  starter: [
+    'Compress/Convert: UNLIMITED',
+    'File Size: UNLIMITED',
+    'AI BG Removal: 200/month',
+    'BG Output Formats: WEBP, AVIF, PNG, JPG',
+    'AI Enhancement: 200/month',
+    'Max Upscale: 8x',
+    'Face Enhancement: Yes',
+    'Priority Processing: No',
+    'API Access: Basic',
+    'Support: Email'
+  ],
+  pro: [
+    'Compress/Convert: UNLIMITED',
+    'File Size: UNLIMITED',
+    'AI BG Removal: 500/month',
+    'BG Output Formats: WEBP, AVIF, PNG, JPG',
+    'AI Enhancement: 500/month',
+    'Max Upscale: 8x',
+    'Face Enhancement: Yes',
+    'Priority Processing: Yes',
+    'API Access: Full',
+    'Support: Priority'
+  ],
+  business: [
+    'Compress/Convert: UNLIMITED',
+    'File Size: UNLIMITED',
+    'AI BG Removal: 1000/month',
+    'BG Output Formats: WEBP, AVIF, PNG, JPG',
+    'AI Enhancement: 1000/month',
+    'Max Upscale: 8x',
+    'Face Enhancement: Yes',
+    'Priority Processing: Yes',
+    'API Access: Full',
+    'Support: Priority'
+  ],
 };
 
 const PLAN_PRICES = {

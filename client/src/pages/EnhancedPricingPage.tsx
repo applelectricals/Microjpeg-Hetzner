@@ -47,7 +47,7 @@ export default function CompletePricingPage() {
         </div>
 
         {/* Main Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+        {/* <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
           <TabsList className="grid w-full max-w-2xl mx-auto grid-cols-4 bg-gray-800/50 backdrop-blur-xl rounded-xl p-2 border border-gray-700/50">
             <TabsTrigger value="web" className="flex items-center gap-2">
               <Globe className="w-4 h-4" />
@@ -67,26 +67,25 @@ export default function CompletePricingPage() {
             </TabsTrigger>
           </TabsList>
 
-          {/* WEB TAB */}
           <TabsContent value="web">
             <WebPricing billingCycle={billingCycle} setBillingCycle={setBillingCycle} />
           </TabsContent>
 
-          {/* API TAB */}
           <TabsContent value="api">
             <APIPricing />
           </TabsContent>
 
-          {/* WORDPRESS TAB */}
           <TabsContent value="wordpress">
             <WordPressPricing billingCycle={billingCycle} setBillingCycle={setBillingCycle} />
           </TabsContent>
 
-          {/* CDN TAB */}
           <TabsContent value="cdn">
             <CDNPricing />
           </TabsContent>
-        </Tabs>
+        </Tabs> */}
+
+        {/* Direct Web Pricing Display */}
+        <WebPricing billingCycle={billingCycle} setBillingCycle={setBillingCycle} />
 
         {/* FAQ Section */}
         <FAQSection />
@@ -107,12 +106,16 @@ function WebPricing({ billingCycle, setBillingCycle }: {
       period: 'forever',
       description: 'Perfect for trying out',
       features: [
-        '200 operations/month (100 regular + 100 RAW)',
-        '7MB max per regular file',
-        '15MB max per RAW file',
-        'All formats (JPEG, PNG, WebP, AVIF, RAW)',
-        'Standard processing speed',
-        '1 concurrent upload',
+        'Compress/Convert: 200/month',
+        'File Size: 7MB Regular/15MB RAW',
+        'AI BG Removal: 5/month',
+        'BG Output Formats: PNG only',
+        'AI Enhancement: 3/month',
+        'Max Upscale: 2x',
+        'Face Enhancement: No',
+        'Priority Processing: No',
+        'API Access: None'
+        'Support: Community'
       ],
       cta: 'Current Plan',
       popular: false,
@@ -126,12 +129,16 @@ function WebPricing({ billingCycle, setBillingCycle }: {
       savings: billingCycle === 'yearly' ? 'Save $59/year' : null,
       description: 'For freelancers',
       features: [
-        'Unlimited compressions',
-        '75MB max file size',
-        'All formats including RAW',
-        'Unlimited conversions',
-        'Standard processing',
-        '1 concurrent upload',
+        'Compress/Convert: UNLIMITED',
+        'File Size: UNLIMITED',
+        'AI BG Removal: 200/month',
+        'BG Output Formats: WEBP, AVIF, PNG, JPG',
+        'AI Enhancement: 200/month',
+        'Max Upscale: 8x',
+        'Face Enhancement: Yes',
+        'Priority Processing: No',
+        'API Access: Basic'
+        'Support: Email'
       ],
       cta: 'Get Starter',
       popular: false,
@@ -144,12 +151,16 @@ function WebPricing({ billingCycle, setBillingCycle }: {
       savings: billingCycle === 'yearly' ? 'Save $79/year' : null,
       description: 'For professionals',
       features: [
-        'Unlimited compressions',
-        '150MB max file size',
-        'All formats including RAW',
-        'Unlimited conversions',
-        'Standard processing',
-        '1 concurrent upload',
+        'Compress/Convert: UNLIMITED',
+        'File Size: UNLIMITED',
+        'AI BG Removal: 500/month',
+        'BG Output Formats: WEBP, AVIF, PNG, JPG',
+        'AI Enhancement: 500/month',
+        'Max Upscale: 8x',
+        'Face Enhancement: Yes',
+        'Priority Processing: Yes',
+        'API Access: Full'
+        'Support: Priority'
       ],
       cta: 'Get Pro',
       popular: true,
@@ -162,12 +173,16 @@ function WebPricing({ billingCycle, setBillingCycle }: {
       savings: billingCycle === 'yearly' ? 'Save $239/year' : null,
       description: 'For teams',
       features: [
-        'Unlimited compressions',
-        '200MB max file size',
-        'All formats including RAW',
-        'Unlimited conversions',
-        'Standard processing',
-        '1 concurrent upload',
+        'Compress/Convert: UNLIMITED',
+        'File Size: UNLIMITED',
+        'AI BG Removal: 1000/month',
+        'BG Output Formats: WEBP, AVIF, PNG, JPG',
+        'AI Enhancement: 1000/month',
+        'Max Upscale: 8x',
+        'Face Enhancement: Yes',
+        'Priority Processing: Yes',
+        'API Access: Full'
+        'Support: Priority'
       ],
       cta: 'Get Business',
       popular: false,

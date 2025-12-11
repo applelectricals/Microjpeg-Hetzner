@@ -122,10 +122,10 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
                 Plugin
               </a>
               <a href="/remove-background" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
-                Remove Background
+                AI Remove Background
               </a>
               <a href="/enhance-image" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
-                AI Enhancer
+                AI Image Upscaler
               </a>
               <a href="/blog" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
                 Blogs
