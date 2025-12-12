@@ -1,10 +1,10 @@
 import DynamicCompressPage from './pages/DynamicCompressPage';
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, useLocation, Router } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { lazy, Suspense, useEffect, useState } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 
 // Loading component
@@ -76,13 +76,13 @@ const NotFound = () => (
 );
 
 // ========================================
-// DASHBOARD PAGE WRAPPER - Handles auth check inline
+// PROTECTED ROUTE WRAPPER
 // ========================================
-const DashboardPage = () => {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
   
-  console.log('[DashboardPage] Rendering - isLoading:', isLoading, 'isAuthenticated:', isAuthenticated);
+  console.log('[ProtectedRoute] isLoading:', isLoading, 'isAuthenticated:', isAuthenticated);
   
   // Show loader while checking auth
   if (isLoading) {
@@ -91,120 +91,89 @@ const DashboardPage = () => {
   
   // Redirect if not authenticated
   if (!isAuthenticated) {
-    console.log('[DashboardPage] Not authenticated, redirecting to login');
-    // Use useEffect to avoid render-time side effects
-    useEffect(() => {
-      setLocation('/login');
-    }, []);
+    console.log('[ProtectedRoute] Not authenticated, redirecting to login');
+    // Use window.location for guaranteed redirect
+    window.location.href = '/login';
     return <PageLoader />;
   }
   
-  // User is authenticated, render dashboard
-  return <Dashboard />;
-};
-
-// Profile page wrapper
-const ProfilePage = () => {
-  const { isAuthenticated, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
-  
-  if (isLoading) {
-    return <PageLoader />;
-  }
-  
-  if (!isAuthenticated) {
-    useEffect(() => {
-      setLocation('/login');
-    }, []);
-    return <PageLoader />;
-  }
-  
-  return <Profile />;
-};
-
-// Compress page wrapper (for authenticated compress)
-const CompressPage = () => {
-  const { isAuthenticated, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
-  
-  if (isLoading) {
-    return <PageLoader />;
-  }
-  
-  if (!isAuthenticated) {
-    useEffect(() => {
-      setLocation('/login');
-    }, []);
-    return <PageLoader />;
-  }
-  
-  return <DynamicCompressPage />;
-};
-
-// Login page - redirect if already logged in
-const LoginPage = () => {
-  const { isAuthenticated, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
-  
-  if (isLoading) {
-    return <PageLoader />;
-  }
-  
-  if (isAuthenticated) {
-    useEffect(() => {
-      setLocation('/dashboard');
-    }, []);
-    return <PageLoader />;
-  }
-  
-  return <Login />;
-};
-
-// Signup page - redirect if already logged in
-const SignupPage = () => {
-  const { isAuthenticated, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
-  
-  if (isLoading) {
-    return <PageLoader />;
-  }
-  
-  if (isAuthenticated) {
-    useEffect(() => {
-      setLocation('/dashboard');
-    }, []);
-    return <PageLoader />;
-  }
-  
-  return <Signup />;
+  return <>{children}</>;
 };
 
 // Simple redirect component
 const RedirectTo = ({ to }: { to: string }) => {
-  const [, setLocation] = useLocation();
   useEffect(() => {
-    setLocation(to);
-  }, [to, setLocation]);
+    console.log('[RedirectTo] Redirecting to:', to);
+    window.location.href = to;
+  }, [to]);
   return <PageLoader />;
 };
 
-function Router() {
+// Debug wrapper to log route matching
+const DebugRoute = ({ path, children }: { path: string; children: React.ReactNode }) => {
+  console.log('[Route] Matched path:', path);
+  return <>{children}</>;
+};
+
+function AppRouter() {
+  const [location] = useLocation();
+  
+  // Debug: Log current location on every render
+  console.log('[AppRouter] Current location:', location);
+  
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
-        {/* HOME - must be exact */}
-        <Route path="/" component={Landing} />
-        
         {/* ========================================
-            CRITICAL: DASHBOARD ROUTE - MUST BE BEFORE ANY WILDCARDS
+            DASHBOARD - MUST BE VERY EARLY
+            Using render function pattern for debugging
             ======================================== */}
-        <Route path="/dashboard" component={DashboardPage} />
-        <Route path="/profile" component={ProfilePage} />
-        <Route path="/compress" component={CompressPage} />
+        <Route path="/dashboard">
+          {() => {
+            console.log('[Route /dashboard] Matched! Rendering ProtectedRoute > Dashboard');
+            return (
+              <ProtectedRoute>
+                <Dashboard />
+              </ProtectedRoute>
+            );
+          }}
+        </Route>
+        
+        <Route path="/profile">
+          {() => {
+            console.log('[Route /profile] Matched!');
+            return (
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            );
+          }}
+        </Route>
+        
+        <Route path="/compress">
+          {() => {
+            console.log('[Route /compress] Matched!');
+            return (
+              <ProtectedRoute>
+                <DynamicCompressPage />
+              </ProtectedRoute>
+            );
+          }}
+        </Route>
         
         {/* AUTH ROUTES */}
-        <Route path="/login" component={LoginPage} />
-        <Route path="/signup" component={SignupPage} />
+        <Route path="/login">
+          {() => {
+            console.log('[Route /login] Matched!');
+            return <Login />;
+          }}
+        </Route>
+        <Route path="/signup">
+          {() => {
+            console.log('[Route /signup] Matched!');
+            return <Signup />;
+          }}
+        </Route>
         <Route path="/verify-email" component={EmailVerification} />
         
         {/* PRICING & CHECKOUT */}
@@ -222,14 +191,14 @@ function Router() {
         <Route path="/remove-background" component={RemoveBackgroundPage} />
         <Route path="/enhance-image" component={EnhanceImagePage} />
         
-        {/* TOOLS */}
-        <Route path="/tools" component={Tools} />
+        {/* TOOLS - Specific paths before wildcard */}
         <Route path="/tools/compress" component={ToolsCompress} />
         <Route path="/tools/convert" component={ToolsConvert} />
         <Route path="/tools/batch" component={ToolsBatch} />
         <Route path="/tools/optimizer" component={ToolsOptimizer} />
         <Route path="/tools/bulk" component={BulkImageCompression} />
         <Route path="/tools/raw" component={CompressRawFiles} />
+        <Route path="/tools" component={Tools} />
         
         {/* COMPRESSION TIERS */}
         <Route path="/premium" component={PremiumCompress} />
@@ -251,16 +220,21 @@ function Router() {
         <Route path="/legal/payment-protection" component={LegalPaymentProtection} />
         
         {/* WORDPRESS */}
-        <Route path="/wordpress-plugin" component={WordPressDetails} />
         <Route path="/wordpress-plugin/install" component={WordPressInstallation} />
         <Route path="/wordpress-plugin/docs" component={WordPressImagePlugin} />
         <Route path="/wordpress-plugin/api" component={WordPressDevelopment} />
         <Route path="/wordpress-plugin/download" component={WordPressDetails} />
+        <Route path="/wordpress-plugin" component={WordPressDetails} />
         
         {/* ========================================
-            LEGACY REDIRECTS - After all static routes
+            LEGACY REDIRECTS
             ======================================== */}
-        <Route path="/free">{() => <RedirectTo to="/" />}</Route>
+        <Route path="/free">
+          {() => {
+            console.log('[Route /free] Matched! Redirecting to /');
+            return <RedirectTo to="/" />;
+          }}
+        </Route>
         <Route path="/compress-free">{() => <RedirectTo to="/" />}</Route>
         <Route path="/compress-premium">{() => <RedirectTo to="/premium" />}</Route>
         <Route path="/compress-enterprise">{() => <RedirectTo to="/enterprise" />}</Route>
@@ -282,16 +256,30 @@ function Router() {
         <Route path="/bulk-image-compression">{() => <RedirectTo to="/tools" />}</Route>
         
         {/* ========================================
-            DYNAMIC ROUTES - MUST BE LAST (before 404)
-            These have wildcards that could match anything
+            DYNAMIC ROUTES - MUST BE AFTER ALL STATIC ROUTES
             ======================================== */}
         <Route path="/blog/:slug" component={BlogPost} />
         <Route path="/convert/:conversion" component={ConversionPage} />
         <Route path="/compress/:format" component={ConversionPage} />
         <Route path="/tools/:format" component={ConversionPage} />
         
+        {/* ========================================
+            HOME - Put near the end to avoid matching other routes
+            ======================================== */}
+        <Route path="/">
+          {() => {
+            console.log('[Route /] Matched! Rendering Landing');
+            return <Landing />;
+          }}
+        </Route>
+        
         {/* 404 - Absolute last */}
-        <Route component={NotFound} />
+        <Route>
+          {() => {
+            console.log('[Route 404] No route matched!');
+            return <NotFound />;
+          }}
+        </Route>
       </Switch>
     </Suspense>
   );
@@ -302,7 +290,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <Toaster />
-        <Router />
+        <AppRouter />
       </TooltipProvider>
     </QueryClientProvider>
   );
