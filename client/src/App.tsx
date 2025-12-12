@@ -1,5 +1,5 @@
 import DynamicCompressPage from './pages/DynamicCompressPage';
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -14,22 +14,41 @@ const PageLoader = () => (
   </div>
 );
 
-// ProtectedRoute wrapper — redirects unauthenticated users to /login
+// ProtectedRoute wrapper - FIXED VERSION
+// Shows loader while checking auth, redirects if not authenticated
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 
-  // While auth status is loading, show loader
-  if (isLoading) return <PageLoader />;
+  // While auth status is loading, show loader (don't redirect yet!)
+  if (isLoading) {
+    return <PageLoader />;
+  }
 
-  // If not authenticated, redirect to login
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      setLocation('/login');
-    }
-  }, [isLoading, isAuthenticated, setLocation]);
+  // If not authenticated after loading complete, redirect to login
+  if (!isAuthenticated) {
+    // Use Redirect component for cleaner handling, or setLocation
+    setLocation('/login');
+    return null;
+  }
 
-  if (!isAuthenticated) return null;
+  return <>{children}</>;
+};
+
+// GuestOnlyRoute - for pages that should only be shown to non-authenticated users
+const GuestOnlyRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+
+  if (isLoading) {
+    return <PageLoader />;
+  }
+
+  // Redirect authenticated users away from login/signup
+  if (isAuthenticated) {
+    setLocation('/dashboard');
+    return null;
+  }
 
   return <>{children}</>;
 };
@@ -108,29 +127,13 @@ const LegalCookies = lazy(() => import("@/pages/legal-cookies"));
 const LegalCancellation = lazy(() => import("@/pages/legal-cancellation"));
 const LegalPaymentProtection = lazy(() => import("@/pages/legal-payment-protection"));
 
-// Redirect components for legacy URLs
-const LegalRedirect = ({ to }: { to: string }) => {
+// Simple redirect component using useEffect
+const SimpleRedirect = ({ to }: { to: string }) => {
   const [, setLocation] = useLocation();
-  useEffect(() => { setLocation(to); }, [to, setLocation]);
-  return null;
-};
-
-const WordPressRedirect = ({ to }: { to: string }) => {
-  const [, setLocation] = useLocation();
-  useEffect(() => { setLocation(to); }, [to, setLocation]);
-  return null;
-};
-
-const CompressRedirect = ({ to }: { to: string }) => {
-  const [, setLocation] = useLocation();
-  useEffect(() => { setLocation(to); }, [to, setLocation]);
-  return null;
-};
-
-const WebToolsRedirect = ({ to }: { to: string }) => {
-  const [, setLocation] = useLocation();
-  useEffect(() => { setLocation(to); }, [to, setLocation]);
-  return null;
+  useEffect(() => {
+    setLocation(to);
+  }, [to, setLocation]);
+  return <PageLoader />;
 };
 
 // Error pages
@@ -149,18 +152,32 @@ function Router() {
     <Suspense fallback={<PageLoader />}>
       <Switch>
         {/* ========================================== */}
-        {/* STATIC ROUTES - MUST COME FIRST */}
+        {/* HOME */}
         {/* ========================================== */}
-        
-        {/* Home */}
         <Route path="/" component={Landing} />
         
-        {/* Authentication - Always available */}
-        <Route path="/login" component={Login} />
-        <Route path="/signup" component={Signup} />
+        {/* ========================================== */}
+        {/* AUTHENTICATION - Guest only routes */}
+        {/* ========================================== */}
+        <Route path="/login">
+          {() => (
+            <GuestOnlyRoute>
+              <Login />
+            </GuestOnlyRoute>
+          )}
+        </Route>
+        <Route path="/signup">
+          {() => (
+            <GuestOnlyRoute>
+              <Signup />
+            </GuestOnlyRoute>
+          )}
+        </Route>
         <Route path="/verify-email" component={EmailVerification} />
         
-        {/* Dashboard & Profile - Protected but ALWAYS REGISTERED */}
+        {/* ========================================== */}
+        {/* PROTECTED ROUTES - Require authentication */}
+        {/* ========================================== */}
         <Route path="/dashboard">
           {() => (
             <ProtectedRoute>
@@ -175,23 +192,38 @@ function Router() {
             </ProtectedRoute>
           )}
         </Route>
+        <Route path="/compress">
+          {() => (
+            <ProtectedRoute>
+              <DynamicCompressPage />
+            </ProtectedRoute>
+          )}
+        </Route>
         
-        {/* Pricing & Checkout */}
+        {/* ========================================== */}
+        {/* PRICING & CHECKOUT */}
+        {/* ========================================== */}
         <Route path="/pricing" component={EnhancedPricingPage} />
         <Route path="/checkout" component={CheckoutPage} />
         <Route path="/simple-pricing" component={SimplePricing} />
         
-        {/* API pages */}
+        {/* ========================================== */}
+        {/* API PAGES */}
+        {/* ========================================== */}
         <Route path="/api-docs" component={ApiDocs} />
         <Route path="/api-signup" component={ApiSignup} />
         <Route path="/api-demo" component={ApiDemo} />
         <Route path="/api-dashboard" component={ApiDashboard} />
         
-        {/* AI Tools */}
+        {/* ========================================== */}
+        {/* AI TOOLS */}
+        {/* ========================================== */}
         <Route path="/remove-background" component={RemoveBackgroundPage} />
         <Route path="/enhance-image" component={EnhanceImagePage} />
         
-        {/* Tools hierarchy */}
+        {/* ========================================== */}
+        {/* TOOLS HIERARCHY */}
+        {/* ========================================== */}
         <Route path="/tools" component={Tools} />
         <Route path="/tools/compress" component={ToolsCompress} />
         <Route path="/tools/convert" component={ToolsConvert} />
@@ -200,19 +232,16 @@ function Router() {
         <Route path="/tools/bulk" component={BulkImageCompression} />
         <Route path="/tools/raw" component={CompressRawFiles} />
         
-        {/* Compression pages */}
-        <Route path="/compress">
-          {() => (
-            <ProtectedRoute>
-              <DynamicCompressPage />
-            </ProtectedRoute>
-          )}
-        </Route>
+        {/* ========================================== */}
+        {/* COMPRESSION PAGES */}
+        {/* ========================================== */}
         <Route path="/premium" component={PremiumCompress} />
         <Route path="/enterprise" component={EnterpriseCompress} />
         <Route path="/test-premium" component={TestPremiumCompress} />
         
-        {/* Content pages */}
+        {/* ========================================== */}
+        {/* CONTENT PAGES */}
+        {/* ========================================== */}
         <Route path="/about" component={About} />
         <Route path="/contact" component={Contact} />
         <Route path="/support" component={Support} />
@@ -220,14 +249,18 @@ function Router() {
         <Route path="/blog" component={Blog} />
         <Route path="/blog/:slug" component={BlogPost} />
         
-        {/* Legal pages - New hierarchy */}
+        {/* ========================================== */}
+        {/* LEGAL PAGES - New hierarchy */}
+        {/* ========================================== */}
         <Route path="/legal/terms" component={LegalTerms} />
         <Route path="/legal/privacy" component={LegalPrivacy} />
         <Route path="/legal/cookies" component={LegalCookies} />
         <Route path="/legal/cancellation" component={LegalCancellation} />
         <Route path="/legal/payment-protection" component={LegalPaymentProtection} />
         
-        {/* WordPress Plugin hierarchy */}
+        {/* ========================================== */}
+        {/* WORDPRESS PLUGIN */}
+        {/* ========================================== */}
         <Route path="/wordpress-plugin" component={WordPressDetails} />
         <Route path="/wordpress-plugin/install" component={WordPressInstallation} />
         <Route path="/wordpress-plugin/docs" component={WordPressImagePlugin} />
@@ -237,37 +270,37 @@ function Router() {
         {/* ========================================== */}
         {/* LEGACY REDIRECTS */}
         {/* ========================================== */}
-        <Route path="/free" component={() => <CompressRedirect to="/" />} />
-        <Route path="/compress-free" component={() => <CompressRedirect to="/" />} />
-        <Route path="/compress-premium" component={() => <CompressRedirect to="/premium" />} />
-        <Route path="/compress-enterprise" component={() => <CompressRedirect to="/enterprise" />} />
+        <Route path="/free" component={() => <SimpleRedirect to="/" />} />
+        <Route path="/compress-free" component={() => <SimpleRedirect to="/" />} />
+        <Route path="/compress-premium" component={() => <SimpleRedirect to="/premium" />} />
+        <Route path="/compress-enterprise" component={() => <SimpleRedirect to="/enterprise" />} />
         
         {/* Legacy legal redirects */}
-        <Route path="/terms-of-service" component={() => <LegalRedirect to="/legal/terms" />} />
-        <Route path="/privacy-policy" component={() => <LegalRedirect to="/legal/privacy" />} />
-        <Route path="/cookie-policy" component={() => <LegalRedirect to="/legal/cookies" />} />
-        <Route path="/cancellation-policy" component={() => <LegalRedirect to="/legal/cancellation" />} />
-        <Route path="/payment-protection" component={() => <LegalRedirect to="/legal/payment-protection" />} />
+        <Route path="/terms-of-service" component={() => <SimpleRedirect to="/legal/terms" />} />
+        <Route path="/privacy-policy" component={() => <SimpleRedirect to="/legal/privacy" />} />
+        <Route path="/cookie-policy" component={() => <SimpleRedirect to="/legal/cookies" />} />
+        <Route path="/cancellation-policy" component={() => <SimpleRedirect to="/legal/cancellation" />} />
+        <Route path="/payment-protection" component={() => <SimpleRedirect to="/legal/payment-protection" />} />
         
         {/* Legacy WordPress redirects */}
-        <Route path="/wordpress/details" component={() => <WordPressRedirect to="/wordpress-plugin" />} />
-        <Route path="/wordpress/installation" component={() => <WordPressRedirect to="/wordpress-plugin/install" />} />
-        <Route path="/wordpress-installation" component={() => <WordPressRedirect to="/wordpress-plugin/install" />} />
-        <Route path="/wordpress/development" component={() => <WordPressRedirect to="/wordpress-plugin/api" />} />
-        <Route path="/wordpress-development" component={() => <WordPressRedirect to="/wordpress-plugin/api" />} />
-        <Route path="/wordpress-image-plugin" component={() => <WordPressRedirect to="/wordpress-plugin/docs" />} />
+        <Route path="/wordpress/details" component={() => <SimpleRedirect to="/wordpress-plugin" />} />
+        <Route path="/wordpress/installation" component={() => <SimpleRedirect to="/wordpress-plugin/install" />} />
+        <Route path="/wordpress-installation" component={() => <SimpleRedirect to="/wordpress-plugin/install" />} />
+        <Route path="/wordpress/development" component={() => <SimpleRedirect to="/wordpress-plugin/api" />} />
+        <Route path="/wordpress-development" component={() => <SimpleRedirect to="/wordpress-plugin/api" />} />
+        <Route path="/wordpress-image-plugin" component={() => <SimpleRedirect to="/wordpress-plugin/docs" />} />
         
         {/* Legacy web tools redirects */}
-        <Route path="/web/overview" component={() => <WebToolsRedirect to="/tools" />} />
-        <Route path="/web/compress" component={() => <WebToolsRedirect to="/tools/compress" />} />
-        <Route path="/web/convert" component={() => <WebToolsRedirect to="/tools/convert" />} />
+        <Route path="/web/overview" component={() => <SimpleRedirect to="/tools" />} />
+        <Route path="/web/compress" component={() => <SimpleRedirect to="/tools/compress" />} />
+        <Route path="/web/convert" component={() => <SimpleRedirect to="/tools/convert" />} />
         
         {/* Legacy SEO redirects */}
-        <Route path="/compress-raw-files" component={() => <CompressRedirect to="/tools" />} />
-        <Route path="/bulk-image-compression" component={() => <CompressRedirect to="/tools" />} />
+        <Route path="/compress-raw-files" component={() => <SimpleRedirect to="/tools" />} />
+        <Route path="/bulk-image-compression" component={() => <SimpleRedirect to="/tools" />} />
         
         {/* ========================================== */}
-        {/* DYNAMIC ROUTES - MUST COME LAST */}
+        {/* DYNAMIC ROUTES - MUST BE LAST before 404 */}
         {/* ========================================== */}
         <Route path="/convert/:conversion" component={ConversionPage} />
         <Route path="/compress/:format" component={ConversionPage} />
