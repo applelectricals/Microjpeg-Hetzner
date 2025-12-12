@@ -16,7 +16,8 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
   const { user, isAuthenticated } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [usageStats, setUsageStats] = useState<any>(null);
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   // Silent tracking - fetch stats but don't display counter
   useEffect(() => {
@@ -53,6 +54,53 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
     };
   }, []);
 
+  // Fixed sign out handler
+  const handleSignOut = async () => {
+    if (isSigningOut) return; // Prevent double-clicks
+    
+    setIsSigningOut(true);
+    console.log('Signing out...');
+    
+    try {
+      // Clear local storage first
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      sessionStorage.clear();
+      
+      // Try POST first (most secure)
+      let response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      // If POST fails, try GET as fallback
+      if (!response.ok) {
+        response = await fetch('/api/logout', {
+          method: 'GET',
+          credentials: 'include',
+        });
+      }
+      
+      console.log('Logout response:', response.status);
+      
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Always redirect, even if API fails
+      window.location.href = '/';
+    }
+  };
+
+  // Fixed dashboard navigation
+  const handleDashboardClick = () => {
+    console.log('Dashboard clicked');
+    // Use window.location for guaranteed navigation
+    window.location.href = '/dashboard';
+  };
+
   return (
     <>
       {/* Mobile Header */}
@@ -66,7 +114,8 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
               <span className="text-xs font-opensans text-brand-dark dark:text-gray-300 opacity-70 tracking-wider">PICTURE PERFECT</span>
             </div>
           </div>
-{/* Dark Mode Toggle - Mobile */}
+
+          {/* Dark Mode Toggle - Mobile */}
           {onToggleDark && (
             <Button
               variant="ghost"
@@ -81,9 +130,6 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
               )}
             </Button>
           )}
-
-          
-          {/* Mobile: No counter display - silent tracking only */}
           
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -125,14 +171,12 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
               <a href="/blog" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
                 Blogs
               </a>
-              <button
-                onClick={() => window.location.href = "/pricing"}
-                className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium bg-transparent border-none cursor-pointer transition-colors"
-              >
+              <a href="/pricing" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
                 Pricing
-              </button>
+              </a>
             </nav>
-{/* Dark Mode Toggle - Desktop */}
+
+            {/* Dark Mode Toggle - Desktop */}
             {onToggleDark && (
               <Button
                 variant="ghost"
@@ -148,28 +192,27 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
               </Button>
             )}
 
-            {/* Desktop: No counter display - silent tracking only */}
-
             {/* Auth Buttons */}
             <div className="hidden lg:flex items-center gap-2 lg:gap-4 flex-shrink-0">
               {isAuthenticated ? (
                 <div className="flex items-center gap-2 lg:gap-3">
                   <Button 
                     variant="outline" 
-                    size="sm" 
-                    onClick={() => window.location.href = '/dashboard'}
+                    size="sm"
+                    type="button"
+                    onClick={handleDashboardClick}
                   >
                     Dashboard
                   </Button>
                   <Button 
                     variant="outline" 
-                    size="sm" 
-                    onClick={() => {
-                      fetch('/api/logout', { method: 'GET', credentials: 'include' })
-                        .finally(() => window.location.href = '/');
-                    }}
+                    size="sm"
+                    type="button"
+                    disabled={isSigningOut}
+                    onClick={handleSignOut}
+                    className="cursor-pointer"
                   >
-                    Sign Out
+                    {isSigningOut ? 'Signing out...' : 'Sign Out'}
                   </Button>
                 </div>
               ) : (
@@ -246,18 +289,16 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
                 >
                   Blogs
                 </a>
-                <button
-                  onClick={() => {
-                    setIsMobileMenuOpen(false);
-                    window.location.href = "/pricing";
-                  }}
-                  className="block w-full text-left py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2 bg-transparent border-none cursor-pointer"
+                <a
+                  href="/pricing"
+                  className="block py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Pricing
-                </button>
+                </a>
               </div>
 
-                            {/* Dark Mode Toggle in Menu */}
+              {/* Dark Mode Toggle in Menu */}
               {onToggleDark && (
                 <button 
                   onClick={() => { 
@@ -281,13 +322,14 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
 
               <hr className="border-gray-200 dark:border-gray-600" />
 
-              {/* Auth Buttons */}
+              {/* Auth Buttons - Mobile */}
               {isAuthenticated ? (
                 <div className="space-y-2">
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="w-full justify-start" 
+                    className="w-full justify-start"
+                    type="button"
                     onClick={() => { 
                       setIsMobileMenuOpen(false); 
                       window.location.href = '/dashboard'; 
@@ -298,14 +340,15 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="w-full justify-start" 
+                    className="w-full justify-start cursor-pointer"
+                    type="button"
+                    disabled={isSigningOut}
                     onClick={() => { 
                       setIsMobileMenuOpen(false); 
-                      fetch('/api/logout', { method: 'GET', credentials: 'include' })
-                        .finally(() => window.location.href = '/'); 
+                      handleSignOut();
                     }}
                   >
-                    Sign Out
+                    {isSigningOut ? 'Signing out...' : 'Sign Out'}
                   </Button>
                 </div>
               ) : (
