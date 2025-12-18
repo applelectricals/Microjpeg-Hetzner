@@ -28,6 +28,7 @@ import betaUser1 from '@assets/01_1756987891168.webp';
 import betaUser2 from '@assets/06_1756987891169.webp';
 import betaUser3 from '@assets/07_1756987891169.webp';
 import ButtonsSection from "@/components/ButtonsSection";
+import SEOLinks from '@/components/SEOLinks';
 
 
 // Lazy load heavy components for better performance
@@ -2840,6 +2841,7 @@ export default function MicroJPEGLanding() {
               Background photo by <a href="https://www.pexels.com/photo/selective-focus-photo-of-white-petaled-flowers-96627/" target="_blank" rel="noopener noreferrer" className="hover:underline">AS Photography</a>
             </p>
           </div>
+          <SEOLinks />
         </div>
       </footer>
 

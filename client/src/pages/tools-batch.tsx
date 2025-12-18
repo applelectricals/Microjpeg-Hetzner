@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { ArrowRight, Package, Zap, FileImage, Download, Upload, Gauge, Camera, Layers, Shield, Settings, BarChart, Clock, Users } from 'lucide-react';
 import { Link } from 'wouter';
 import Header from '@/components/header';
+
 import { SEOHead } from '@/components/SEOHead';
 
 export default function ToolsBatch() {

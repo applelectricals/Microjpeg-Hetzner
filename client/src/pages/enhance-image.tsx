@@ -7,6 +7,7 @@ import { Upload, Download, Loader2, X, ZoomIn, User, AlertCircle, AlertTriangle,
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/header';
+import SEOLinks from '@/components/SEOLinks';
 import { SEOHead } from '@/components/SEOHead';
 import logoUrl from '@assets/mascot-logo-optimized.png';
 import { useQuery } from '@tanstack/react-query';
@@ -962,6 +963,7 @@ export default function EnhanceImagePage() {
                     </p>
                   </div>
                 </div>
+                <SEOLinks />
               </footer>
       </div>
 

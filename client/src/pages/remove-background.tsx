@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import Header from '@/components/header';
+import SEOLinks from '@/components/SEOLinks';
 import { SEOHead } from '@/components/SEOHead';
 import logoUrl from '@assets/mascot-logo-optimized.png';
 import { useQuery } from '@tanstack/react-query';
@@ -676,6 +677,7 @@ export default function RemoveBackgroundPage() {
                       Background photo by <a href="https://www.pexels.com/photo/selective-focus-photo-of-white-petaled-flowers-96627/" target="_blank" rel="noopener noreferrer" className="hover:underline">AS Photography</a>
                     </p>
                   </div>
+                  <SEOLinks />
                 </div>
               </footer>
       </div>

@@ -1,203 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
     
-    <meta charset="UTF-8" />
-    <meta name="prerender-service" content="barcode" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <!-- 
+    ============================================================
+    DYNAMIC SEO TAGS - Set by React's SEOHead component
+    ============================================================
+    The following tags are intentionally NOT included here because 
+    they must be set dynamically per-page by React:
+    - <title>
+    - <meta name="description">
+    - <meta name="keywords">
+    - <link rel="canonical">
+    - <meta property="og:*">
+    - <meta name="twitter:*">
+    - <script type="application/ld+json">
     
+    React's SEOHead component will inject these on each page.
+    The generate-seo-html.mjs script will capture the final HTML
+    with all tags properly set.
+    ============================================================
+    -->
+    
+    <!-- Prerender.io ready signal -->
     <script>
-  // Tell Prerender.io the page is ready as soon as React mounts the root
-  // This works on all your 3 processing pages (landing, compress, all 65 convert/*)
-  document.addEventListener('DOMContentLoaded', function() {
-    // Wait for React to hydrate (your #root div gets content)
-    const checkReady = setInterval(function() {
-      if (document.querySelector('#root')?.children.length > 0 || document.body.innerHTML.length > 5000) {
-        window.prerenderReady = true;
-        clearInterval(checkReady);
-      }
-    }, 500);
-
-    // Fallback: force ready after 15 seconds (safe timeout)
-    setTimeout(function() {
-      window.prerenderReady = true;
-      clearInterval(checkReady);
-    }, 15000);
-  });
-</script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const checkReady = setInterval(function() {
+          if (document.querySelector('#root')?.children.length > 0 || document.body.innerHTML.length > 5000) {
+            window.prerenderReady = true;
+            clearInterval(checkReady);
+          }
+        }, 500);
+        setTimeout(function() {
+          window.prerenderReady = true;
+          clearInterval(checkReady);
+        }, 15000);
+      });
+    </script>
 
     <!-- Critical: Preconnect to Google Fonts FIRST -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
     
     <!-- Preload the EXACT font files used in hero text -->
-    <link 
-      rel="preload" 
-      as="font" 
-      type="font/woff2" 
-      href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2"
-      crossorigin
-    >
-    <link 
-      rel="preload" 
-      as="font" 
-      type="font/woff2"
-      href="https://fonts.gstatic.com/s/poppins/v24/pxiEyp8kv8JHgFVrJJfecg.woff2"
-      crossorigin
-    >
-    <link 
-      rel="preload" 
-      as="font" 
-      type="font/woff2"
-      href="https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLGT9Z1xlFQ.woff2"
-      crossorigin
-    >
-    <link 
-      rel="preload" 
-      as="font" 
-      type="font/woff2"
-      href="https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLEj6Z1xlFQ.woff2"
-      crossorigin
-    >
-    <link 
-      rel="preload" 
-      as="font" 
-      type="font/woff2"
-      href="https://fonts.gstatic.com/s/poppins/v24/pxiByp8kv8JHgFVrLCz7Z1xlFQ.woff2"
-      crossorigin
-    >
-    <link 
-      rel="preload" 
-      as="font" 
-      type="font/woff2"
-      href="https://fonts.gstatic.com/s/opensans/v44/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS-muw.woff2"
-      crossorigin
-    >
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/inter/v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7.woff2" crossorigin="">
+    <link rel="preload" as="font" type="font/woff2" href="https://fonts.gstatic.com/s/poppins/v24/pxiEyp8kv8JHgFVrJJfecg.woff2" crossorigin="">
     
     <!-- Load fonts with font-display: swap -->
-    <link 
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" 
-      rel="stylesheet"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Inline critical CSS for hero section -->
+    <!-- Inline critical CSS -->
     <style>
-      /* Critical styles - inline for instant render */
       body {
         margin: 0;
         font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        background: #111827; /* gray-900 */
-        color: #d1d5db; /* gray-300 */
+        background: #111827;
+        color: #d1d5db;
       }
-      
-      /* Hero text - prevent layout shift */
       .hero-text {
-        font-size: 1.125rem; /* text-lg */
+        font-size: 1.125rem;
         line-height: 1.75rem;
-        color: #d1d5db; /* text-gray-300 */
-        max-width: 42rem; /* max-w-2xl */
+        color: #d1d5db;
+        max-width: 42rem;
       }
-      
       @media (min-width: 640px) {
         .hero-text {
-          font-size: 1.25rem; /* text-xl */
+          font-size: 1.25rem;
           line-height: 1.75rem;
         }
       }
-      
-      /* Prevent FOUC */
       .hero-section-mobile {
         min-height: 100vh;
         background: linear-gradient(to bottom right, #111827, #134e4a, #111827);
       }
     </style>
     
-    <!-- 
-      ============================================================
-      DYNAMIC SEO TAGS - Set by React's SEOHead component
-      ============================================================
-      The following tags are intentionally NOT included here because
-      they must be set dynamically per-page by React:
-      - <title>
-      - <meta name="description">
-      - <meta name="keywords">
-      - <link rel="canonical">
-      - <meta property="og:*">
-      - <meta name="twitter:*">
-      - <script type="application/ld+json"> (structured data)
-      
-      React's SEOHead component will inject these on each page.
-      ============================================================
-    -->
+    <!-- Fallback title (will be overwritten by React) -->
+    <title>MicroJPEG - Image Compression & Conversion</title>
     
-    <!-- Generic fallback title (will be replaced by React) -->
-    <title>MicroJPEG - Image Compression & Converter</title>
+    <!-- Static meta tags that don't change per page -->
+    <meta name="robots" content="index, follow">
+    <meta name="revisit-after" content="3 days">
+    <meta name="author" content="MicroJPEG">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="MobileOptimized" content="320">
+    <meta name="theme-color" content="#0f766e">
     
-    <!-- Static meta tags that apply to all pages -->
-    <meta name="robots" content="index, follow" />
-    <meta name="author" content="MicroJPEG" />
-    <meta name="theme-color" content="#3B82F6" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="MicroJPEG" />
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="HandheldFriendly" content="True" />
-    <meta name="MobileOptimized" content="320" />
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
-    
-    <!-- Favicon and Icons -->
-    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-    <link rel="shortcut icon" type="image/png" href="/favicon-48x48.png" />
-    <meta name="msapplication-TileImage" content="/favicon-48x48.png" />
-    <meta name="msapplication-TileColor" content="#ffffff" />
-    
-    <!-- Performance Optimizations: DNS Prefetch -->
-    <link rel="dns-prefetch" href="//fonts.googleapis.com">
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link rel="dns-prefetch" href="//www.dropbox.com">
-    <link rel="dns-prefetch" href="//pagead2.googlesyndication.com">
-    <link rel="dns-prefetch" href="//api-m.paypal.com">
-    
-    <!-- Dropbox API Script -->
-    <script type="text/javascript" src="https://www.dropbox.com/static/api/2/dropins.js" 
-            id="dropboxjs" 
-            data-app-key="d1f2fn27gn4it4h"
-            defer></script>
-            
-    <!-- Performance and Rendering Optimizations -->
-    <meta name="color-scheme" content="light dark">
-    <meta name="supported-color-schemes" content="light dark">
-    
-    <!-- Optimize rendering -->
-    <style>
-      /* Critical CSS - Above the fold optimization */
-      html { font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif; }
-      body { margin: 0; background-color: #ffffff; }
-      #root { min-height: 100vh; }
-      
-      /* Mobile-only hero section spacing fix */
-      @media (max-width: 1023px) {
-        .hero-section-mobile {
-          padding-top: 80px !important;
-        }
-      }
-      
-      /* Loading state to prevent layout shift */
-      .loading { 
-        display: flex; 
-        justify-content: center; 
-        align-items: center; 
-        min-height: 100vh; 
-        font-size: 18px;
-        color: #3B82F6;
-      }
-    </style>
+    <!-- Preconnect to API and CDN -->
+    <link rel="preconnect" href="https://api.microjpeg.com">
+    <link rel="dns-prefetch" href="https://api.microjpeg.com">
   </head>
   <body>
     <div id="root"></div>
