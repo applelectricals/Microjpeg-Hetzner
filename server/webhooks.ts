@@ -1,195 +1,239 @@
-import { Router } from "express";
-import Stripe from "stripe";
-import { handlePaymentFailure, handlePaymentSuccess } from "./paymentProtection";
+import express from 'express';
+import { verifyWebhookSignature } from '../utils/webhookSecurity';
+import { updateUserSubscription, resetMonthlyLimits } from '../services/subscriptionService';
+import { sendEmail } from '../services/emailService';
+import { logWebhookEvent } from '../services/analyticsService';
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
-}
-
-if (!process.env.STRIPE_WEBHOOK_SECRET) {
-  throw new Error('Missing required Stripe webhook secret: STRIPE_WEBHOOK_SECRET');
-}
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-07-30.basil",
-});
-
-const router = Router();
+const router = express.Router();
 
 /**
- * Stripe webhook endpoint for handling payment events
+ * Stripe Webhook Handler
  */
-router.post('/stripe', async (req, res) => {
-  const sig = req.headers['stripe-signature'] as string;
-  let event: Stripe.Event;
-
+router.post('/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+  const signature = req.headers['stripe-signature'];
+  
   try {
     // Verify webhook signature
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    );
-  } catch (err: any) {
-    console.error(`Webhook signature verification failed:`, err);
-    return res.status(400).send(`Webhook Error: ${err.message}`);
-  }
+    const event = verifyWebhookSignature(req.body, signature, 'stripe');
+    
+    await logWebhookEvent('stripe', event.type, event.data);
 
-  console.log(`Received Stripe webhook: ${event.type}`);
-
-  try {
-    // Handle different event types
     switch (event.type) {
-      case 'invoice.payment_failed':
-        await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+      case 'checkout.session.completed':
+        await handleCheckoutCompleted(event.data.object);
         break;
-
-      case 'invoice.payment_succeeded':
-        await handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice);
+        
+      case 'customer.subscription.created':
+        await handleSubscriptionCreated(event.data.object);
         break;
-
-      case 'customer.subscription.deleted':
-        await handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
-        break;
-
-      case 'invoice.payment_action_required':
-        await handlePaymentActionRequired(event.data.object as Stripe.Invoice);
-        break;
-
+        
       case 'customer.subscription.updated':
-        await handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+        await handleSubscriptionUpdated(event.data.object);
         break;
-
+        
+      case 'customer.subscription.deleted':
+        await handleSubscriptionCancelled(event.data.object);
+        break;
+        
+      case 'invoice.payment_succeeded':
+        await handlePaymentSucceeded(event.data.object);
+        break;
+        
+      case 'invoice.payment_failed':
+        await handlePaymentFailed(event.data.object);
+        break;
+        
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        console.log(`Unhandled Stripe event: ${event.type}`);
     }
 
-    res.status(200).json({ received: true });
-
+    res.json({ received: true });
   } catch (error) {
-    console.error(`Error processing webhook ${event.type}:`, error);
-    res.status(500).json({ error: 'Webhook processing failed' });
+    console.error('Stripe webhook error:', error);
+    res.status(400).send('Webhook Error');
   }
 });
 
 /**
- * Handle failed payment
+ * Handle Checkout Completed
  */
-async function handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
-  console.log(`Payment failed for invoice: ${invoice.id}`);
+async function handleCheckoutCompleted(session: any) {
+  const userId = session.client_reference_id;
+  const subscriptionId = session.subscription;
   
-  if (invoice.customer && typeof invoice.customer === 'string') {
-    await handlePaymentFailure(
-      invoice.customer,
-      invoice.id || '',
-      'payment_failed'
-    );
+  // Update user subscription
+  await updateUserSubscription(userId, {
+    stripeSubscriptionId: subscriptionId,
+    status: 'active'
+  });
+  
+  // Send welcome email
+  await sendEmail(userId, 'subscription-activated', {
+    tier: session.metadata.tier
+  });
+}
+
+/**
+ * Handle Subscription Created
+ */
+async function handleSubscriptionCreated(subscription: any) {
+  const userId = subscription.metadata.userId;
+  const tier = subscription.metadata.tier;
+  
+  await updateUserSubscription(userId, {
+    tier: tier,
+    status: 'active',
+    stripeSubscriptionId: subscription.id,
+    currentPeriodStart: new Date(subscription.current_period_start * 1000),
+    currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+    billingCycle: subscription.items.data[0].plan.interval
+  });
+
+  // Reset monthly limits for the new billing period
+  await resetMonthlyLimits(userId);
+}
+
+/**
+ * Handle Subscription Updated
+ */
+async function handleSubscriptionUpdated(subscription: any) {
+  const userId = subscription.metadata.userId;
+  const newTier = subscription.metadata.tier;
+  
+  // Check if tier changed
+  const oldSubscription = await getUserSubscription(userId);
+  const tierChanged = oldSubscription.tier !== newTier;
+  
+  await updateUserSubscription(userId, {
+    tier: newTier,
+    status: subscription.status,
+    currentPeriodStart: new Date(subscription.current_period_start * 1000),
+    currentPeriodEnd: new Date(subscription.current_period_end * 1000)
+  });
+
+  if (tierChanged) {
+    // Reset limits when tier changes
+    await resetMonthlyLimits(userId);
+    
+    // Send upgrade notification
+    await sendEmail(userId, 'subscription-upgraded', {
+      oldTier: oldSubscription.tier,
+      newTier: newTier
+    });
   }
 }
 
 /**
- * Handle successful payment
+ * Handle Subscription Cancelled
  */
-async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice): Promise<void> {
-  console.log(`Payment succeeded for invoice: ${invoice.id}`);
+async function handleSubscriptionCancelled(subscription: any) {
+  const userId = subscription.metadata.userId;
   
-  if (invoice.customer && typeof invoice.customer === 'string') {
-    // Determine tier from Stripe subscription
-    let tier = 'free_registered';
-    let endDate: Date | undefined = undefined;
+  await updateUserSubscription(userId, {
+    tier: 'free',
+    status: 'cancelled',
+    cancelledAt: new Date()
+  });
+  
+  // Send cancellation email
+  await sendEmail(userId, 'subscription-cancelled', {
+    endDate: new Date(subscription.current_period_end * 1000)
+  });
+}
+
+/**
+ * Handle Payment Succeeded
+ */
+async function handlePaymentSucceeded(invoice: any) {
+  const userId = invoice.customer_metadata?.userId;
+  
+  if (!userId) return;
+  
+  // Log successful payment
+  await logPayment(userId, {
+    amount: invoice.amount_paid / 100,
+    currency: invoice.currency,
+    invoiceId: invoice.id,
+    status: 'succeeded'
+  });
+  
+  // Reset monthly limits for new billing period
+  await resetMonthlyLimits(userId);
+  
+  // Send payment receipt
+  await sendEmail(userId, 'payment-receipt', {
+    amount: invoice.amount_paid / 100,
+    currency: invoice.currency,
+    invoiceUrl: invoice.hosted_invoice_url
+  });
+}
+
+/**
+ * Handle Payment Failed
+ */
+async function handlePaymentFailed(invoice: any) {
+  const userId = invoice.customer_metadata?.userId;
+  
+  if (!userId) return;
+  
+  // Log failed payment
+  await logPayment(userId, {
+    amount: invoice.amount_due / 100,
+    currency: invoice.currency,
+    invoiceId: invoice.id,
+    status: 'failed'
+  });
+  
+  // Send payment failure notification
+  await sendEmail(userId, 'payment-failed', {
+    amount: invoice.amount_due / 100,
+    currency: invoice.currency,
+    retryDate: new Date(invoice.next_payment_attempt * 1000)
+  });
+}
+
+/**
+ * WordPress Plugin Update Webhook
+ * Notifies when a new plugin version is available
+ */
+router.post('/plugin-update', async (req, res) => {
+  const { version, downloadUrl } = req.body;
+  
+  try {
+    // Update plugin version in database
+    await updatePluginVersion(version, downloadUrl);
     
-    // Get subscription to determine tier
-    if (invoice.subscription) {
-      try {
-        const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
-        const priceId = subscription.items.data[0]?.price.id;
-        
-        if (priceId === 'price_test_premium_placeholder') {
-          tier = 'test_premium';
-          endDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
-        } else if (priceId && priceId.includes('pro')) {
-          tier = 'pro';
-        } else if (priceId && priceId.includes('enterprise')) {
-          tier = 'enterprise';
-        }
-      } catch (error) {
-        console.error('Error retrieving subscription:', error);
-      }
+    // Notify all active WordPress installations
+    await notifyWordPressInstalls(version, downloadUrl);
+    
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Plugin update webhook error:', error);
+    res.status(500).json({ success: false });
+  }
+});
+
+/**
+ * Usage Alert Webhook
+ * Triggers when user approaches their limits
+ */
+router.post('/usage-alert', async (req, res) => {
+  const { userId, limitType, percentage } = req.body;
+  
+  try {
+    if (percentage >= 80) {
+      await sendEmail(userId, 'usage-alert', {
+        limitType,
+        percentage,
+        upgradeUrl: `${process.env.FRONTEND_URL}/upgrade`
+      });
     }
     
-    await handlePaymentSuccess(
-      invoice.customer,
-      invoice.id || '',
-      tier,
-      endDate
-    );
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Usage alert webhook error:', error);
+    res.status(500).json({ success: false });
   }
-}
+});
 
-/**
- * Handle subscription deletion (cancellation)
- */
-async function handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
-  console.log(`Subscription deleted: ${subscription.id}`);
-  
-  if (typeof subscription.customer === 'string') {
-    // When user cancels subscription, suspend API access
-    await handlePaymentFailure(
-      subscription.customer,
-      'subscription_cancelled',
-      'subscription_cancelled'
-    );
-  }
-}
-
-/**
- * Handle payment requiring action (3D Secure, etc.)
- */
-async function handlePaymentActionRequired(invoice: Stripe.Invoice): Promise<void> {
-  console.log(`Payment action required for invoice: ${invoice.id}`);
-  
-  // Could send email to user about required payment action
-  // For now, just log it
-}
-
-/**
- * Handle subscription updates
- */
-async function handleSubscriptionUpdated(subscription: Stripe.Subscription): Promise<void> {
-  console.log(`Subscription updated: ${subscription.id}, status: ${subscription.status}`);
-  
-  if (typeof subscription.customer === 'string') {
-    // Determine tier from Stripe price ID
-    const priceId = subscription.items.data[0]?.price.id;
-    let tier = 'free_registered';
-    let endDate: Date | undefined = undefined;
-    
-    // Map Stripe price IDs to our tiers
-    if (priceId === 'price_test_premium_placeholder') {
-      tier = 'test_premium';
-      endDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours from now
-    } else if (priceId && priceId.includes('pro')) {
-      tier = 'pro';
-    } else if (priceId && priceId.includes('enterprise')) {
-      tier = 'enterprise';
-    }
-    
-    // Handle subscription status changes
-    if (subscription.status === 'past_due') {
-      await handlePaymentFailure(
-        subscription.customer,
-        'subscription_past_due',
-        'subscription_past_due'
-      );
-    } else if (subscription.status === 'active') {
-      await handlePaymentSuccess(
-        subscription.customer,
-        'subscription_updated',
-        tier,
-        endDate
-      );
-    }
-  }
-}
-
-export { router as webhookRouter };
+export default router;
