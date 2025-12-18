@@ -319,32 +319,84 @@ async function generatePageHTML(browser, page, pageConfig) {
     // Get the rendered HTML
     let html = await page.content();
 
-    // Post-process: Ensure canonical is correct for conversion pages
+    // ============================================================
+    // POST-PROCESSING: Fix meta tags in the captured HTML
+    // The index.html has hardcoded homepage meta tags that need
+    // to be replaced with the correct page-specific ones.
+    // ============================================================
+    
+    const isHomePage = pageConfig.url === '/';
     const isConversionPage = pageConfig.url.includes('/convert/');
     const isCompressPage = pageConfig.url.includes('/compress/');
     
-    if (isConversionPage || isCompressPage) {
-      const expectedCanonical = `https://microjpeg.com${pageConfig.url}`;
+    // Get the correct values from the rendered page
+    const correctMeta = await page.evaluate(() => {
+      // Find the LAST (most recent) canonical - that's the one SEOHead added
+      const canonicals = document.querySelectorAll('link[rel="canonical"]');
+      const lastCanonical = canonicals[canonicals.length - 1];
       
-      // Check if canonical is wrong (pointing to homepage)
-      if (html.includes('rel="canonical" href="https://microjpeg.com/"') || 
-          html.includes("rel='canonical' href='https://microjpeg.com/'")) {
-        console.log(`   🔧 Fixing wrong canonical URL`);
-        html = html.replace(
-          /(<link[^>]*rel=["']canonical["'][^>]*href=["'])https:\/\/microjpeg\.com\/?["']/gi,
-          `$1${expectedCanonical}"`
-        );
-      }
+      // Find the LAST title
+      const titles = document.querySelectorAll('title');
+      const lastTitle = titles[titles.length - 1];
       
-      // If no canonical exists, add one
-      if (!html.includes('rel="canonical"') && !html.includes("rel='canonical'")) {
-        console.log(`   🔧 Adding missing canonical URL`);
-        html = html.replace(
-          '</head>',
-          `<link rel="canonical" href="${expectedCanonical}">\n</head>`
-        );
+      // Find meta description (SEOHead adds with specific pattern)
+      const metaDescs = document.querySelectorAll('meta[name="description"]');
+      const lastMetaDesc = metaDescs[metaDescs.length - 1];
+      
+      // Find OG tags
+      const ogTitle = document.querySelector('meta[property="og:title"]');
+      const ogDesc = document.querySelector('meta[property="og:description"]');
+      const ogUrl = document.querySelector('meta[property="og:url"]');
+      
+      return {
+        canonical: lastCanonical?.getAttribute('href') || null,
+        title: lastTitle?.innerText || null,
+        description: lastMetaDesc?.getAttribute('content') || null,
+        ogTitle: ogTitle?.getAttribute('content') || null,
+        ogDesc: ogDesc?.getAttribute('content') || null,
+        ogUrl: ogUrl?.getAttribute('content') || null,
+      };
+    });
+    
+    console.log(`   🔧 Post-processing: Fixing meta tags...`);
+    
+    // Remove ALL existing canonical links and add the correct one
+    html = html.replace(/<link[^>]*rel=["']canonical["'][^>]*>/gi, '');
+    const expectedCanonical = `https://microjpeg.com${pageConfig.url === '/' ? '' : pageConfig.url}`;
+    html = html.replace('</head>', `<link rel="canonical" href="${expectedCanonical}">\n</head>`);
+    
+    // Fix title tag - remove old, keep correct
+    if (correctMeta.title && !isHomePage) {
+      // Remove the hardcoded homepage title
+      html = html.replace(/<title>MicroJPEG - Smart Image Compression Made Easy \| Reduce File Size by 90%<\/title>/gi, '');
+      // If title is now missing, add the correct one
+      if (!html.includes('<title>')) {
+        html = html.replace('</head>', `<title>${correctMeta.title}</title>\n</head>`);
       }
     }
+    
+    // Fix meta description - remove homepage one, keep page-specific
+    if (!isHomePage) {
+      // Remove the hardcoded homepage description
+      html = html.replace(/<meta[^>]*name=["']description["'][^>]*content=["']Best free JPEG compression tool online[^"']*["'][^>]*>/gi, '');
+    }
+    
+    // Remove duplicate meta keywords (homepage specific)
+    if (!isHomePage) {
+      html = html.replace(/<meta[^>]*name=["']keywords["'][^>]*content=["']JPEG compression tool[^"']*["'][^>]*>/gi, '');
+    }
+    
+    // Fix OG tags - remove homepage ones
+    if (!isHomePage) {
+      // Remove homepage OG title
+      html = html.replace(/<meta[^>]*property=["']og:title["'][^>]*content=["']MicroJPEG - Smart Image Compression Made Easy[^"']*["'][^>]*>/gi, '');
+      // Remove homepage OG description  
+      html = html.replace(/<meta[^>]*property=["']og:description["'][^>]*content=["']Smart image compression made easy[^"']*["'][^>]*>/gi, '');
+    }
+    
+    console.log(`   ✅ Fixed canonical: ${expectedCanonical}`);
+    
+
 
     // Validate minimum requirements
     if (!validation.hasH1) {
