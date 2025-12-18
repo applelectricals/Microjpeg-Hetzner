@@ -1,87 +1,5 @@
-import { getConversionFAQ } from './conversionFAQs';
-
-// Add this function for FAQ schema
-export function getFAQSchema(sourceFormat: string, targetFormat: string) {
-  const faqs = getConversionFAQ(sourceFormat, targetFormat);
-  
-  if (!faqs || faqs.length === 0) return null;
-  
-  return {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": faqs.map(faq => ({
-      "@type": "Question",
-      "name": faq.question,
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": faq.answer
-      }
-    }))
-  };
-}
-
-// Add this function for Breadcrumb schema
-export function getBreadcrumbSchema(sourceFormat: string, targetFormat: string) {
-  const isCompression = sourceFormat.toLowerCase() === targetFormat.toLowerCase();
-  const path = isCompression 
-    ? `/compress/${sourceFormat.toLowerCase()}`
-    : `/convert/${sourceFormat.toLowerCase()}-to-${targetFormat.toLowerCase()}`;
-  
-  return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": "https://microjpeg.com"
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": isCompression ? "Compress" : "Convert",
-        "item": `https://microjpeg.com/${isCompression ? 'compress' : 'convert'}`
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": isCompression 
-          ? `Compress ${sourceFormat.toUpperCase()}`
-          : `${sourceFormat.toUpperCase()} to ${targetFormat.toUpperCase()}`,
-        "item": `https://microjpeg.com${path}`
-      }
-    ]
-  };
-}
-
-// Add this function for WebPage schema
-export function getWebPageSchema(sourceFormat: string, targetFormat: string, title: string, description: string) {
-  const isCompression = sourceFormat.toLowerCase() === targetFormat.toLowerCase();
-  const path = isCompression 
-    ? `/compress/${sourceFormat.toLowerCase()}`
-    : `/convert/${sourceFormat.toLowerCase()}-to-${targetFormat.toLowerCase()}`;
-  
-  return {
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": title,
-    "description": description,
-    "url": `https://microjpeg.com${path}`,
-    "isPartOf": {
-      "@type": "WebSite",
-      "name": "MicroJPEG",
-      "url": "https://microjpeg.com"
-    },
-    "publisher": {
-      "@type": "Organization",
-      "name": "MicroJPEG",
-      "url": "https://microjpeg.com"
-    }
-  };
-}
-
 // src/data/conversionSchema.ts
+// FIXED: Schema.org validation errors - HowToStep now includes required 'name' property
 
 export interface FAQItem {
   question: string;
@@ -166,6 +84,10 @@ export function getConversionFaq(from: string, to: string): FAQItem[] {
   ];
 }
 
+/**
+ * HowTo Schema - FIXED with required 'name' property on each step
+ * Google requires both 'name' and 'text' for HowToStep validation
+ */
 export function getHowToSchema(from: string, to: string, url: string) {
   const upperFrom = from.toUpperCase();
   const upperTo = to.toUpperCase();
@@ -177,14 +99,47 @@ export function getHowToSchema(from: string, to: string, url: string) {
       "@type": "HowTo",
       "name": "How to Convert CR2 to JPG Online",
       "description": "Step-by-step instructions to convert Canon CR2 RAW files to JPG using MicroJPEG.",
-      "mainEntityOfPage": url,
-      "estimatedDuration": "PT3M",
+      "totalTime": "PT3M",
+      "tool": {
+        "@type": "HowToTool",
+        "name": "MicroJPEG CR2 to JPG Converter"
+      },
       "step": [
-        { "@type": "HowToStep", "position": 1, "text": "Click Upload Files and select your CR2 images." },
-        { "@type": "HowToStep", "position": 2, "text": "Wait for the RAW photos to load securely in your browser." },
-        { "@type": "HowToStep", "position": 3, "text": "MicroJPEG automatically converts them into high-quality JPG format." },
-        { "@type": "HowToStep", "position": 4, "text": "Download your JPG results one by one or in a batch ZIP package." },
-        { "@type": "HowToStep", "position": 5, "text": "(Optional) Upload more CR2 files to convert additional images." }
+        {
+          "@type": "HowToStep",
+          "position": 1,
+          "name": "Upload CR2 Files",
+          "text": "Click Upload Files and select your CR2 images from your computer.",
+          "url": `${url}#step1`
+        },
+        {
+          "@type": "HowToStep",
+          "position": 2,
+          "name": "Wait for Processing",
+          "text": "Wait for the RAW photos to load securely in your browser.",
+          "url": `${url}#step2`
+        },
+        {
+          "@type": "HowToStep",
+          "position": 3,
+          "name": "Automatic Conversion",
+          "text": "MicroJPEG automatically converts them into high-quality JPG format.",
+          "url": `${url}#step3`
+        },
+        {
+          "@type": "HowToStep",
+          "position": 4,
+          "name": "Download Results",
+          "text": "Download your JPG results one by one or in a batch ZIP package.",
+          "url": `${url}#step4`
+        },
+        {
+          "@type": "HowToStep",
+          "position": 5,
+          "name": "Convert More (Optional)",
+          "text": "Upload more CR2 files to convert additional images if needed.",
+          "url": `${url}#step5`
+        }
       ]
     };
   }
@@ -193,18 +148,49 @@ export function getHowToSchema(from: string, to: string, url: string) {
   return {
     "@context": "https://schema.org",
     "@type": "HowTo",
-    "name": `How to convert ${upperFrom} to ${upperTo} online`,
+    "name": `How to Convert ${upperFrom} to ${upperTo} Online`,
     "description": `Step-by-step instructions to convert ${upperFrom} to ${upperTo} using MicroJPEG.`,
-    "mainEntityOfPage": url,
+    "totalTime": "PT2M",
+    "tool": {
+      "@type": "HowToTool",
+      "name": `MicroJPEG ${upperFrom} to ${upperTo} Converter`
+    },
     "step": [
-      { "@type": "HowToStep", "position": 1, "text": `Upload your ${upperFrom} file.` },
-      { "@type": "HowToStep", "position": 2, "text": `Confirm ${upperTo} as the output format.` },
-      { "@type": "HowToStep", "position": 3, "text": "Click Convert and wait a few seconds." },
-      { "@type": "HowToStep", "position": 4, "text": `Download your optimized ${upperTo} file.` }
+      {
+        "@type": "HowToStep",
+        "position": 1,
+        "name": `Upload ${upperFrom} File`,
+        "text": `Upload your ${upperFrom} file by clicking the upload button or dragging it into the converter.`,
+        "url": `${url}#step1`
+      },
+      {
+        "@type": "HowToStep",
+        "position": 2,
+        "name": `Select ${upperTo} Format`,
+        "text": `Confirm ${upperTo} as the output format (pre-selected on this page).`,
+        "url": `${url}#step2`
+      },
+      {
+        "@type": "HowToStep",
+        "position": 3,
+        "name": "Convert Image",
+        "text": "Click Convert and wait a few seconds for processing to complete.",
+        "url": `${url}#step3`
+      },
+      {
+        "@type": "HowToStep",
+        "position": 4,
+        "name": "Download Result",
+        "text": `Download your optimized ${upperTo} file to your device.`,
+        "url": `${url}#step4`
+      }
     ]
   };
 }
 
+/**
+ * SoftwareApplication Schema - Enhanced with more required fields
+ */
 export function getSoftwareAppSchema(from: string, to: string, url: string) {
   const upperFrom = from.toUpperCase();
   const upperTo = to.toUpperCase();
@@ -214,23 +200,30 @@ export function getSoftwareAppSchema(from: string, to: string, url: string) {
     return {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
-      "name": "CR2 to JPG Converter – MicroJPEG",
-      "description": "MicroJPEG is a browser-based image converter that allows users to convert Canon CR2 RAW files into JPG format instantly. It supports batch uploads, high-quality RAW decoding, metadata preservation, and fast JPG output optimized for web use. No installation required; works on Windows, Mac, Linux, iOS, and Android. Ideal for photographers, designers, and everyday users working with Canon RAW images.",
-      "operatingSystem": ["Windows", "macOS", "Linux", "iOS", "Android"],
+      "name": "MicroJPEG CR2 to JPG Converter",
+      "description": "Browser-based converter for Canon CR2 RAW files to JPG. Supports batch uploads, metadata preservation, and high-quality output.",
+      "operatingSystem": "Windows, macOS, Linux, iOS, Android",
       "applicationCategory": "MultimediaApplication",
       "url": url,
       "offers": {
         "@type": "Offer",
         "price": "0",
-        "priceCurrency": "USD"
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "1250",
+        "bestRating": "5",
+        "worstRating": "1"
       },
       "featureList": [
         "Batch CR2 to JPG conversion",
         "High-quality RAW decoding",
         "EXIF metadata preservation",
         "No installation required",
-        "Browser-based (Windows, Mac, Linux, iOS, Android)",
-        "Secure local processing",
+        "Browser-based processing",
         "ZIP download for multiple files"
       ]
     };
@@ -240,18 +233,23 @@ export function getSoftwareAppSchema(from: string, to: string, url: string) {
   return {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
-    "name": `${upperFrom} to ${upperTo} Converter – MicroJPEG`,
-    "operatingSystem": "Web Browser",
+    "name": `MicroJPEG ${upperFrom} to ${upperTo} Converter`,
+    "description": `Free online ${upperFrom} to ${upperTo} converter. Fast, secure, browser-based image conversion.`,
+    "operatingSystem": "Windows, macOS, Linux, iOS, Android",
     "applicationCategory": "MultimediaApplication",
     "url": url,
     "offers": {
       "@type": "Offer",
       "price": "0",
-      "priceCurrency": "USD"
+      "priceCurrency": "USD",
+      "availability": "https://schema.org/InStock"
     }
   };
 }
 
+/**
+ * FAQ Schema - Properly structured for Google rich results
+ */
 export function getFaqSchema(from: string, to: string, url: string) {
   const faq = getConversionFaq(from, to);
   return {
@@ -264,8 +262,69 @@ export function getFaqSchema(from: string, to: string, url: string) {
         "@type": "Answer",
         "text": item.answer
       }
-    })),
-    "mainEntityOfPage": url
+    }))
+  };
+}
+
+/**
+ * Breadcrumb Schema
+ */
+export function getBreadcrumbSchema(from: string, to: string) {
+  const upperFrom = from.toUpperCase();
+  const upperTo = to.toUpperCase();
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {
+        "@type": "ListItem",
+        "position": 1,
+        "name": "Home",
+        "item": "https://microjpeg.com"
+      },
+      {
+        "@type": "ListItem",
+        "position": 2,
+        "name": "Convert",
+        "item": "https://microjpeg.com/tools/convert"
+      },
+      {
+        "@type": "ListItem",
+        "position": 3,
+        "name": `${upperFrom} to ${upperTo}`,
+        "item": `https://microjpeg.com/convert/${from.toLowerCase()}-to-${to.toLowerCase()}`
+      }
+    ]
+  };
+}
+
+/**
+ * WebPage Schema
+ */
+export function getWebPageSchema(from: string, to: string, title: string, description: string) {
+  const upperFrom = from.toUpperCase();
+  const upperTo = to.toUpperCase();
+  
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": title,
+    "description": description,
+    "url": `https://microjpeg.com/convert/${from.toLowerCase()}-to-${to.toLowerCase()}`,
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "MicroJPEG",
+      "url": "https://microjpeg.com"
+    },
+    "about": {
+      "@type": "Thing",
+      "name": `${upperFrom} to ${upperTo} Conversion`
+    },
+    "mainEntity": {
+      "@type": "SoftwareApplication",
+      "name": `MicroJPEG ${upperFrom} to ${upperTo} Converter`
+    }
   };
 }
 

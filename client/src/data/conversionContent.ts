@@ -55,7 +55,7 @@ const CONTENT: Record<string, PageContent> = {
   // 1. CR2 to JPG - HIGHEST PRIORITY
   // =========================================================================
   'cr2-jpg': {
-    metaTitle: 'CR2 to JPG Converter - Free Online Canon RAW to JPEG | MicroJPEG',
+    metaTitle: 'CR2 to JPG Converter - Canon RAW Free | MicroJPEG',
     metaDescription: 'Convert Canon CR2 RAW files to JPG instantly. Free online converter supports EOS 5D, 6D, 7D, 80D, Rebel series. Batch conversion, preserves EXIF metadata.',
     
     headline: 'Convert CR2 to JPG Online',
@@ -144,7 +144,7 @@ const CONTENT: Record<string, PageContent> = {
 // 2. Convert CR2 TO PNG
 // =========================================================================
 'cr2-png': {
-  metaTitle: 'Convert CR2 to PNG Online – Canon RAW to PNG Converter | MicroJPEG',
+  metaTitle: 'CR2 to PNG Converter - Canon RAW | MicroJPEG',
   metaDescription:
     'Convert Canon CR2 RAW photos to PNG online with MicroJPEG. Preserve detail and transparency-ready output. Fast, secure CR2 to PNG converter that works in your browser.',
 
@@ -228,7 +228,7 @@ const CONTENT: Record<string, PageContent> = {
 // 3. Convert CR2 TO TIFF
 // =========================================================================
 'cr2-tiff': {
-  metaTitle: 'Convert CR2 to TIFF Online – Canon RAW to TIFF Converter | MicroJPEG',
+  metaTitle: 'CR2 to TIFF Converter - Canon RAW | MicroJPEG',
   metaDescription:
     'Convert Canon CR2 RAW images to TIFF with MicroJPEG. Get lossless, print-ready TIFF files for professional workflows. Fast online CR2 to TIFF converter – no software needed.',
 
@@ -311,7 +311,7 @@ const CONTENT: Record<string, PageContent> = {
  // 4. Convert CR2 TO WEBP
  // =========================================================================
 'cr2-webp': {
-  metaTitle: 'Convert CR2 to WebP Online – Canon RAW to WebP Converter | MicroJPEG',
+  metaTitle: 'CR2 to WebP Converter - Canon RAW | MicroJPEG',
   metaDescription:
     'Convert CR2 RAW photos to WebP using MicroJPEG. Create lightweight, web-optimized images from Canon RAW files. Fast CR2 to WebP converter that runs in your browser.',
 
@@ -393,7 +393,7 @@ const CONTENT: Record<string, PageContent> = {
 // 5. Convert CR2 TO AVIF
 // =========================================================================
 'cr2-avif': {
-  metaTitle: 'Convert CR2 to AVIF Online – Canon RAW to AVIF Converter | MicroJPEG',
+  metaTitle: 'CR2 to AVIF Converter - Canon RAW | MicroJPEG',
   metaDescription:
     'Convert Canon CR2 RAW photos to AVIF with MicroJPEG. Achieve tiny file sizes and high visual quality for modern web use. Fast online CR2 to AVIF converter.',
 
@@ -475,7 +475,7 @@ const CONTENT: Record<string, PageContent> = {
   // 6. NEF to JPG
   // =========================================================================
   'nef-jpg': {
-    metaTitle: 'NEF to JPG Converter - Free Online Nikon RAW to JPEG | MicroJPEG',
+    metaTitle: 'NEF to JPG Converter - Nikon RAW Free | MicroJPEG',
     metaDescription: 'Convert Nikon NEF RAW files to JPG instantly. Free online converter supports D850, D780, Z9, Z6, D7500. No software needed, preserves EXIF metadata.',
     
     headline: 'Convert NEF to JPG Online',
@@ -558,7 +558,7 @@ const CONTENT: Record<string, PageContent> = {
 // 7. Convert NEF TO PNG
 // =========================================================================
 'nef-png': {
-  metaTitle: 'Convert NEF to PNG Online – Nikon RAW to PNG Converter | MicroJPEG',
+  metaTitle: 'NEF to PNG Converter - Nikon RAW | MicroJPEG',
   metaDescription:
     'Convert NEF RAW photos to high-quality PNG images using MicroJPEG. Fast, browser-based NEF to PNG online converter with lossless results and transparency support.',
 
@@ -641,7 +641,7 @@ const CONTENT: Record<string, PageContent> = {
 // 8. Convert NEF TO TIFF
 // =========================================================================
 'nef-tiff': {
-  metaTitle: 'Convert NEF to TIFF Online – Nikon RAW to TIFF Converter | MicroJPEG',
+  metaTitle: 'NEF to TIFF Converter - Nikon RAW | MicroJPEG',
   metaDescription:
     'Convert NEF RAW images to high-fidelity TIFF files with MicroJPEG. Print-ready and lossless NEF to TIFF converter online — fast and browser-based.',
 
@@ -724,7 +724,7 @@ const CONTENT: Record<string, PageContent> = {
 // 9. Convert NEF TO WEBP
 // =========================================================================
 'nef-webp': {
-  metaTitle: 'Convert NEF to WebP Online – Nikon RAW to WebP Converter | MicroJPEG',
+  metaTitle: 'NEF to WebP Converter - Nikon RAW | MicroJPEG',
   metaDescription:
     'Convert NEF RAW photos into efficient WebP images with MicroJPEG. WebP output makes sharing and web use faster and smaller — free online NEF to WebP converter.',
 
@@ -807,7 +807,7 @@ const CONTENT: Record<string, PageContent> = {
 // 10. Convert NEF TO AVIF
 // =========================================================================
 'nef-avif': {
-  metaTitle: 'Convert NEF to AVIF Online – Nikon RAW to AVIF Converter | MicroJPEG',
+  metaTitle: 'NEF to AVIF Converter - Nikon RAW | MicroJPEG',
   metaDescription:
     'Convert NEF RAW files into AVIF images with MicroJPEG. Tiny files and premium quality — fast online NEF to AVIF converter that works in your browser.',
 
@@ -890,7 +890,7 @@ const CONTENT: Record<string, PageContent> = {
   // 11. ARW to JPG
   // =========================================================================
   'arw-jpg': {
-    metaTitle: 'ARW to JPG Converter - Free Online Sony RAW to JPEG | MicroJPEG',
+    metaTitle: 'ARW to JPG Converter - Sony RAW Free | MicroJPEG',
     metaDescription: 'Convert Sony ARW RAW files to JPG instantly. Free online converter supports A7 IV, A7R V, A6700, A6400. No Sony software needed.',
     
     headline: 'Convert ARW to JPG Online',
@@ -969,7 +969,7 @@ const CONTENT: Record<string, PageContent> = {
 // 12. Convert ARW TO PNG
 // =========================================================================
 'arw-png': {
-  metaTitle: 'Convert ARW to PNG Online – Sony RAW to PNG Converter | MicroJPEG',
+  metaTitle: 'ARW to PNG Converter - Sony RAW | MicroJPEG',
   metaDescription:
     'Convert Sony ARW RAW photos to PNG easily with MicroJPEG. Fast, secure online ARW to PNG converter that preserves full detail and transparency.',
 
@@ -1052,7 +1052,7 @@ const CONTENT: Record<string, PageContent> = {
 // 13. Convert ARW TO TIFF
 // =========================================================================
 'arw-tiff': {
-  metaTitle: 'Convert ARW to TIFF Online – Sony RAW to TIFF Converter | MicroJPEG',
+  metaTitle: 'ARW to TIFF Converter - Sony RAW | MicroJPEG',
   metaDescription:
     'Convert Sony ARW RAW files to high-quality TIFF images with MicroJPEG. Online ARW to TIFF converter with lossless results for printing and professional workflows.',
 
@@ -1135,7 +1135,7 @@ const CONTENT: Record<string, PageContent> = {
 // 14. Convert ARW TO WEBP
 // =========================================================================
 'arw-webp': {
-  metaTitle: 'Convert ARW to WebP Online – Sony RAW to WebP Converter | MicroJPEG',
+  metaTitle: 'ARW to WebP Converter - Sony RAW | MicroJPEG',
   metaDescription:
     'Convert Sony ARW RAW photos to WebP online. Get web-optimized images easily with MicroJPEG’s fast ARW to WebP converter that works in your browser.',
 
@@ -1218,7 +1218,7 @@ const CONTENT: Record<string, PageContent> = {
 // 15. Convert ARW TO AVIF
 // =========================================================================
 'arw-avif': {
-  metaTitle: 'Convert ARW to AVIF Online – Sony RAW to AVIF Converter | MicroJPEG',
+  metaTitle: 'ARW to AVIF Converter - Sony RAW | MicroJPEG',
   metaDescription:
     'Convert ARW RAW files to modern AVIF images with MicroJPEG. Get tiny files and great quality — perfect for web delivery. Quick and free ARW to AVIF converter online.',
 
@@ -1301,7 +1301,7 @@ const CONTENT: Record<string, PageContent> = {
 // 16. Convert RAF TO JPG
 // =========================================================================
 'raf-jpg': {
-  metaTitle: 'Convert RAF to JPG Online – Fujifilm RAW to JPG Converter | MicroJPEG',
+  metaTitle: 'RAF to JPG Converter - Fujifilm RAW | MicroJPEG',
   metaDescription:
     'Convert RAF RAW photos from Fujifilm to high-quality JPG online with MicroJPEG. Fast, secure RAF to JPG conversion in your browser.',
 
@@ -1384,7 +1384,7 @@ const CONTENT: Record<string, PageContent> = {
 // 17. Convert RAF TO PNG
 // =========================================================================
 'raf-png': {
-  metaTitle: 'Convert RAF to PNG Online – Fujifilm RAW to PNG Converter | MicroJPEG',
+  metaTitle: 'RAF to PNG Converter - Fujifilm RAW | MicroJPEG',
   metaDescription:
     'Convert RAF RAW photos to lossless PNG images with MicroJPEG. Get high-quality PNG output from Fujifilm RAW files in seconds — online and free.',
 
@@ -1467,7 +1467,7 @@ const CONTENT: Record<string, PageContent> = {
 // 18. Convert RAF TO PNG
 // =========================================================================
 'raf-png': {
-  metaTitle: 'Convert RAF to PNG Online – Fujifilm RAW to PNG Converter | MicroJPEG',
+  metaTitle: 'RAF to PNG Converter - Fujifilm RAW | MicroJPEG',
   metaDescription:
     'Convert RAF RAW photos to lossless PNG images with MicroJPEG. Get high-quality PNG output from Fujifilm RAW files in seconds — online and free.',
 
@@ -1550,7 +1550,7 @@ const CONTENT: Record<string, PageContent> = {
 // 19. Convert RAF TO TIFF
 // =========================================================================
 'raf-tiff': {
-  metaTitle: 'Convert RAF to TIFF Online – Fujifilm RAW to TIFF Converter | MicroJPEG',
+  metaTitle: 'RAF to TIFF Converter - Fujifilm RAW | MicroJPEG',
   metaDescription:
     'Convert Fujifilm RAF RAW images to professional TIFF files online with MicroJPEG. Get lossless, print-ready TIFF output fast and securely.',
 
@@ -1632,7 +1632,7 @@ const CONTENT: Record<string, PageContent> = {
 // 20. Convert RAF TO AVIF
 // =========================================================================
 'raf-avif': {
-  metaTitle: 'Convert RAF to AVIF Online – Fujifilm RAW to AVIF Converter | MicroJPEG',
+  metaTitle: 'RAF to AVIF Converter - Fuji RAW | MicroJPEG',
   metaDescription:
     'Convert Fujifilm RAF RAW images to efficient AVIF format using MicroJPEG. Tiny files and great quality — free and online RAF to AVIF converter.',
 
@@ -1716,7 +1716,7 @@ const CONTENT: Record<string, PageContent> = {
 // 21. Convert ORF TO JPG
 // =========================================================================
 'orf-jpg': {
-  metaTitle: 'Convert ORF to JPG Online – Olympus RAW to JPG Converter | MicroJPEG',
+  metaTitle: 'ORF to JPG Converter - Olympus RAW | MicroJPEG',
   metaDescription:
     'Convert ORF RAW photos from Olympus to high-quality JPG online with MicroJPEG. Fast, browser-based ORF to JPG converter — no software required.',
 
@@ -1799,7 +1799,7 @@ const CONTENT: Record<string, PageContent> = {
 // 22. Convert ORF TO PNG
 // =========================================================================
 'orf-png': {
-  metaTitle: 'Convert ORF to PNG Online – Olympus RAW to PNG Converter | MicroJPEG',
+  metaTitle: 'ORF to PNG Converter - Olympus RAW | MicroJPEG',
   metaDescription:
     'Convert ORF RAW photos to lossless PNG images using MicroJPEG. High-quality PNG output from Olympus RAW — fast, secure, and free.',
 
@@ -1882,7 +1882,7 @@ const CONTENT: Record<string, PageContent> = {
 // 23. Convert ORF TO TIFF
 // =========================================================================
 'orf-tiff': {
-  metaTitle: 'Convert ORF to TIFF Online – Olympus RAW to TIFF Converter | MicroJPEG',
+  metaTitle: 'ORF to TIFF Converter - Olympus RAW | MicroJPEG',
   metaDescription:
     'Convert Olympus ORF RAW files to TIFF with MicroJPEG. Get lossless, print-quality TIFF images from Olympus RAW — online and secure.',
 
@@ -1965,7 +1965,7 @@ const CONTENT: Record<string, PageContent> = {
 // 24. Convert ORF TO WEBP
 // =========================================================================
 'orf-webp': {
-  metaTitle: 'Convert ORF to WebP Online – Olympus RAW to WebP Converter | MicroJPEG',
+  metaTitle: 'ORF to WebP Converter - Olympus RAW | MicroJPEG',
   metaDescription:
     'Convert ORF RAW files to WebP online with MicroJPEG. Get compressed web-ready images fast and easy in your browser.',
 
@@ -2048,7 +2048,7 @@ const CONTENT: Record<string, PageContent> = {
 // 25. Convert ORF TO WEBP
 // =========================================================================
 'orf-webp': {
-  metaTitle: 'Convert ORF to WebP Online – Olympus RAW to WebP Converter | MicroJPEG',
+  metaTitle: 'ORF to WebP Converter - Olympus RAW | MicroJPEG',
   metaDescription:
     'Convert ORF RAW files to WebP online with MicroJPEG. Get compressed web-ready images fast and easy in your browser.',
 
@@ -2131,7 +2131,7 @@ const CONTENT: Record<string, PageContent> = {
 // 26. Convert DNG TO JPG
 // =========================================================================
 'dng-jpg': {
-  metaTitle: 'Convert DNG to JPG Online – DNG RAW to JPG Converter | MicroJPEG',
+  metaTitle: 'DNG to JPG Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert DNG RAW photos to JPG quickly with MicroJPEG. Fast, browser-based DNG to JPG converter with high quality — no software needed.',
 
@@ -2214,7 +2214,7 @@ const CONTENT: Record<string, PageContent> = {
 // 27. Convert DNG TO PNG
 // =========================================================================
 'dng-png': {
-  metaTitle: 'Convert DNG to PNG Online – Lossless DNG to PNG Converter | MicroJPEG',
+  metaTitle: 'DNG to PNG Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert DNG RAW photos to lossless PNG images using MicroJPEG. Quick browser-based DNG to PNG converter for transparent output and high detail.',
 
@@ -2298,7 +2298,7 @@ const CONTENT: Record<string, PageContent> = {
 // 28. Convert DNG TO TIFF
 // =========================================================================
 'dng-tiff': {
-  metaTitle: 'Convert DNG to TIFF Online – Lossless TIFF Output for RAW | MicroJPEG',
+  metaTitle: 'DNG to TIFF Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert DNG RAW files to high-fidelity TIFF images online with MicroJPEG. Great for printing, editing and archiving — secure and fast.',
 
@@ -2380,7 +2380,7 @@ const CONTENT: Record<string, PageContent> = {
 // 29. Convert DNG TO WEBP
 // =========================================================================
 'dng-webp': {
-  metaTitle: 'Convert DNG to WebP Online – Efficient WebP from RAW | MicroJPEG',
+  metaTitle: 'DNG to WebP Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert DNG RAW images to WebP online with MicroJPEG. Get compressed, web-optimized images with great quality — fast and simple.',
 
@@ -2463,7 +2463,7 @@ const CONTENT: Record<string, PageContent> = {
 // 30. Convert DNG TO AVIF
 // =========================================================================
 'dng-avif': {
-  metaTitle: 'Convert DNG to AVIF Online – Modern AVIF from RAW | MicroJPEG',
+  metaTitle: 'DNG to AVIF Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert DNG RAW images to AVIF online with MicroJPEG. Get modern, tiny images with excellent quality — quick and browser-based.',
 
@@ -2546,7 +2546,7 @@ const CONTENT: Record<string, PageContent> = {
 // 31. Convert CRW TO JPG
 // =========================================================================
 'crw-jpg': {
-  metaTitle: 'Convert CRW to JPG Online – Canon RAW to JPG Converter | MicroJPEG',
+  metaTitle: 'CRW to JPG Converter - Canon RAW | MicroJPEG',
   metaDescription:
     'Convert Canon CRW RAW photos to JPG online with MicroJPEG. Fast, browser-based CRW to JPG converter with high quality output.',
 
@@ -2629,7 +2629,7 @@ const CONTENT: Record<string, PageContent> = {
 // 32. Convert CRW TO PNG
 // =========================================================================
 'crw-png': {
-  metaTitle: 'Convert CRW to PNG Online – Canon RAW to PNG Converter | MicroJPEG',
+  metaTitle: 'CRW to PNG Converter - Canon RAW | MicroJPEG',
   metaDescription:
     'Convert Canon CRW RAW images to PNG online with MicroJPEG. Lossless PNG output from Canon RAW — quick, secure, and easy.',
 
@@ -2712,7 +2712,7 @@ const CONTENT: Record<string, PageContent> = {
 // 33. Convert CRW TO TIFF
 // =========================================================================
 'crw-tiff': {
-  metaTitle: 'Convert CRW to TIFF Online – Canon RAW to TIFF Converter | MicroJPEG',
+  metaTitle: 'CRW to TIFF Converter - Canon RAW | MicroJPEG',
   metaDescription:
     'Convert Canon CRW RAW photos to high-quality TIFF images with MicroJPEG. Lossless TIFF output for printing and professional workflows.',
 
@@ -2795,7 +2795,7 @@ const CONTENT: Record<string, PageContent> = {
 // 34. Convert CRW TO TIFF
 // =========================================================================
 'crw-tiff': {
-  metaTitle: 'Convert CRW to TIFF Online – Canon RAW to TIFF Converter | MicroJPEG',
+  metaTitle: 'CRW to TIFF Converter - Canon RAW | MicroJPEG',
   metaDescription:
     'Convert Canon CRW RAW photos to high-quality TIFF images with MicroJPEG. Lossless TIFF output for printing and professional workflows.',
 
@@ -2878,7 +2878,7 @@ const CONTENT: Record<string, PageContent> = {
 // 35. Convert CRW TO WEBP
 // =========================================================================
 'crw-webp': {
-  metaTitle: 'Convert CRW to WebP Online – Canon RAW to WebP Converter | MicroJPEG',
+  metaTitle: 'CRW to WebP Converter - Canon RAW | MicroJPEG',
   metaDescription:
     'Convert Canon CRW RAW images to WebP online with MicroJPEG. Get web-optimized images fast with a simple browser workflow.',
 
@@ -3028,7 +3028,7 @@ const CONTENT: Record<string, PageContent> = {
 // 37. Convert WEBP TO TIFF
 // =========================================================================
 'webp-tiff': {
-  metaTitle: 'Convert WebP to TIFF Online – Fast, High-Quality WebP to TIFF Converter | MicroJPEG',
+  metaTitle: 'WebP to TIFF Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert WebP images to TIFF instantly with MicroJPEG. High-quality, lossless output ideal for print and archival use. Free online WebP to TIFF converter — no signup required. Works on all devices.',
 
@@ -3112,7 +3112,7 @@ const CONTENT: Record<string, PageContent> = {
 // 38. Convert WEBP TO PNG
 // =========================================================================
 'webp-png': {
-  metaTitle: 'Convert WebP to PNG Online – High-Quality WebP to PNG Converter | MicroJPEG',
+  metaTitle: 'WebP to PNG Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert WebP images to PNG instantly with MicroJPEG. Preserve transparency and quality with a fast, free WebP to PNG converter. Works on all devices without installation.',
 
@@ -3196,7 +3196,7 @@ const CONTENT: Record<string, PageContent> = {
 // 39. Convert WEBP TO AVIF
 // =========================================================================
 'webp-avif': {
-  metaTitle: 'Convert WebP to AVIF Online – High-Compression WebP to AVIF Converter | MicroJPEG',
+  metaTitle: 'WebP to AVIF Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert WebP images to AVIF instantly with MicroJPEG. Get smaller file sizes with superior visual quality. Free online WebP to AVIF converter — works on all devices.',
 
@@ -3280,7 +3280,7 @@ const CONTENT: Record<string, PageContent> = {
 // 40. Convert TIFF TO JPG
 // =========================================================================
 'tiff-jpg': {
-  metaTitle: 'Convert TIFF to JPG Online – Fast TIFF to JPG Converter | MicroJPEG',
+  metaTitle: 'TIFF to JPG Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert TIFF images to JPG quickly with MicroJPEG. Simple, browser-based TIFF to JPG converter with high-quality results.',
 
@@ -3363,7 +3363,7 @@ const CONTENT: Record<string, PageContent> = {
 // 41. Convert TIFF TO PNG
 // =========================================================================
 'tiff-png': {
-  metaTitle: 'Convert TIFF to PNG Online – Lossless TIFF to PNG Converter | MicroJPEG',
+  metaTitle: 'TIFF to PNG Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert TIFF images to PNG online with MicroJPEG. Preserve transparency and quality in a browser-based TIFF to PNG converter.',
 
@@ -3446,7 +3446,7 @@ const CONTENT: Record<string, PageContent> = {
 // 42. Convert TIFF TO WEBP
 // =========================================================================
 'tiff-webp': {
-  metaTitle: 'Convert TIFF to WebP Online – Efficient TIFF to WebP Converter | MicroJPEG',
+  metaTitle: 'TIFF to WebP Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert TIFF images to WebP format online with MicroJPEG. Get smaller files with good quality — ideal for web and apps.',
 
@@ -3529,7 +3529,7 @@ const CONTENT: Record<string, PageContent> = {
 // 43. Convert TIFF TO AVIF
 // =========================================================================
 'tiff-avif': {
-  metaTitle: 'Convert TIFF to AVIF Online – Modern AVIF from TIFF | MicroJPEG',
+  metaTitle: 'TIFF to AVIF Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert your TIFF images to AVIF format online using MicroJPEG. Get very small files with excellent quality — ideal for modern web delivery.',
 
@@ -3612,7 +3612,7 @@ const CONTENT: Record<string, PageContent> = {
 // 44. Convert SVG TO TIFF
 // =========================================================================
 'svg-tiff': {
-  metaTitle: 'Convert SVG to TIFF Online – Vector to High-Quality TIFF | MicroJPEG',
+  metaTitle: 'SVG to TIFF Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert SVG vector images to TIFF online with MicroJPEG. Lossless TIFF output ideal for printing and archiving — fast, browser-based SVG to TIFF converter.',
 
@@ -3696,7 +3696,7 @@ const CONTENT: Record<string, PageContent> = {
 // 45. Convert SVG TO JPG
 // =========================================================================
 'svg-jpg': {
-  metaTitle: 'Convert SVG to JPG Online – Vector to Compressed JPG | MicroJPEG',
+  metaTitle: 'SVG to JPG Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert SVG vector graphics to JPG online with MicroJPEG. Easy online SVG to JPG converter with fast results — no software needed.',
 
@@ -3780,7 +3780,7 @@ const CONTENT: Record<string, PageContent> = {
 // 46. Convert SVG TO PNG
 // =========================================================================
 'svg-png': {
-  metaTitle: 'Convert SVG to PNG Online – Vector to PNG Converter | MicroJPEG',
+  metaTitle: 'SVG to PNG Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert SVG images to PNG online with MicroJPEG. Get crisp, lossless PNG results — perfect for editing, design, and transparency.',
 
@@ -3865,7 +3865,7 @@ const CONTENT: Record<string, PageContent> = {
 // 47. Convert SVG TO WEBP
 // =========================================================================
 'svg-webp': {
-  metaTitle: 'Convert SVG to WebP Online – Vector to WebP Converter | MicroJPEG',
+  metaTitle: 'SVG to WebP Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert SVG vector images to WebP online with MicroJPEG. Get web-optimized, small images with good quality — fast and easy.',
 
@@ -3949,7 +3949,7 @@ const CONTENT: Record<string, PageContent> = {
 // 48. Convert SVG TO AVIF
 // =========================================================================
 'svg-avif': {
-  metaTitle: 'Convert SVG to AVIF Online – Web-Optimized AVIF from Vector | MicroJPEG',
+  metaTitle: 'SVG to AVIF Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert SVG images to AVIF online with MicroJPEG. Get state-of-the-art compression with excellent quality — fast browser-based conversion.',
 
@@ -4116,7 +4116,7 @@ const CONTENT: Record<string, PageContent> = {
 //  50. Convert PNG TO TIFF
 // =========================================================================
 'png-tiff': {
-  metaTitle: 'Convert PNG to TIFF Online – Lossless PNG to TIFF Converter | MicroJPEG',
+  metaTitle: 'PNG to TIFF Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert PNG images to high-quality TIFF online with MicroJPEG. Get lossless TIFF output fast and securely in your browser.',
 
@@ -4200,7 +4200,7 @@ const CONTENT: Record<string, PageContent> = {
 //  51. Convert PNG TO WEBP
 // =========================================================================
 'png-webp': {
-  metaTitle: 'Convert PNG to WebP Online – Efficient PNG to WebP Converter | MicroJPEG',
+  metaTitle: 'PNG to WebP Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert PNG images to WebP online with MicroJPEG. Get web-optimized images with good quality and smaller file sizes — fast and secure.',
 
@@ -4284,7 +4284,7 @@ const CONTENT: Record<string, PageContent> = {
 //  52. Convert PNG TO AVIF
 // =========================================================================
 'png-avif': {
-  metaTitle: 'Convert PNG to AVIF Online – Modern Compression | MicroJPEG',
+  metaTitle: 'PNG to AVIF Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert PNG images to AVIF format online with MicroJPEG. Achieve very small files and great quality for web use — fast and secure.',
 
@@ -4519,7 +4519,7 @@ const CONTENT: Record<string, PageContent> = {
 //  55. Convert JPG TO TIFF
 // =========================================================================
 'jpg-tiff': {
-  metaTitle: 'Convert JPG to TIFF Online – High-Quality JPG to TIFF Converter | MicroJPEG',
+  metaTitle: 'JPG to TIFF Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert JPG images to high-quality TIFF online with MicroJPEG. Lossless TIFF conversion from JPG that works fast in your browser.',
 
@@ -4603,7 +4603,7 @@ const CONTENT: Record<string, PageContent> = {
 // 56. Convert JPG TO AVIF
 // =========================================================================
 'jpg-avif': {
-  metaTitle: 'Convert JPG to AVIF Online – Efficient JPG to AVIF Converter | MicroJPEG',
+  metaTitle: 'JPG to AVIF Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert JPG images to AVIF online with MicroJPEG for smaller file sizes and excellent quality. Fast, secure, browser-based jpg to avif converter.',
 
@@ -4688,7 +4688,7 @@ const CONTENT: Record<string, PageContent> = {
 // 57. Convert AVIF TO TIFF
 // =========================================================================
 'avif-tiff': {
-  metaTitle: 'Convert AVIF to TIFF Online – Professional AVIF to TIFF Converter | MicroJPEG',
+  metaTitle: 'AVIF to TIFF Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert AVIF images to TIFF online with MicroJPEG for professional-grade, lossless output. Fast, secure, browser-based avif to tiff converter for photography and print.',
 
@@ -4774,7 +4774,7 @@ const CONTENT: Record<string, PageContent> = {
 // 58. Convert AVIF TO JPG
 // =========================================================================
 'avif-jpg': {
-  metaTitle: 'Convert AVIF to JPG Online – Fast AVIF to JPG Converter | MicroJPEG',
+  metaTitle: 'AVIF to JPG Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert AVIF images to JPG online with MicroJPEG for universal compatibility. Fast, secure, browser-based avif to jpg converter with high-quality output.',
 
@@ -4861,7 +4861,7 @@ const CONTENT: Record<string, PageContent> = {
 // 59. Convert AVIF TO PNG
 // =========================================================================
 'avif-png': {
-  metaTitle: 'Convert AVIF to PNG Online – Lossless AVIF to PNG Converter | MicroJPEG',
+  metaTitle: 'AVIF to PNG Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert AVIF images to PNG online with MicroJPEG for lossless quality and transparency support. Fast, secure, browser-based avif to png converter.',
 
@@ -4948,7 +4948,7 @@ const CONTENT: Record<string, PageContent> = {
 // 60. Convert AVIF TO WEBP
 // =========================================================================
 'avif-webp': {
-  metaTitle: 'Convert AVIF to WebP Online – Modern AVIF to WebP Converter | MicroJPEG',
+  metaTitle: 'AVIF to WebP Converter Free Online | MicroJPEG',
   metaDescription:
     'Convert AVIF images to WebP online with MicroJPEG for excellent compression and broad browser support. Fast, secure, browser-based avif to webp converter.',
 
@@ -5035,7 +5035,7 @@ const CONTENT: Record<string, PageContent> = {
 // 61. Compress WEBP
 // =========================================================================
 'compress-webp': {
-  metaTitle: 'Compress WebP Images Online – Free WebP Compressor | MicroJPEG',
+  metaTitle: 'Compress WebP Images Free Online | MicroJPEG',
   metaDescription:
     'Compress WebP images online with MicroJPEG for smaller file sizes without quality loss. Fast, secure, free webp compression tool for web optimization.',
 
@@ -5124,7 +5124,7 @@ const CONTENT: Record<string, PageContent> = {
 // 62. Compress TIFF
 // =========================================================================
 'compress-tiff': {
-  metaTitle: 'Compress TIFF Images Online – Professional TIFF Compressor | MicroJPEG',
+  metaTitle: 'Compress TIFF Images Free Online | MicroJPEG',
   metaDescription:
     'Compress TIFF images online with MicroJPEG while preserving quality. Fast, secure tiff compression for photography, print, and archival storage.',
 
@@ -5213,7 +5213,7 @@ const CONTENT: Record<string, PageContent> = {
 // 63. Compress AVIF
 // =========================================================================
 'compress-avif': {
-  metaTitle: 'Compress AVIF Images Online – Next-Gen AVIF Compressor | MicroJPEG',
+  metaTitle: 'Compress AVIF Images Free Online | MicroJPEG',
   metaDescription:
     'Compress AVIF images online with MicroJPEG for ultra-small file sizes. Fast, secure avif compression for modern web optimization and performance.',
 

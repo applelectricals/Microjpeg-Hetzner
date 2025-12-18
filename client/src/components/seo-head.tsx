@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 
 interface SEOHeadProps {
   title: string;
@@ -12,6 +12,9 @@ interface SEOHeadProps {
   structuredData?: object;
 }
 
+// Use useLayoutEffect on client, useEffect on server (SSR safety)
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
+
 export function SEOHead({
   title,
   description,
@@ -23,7 +26,7 @@ export function SEOHead({
   canonicalUrl,
   structuredData
 }: SEOHeadProps) {
-  useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     // Skip if authoritative SEO system is active (ConversionPage, etc.)
     if ((window as any).__seo_authoritative) {
       return;
@@ -34,18 +37,6 @@ export function SEOHead({
       return;
     }
 
-// ========== ADD THESE 4 LINES FOR PRERENDER.IO TOKEN ==========
-  // This meta tag MUST be added synchronously so bots see it in raw HTML
-  const prerenderToken = 'wqG6yzxek2NWzipdNtwb'; // ← replace this!
-  if (prerenderToken && prerenderToken !== 'wqG6yzxek2NWzipdNtwb') {
-    let prerenderMeta = document.querySelector('meta[name="prerender-token"]');
-    if (!prerenderMeta) {
-      prerenderMeta = document.createElement('meta');
-      prerenderMeta.setAttribute('name', 'prerender-token');
-      prerenderMeta.setAttribute('content', prerenderToken);
-      document.head.appendChild(prerenderMeta);
-    }
-  }
     // Set document title
     document.title = title;
 
@@ -74,8 +65,8 @@ export function SEOHead({
     if (ogImage) {
       setMetaTag('og:image', ogImage, true);
     }
-    if (ogUrl) {
-      setMetaTag('og:url', ogUrl, true);
+    if (ogUrl || canonicalUrl) {
+      setMetaTag('og:url', ogUrl || canonicalUrl || '', true);
     }
 
     // Set Twitter Card tags
@@ -86,33 +77,35 @@ export function SEOHead({
       setMetaTag('twitter:image', ogImage);
     }
 
-    // Set canonical URL
-    let canonical = document.querySelector('link[rel="canonical"]');
+    // CRITICAL FIX: Set canonical URL - Remove existing ones first
     if (canonicalUrl) {
-      if (!canonical) {
-        canonical = document.createElement('link');
-        canonical.setAttribute('rel', 'canonical');
-        document.head.appendChild(canonical);
-      }
-      canonical.setAttribute('href', canonicalUrl);
+      // Remove ALL existing canonical links first
+      const existingCanonicals = document.querySelectorAll('link[rel="canonical"]');
+      existingCanonicals.forEach(link => link.remove());
+      
+      // Create new canonical link
+      const link = document.createElement('link');
+      link.setAttribute('rel', 'canonical');
+      link.setAttribute('href', canonicalUrl);
+      document.head.appendChild(link);
     }
 
-    // Set structured data
+    // Set structured data - Remove existing ones first to avoid duplicates
     if (structuredData) {
-      let script = document.querySelector('script[type="application/ld+json"]');
-      if (!script) {
-        script = document.createElement('script');
-        script.setAttribute('type', 'application/ld+json');
-        document.head.appendChild(script);
-      }
+      const existingScripts = document.querySelectorAll('script[type="application/ld+json"]');
+      existingScripts.forEach(script => script.remove());
+      
+      const script = document.createElement('script');
+      script.setAttribute('type', 'application/ld+json');
       script.textContent = JSON.stringify(structuredData);
+      document.head.appendChild(script);
     }
 
-    // Cleanup function to remove dynamic meta tags when component unmounts
+    // Cleanup function
     return () => {
-      // Keep basic meta tags but clean up dynamic ones if needed
+      // Don't cleanup - we want SEO tags to persist
     };
   }, [title, description, keywords, ogTitle, ogDescription, ogImage, ogUrl, canonicalUrl, structuredData]);
 
-  return null; // This component doesn't render anything visually
+  return null;
 }

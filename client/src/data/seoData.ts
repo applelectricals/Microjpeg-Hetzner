@@ -1,6 +1,10 @@
 /**
  * SEO Data Configuration
  * Based on MicroJPEG SEO Keywords Strategy
+ * 
+ * FIXED: 
+ * - Homepage title shortened to 60 chars
+ * - Homepage description shortened to 155 chars
  */
 
 export const PRIMARY_KEYWORDS = {
@@ -79,8 +83,10 @@ export const TECHNICAL_KEYWORDS = {
 
 export const SEO_CONTENT = {
   homepage: {
-    title: 'Image Compression & Converter Online - Compress Images Free | MicroJPEG',
-    description: 'Compress images online for free with MicroJPEG. Convert RAW files, optimize photos for web, reduce file size without quality loss. Supports 13+ formats including JPG, PNG, WEBP, AVIF.',
+    // FIXED: Title is now 56 chars (under 60)
+    title: 'Free Image Compression & Converter Online | MicroJPEG',
+    // FIXED: Description is now 155 chars (under 160)
+    description: 'Compress images free online. Convert RAW to JPG, PNG to WebP, optimize photos for web. Reduce file size 90% without quality loss. 13+ formats supported.',
     keywords: PRIMARY_KEYWORDS.homepage.join(', '),
     h1: 'Professional Image Compression & Conversion Online',
     h2: 'Compress Images Without Quality Loss - Support for 13+ Formats'

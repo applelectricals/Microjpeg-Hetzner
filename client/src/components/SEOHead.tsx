@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useLayoutEffect } from 'react';
 
 interface SEOHeadProps {
   title: string;
@@ -7,8 +7,11 @@ interface SEOHeadProps {
   ogImage?: string;
   canonicalUrl?: string;
   structuredData?: any;
-  authoritative?: boolean; // When true, prevents other SEO systems from overriding
+  authoritative?: boolean;
 }
+
+// Use useLayoutEffect on client, useEffect on server (SSR safety)
+const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export function SEOHead({
   title,
@@ -19,30 +22,19 @@ export function SEOHead({
   structuredData,
   authoritative = false
 }: SEOHeadProps) {
-  useEffect(() => {
+  
+  // Use useLayoutEffect for synchronous DOM updates (runs before paint)
+  // This ensures meta tags are set BEFORE Puppeteer captures the HTML
+  useIsomorphicLayoutEffect(() => {
     // If authoritative, mark this as the primary SEO source
     if (authoritative) {
-      console.log('🔧 SEO Head (Authoritative): Setting title to:', title);
       (window as any).__seo_authoritative = true;
     }
 
-    // ========== ADD THESE 4 LINES FOR PRERENDER.IO TOKEN ==========
-  // This meta tag MUST be added synchronously so bots see it in raw HTML
-  const prerenderToken = 'wqG6yzxek2NWzipdNtwb'; // ← replace this!
-  if (prerenderToken && prerenderToken !== 'wqG6yzxek2NWzipdNtwb') {
-    let prerenderMeta = document.querySelector('meta[name="prerender-token"]');
-    if (!prerenderMeta) {
-      prerenderMeta = document.createElement('meta');
-      prerenderMeta.setAttribute('name', 'prerender-token');
-      prerenderMeta.setAttribute('content', prerenderToken);
-      document.head.appendChild(prerenderMeta);
-    }
-  }
-    
-    // Set document title
+    // Set document title immediately
     document.title = title;
     
-    // Set meta tags
+    // Helper to set meta tags
     const setMetaTag = (name: string, content: string, property = false) => {
       const attribute = property ? 'property' : 'name';
       let meta = document.querySelector(`meta[${attribute}="${name}"]`);
@@ -65,6 +57,9 @@ export function SEOHead({
     setMetaTag('og:description', description, true);
     setMetaTag('og:image', ogImage, true);
     setMetaTag('og:type', 'website', true);
+    if (canonicalUrl) {
+      setMetaTag('og:url', canonicalUrl, true);
+    }
     
     // Twitter Card tags
     setMetaTag('twitter:card', 'summary_large_image');
@@ -72,28 +67,45 @@ export function SEOHead({
     setMetaTag('twitter:description', description);
     setMetaTag('twitter:image', ogImage);
     
-    // Canonical URL
+    // CRITICAL FIX: Canonical URL - Remove any existing and set the correct one
     if (canonicalUrl) {
-      let link = document.querySelector('link[rel="canonical"]');
-      if (!link) {
-        link = document.createElement('link');
-        link.setAttribute('rel', 'canonical');
-        document.head.appendChild(link);
-      }
+      // Remove ALL existing canonical links first (there might be a default one)
+      const existingCanonicals = document.querySelectorAll('link[rel="canonical"]');
+      existingCanonicals.forEach(link => link.remove());
+      
+      // Create new canonical link
+      const link = document.createElement('link');
+      link.setAttribute('rel', 'canonical');
       link.setAttribute('href', canonicalUrl);
+      document.head.appendChild(link);
     }
     
-    // Structured Data
+    // Structured Data - Remove existing and add new
     if (structuredData) {
-      let script = document.querySelector('script[type="application/ld+json"]');
-      if (!script) {
-        script = document.createElement('script');
-        script.setAttribute('type', 'application/ld+json');
-        document.head.appendChild(script);
-      }
-      script.textContent = JSON.stringify(structuredData);
+      // Remove existing structured data scripts to avoid duplicates
+      const existingScripts = document.querySelectorAll('script[type="application/ld+json"]');
+      existingScripts.forEach(script => script.remove());
+      
+      // Handle array of structured data objects
+      const dataArray = Array.isArray(structuredData) ? structuredData : [structuredData];
+      
+      dataArray.forEach((data, index) => {
+        if (data) {
+          const script = document.createElement('script');
+          script.setAttribute('type', 'application/ld+json');
+          script.setAttribute('data-seo-index', String(index));
+          script.textContent = JSON.stringify(data);
+          document.head.appendChild(script);
+        }
+      });
     }
-  }, [title, description, keywords, ogImage, canonicalUrl, structuredData]);
+
+    // Cleanup function
+    return () => {
+      // Don't cleanup on unmount - we want SEO tags to persist
+      // This prevents flashing during navigation
+    };
+  }, [title, description, keywords, ogImage, canonicalUrl, structuredData, authoritative]);
 
   return null;
 }

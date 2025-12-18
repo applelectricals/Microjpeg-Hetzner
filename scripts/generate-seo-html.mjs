@@ -8,6 +8,8 @@
  * 2. Using Puppeteer to render each page
  * 3. Saving the fully-rendered HTML to dist/seo/
  * 
+ * FIXED: Now properly waits for canonical URLs and meta tags to be set
+ * 
  * Run: node scripts/generate-seo-html.mjs
  */
 
@@ -46,102 +48,122 @@ const SEO_PAGES = [
   {
     url: '/',
     output: 'index.html',
-    name: 'Landing Page'
+    name: 'Landing Page',
+    expectedCanonical: 'https://microjpeg.com'
   },
   {
     url: '/about',
     output: 'about.html',
-    name: 'About Page'
+    name: 'About Page',
+    expectedCanonical: 'https://microjpeg.com/about'
   },
   {
     url: '/contact',
     output: 'contact.html',
-    name: 'Contact Page'
+    name: 'Contact Page',
+    expectedCanonical: 'https://microjpeg.com/contact'
   },
   {
     url: '/privacy-policy',
     output: 'privacy-policy.html',
-    name: 'Privacy Policy'
+    name: 'Privacy Policy',
+    expectedCanonical: 'https://microjpeg.com/privacy-policy'
   },
   {
     url: '/terms-of-service',
     output: 'terms-of-service.html',
-    name: 'Terms of Service'
+    name: 'Terms of Service',
+    expectedCanonical: 'https://microjpeg.com/terms-of-service'
   },
   {
     url: '/cancellation-policy',
     output: 'cancellation-policy.html',
-    name: 'Cancellation Policy'
+    name: 'Cancellation Policy',
+    expectedCanonical: 'https://microjpeg.com/cancellation-policy'
   },
   {
     url: '/tools',
     output: 'tools.html',
-    name: 'Tools Page'
+    name: 'Tools Page',
+    expectedCanonical: 'https://microjpeg.com/tools'
   },
   {
     url: '/tools/compress',
     output: 'tools-compress.html',
-    name: 'Tools Compress'
+    name: 'Tools Compress',
+    expectedCanonical: 'https://microjpeg.com/tools/compress'
   },
   {
     url: '/tools/convert',
     output: 'tools-convert.html',
-    name: 'Tools Convert'
+    name: 'Tools Convert',
+    expectedCanonical: 'https://microjpeg.com/tools/convert'
   },
   {
     url: '/tools/optimizer',
     output: 'tools-optimizer.html',
-    name: 'Tools Optimizer'
+    name: 'Tools Optimizer',
+    expectedCanonical: 'https://microjpeg.com/tools/optimizer'
   },
   {
     url: '/api-docs#overview',
     output: 'api-docs-overview.html',
-    name: 'API Overview'
+    name: 'API Overview',
+    expectedCanonical: 'https://microjpeg.com/api-docs'
   },
   {
     url: '/api-docs#how-it-works',
     output: 'api-docs-how-it-works.html',
-    name: 'API How It Works'
+    name: 'API How It Works',
+    expectedCanonical: 'https://microjpeg.com/api-docs'
   },
   {
     url: '/api-docs#api-vs-web',
     output: 'api-docs-api-vs-web.html',
-    name: 'API vs Web'
+    name: 'API vs Web',
+    expectedCanonical: 'https://microjpeg.com/api-docs'
   },
   {
     url: '/api-docs#documentation',
     output: 'api-docs-documentation.html',
-    name: 'API Documentation'
+    name: 'API Documentation',
+    expectedCanonical: 'https://microjpeg.com/api-docs'
   },
   {
     url: '/wordpress-plugin',
     output: 'wordpress-plugin.html',
-    name: 'WordPress Plugin'
+    name: 'WordPress Plugin',
+    expectedCanonical: 'https://microjpeg.com/wordpress-plugin'
   },
   {
     url: '/wordpress-plugin/install',
     output: 'wordpress-plugin-install.html',
-    name: 'WordPress Plugin Install'
+    name: 'WordPress Plugin Install',
+    expectedCanonical: 'https://microjpeg.com/wordpress-plugin/install'
   },
   {
     url: '/wordpress-plugin/docs',
     output: 'wordpress-plugin-docs.html',
-    name: 'WordPress Plugin Docs'
+    name: 'WordPress Plugin Docs',
+    expectedCanonical: 'https://microjpeg.com/wordpress-plugin/docs'
   },
   {
     url: '/pricing',
     output: 'pricing.html',
-    name: 'Pricing'
+    name: 'Pricing',
+    expectedCanonical: 'https://microjpeg.com/pricing'
   },
   {
     url: '/features',
     output: 'features.html',
-    name: 'Features'
+    name: 'Features',
+    expectedCanonical: 'https://microjpeg.com/features'
   },
   {
     url: '/legal/cookies',
     output: 'legal-cookies.html',
-    name: 'Cookie Policy'
+    name: 'Cookie Policy',
+    expectedCanonical: 'https://microjpeg.com/legal/cookies'
   },
   // ========================================
   // AI TOOLS PAGES - NEW
@@ -149,12 +171,14 @@ const SEO_PAGES = [
   {
     url: '/remove-background',
     output: 'remove-background.html',
-    name: 'AI Background Remover'
+    name: 'AI Background Remover',
+    expectedCanonical: 'https://microjpeg.com/remove-background'
   },
   {
     url: '/enhance-image',
     output: 'enhance-image.html',
-    name: 'AI Image Enhancer'
+    name: 'AI Image Enhancer',
+    expectedCanonical: 'https://microjpeg.com/enhance-image'
   }
 ];
 
@@ -182,7 +206,8 @@ BLOG_POSTS.forEach(slug => {
   SEO_PAGES.push({
     url: `/blog/${slug}`,
     output: `blog-${slug}.html`,
-    name: `Blog: ${slug}`
+    name: `Blog: ${slug}`,
+    expectedCanonical: `https://microjpeg.com/blog/${slug}`
   });
 });
 
@@ -225,11 +250,17 @@ CONVERSION_PAGES.forEach(conversion => {
   // Extract format name from conversion (e.g., 'jpg-to-jpg' -> 'jpg')
   const format = isSelfCompression ? conversion.split('-')[0] : null;
   const outputFile = isSelfCompression ? `compress-${format}.html` : `convert-${conversion}.html`;
+  
+  // Build the expected canonical URL
+  const expectedCanonical = isSelfCompression 
+    ? `https://microjpeg.com/compress/${format}`
+    : `https://microjpeg.com/convert/${conversion}`;
 
   SEO_PAGES.push({
     url: `${pagePath}${conversion}`,
     output: outputFile,
-    name: `${isSelfCompression ? 'Compress' : 'Convert'}: ${conversion}`
+    name: `${isSelfCompression ? 'Compress' : 'Convert'}: ${conversion}`,
+    expectedCanonical: expectedCanonical
   });
 });
 
@@ -269,25 +300,31 @@ async function waitForServer(maxRetries = MAX_RETRIES) {
  */
 function startServer() {
   return new Promise((resolve, reject) => {
-    console.log('🚀 Starting development server...');
+    console.log('🚀 Starting local server...');
     
-    // Start the dev server (tsx already loads .env)
-    serverProcess = spawn('node', ['dist/index.js'], {
-      env: { ...process.env, PORT: SERVER_PORT },
-      stdio: ['ignore', 'pipe', 'pipe']
+    // Use npm run dev or your production server command
+    serverProcess = spawn('npm', ['run', 'start'], {
+      cwd: path.join(__dirname, '..'),
+      stdio: ['ignore', 'pipe', 'pipe'],
+      shell: true,
+      env: {
+        ...process.env,
+        PORT: SERVER_PORT
+      }
     });
 
     serverProcess.stdout.on('data', (data) => {
       const output = data.toString();
-      if (output.includes('serving on') || output.includes('listening') || output.includes('ready')) {
-        console.log(`   ✅ Server started`);
+      if (output.includes('listening') || output.includes('ready') || output.includes('started')) {
+        console.log(`   ✅ Server started on port ${SERVER_PORT}`);
+        resolve();
       }
     });
 
     serverProcess.stderr.on('data', (data) => {
-      // Only log errors, not warnings
+      // Don't log all stderr, just errors
       const output = data.toString();
-      if (output.includes('error') || output.includes('Error')) {
+      if (output.includes('Error') || output.includes('error')) {
         console.error(`   Server error: ${output}`);
       }
     });
@@ -298,26 +335,21 @@ function startServer() {
     });
 
     // Give server time to start
-    console.log(`   ⏳ Waiting ${STARTUP_DELAY / 1000}s for server to initialize...`);
-    setTimeout(() => {
-      resolve();
-    }, STARTUP_DELAY);
+    setTimeout(resolve, STARTUP_DELAY);
   });
 }
 
-/**
- * Stop the server
- */
 function stopServer() {
   if (serverProcess) {
-    console.log('🛑 Stopping server...');
+    console.log('\n🛑 Stopping server...');
     serverProcess.kill('SIGTERM');
     serverProcess = null;
   }
 }
 
 /**
- * Wait for React to render the page
+ * Wait for React to render the page AND for SEO tags to be set
+ * IMPROVED: Now specifically waits for canonical URL to match expected value
  */
 async function waitForReactRender(page, pageConfig) {
   // Wait for common React render indicators
@@ -328,8 +360,54 @@ async function waitForReactRender(page, pageConfig) {
     console.log(`   ⚠️  Root element not found, continuing anyway...`);
   }
 
-  // Additional wait for dynamic content
-  await new Promise(resolve => setTimeout(resolve, 2000));
+  // Wait for SEO tags to be set (canonical URL is critical)
+  const expectedCanonical = pageConfig.expectedCanonical;
+  
+  if (expectedCanonical) {
+    let canonicalCorrect = false;
+    let attempts = 0;
+    const maxAttempts = 10;
+    
+    while (!canonicalCorrect && attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      canonicalCorrect = await page.evaluate((expected) => {
+        const canonical = document.querySelector('link[rel="canonical"]');
+        return canonical && canonical.getAttribute('href') === expected;
+      }, expectedCanonical);
+      
+      attempts++;
+    }
+    
+    if (!canonicalCorrect) {
+      console.log(`   ⚠️  Canonical URL not set correctly after ${maxAttempts} attempts`);
+      console.log(`      Expected: ${expectedCanonical}`);
+      
+      // Get actual canonical for debugging
+      const actualCanonical = await page.evaluate(() => {
+        const link = document.querySelector('link[rel="canonical"]');
+        return link ? link.getAttribute('href') : 'NOT FOUND';
+      });
+      console.log(`      Actual: ${actualCanonical}`);
+      
+      // FORCE FIX: Inject correct canonical if it's wrong
+      await page.evaluate((correctCanonical) => {
+        // Remove all existing canonicals
+        document.querySelectorAll('link[rel="canonical"]').forEach(l => l.remove());
+        
+        // Add correct one
+        const link = document.createElement('link');
+        link.rel = 'canonical';
+        link.href = correctCanonical;
+        document.head.appendChild(link);
+      }, expectedCanonical);
+      
+      console.log(`   ✅ Injected correct canonical URL`);
+    }
+  }
+
+  // Additional wait for other dynamic content
+  await new Promise(resolve => setTimeout(resolve, 1500));
 
   // Check if the page has meaningful content (not just empty shell)
   const hasContent = await page.evaluate(() => {
@@ -373,7 +451,7 @@ async function generatePageHTML(browser, page, pageConfig) {
       timeout: 30000              // Increased timeout to 30s
     });
 
-    // Wait for React to fully render the page content
+    // Wait for React to fully render the page content AND SEO tags
     const hasContent = await waitForReactRender(page, pageConfig);
     
     if (!hasContent) {
@@ -401,6 +479,24 @@ async function generatePageHTML(browser, page, pageConfig) {
     const contentLength = html.length;
     const hasBody = html.includes('<main') || html.includes('<article') || 
                     html.includes('class="content"') || html.includes('<h1');
+    
+    // Verify canonical URL in final HTML
+    const canonicalMatch = html.match(/<link[^>]*rel="canonical"[^>]*href="([^"]*)"[^>]*>/);
+    const actualCanonical = canonicalMatch ? canonicalMatch[1] : 'NOT FOUND';
+    
+    if (pageConfig.expectedCanonical && actualCanonical !== pageConfig.expectedCanonical) {
+      console.log(`   ⚠️  Final HTML has wrong canonical: ${actualCanonical}`);
+      console.log(`      Expected: ${pageConfig.expectedCanonical}`);
+      
+      // Fix the HTML directly
+      if (canonicalMatch) {
+        html = html.replace(canonicalMatch[0], `<link rel="canonical" href="${pageConfig.expectedCanonical}">`);
+      } else {
+        // No canonical found, inject one in head
+        html = html.replace('</head>', `<link rel="canonical" href="${pageConfig.expectedCanonical}">\n</head>`);
+      }
+      console.log(`   ✅ Fixed canonical in output HTML`);
+    }
     
     if (contentLength < 5000 || !hasBody) {
       console.log(`   ⚠️  HTML seems incomplete (${contentLength} bytes, hasBody: ${hasBody})`);
@@ -430,6 +526,7 @@ async function generatePageHTML(browser, page, pageConfig) {
   <title>${pageConfig.name} - MicroJPEG</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="canonical" href="${pageConfig.expectedCanonical || fullUrl}">
 </head>
 <body>
   <h1>${pageConfig.name}</h1>
@@ -547,7 +644,8 @@ async function main() {
       failed,
       pages: SEO_PAGES.map(p => ({
         url: p.url,
-        file: p.output
+        file: p.output,
+        canonical: p.expectedCanonical
       }))
     };
 

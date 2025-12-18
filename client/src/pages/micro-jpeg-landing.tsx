@@ -34,32 +34,8 @@ import ButtonsSection from "@/components/ButtonsSection";
 const AdSenseAd = lazy(() => import('@/components/AdSenseAd').then(m => ({ default: m.AdSenseAd })));
 const OurProducts = lazy(() => import('@/components/our-products'));
 
-// ← YOUR FULL SEO + STRUCTURED DATA (copy-pasted & improved from your original)
-const STRUCTURED_DATA = {
-  "@context": "https://schema.org",
-  "@type": "SoftwareApplication",
-  "name": "MicroJPEG",
-  "operatingSystem": "Web Browser",
-  "applicationCategory": "https://schema.org/DesignApplication",
-  "description": "Free online image compression & conversion tool supporting JPEG, PNG, WebP, AVIF, RAW formats and more. Reduce file size up to 90% with zero quality loss.",
-  "url": "https://microjpeg.com",
-  "image": "https://microjpeg.com/og-image-compression-results.jpg",
-  "offers": {
-    "@type": "Offer",
-    "price": "0",
-    "priceCurrency": "USD"
-  },
-  "aggregateRating": {
-    "@type": "AggregateRating",
-    "ratingValue": "4.9",
-    "ratingCount": "2847",
-    "bestRating": "5",
-    "worstRating": "1"
-  },
-  "review": [
-    // keep your real reviews here or leave as-is
-  ]
-};
+// Using STRUCTURED_DATA imported from seoData.ts
+// Local structured data removed to avoid shadowing the import
 
 // Types
 interface FileWithPreview extends File {
@@ -1373,6 +1349,8 @@ export default function MicroJPEGLanding() {
         keywords={SEO_CONTENT.homepage.keywords}
         structuredData={STRUCTURED_DATA.homepage}
         canonicalUrl="https://microjpeg.com"
+        ogImage="https://microjpeg.com/og-image-compression-results.jpg"
+        authoritative={true}
       />
       <Header />
       <div className="min-h-screen bg-gray-900">
@@ -2213,9 +2191,9 @@ export default function MicroJPEGLanding() {
       
       <section className="py-20 bg-gradient-to-b from-gray-50 to-white">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
             MicroJPEG — The Smartest Online Image Compressor & RAW Converter
-          </h1>
+          </h2>
           <p className="text-xl text-gray-700 max-w-4xl mx-auto leading-relaxed">
             Reduce JPEG, PNG, WebP, AVIF, TIFF, GIF, SVG, and over 65 RAW camera formats (CR2, NEF, ARW, DNG, ORF, RAF, RW2, etc.) by up to 90% 
             while keeping perfect visual quality. No software installation, no signup required for 500 free operations per month.
