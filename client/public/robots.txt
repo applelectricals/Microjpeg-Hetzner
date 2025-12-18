@@ -39,10 +39,13 @@ Allow: /
 Disallow: /api/
 Crawl-delay: 2
 
-# Block spam / scrapers
+# SEO Tools - Allowed for site audits
 User-agent: AhrefsBot
-Disallow: /
+Allow: /
+Disallow: /api/
+Crawl-delay: 2
 
+# Block spam / scrapers
 User-agent: MJ12bot
 Disallow: /
 
