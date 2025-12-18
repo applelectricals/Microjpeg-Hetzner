@@ -1,4 +1,4 @@
-
+import { seoPreRenderMiddleware } from './middleware/seoPreRenderMiddleware';
 import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
@@ -685,6 +685,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await ensureDirectories();
   
   app.use('/api', instamojoRoutes);
+
+  app.use(seoPreRenderMiddleware);
 
   // Enable compression middleware for better performance
   app.use(compression({
