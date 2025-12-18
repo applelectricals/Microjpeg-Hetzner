@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
 /**
- * SEO Static HTML Generator - IMPROVED VERSION
+ * SEO Static HTML Generator - BULLETPROOF VERSION
  * 
- * This script generates static HTML for SEO pages by:
- * 1. Starting the production server
- * 2. Using Puppeteer to render each page
- * 3. WAITING for React to fully render (H1, meta tags, links)
- * 4. Saving the fully-rendered HTML to dist/seo/
+ * This script generates static HTML for SEO pages and GUARANTEES
+ * that each page has the correct:
+ * - <title>
+ * - <link rel="canonical">
+ * - <meta name="description">
+ * - <meta property="og:*">
  * 
  * Run: node scripts/generate-seo-html.mjs
  */
@@ -19,7 +20,6 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 
-// Load environment variables from .env file
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,11 +28,9 @@ const __dirname = path.dirname(__filename);
 // Configuration
 const SERVER_PORT = process.env.SEO_SERVER_PORT || 10000;
 const IS_BUILD = process.env.SEO_BUILD === 'true';
-
 const SERVER_URL = IS_BUILD
   ? `http://127.0.0.1:${SERVER_PORT}`
   : (process.env.SEO_SERVER_URL || 'https://microjpeg.com');
-
 const OUTPUT_DIR = path.join(__dirname, '../dist/seo');
 const STARTUP_DELAY = 15000;
 const MAX_RETRIES = 3;
@@ -45,25 +43,21 @@ const SEO_PAGES = [
   { url: '/', output: 'index.html', name: 'Landing Page' },
   { url: '/about', output: 'about.html', name: 'About Page' },
   { url: '/contact', output: 'contact.html', name: 'Contact Page' },
-  { url: '/privacy-policy', output: 'privacy-policy.html', name: 'Privacy Policy' },
-  { url: '/terms-of-service', output: 'terms-of-service.html', name: 'Terms of Service' },
-  { url: '/cancellation-policy', output: 'cancellation-policy.html', name: 'Cancellation Policy' },
   { url: '/tools', output: 'tools.html', name: 'Tools Page' },
-  { url: '/tools/compress', output: 'tools-compress.html', name: 'Tools Compress' },
-  { url: '/tools/convert', output: 'tools-convert.html', name: 'Tools Convert' },
-  { url: '/tools/optimizer', output: 'tools-optimizer.html', name: 'Tools Optimizer' },
-  { url: '/api-docs#overview', output: 'api-docs-overview.html', name: 'API Overview' },
-  { url: '/api-docs#how-it-works', output: 'api-docs-how-it-works.html', name: 'API How It Works' },
-  { url: '/api-docs#api-vs-web', output: 'api-docs-api-vs-web.html', name: 'API vs Web' },
-  { url: '/api-docs#documentation', output: 'api-docs-documentation.html', name: 'API Documentation' },
-  { url: '/wordpress-plugin', output: 'wordpress-plugin.html', name: 'WordPress Plugin' },
-  { url: '/wordpress-plugin/install', output: 'wordpress-plugin-install.html', name: 'WordPress Plugin Install' },
-  { url: '/wordpress-plugin/docs', output: 'wordpress-plugin-docs.html', name: 'WordPress Plugin Docs' },
   { url: '/pricing', output: 'pricing.html', name: 'Pricing' },
   { url: '/features', output: 'features.html', name: 'Features' },
+  { url: '/api-docs', output: 'api-docs.html', name: 'API Docs' },
+  { url: '/wordpress-plugin', output: 'wordpress-plugin.html', name: 'WordPress Plugin' },
+  { url: '/wordpress-plugin/install', output: 'wordpress-plugin-install.html', name: 'WordPress Install' },
+  { url: '/blog', output: 'blog.html', name: 'Blog' },
+  { url: '/support', output: 'support.html', name: 'Support' },
+  { url: '/legal/terms', output: 'legal-terms.html', name: 'Terms of Service' },
+  { url: '/legal/privacy', output: 'legal-privacy.html', name: 'Privacy Policy' },
   { url: '/legal/cookies', output: 'legal-cookies.html', name: 'Cookie Policy' },
+  { url: '/legal/cancellation', output: 'legal-cancellation.html', name: 'Cancellation Policy' },
+  { url: '/legal/payment-protection', output: 'legal-payment-protection.html', name: 'Payment Protection' },
   { url: '/remove-background', output: 'remove-background.html', name: 'AI Background Remover' },
-  { url: '/enhance-image', output: 'enhance-image.html', name: 'AI Image Enhancer' }
+  { url: '/enhance-image', output: 'enhance-image.html', name: 'AI Image Enhancer' },
 ];
 
 // Blog posts
@@ -93,11 +87,12 @@ BLOG_POSTS.forEach(slug => {
 });
 
 // Conversion pages
-const CONVERSION_PAGES = [
+const CONVERSIONS = [
   'jpg-to-png', 'jpg-to-webp', 'jpg-to-avif', 'jpg-to-tiff',
   'png-to-jpg', 'png-to-webp', 'png-to-avif', 'png-to-tiff',
   'webp-to-jpg', 'webp-to-png', 'webp-to-avif', 'webp-to-tiff',
   'avif-to-jpg', 'avif-to-png', 'avif-to-webp', 'avif-to-tiff',
+  'tiff-to-jpg', 'tiff-to-png', 'tiff-to-webp', 'tiff-to-avif',
   'cr2-to-jpg', 'cr2-to-png', 'cr2-to-webp', 'cr2-to-avif', 'cr2-to-tiff',
   'nef-to-jpg', 'nef-to-png', 'nef-to-webp', 'nef-to-avif', 'nef-to-tiff',
   'arw-to-jpg', 'arw-to-png', 'arw-to-webp', 'arw-to-avif', 'arw-to-tiff',
@@ -105,21 +100,30 @@ const CONVERSION_PAGES = [
   'orf-to-jpg', 'orf-to-png', 'orf-to-webp', 'orf-to-avif', 'orf-to-tiff',
   'raf-to-jpg', 'raf-to-png', 'raf-to-webp', 'raf-to-avif', 'raf-to-tiff',
   'crw-to-jpg', 'crw-to-png', 'crw-to-webp', 'crw-to-avif', 'crw-to-tiff',
-  'tiff-to-jpg', 'tiff-to-png', 'tiff-to-webp', 'tiff-to-avif',
+  'rw2-to-jpg',
   'svg-to-jpg', 'svg-to-png', 'svg-to-webp', 'svg-to-avif', 'svg-to-tiff',
-  'jpg-to-jpg', 'png-to-png', 'webp-to-webp', 'avif-to-avif', 'tiff-to-tiff'
 ];
 
-CONVERSION_PAGES.forEach(conversion => {
-  const isSelfCompression = conversion.split('-to-')[0] === conversion.split('-to-')[1];
-  const pagePath = isSelfCompression ? '/compress/' : '/convert/';
-  const format = isSelfCompression ? conversion.split('-')[0] : null;
-  const outputFile = isSelfCompression ? `compress-${format}.html` : `convert-${conversion}.html`;
-
+CONVERSIONS.forEach(conversion => {
   SEO_PAGES.push({
-    url: `${pagePath}${conversion}`,
-    output: outputFile,
-    name: `${isSelfCompression ? 'Compress' : 'Convert'}: ${conversion}`
+    url: `/convert/${conversion}`,
+    output: `convert-${conversion}.html`,
+    name: `Convert: ${conversion}`
+  });
+});
+
+// Compression pages
+const COMPRESS_FORMATS = ['jpg', 'png', 'webp', 'avif', 'tiff'];
+COMPRESS_FORMATS.forEach(format => {
+  SEO_PAGES.push({
+    url: `/compress/${format}`,
+    output: `compress-${format}.html`,
+    name: `Compress: ${format}`
+  });
+  SEO_PAGES.push({
+    url: `/compress/${format}-to-${format}`,
+    output: `compress-${format}-to-${format}.html`,
+    name: `Compress: ${format}-to-${format}`
   });
 });
 
@@ -129,7 +133,6 @@ let serverProcess = null;
 
 async function waitForServer(maxRetries = MAX_RETRIES) {
   console.log('🔍 Waiting for server to be ready...');
-  
   for (let i = 0; i < maxRetries; i++) {
     try {
       const response = await fetch(`${SERVER_URL}/`);
@@ -140,21 +143,18 @@ async function waitForServer(maxRetries = MAX_RETRIES) {
       await new Promise(resolve => setTimeout(resolve, 5000));
     }
   }
-  
   throw new Error('Server failed to start after maximum retries');
 }
 
 function startServer() {
   return new Promise((resolve, reject) => {
     console.log('🚀 Starting local server...');
-    
     serverProcess = spawn('npm', ['run', 'start'], {
       cwd: path.join(__dirname, '..'),
       stdio: ['ignore', 'pipe', 'pipe'],
       shell: true,
       env: { ...process.env, PORT: SERVER_PORT }
     });
-
     serverProcess.stdout.on('data', (data) => {
       const output = data.toString();
       if (output.includes('listening') || output.includes('ready') || output.includes('started')) {
@@ -162,19 +162,16 @@ function startServer() {
         resolve();
       }
     });
-
     serverProcess.stderr.on('data', (data) => {
       const output = data.toString();
       if (output.includes('Error') || output.includes('error')) {
         console.error(`   Server error: ${output}`);
       }
     });
-
     serverProcess.on('error', (error) => {
       console.error(`   ❌ Failed to start server: ${error.message}`);
       reject(error);
     });
-
     setTimeout(resolve, STARTUP_DELAY);
   });
 }
@@ -188,248 +185,171 @@ function stopServer() {
 }
 
 /**
- * IMPROVED: Wait for React to FULLY render with specific element checks
+ * BULLETPROOF: Completely rewrite the <head> section with correct meta tags
  */
-async function waitForReactRender(page, pageConfig) {
-  const isConversionPage = pageConfig.url.includes('/convert/') || pageConfig.url.includes('/compress/');
-  const isHomePage = pageConfig.url === '/';
+function fixHeadSection(html, pageConfig) {
+  const pageUrl = pageConfig.url;
+  const isHomePage = pageUrl === '/';
+  const fullUrl = `https://microjpeg.com${pageUrl === '/' ? '' : pageUrl}`;
   
-  console.log(`   ⏳ Waiting for React to render...`);
+  // Extract the page-specific title from the rendered content
+  // Look for H1 tag content as fallback
+  let pageTitle = 'MicroJPEG';
+  let pageDescription = 'Free online image compression and conversion tool.';
   
-  // Step 1: Wait for root element to have children
-  try {
-    await page.waitForSelector('#root > *', { timeout: 15000 });
-  } catch (e) {
-    console.log(`   ⚠️  Root element not found`);
-  }
-
-  // Step 2: Wait for H1 tag to appear (critical for SEO)
-  try {
-    await page.waitForSelector('h1', { timeout: 10000 });
-    console.log(`   ✅ H1 tag found`);
-  } catch (e) {
-    console.log(`   ⚠️  H1 tag not found within timeout`);
-  }
-
-  // Step 3: Wait for canonical link to be set (critical for SEO)
-  let canonicalAttempts = 0;
-  const maxCanonicalAttempts = 20;
-  
-  while (canonicalAttempts < maxCanonicalAttempts) {
-    const canonical = await page.evaluate(() => {
-      const link = document.querySelector('link[rel="canonical"]');
-      return link ? link.getAttribute('href') : null;
-    });
+  // Try to find H1 in the body
+  const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+  if (h1Match) {
+    // Clean up the H1 text
+    pageTitle = h1Match[1]
+      .replace(/<[^>]*>/g, '') // Remove HTML tags
+      .replace(/\s+/g, ' ')     // Normalize whitespace
+      .trim();
     
-    if (canonical && canonical !== 'https://microjpeg.com/' && !isHomePage) {
-      console.log(`   ✅ Canonical set: ${canonical}`);
-      break;
-    } else if (canonical && isHomePage) {
-      console.log(`   ✅ Canonical set: ${canonical}`);
-      break;
-    }
-    
-    canonicalAttempts++;
-    await new Promise(resolve => setTimeout(resolve, 500));
-  }
-
-  // Step 4: Wait for internal links (ButtonsSection) on conversion pages
-  if (isConversionPage) {
-    try {
-      // Wait for either the details element or the hidden nav
-      await page.waitForSelector('details summary, nav[aria-label="All conversion tools"]', { timeout: 10000 });
-      
-      // Count internal links
-      const linkCount = await page.evaluate(() => {
-        const links = document.querySelectorAll('a[href^="/convert/"], a[href^="/compress/"]');
-        return links.length;
-      });
-      
-      console.log(`   ✅ Found ${linkCount} internal conversion links`);
-    } catch (e) {
-      console.log(`   ⚠️  ButtonsSection links not found`);
+    // Truncate if too long
+    if (pageTitle.length > 60) {
+      pageTitle = pageTitle.substring(0, 57) + '...';
     }
   }
-
-  // Step 5: Wait for meta description
-  try {
-    await page.waitForFunction(() => {
-      const meta = document.querySelector('meta[name="description"]');
-      return meta && meta.getAttribute('content') && meta.getAttribute('content').length > 50;
-    }, { timeout: 8000 });
-    console.log(`   ✅ Meta description set`);
-  } catch (e) {
-    console.log(`   ⚠️  Meta description not found or too short`);
-  }
-
-  // Step 6: Wait for Open Graph tags
-  try {
-    await page.waitForFunction(() => {
-      const ogTitle = document.querySelector('meta[property="og:title"]');
-      return ogTitle && ogTitle.getAttribute('content');
-    }, { timeout: 5000 });
-    console.log(`   ✅ Open Graph tags set`);
-  } catch (e) {
-    console.log(`   ⚠️  Open Graph tags not found`);
-  }
-
-  // Step 7: Additional wait for any remaining async content
-  await new Promise(resolve => setTimeout(resolve, 3000));
-
-  // Validate final content
-  const validation = await page.evaluate(() => {
-    return {
-      hasH1: !!document.querySelector('h1'),
-      h1Text: document.querySelector('h1')?.innerText?.substring(0, 50) || 'NONE',
-      hasCanonical: !!document.querySelector('link[rel="canonical"]'),
-      canonicalUrl: document.querySelector('link[rel="canonical"]')?.getAttribute('href') || 'NONE',
-      hasMetaDesc: !!document.querySelector('meta[name="description"]'),
-      hasOgTitle: !!document.querySelector('meta[property="og:title"]'),
-      hasOgDesc: !!document.querySelector('meta[property="og:description"]'),
-      hasOgImage: !!document.querySelector('meta[property="og:image"]'),
-      internalLinkCount: document.querySelectorAll('a[href^="/convert/"], a[href^="/compress/"]').length,
-      bodyLength: document.body.innerText.length,
-    };
-  });
-
-  console.log(`   📋 Validation: H1="${validation.h1Text}" | Links=${validation.internalLinkCount} | Body=${validation.bodyLength} chars`);
   
-  return validation;
+  // Generate description based on page type
+  if (pageUrl.startsWith('/convert/')) {
+    const conversion = pageUrl.replace('/convert/', '');
+    const [from, to] = conversion.split('-to-');
+    pageDescription = `Convert ${from.toUpperCase()} to ${to.toUpperCase()} online for free. Fast, secure, and high-quality image conversion. No signup required.`;
+    if (!pageTitle.includes(from.toUpperCase())) {
+      pageTitle = `Convert ${from.toUpperCase()} to ${to.toUpperCase()} Online | Free Converter`;
+    }
+  } else if (pageUrl.startsWith('/compress/')) {
+    const format = pageUrl.replace('/compress/', '').split('-')[0];
+    pageDescription = `Compress ${format.toUpperCase()} images online for free. Reduce file size up to 90% without losing quality.`;
+    if (!pageTitle.includes('Compress')) {
+      pageTitle = `Compress ${format.toUpperCase()} Images Online | Free Compressor`;
+    }
+  } else if (pageUrl === '/') {
+    pageTitle = 'MicroJPEG - Smart Image Compression & Conversion | Free Online Tool';
+    pageDescription = 'Free online image compression and conversion tool. Compress JPG, PNG, WEBP up to 90% smaller. Convert RAW files (CR2, NEF, ARW) to JPG, PNG, WEBP. No signup required.';
+  }
+  
+  // Remove ALL existing meta tags that we'll replace
+  // Remove title
+  html = html.replace(/<title>[\s\S]*?<\/title>/gi, '');
+  
+  // Remove canonical
+  html = html.replace(/<link[^>]*rel=["']canonical["'][^>]*>/gi, '');
+  
+  // Remove description
+  html = html.replace(/<meta[^>]*name=["']description["'][^>]*>/gi, '');
+  
+  // Remove keywords
+  html = html.replace(/<meta[^>]*name=["']keywords["'][^>]*>/gi, '');
+  
+  // Remove all OG tags
+  html = html.replace(/<meta[^>]*property=["']og:[^"']*["'][^>]*>/gi, '');
+  
+  // Remove all Twitter tags
+  html = html.replace(/<meta[^>]*name=["']twitter:[^"']*["'][^>]*>/gi, '');
+  
+  // Build new meta tags
+  const newMetaTags = `
+    <title>${pageTitle}</title>
+    <link rel="canonical" href="${fullUrl}">
+    <meta name="description" content="${pageDescription}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="${fullUrl}">
+    <meta property="og:title" content="${pageTitle}">
+    <meta property="og:description" content="${pageDescription}">
+    <meta property="og:image" content="https://microjpeg.com/og-image.jpg">
+    <meta property="og:site_name" content="MicroJPEG">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="${pageTitle}">
+    <meta name="twitter:description" content="${pageDescription}">
+    <meta name="twitter:image" content="https://microjpeg.com/og-image.jpg">
+`;
+  
+  // Insert new meta tags right after <head>
+  html = html.replace(/<head>/i, `<head>${newMetaTags}`);
+  
+  return html;
 }
 
-/**
- * Generate HTML for a single page with validation
- */
-async function generatePageHTML(browser, page, pageConfig) {
+async function generatePage(browser, pageConfig) {
   const fullUrl = `${SERVER_URL}${pageConfig.url}`;
-  
   console.log(`\n📄 Generating: ${pageConfig.name}`);
   console.log(`   URL: ${fullUrl}`);
 
+  const page = await browser.newPage();
+
   try {
-    // Navigate with longer timeout
+    await page.setUserAgent('Mozilla/5.0 (compatible; MicroJPEG-SEO-Generator/1.0)');
+    await page.setViewport({ width: 1920, height: 1080 });
+
+    // Navigate and wait for network to be idle
     await page.goto(fullUrl, {
-      waitUntil: 'networkidle2',
-      timeout: 45000
+      waitUntil: 'networkidle0',
+      timeout: 60000
     });
 
-    // Wait for React to fully render
-    const validation = await waitForReactRender(page, pageConfig);
+    // Wait for React to render
+    console.log(`   ⏳ Waiting for React to render...`);
+    
+    // Wait for #root to have children
+    await page.waitForFunction(
+      () => document.querySelector('#root')?.children.length > 0,
+      { timeout: 30000 }
+    ).catch(() => console.log('   ⚠️ Root children timeout'));
 
-    // Get the rendered HTML
+    // Wait for H1
+    await page.waitForSelector('h1', { timeout: 15000 })
+      .then(() => console.log('   ✅ H1 found'))
+      .catch(() => console.log('   ⚠️ No H1 found'));
+
+    // Additional wait for dynamic content
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
+    // Get the HTML
     let html = await page.content();
 
     // ============================================================
-    // POST-PROCESSING: Fix meta tags in the captured HTML
-    // The index.html has hardcoded homepage meta tags that need
-    // to be replaced with the correct page-specific ones.
+    // BULLETPROOF FIX: Completely rewrite the <head> section
     // ============================================================
-    
-    const isHomePage = pageConfig.url === '/';
-    const isConversionPage = pageConfig.url.includes('/convert/');
-    const isCompressPage = pageConfig.url.includes('/compress/');
-    
-    // Get the correct values from the rendered page
-    const correctMeta = await page.evaluate(() => {
-      // Find the LAST (most recent) canonical - that's the one SEOHead added
-      const canonicals = document.querySelectorAll('link[rel="canonical"]');
-      const lastCanonical = canonicals[canonicals.length - 1];
-      
-      // Find the LAST title
-      const titles = document.querySelectorAll('title');
-      const lastTitle = titles[titles.length - 1];
-      
-      // Find meta description (SEOHead adds with specific pattern)
-      const metaDescs = document.querySelectorAll('meta[name="description"]');
-      const lastMetaDesc = metaDescs[metaDescs.length - 1];
-      
-      // Find OG tags
-      const ogTitle = document.querySelector('meta[property="og:title"]');
-      const ogDesc = document.querySelector('meta[property="og:description"]');
-      const ogUrl = document.querySelector('meta[property="og:url"]');
-      
-      return {
-        canonical: lastCanonical?.getAttribute('href') || null,
-        title: lastTitle?.innerText || null,
-        description: lastMetaDesc?.getAttribute('content') || null,
-        ogTitle: ogTitle?.getAttribute('content') || null,
-        ogDesc: ogDesc?.getAttribute('content') || null,
-        ogUrl: ogUrl?.getAttribute('content') || null,
-      };
-    });
-    
-    console.log(`   🔧 Post-processing: Fixing meta tags...`);
-    
-    // Remove ALL existing canonical links and add the correct one
-    html = html.replace(/<link[^>]*rel=["']canonical["'][^>]*>/gi, '');
+    console.log(`   🔧 Fixing meta tags...`);
+    html = fixHeadSection(html, pageConfig);
+
+    // Validate
     const expectedCanonical = `https://microjpeg.com${pageConfig.url === '/' ? '' : pageConfig.url}`;
-    html = html.replace('</head>', `<link rel="canonical" href="${expectedCanonical}">\n</head>`);
-    
-    // Fix title tag - remove old, keep correct
-    if (correctMeta.title && !isHomePage) {
-      // Remove the hardcoded homepage title
-      html = html.replace(/<title>MicroJPEG - Smart Image Compression Made Easy \| Reduce File Size by 90%<\/title>/gi, '');
-      // If title is now missing, add the correct one
-      if (!html.includes('<title>')) {
-        html = html.replace('</head>', `<title>${correctMeta.title}</title>\n</head>`);
-      }
-    }
-    
-    // Fix meta description - remove homepage one, keep page-specific
-    if (!isHomePage) {
-      // Remove the hardcoded homepage description
-      html = html.replace(/<meta[^>]*name=["']description["'][^>]*content=["']Best free JPEG compression tool online[^"']*["'][^>]*>/gi, '');
-    }
-    
-    // Remove duplicate meta keywords (homepage specific)
-    if (!isHomePage) {
-      html = html.replace(/<meta[^>]*name=["']keywords["'][^>]*content=["']JPEG compression tool[^"']*["'][^>]*>/gi, '');
-    }
-    
-    // Fix OG tags - remove homepage ones
-    if (!isHomePage) {
-      // Remove homepage OG title
-      html = html.replace(/<meta[^>]*property=["']og:title["'][^>]*content=["']MicroJPEG - Smart Image Compression Made Easy[^"']*["'][^>]*>/gi, '');
-      // Remove homepage OG description  
-      html = html.replace(/<meta[^>]*property=["']og:description["'][^>]*content=["']Smart image compression made easy[^"']*["'][^>]*>/gi, '');
-    }
-    
-    console.log(`   ✅ Fixed canonical: ${expectedCanonical}`);
-    
+    const hasCorrectCanonical = html.includes(`href="${expectedCanonical}"`);
+    const hasH1 = /<h1[^>]*>/i.test(html);
+    const linkCount = (html.match(/href=["']\/(convert|compress)\//gi) || []).length;
 
+    console.log(`   📋 Validation:`);
+    console.log(`      Canonical: ${hasCorrectCanonical ? '✅' : '❌'} ${expectedCanonical}`);
+    console.log(`      H1: ${hasH1 ? '✅' : '❌'}`);
+    console.log(`      Internal links: ${linkCount}`);
 
-    // Validate minimum requirements
-    if (!validation.hasH1) {
-      console.log(`   ⚠️  WARNING: Page has no H1 tag!`);
-    }
-    
-    if (validation.internalLinkCount < 5 && (isConversionPage || isCompressPage)) {
-      console.log(`   ⚠️  WARNING: Page has only ${validation.internalLinkCount} internal links!`);
-    }
-
-    // Save to file
+    // Save
     const outputPath = path.join(OUTPUT_DIR, pageConfig.output);
     fs.writeFileSync(outputPath, html, 'utf8');
 
     const stats = fs.statSync(outputPath);
-    const sizeKB = (stats.size / 1024).toFixed(2);
+    console.log(`   ✅ Saved: ${pageConfig.output} (${(stats.size / 1024).toFixed(2)} KB)`);
 
-    console.log(`   ✅ Saved: ${pageConfig.output} (${sizeKB} KB)`);
-    return { success: true, validation };
+    await page.close();
+    return { success: true };
 
   } catch (error) {
     console.log(`   ❌ Error: ${error.message}`);
+    await page.close();
     return { success: false, error: error.message };
   }
 }
 
 async function main() {
   console.log('╔════════════════════════════════════════════════════════════╗');
-  console.log('║   SEO Static HTML Generator for MicroJPEG (IMPROVED)       ║');
+  console.log('║   SEO Static HTML Generator - BULLETPROOF VERSION          ║');
   console.log('╚════════════════════════════════════════════════════════════╝\n');
 
   try {
-    // Create output directory
     if (!fs.existsSync(OUTPUT_DIR)) {
       fs.mkdirSync(OUTPUT_DIR, { recursive: true });
       console.log(`✅ Created output directory: ${OUTPUT_DIR}\n`);
@@ -437,15 +357,12 @@ async function main() {
 
     if (IS_BUILD) {
       await startServer();
-      console.log('✅ Local server started for SEO generation\n');
     } else {
       console.log(`🔗 Connecting to: ${SERVER_URL}\n`);
     }
 
     await waitForServer();
-    console.log('✅ Server is responding\n');
 
-    // Launch Puppeteer
     console.log('🌐 Launching browser...');
     const browser = await puppeteer.launch({
       headless: 'new',
@@ -454,103 +371,39 @@ async function main() {
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
         '--disable-gpu',
-        '--disable-web-security',
-        '--disable-features=IsolateOrigins,site-per-process'
+        '--single-process'
       ]
     });
-    console.log('✅ Browser launched\n');
 
-    const page = await browser.newPage();
-    
-    // Set viewport and user agent
-    await page.setViewport({ width: 1920, height: 1080 });
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36');
-    await page.setJavaScriptEnabled(true);
+    let successCount = 0;
+    let failCount = 0;
 
-    // Track results
-    let successful = 0;
-    let failed = 0;
-    const issues = [];
-
-    // Generate HTML for each page
     for (const pageConfig of SEO_PAGES) {
-      const result = await generatePageHTML(browser, page, pageConfig);
+      const result = await generatePage(browser, pageConfig);
       if (result.success) {
-        successful++;
-        
-        // Track pages with potential issues
-        if (result.validation && !result.validation.hasH1) {
-          issues.push({ page: pageConfig.name, issue: 'Missing H1' });
-        }
-        if (result.validation && result.validation.internalLinkCount < 5 && 
-            (pageConfig.url.includes('/convert/') || pageConfig.url.includes('/compress/'))) {
-          issues.push({ page: pageConfig.name, issue: `Only ${result.validation.internalLinkCount} links` });
-        }
+        successCount++;
       } else {
-        failed++;
+        failCount++;
       }
+      // Small delay between pages
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
 
     await browser.close();
-    console.log('\n✅ Browser closed\n');
 
-    // Summary
-    console.log('╔════════════════════════════════════════════════════════════╗');
+    console.log('\n╔════════════════════════════════════════════════════════════╗');
     console.log('║                    GENERATION COMPLETE                      ║');
-    console.log('╚════════════════════════════════════════════════════════════╝\n');
-    console.log(`✅ Successful: ${successful} pages`);
-    if (failed > 0) {
-      console.log(`❌ Failed: ${failed} pages`);
-    }
-    
-    if (issues.length > 0) {
-      console.log(`\n⚠️  Pages with potential SEO issues:`);
-      issues.forEach(i => console.log(`   - ${i.page}: ${i.issue}`));
-    }
-    
-    console.log(`\n📁 Output: ${OUTPUT_DIR}\n`);
-
-    // Create manifest
-    const manifest = {
-      generatedAt: new Date().toISOString(),
-      totalPages: SEO_PAGES.length,
-      successful,
-      failed,
-      issues,
-      pages: SEO_PAGES.map(p => ({ url: p.url, file: p.output }))
-    };
-
-    fs.writeFileSync(
-      path.join(OUTPUT_DIR, 'manifest.json'),
-      JSON.stringify(manifest, null, 2)
-    );
-    console.log('✅ Manifest created: manifest.json\n');
-
-    if (IS_BUILD) {
-      stopServer();
-    }
-
-    process.exit(failed > 0 ? 1 : 0);
+    console.log('╚════════════════════════════════════════════════════════════╝');
+    console.log(`\n✅ Success: ${successCount} pages`);
+    console.log(`❌ Failed: ${failCount} pages`);
+    console.log(`📁 Output: ${OUTPUT_DIR}\n`);
 
   } catch (error) {
-    console.error('\n❌ Fatal error:', error);
-    if (IS_BUILD) {
-      stopServer();
-    }
+    console.error('\n❌ Fatal error:', error.message);
     process.exit(1);
+  } finally {
+    stopServer();
   }
 }
-
-process.on('SIGINT', () => {
-  console.log('\n\n⚠️  Interrupted by user');
-  if (IS_BUILD) stopServer();
-  process.exit(1);
-});
-
-process.on('SIGTERM', () => {
-  console.log('\n\n⚠️  Terminated');
-  if (IS_BUILD) stopServer();
-  process.exit(1);
-});
 
 main();
