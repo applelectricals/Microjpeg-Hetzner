@@ -1,39 +1,30 @@
 #!/usr/bin/env node
 
 /**
- * SEO Static HTML Generator - BULLETPROOF VERSION
+ * SEO Static HTML Generator - LIVE SITE VERSION
  * 
- * This script generates static HTML for SEO pages and GUARANTEES
- * that each page has the correct:
- * - <title>
- * - <link rel="canonical">
- * - <meta name="description">
- * - <meta property="og:*">
+ * This script generates static HTML by fetching from the LIVE production site
+ * instead of trying to start a local server (which fails in Docker builds).
  * 
- * Run: node scripts/generate-seo-html.mjs
+ * If the live site is not reachable, it skips gracefully so the build continues.
+ * 
+ * Run manually after deployment:
+ *   node scripts/generate-seo-html.mjs
  */
 
 import puppeteer from 'puppeteer';
-import { spawn } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Configuration
-const SERVER_PORT = process.env.SEO_SERVER_PORT || 10000;
-const IS_BUILD = process.env.SEO_BUILD === 'true';
-const SERVER_URL = IS_BUILD
-  ? `http://127.0.0.1:${SERVER_PORT}`
-  : (process.env.SEO_SERVER_URL || 'https://microjpeg.com');
+// Configuration - ALWAYS use the live site
+const SERVER_URL = process.env.SEO_SERVER_URL || 'https://microjpeg.com';
 const OUTPUT_DIR = path.join(__dirname, '../dist/seo');
-const STARTUP_DELAY = 15000;
-const MAX_RETRIES = 3;
+
+console.log(`\n🌐 SEO Generator will fetch from: ${SERVER_URL}\n`);
 
 // ============================================================================
 // SEO PAGES CONFIGURATION
@@ -127,86 +118,25 @@ COMPRESS_FORMATS.forEach(format => {
   });
 });
 
-console.log(`\n📊 Total SEO pages to generate: ${SEO_PAGES.length}\n`);
-
-let serverProcess = null;
-
-async function waitForServer(maxRetries = MAX_RETRIES) {
-  console.log('🔍 Waiting for server to be ready...');
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      const response = await fetch(`${SERVER_URL}/`);
-      console.log(`   ✅ Server responding (status: ${response.status})`);
-      return true;
-    } catch (error) {
-      console.log(`   ⏳ Attempt ${i + 1}/${maxRetries}: Server not ready yet...`);
-      await new Promise(resolve => setTimeout(resolve, 5000));
-    }
-  }
-  throw new Error('Server failed to start after maximum retries');
-}
-
-function startServer() {
-  return new Promise((resolve, reject) => {
-    console.log('🚀 Starting local server...');
-    serverProcess = spawn('npm', ['run', 'start'], {
-      cwd: path.join(__dirname, '..'),
-      stdio: ['ignore', 'pipe', 'pipe'],
-      shell: true,
-      env: { ...process.env, PORT: SERVER_PORT }
-    });
-    serverProcess.stdout.on('data', (data) => {
-      const output = data.toString();
-      if (output.includes('listening') || output.includes('ready') || output.includes('started')) {
-        console.log(`   ✅ Server started on port ${SERVER_PORT}`);
-        resolve();
-      }
-    });
-    serverProcess.stderr.on('data', (data) => {
-      const output = data.toString();
-      if (output.includes('Error') || output.includes('error')) {
-        console.error(`   Server error: ${output}`);
-      }
-    });
-    serverProcess.on('error', (error) => {
-      console.error(`   ❌ Failed to start server: ${error.message}`);
-      reject(error);
-    });
-    setTimeout(resolve, STARTUP_DELAY);
-  });
-}
-
-function stopServer() {
-  if (serverProcess) {
-    console.log('\n🛑 Stopping server...');
-    serverProcess.kill('SIGTERM');
-    serverProcess = null;
-  }
-}
+console.log(`📊 Total SEO pages to generate: ${SEO_PAGES.length}\n`);
 
 /**
  * BULLETPROOF: Completely rewrite the <head> section with correct meta tags
  */
 function fixHeadSection(html, pageConfig) {
   const pageUrl = pageConfig.url;
-  const isHomePage = pageUrl === '/';
   const fullUrl = `https://microjpeg.com${pageUrl === '/' ? '' : pageUrl}`;
   
-  // Extract the page-specific title from the rendered content
-  // Look for H1 tag content as fallback
+  // Extract title from H1 if possible
   let pageTitle = 'MicroJPEG';
   let pageDescription = 'Free online image compression and conversion tool.';
   
-  // Try to find H1 in the body
   const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
   if (h1Match) {
-    // Clean up the H1 text
     pageTitle = h1Match[1]
-      .replace(/<[^>]*>/g, '') // Remove HTML tags
-      .replace(/\s+/g, ' ')     // Normalize whitespace
+      .replace(/<[^>]*>/g, '')
+      .replace(/\s+/g, ' ')
       .trim();
-    
-    // Truncate if too long
     if (pageTitle.length > 60) {
       pageTitle = pageTitle.substring(0, 57) + '...';
     }
@@ -217,13 +147,13 @@ function fixHeadSection(html, pageConfig) {
     const conversion = pageUrl.replace('/convert/', '');
     const [from, to] = conversion.split('-to-');
     pageDescription = `Convert ${from.toUpperCase()} to ${to.toUpperCase()} online for free. Fast, secure, and high-quality image conversion. No signup required.`;
-    if (!pageTitle.includes(from.toUpperCase())) {
+    if (!pageTitle.toLowerCase().includes(from.toLowerCase())) {
       pageTitle = `Convert ${from.toUpperCase()} to ${to.toUpperCase()} Online | Free Converter`;
     }
   } else if (pageUrl.startsWith('/compress/')) {
     const format = pageUrl.replace('/compress/', '').split('-')[0];
     pageDescription = `Compress ${format.toUpperCase()} images online for free. Reduce file size up to 90% without losing quality.`;
-    if (!pageTitle.includes('Compress')) {
+    if (!pageTitle.toLowerCase().includes('compress')) {
       pageTitle = `Compress ${format.toUpperCase()} Images Online | Free Compressor`;
     }
   } else if (pageUrl === '/') {
@@ -231,23 +161,12 @@ function fixHeadSection(html, pageConfig) {
     pageDescription = 'Free online image compression and conversion tool. Compress JPG, PNG, WEBP up to 90% smaller. Convert RAW files (CR2, NEF, ARW) to JPG, PNG, WEBP. No signup required.';
   }
   
-  // Remove ALL existing meta tags that we'll replace
-  // Remove title
+  // Remove ALL existing meta tags
   html = html.replace(/<title>[\s\S]*?<\/title>/gi, '');
-  
-  // Remove canonical
   html = html.replace(/<link[^>]*rel=["']canonical["'][^>]*>/gi, '');
-  
-  // Remove description
   html = html.replace(/<meta[^>]*name=["']description["'][^>]*>/gi, '');
-  
-  // Remove keywords
   html = html.replace(/<meta[^>]*name=["']keywords["'][^>]*>/gi, '');
-  
-  // Remove all OG tags
   html = html.replace(/<meta[^>]*property=["']og:[^"']*["'][^>]*>/gi, '');
-  
-  // Remove all Twitter tags
   html = html.replace(/<meta[^>]*name=["']twitter:[^"']*["'][^>]*>/gi, '');
   
   // Build new meta tags
@@ -267,7 +186,7 @@ function fixHeadSection(html, pageConfig) {
     <meta name="twitter:image" content="https://microjpeg.com/og-image.jpg">
 `;
   
-  // Insert new meta tags right after <head>
+  // Insert after <head>
   html = html.replace(/<head>/i, `<head>${newMetaTags}`);
   
   return html;
@@ -284,35 +203,30 @@ async function generatePage(browser, pageConfig) {
     await page.setUserAgent('Mozilla/5.0 (compatible; MicroJPEG-SEO-Generator/1.0)');
     await page.setViewport({ width: 1920, height: 1080 });
 
-    // Navigate and wait for network to be idle
+    // Navigate with longer timeout for live site
     await page.goto(fullUrl, {
-      waitUntil: 'networkidle0',
-      timeout: 60000
+      waitUntil: 'networkidle2',
+      timeout: 90000
     });
 
-    // Wait for React to render
-    console.log(`   ⏳ Waiting for React to render...`);
+    // Wait for React
+    console.log(`   ⏳ Waiting for React...`);
     
-    // Wait for #root to have children
     await page.waitForFunction(
       () => document.querySelector('#root')?.children.length > 0,
       { timeout: 30000 }
-    ).catch(() => console.log('   ⚠️ Root children timeout'));
+    ).catch(() => {});
 
-    // Wait for H1
     await page.waitForSelector('h1', { timeout: 15000 })
       .then(() => console.log('   ✅ H1 found'))
-      .catch(() => console.log('   ⚠️ No H1 found'));
+      .catch(() => console.log('   ⚠️ No H1'));
 
-    // Additional wait for dynamic content
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    // Wait for content
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Get the HTML
     let html = await page.content();
 
-    // ============================================================
-    // BULLETPROOF FIX: Completely rewrite the <head> section
-    // ============================================================
+    // Fix meta tags
     console.log(`   🔧 Fixing meta tags...`);
     html = fixHeadSection(html, pageConfig);
 
@@ -322,17 +236,12 @@ async function generatePage(browser, pageConfig) {
     const hasH1 = /<h1[^>]*>/i.test(html);
     const linkCount = (html.match(/href=["']\/(convert|compress)\//gi) || []).length;
 
-    console.log(`   📋 Validation:`);
-    console.log(`      Canonical: ${hasCorrectCanonical ? '✅' : '❌'} ${expectedCanonical}`);
-    console.log(`      H1: ${hasH1 ? '✅' : '❌'}`);
-    console.log(`      Internal links: ${linkCount}`);
+    console.log(`   📋 Canonical: ${hasCorrectCanonical ? '✅' : '❌'} | H1: ${hasH1 ? '✅' : '❌'} | Links: ${linkCount}`);
 
     // Save
     const outputPath = path.join(OUTPUT_DIR, pageConfig.output);
     fs.writeFileSync(outputPath, html, 'utf8');
-
-    const stats = fs.statSync(outputPath);
-    console.log(`   ✅ Saved: ${pageConfig.output} (${(stats.size / 1024).toFixed(2)} KB)`);
+    console.log(`   ✅ Saved: ${pageConfig.output} (${(fs.statSync(outputPath).size / 1024).toFixed(1)} KB)`);
 
     await page.close();
     return { success: true };
@@ -346,64 +255,74 @@ async function generatePage(browser, pageConfig) {
 
 async function main() {
   console.log('╔════════════════════════════════════════════════════════════╗');
-  console.log('║   SEO Static HTML Generator - BULLETPROOF VERSION          ║');
+  console.log('║   SEO Static HTML Generator - LIVE SITE VERSION            ║');
   console.log('╚════════════════════════════════════════════════════════════╝\n');
 
-  try {
-    if (!fs.existsSync(OUTPUT_DIR)) {
-      fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-      console.log(`✅ Created output directory: ${OUTPUT_DIR}\n`);
-    }
-
-    if (IS_BUILD) {
-      await startServer();
-    } else {
-      console.log(`🔗 Connecting to: ${SERVER_URL}\n`);
-    }
-
-    await waitForServer();
-
-    console.log('🌐 Launching browser...');
-    const browser = await puppeteer.launch({
-      headless: 'new',
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-gpu',
-        '--single-process'
-      ]
-    });
-
-    let successCount = 0;
-    let failCount = 0;
-
-    for (const pageConfig of SEO_PAGES) {
-      const result = await generatePage(browser, pageConfig);
-      if (result.success) {
-        successCount++;
-      } else {
-        failCount++;
-      }
-      // Small delay between pages
-      await new Promise(resolve => setTimeout(resolve, 500));
-    }
-
-    await browser.close();
-
-    console.log('\n╔════════════════════════════════════════════════════════════╗');
-    console.log('║                    GENERATION COMPLETE                      ║');
-    console.log('╚════════════════════════════════════════════════════════════╝');
-    console.log(`\n✅ Success: ${successCount} pages`);
-    console.log(`❌ Failed: ${failCount} pages`);
-    console.log(`📁 Output: ${OUTPUT_DIR}\n`);
-
-  } catch (error) {
-    console.error('\n❌ Fatal error:', error.message);
-    process.exit(1);
-  } finally {
-    stopServer();
+  // Create output directory
+  if (!fs.existsSync(OUTPUT_DIR)) {
+    fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   }
+
+  // Check if we can reach the live site
+  console.log(`🔍 Testing connection to ${SERVER_URL}...`);
+  try {
+    const response = await fetch(SERVER_URL);
+    if (!response.ok) {
+      console.log(`⚠️ Warning: ${SERVER_URL} returned status ${response.status}`);
+    } else {
+      console.log(`✅ Live site is reachable\n`);
+    }
+  } catch (error) {
+    console.log(`❌ Cannot reach ${SERVER_URL}: ${error.message}`);
+    console.log(`\n⚠️ SEO generation requires the live site to be accessible.`);
+    console.log(`   Skipping SEO generation - deploy first, then run manually:`);
+    console.log(`   node scripts/generate-seo-html.mjs\n`);
+    
+    // Create a placeholder file
+    fs.writeFileSync(
+      path.join(OUTPUT_DIR, 'README.txt'),
+      'SEO files not generated during build.\nRun "node scripts/generate-seo-html.mjs" after deployment.'
+    );
+    process.exit(0); // Exit cleanly, don't fail the build
+  }
+
+  console.log('🌐 Launching browser...');
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--single-process'
+    ]
+  });
+
+  let successCount = 0;
+  let failCount = 0;
+
+  for (const pageConfig of SEO_PAGES) {
+    const result = await generatePage(browser, pageConfig);
+    if (result.success) {
+      successCount++;
+    } else {
+      failCount++;
+    }
+    // Small delay between pages
+    await new Promise(resolve => setTimeout(resolve, 300));
+  }
+
+  await browser.close();
+
+  console.log('\n╔════════════════════════════════════════════════════════════╗');
+  console.log('║                    GENERATION COMPLETE                      ║');
+  console.log('╚════════════════════════════════════════════════════════════╝');
+  console.log(`\n✅ Success: ${successCount} pages`);
+  console.log(`❌ Failed: ${failCount} pages`);
+  console.log(`📁 Output: ${OUTPUT_DIR}\n`);
 }
 
-main();
+main().catch(error => {
+  console.error('Fatal error:', error);
+  process.exit(1);
+});

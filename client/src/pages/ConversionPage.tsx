@@ -13,7 +13,7 @@ import { useLocation, useParams } from 'wouter';
 import ConversionOutputModal from '@/components/ConversionOutputModal';
 import ButtonsSection from "@/components/ButtonsSection";
 import { getHowToSchema, getSoftwareAppSchema, getFaqSchema } from "@/data/conversionSchema";
-import SEOLinks from '@/components/SEOLinks';
+
 
 
 import { getConversionPageContent, hasConversionContent, PageContent } from '@/data/conversionContent';
@@ -1406,7 +1406,7 @@ export default function ConversionPage() {
               Background photo by <a href="https://www.pexels.com/photo/selective-focus-photo-of-white-petaled-flowers-96627/" target="_blank" rel="noopener noreferrer" className="hover:underline">AS Photography</a>
             </p>
           </div>
-          <SEOLinks />
+          
         </div>
       </footer>
     </div>

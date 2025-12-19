@@ -9,7 +9,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from 
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import Header from '@/components/header';
-import SEOLinks from '@/components/SEOLinks';
+
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQuery } from '@tanstack/react-query';
@@ -1101,7 +1101,7 @@ function FAQSection() {
           <div className="border-t border-teal-500/30 mt-8 pt-8 text-center text-gray-400">
             <p>© 2025 MicroJPEG. All rights reserved. Making the web faster, one image at a time.</p>
           </div>
-          <SEOLinks />
+          
         </div>
       </footer>
     </>
