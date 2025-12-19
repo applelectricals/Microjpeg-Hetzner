@@ -23,17 +23,13 @@ const BOT_USER_AGENTS = [
   
   // SEO Tools - CRITICAL FOR AUDITS
   'ahrefsbot',       // Ahrefs ← THIS WAS MISSING!
-  'semrushbot',      // SEMrush ← THIS WAS MISSING!
+  'semrushbot',      // SEMrush
   'mj12bot',         // Majestic
   'dotbot',          // Moz
   'rogerbot',        // Moz
   'screaming frog',  // Screaming Frog
   'sitebulb',        // Sitebulb
-  'deepcrawl',       // DeepCrawl
-  'oncrawl',         // OnCrawl
   'seokicks',        // SEOkicks
-  'sistrix',         // Sistrix
-  'serpstat',        // Serpstat
   'petalbot',        // Huawei/Petal
   
   // Social Media
@@ -51,13 +47,6 @@ const BOT_USER_AGENTS = [
   'ia_archiver',         // Alexa
   'seznambot',           // Seznam
   'developers.google.com/+/web/snippet', // Google+
-  'redditbot',           // Reddit
-  'embedly',             // Embedly
-  'quora link preview',  // Quora
-  'outbrain',            // Outbrain
-  'vkshare',             // VK
-  'w3c_validator',       // W3C Validator
-  'lighthouse',          // Google Lighthouse
 ];
 
 /**
@@ -75,53 +64,48 @@ export function isBot(userAgent: string): boolean {
  */
 function getStaticHTMLPath(route: string): string | null {
   const seoDir = path.join(process.cwd(), 'dist/seo');
-
-  // Remove query string and trailing slash
+  
+  // Clean the route - remove query strings and trailing slashes
   const cleanRoute = route.split('?')[0].replace(/\/$/, '') || '/';
 
-  // Map routes to files
+  // Map routes to files - COMPLETE LIST
   const routeMap: Record<string, string> = {
     '/': 'index.html',
     '/about': 'about.html',
     '/contact': 'contact.html',
-    '/privacy-policy': 'privacy-policy.html',
-    '/terms-of-service': 'terms-of-service.html',
-    '/cancellation-policy': 'cancellation-policy.html',
     '/tools': 'tools.html',
-    '/tools/compress': 'tools-compress.html',
-    '/tools/convert': 'tools-convert.html',
-    '/tools/optimizer': 'tools-optimizer.html',
-    '/api-docs': 'api-docs-overview.html',
+    '/pricing': 'pricing.html',
+    '/features': 'features.html',
+    '/support': 'support.html',
+    '/blog': 'blog.html',
+    
+    // API Docs
+    '/api-docs': 'api-docs.html',
+    
+    // WordPress
     '/wordpress-plugin': 'wordpress-plugin.html',
     '/wordpress-plugin/install': 'wordpress-plugin-install.html',
     '/wordpress-plugin/docs': 'wordpress-plugin-docs.html',
-    '/pricing': 'pricing.html',
-    '/features': 'features.html',
+    
+    // Legal pages - THESE WERE MISSING!
+    '/legal/terms': 'legal-terms.html',
+    '/legal/privacy': 'legal-privacy.html',
     '/legal/cookies': 'legal-cookies.html',
-    '/legal/terms': 'terms-of-service.html',
-    '/legal/privacy': 'privacy-policy.html',
-    '/legal/cancellation': 'cancellation-policy.html',
+    '/legal/cancellation': 'legal-cancellation.html',
+    '/legal/payment-protection': 'legal-payment-protection.html',
+    
+    // AI Tools - THESE WERE MISSING!
     '/remove-background': 'remove-background.html',
     '/enhance-image': 'enhance-image.html',
+    
+    // Legacy redirects (in case bots hit old URLs)
+    '/privacy-policy': 'legal-privacy.html',
+    '/terms-of-service': 'legal-terms.html',
+    '/cookie-policy': 'legal-cookies.html',
+    '/cancellation-policy': 'legal-cancellation.html',
   };
 
-  // Handle API docs fragment routes (#overview, #how-it-works, etc.)
-  if (cleanRoute.startsWith('/api-docs')) {
-    const fragment = cleanRoute.split('#')[1];
-    let fileName = 'api-docs-overview.html';
-
-    if (fragment) {
-      fileName = `api-docs-${fragment}.html`;
-    }
-
-    const filePath = path.join(seoDir, fileName);
-    if (fs.existsSync(filePath)) {
-      return filePath;
-    }
-    return path.join(seoDir, 'api-docs-overview.html');
-  }
-
-  // Handle blog posts
+  // Handle blog posts: /blog/slug -> blog-slug.html
   if (cleanRoute.startsWith('/blog/')) {
     const slug = cleanRoute.replace('/blog/', '');
     const fileName = `blog-${slug}.html`;
@@ -133,7 +117,7 @@ function getStaticHTMLPath(route: string): string | null {
     return null;
   }
 
-  // Handle conversion pages: /convert/xxx-to-yyy
+  // Handle conversion pages: /convert/xxx-to-yyy -> convert-xxx-to-yyy.html
   if (cleanRoute.startsWith('/convert/')) {
     const conversion = cleanRoute.replace('/convert/', '');
     const fileName = `convert-${conversion}.html`;
@@ -145,25 +129,23 @@ function getStaticHTMLPath(route: string): string | null {
     return null;
   }
 
-  // Handle compression pages: /compress/xxx-to-xxx or /compress/xxx
+  // Handle compression pages: /compress/xxx or /compress/xxx-to-xxx
   if (cleanRoute.startsWith('/compress/')) {
     const compressPath = cleanRoute.replace('/compress/', '');
-    
-    // Try full path first (e.g., compress-jpg-to-jpg.html)
-    let fileName = `compress-${compressPath}.html`;
-    let filePath = path.join(seoDir, fileName);
+    const fileName = `compress-${compressPath}.html`;
+    const filePath = path.join(seoDir, fileName);
     
     if (fs.existsSync(filePath)) {
       return filePath;
     }
     
-    // Try short format (e.g., compress-jpg.html)
+    // Try short format: compress-jpg.html
     const format = compressPath.split('-')[0];
-    fileName = `compress-${format}.html`;
-    filePath = path.join(seoDir, fileName);
+    const shortFileName = `compress-${format}.html`;
+    const shortFilePath = path.join(seoDir, shortFileName);
     
-    if (fs.existsSync(filePath)) {
-      return filePath;
+    if (fs.existsSync(shortFilePath)) {
+      return shortFilePath;
     }
     
     return null;
@@ -184,18 +166,11 @@ function getStaticHTMLPath(route: string): string | null {
 
 /**
  * Bot detection middleware
- * 
- * Usage:
- * app.use(botDetectionMiddleware);
  */
 export function botDetectionMiddleware(req: Request, res: Response, next: NextFunction) {
-  // Skip API routes
-  if (req.path.startsWith('/api')) {
-    return next();
-  }
-  
-  // Skip static assets
-  if (req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot|map|json|webp|avif|pdf|zip)$/i)) {
+  // Skip API routes and static assets
+  if (req.path.startsWith('/api') || 
+      req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|map|json|webp|avif)$/i)) {
     return next();
   }
   
@@ -203,7 +178,6 @@ export function botDetectionMiddleware(req: Request, res: Response, next: NextFu
   
   // Check if this is a bot
   if (!isBot(userAgent)) {
-    // Regular user - continue to React app
     return next();
   }
 
@@ -213,26 +187,21 @@ export function botDetectionMiddleware(req: Request, res: Response, next: NextFu
   const staticHTMLPath = getStaticHTMLPath(req.path);
 
   if (staticHTMLPath) {
-    // Serve pre-rendered HTML
-    console.log(`   ✅ Serving static HTML: ${path.basename(staticHTMLPath)}`);
+    console.log(`   ✅ Serving: ${path.basename(staticHTMLPath)}`);
     
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('X-Rendered-By', 'MicroJPEG-SEO-Static');
-    res.setHeader('X-SEO-Prerender', 'true');
+    res.setHeader('X-SEO-Bot', 'true');
     
     return res.sendFile(staticHTMLPath);
   } else {
-    // No static HTML available - serve React app
-    console.log(`   ⚠️  No static HTML for ${req.path}, serving React app`);
+    console.log(`   ⚠️ No static HTML for ${req.path}`);
     return next();
   }
 }
 
 /**
- * Debug endpoint to test bot detection
- * 
- * Usage:
- * curl -A "AhrefsBot" https://microjpeg.com/__seo-debug
+ * Debug endpoint
  */
 export function seoDebugEndpoint(req: Request, res: Response) {
   const userAgent = req.get('user-agent') || '';
@@ -247,20 +216,11 @@ export function seoDebugEndpoint(req: Request, res: Response) {
     botDetected: isBotRequest,
     userAgent,
     seoFilesAvailable: seoFiles.length,
-    sampleFiles: seoFiles.slice(0, 10),
-    totalBots: BOT_USER_AGENTS.length,
-    botsIncluded: BOT_USER_AGENTS,
-    testUrls: {
-      landing: '/',
-      convert: '/convert/cr2-to-jpg',
-      compress: '/compress/jpg-to-jpg',
-      about: '/about',
-      blog: '/blog/how-to-use-microjpeg'
-    },
-    howToTest: {
-      asAhrefsBot: 'curl -A "AhrefsBot/7.0" https://microjpeg.com/convert/cr2-to-jpg',
-      asGooglebot: 'curl -A "Googlebot" https://microjpeg.com/',
-      asUser: 'curl https://microjpeg.com/',
+    sampleFiles: seoFiles.slice(0, 20),
+    botsSupported: BOT_USER_AGENTS,
+    testCommands: {
+      ahrefsBot: 'curl -A "AhrefsBot/7.0" https://microjpeg.com/convert/cr2-to-jpg',
+      googleBot: 'curl -A "Googlebot" https://microjpeg.com/',
     }
   });
 }
