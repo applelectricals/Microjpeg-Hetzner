@@ -97,6 +97,33 @@ const ALL_COMPRESS = [
   '/compress/tiff-to-tiff',
 ];
 
+const BLOG_POSTS = [
+  '/blog/how-to-use-microjpeg',
+  '/blog/optimize-png-tiff-wordpress',
+  '/blog/avif-vs-webp-vs-jpg-2025',
+  '/blog/batch-convert-avif-2025',
+  '/blog/raw-to-webp-photographer-workflow',
+  '/blog/webp-back-to-jpg-png',
+  '/blog/image-compression-best-practices',
+  '/blog/svg-to-avif-icons',
+  '/blog/jpg-recompression-myths',
+  '/blog/python-raw-to-tiff',
+  '/blog/webp-quality-settings',
+  '/blog/compress-jpg-images-without-losing-quality',
+  '/blog/raw-to-jpg-conversion-guide',
+  '/blog/wordpress-image-optimization-guide',
+];
+
+const WEB_TOOLS = [
+  '/tools/compress',
+  '/tools/convert',
+  '/tools/optimizer',
+];
+
+const EXTRA_WORDPRESS_PAGES = [
+  '/wordpress-plugin/docs',
+];
+
 export default function SEOFooter() {
   return (
     <footer className="bg-gray-100 dark:bg-gray-800 text-black dark:text-white py-12">
@@ -106,9 +133,9 @@ export default function SEOFooter() {
           {/* Brand */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <img 
-                src="/assets/mascot-logo-optimized-BdORzE_N.png" 
-                alt="MicroJPEG Logo" 
+              <img
+                src="/assets/mascot-logo-optimized-BdORzE_N.png"
+                alt="MicroJPEG Logo"
                 className="w-10 h-10"
               />
               <span className="text-xl font-bold font-poppins">MicroJPEG</span>
@@ -182,18 +209,18 @@ export default function SEOFooter() {
           </h4>
           <div className="flex flex-wrap justify-center gap-3 text-sm">
             {COMPRESSION_TOOLS.map(link => (
-              <a 
+              <a
                 key={link.href}
-                href={link.href} 
+                href={link.href}
                 className="px-3 py-1 bg-gray-200 dark:bg-gray-700 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition"
               >
                 {link.name}
               </a>
             ))}
             {AI_TOOLS.map(link => (
-              <a 
+              <a
                 key={link.href}
-                href={link.href} 
+                href={link.href}
                 className="px-3 py-1 bg-teal-100 dark:bg-teal-800 rounded hover:bg-teal-200 dark:hover:bg-teal-700 transition"
               >
                 {link.name}
@@ -212,20 +239,20 @@ export default function SEOFooter() {
             Contains ALL internal links for crawler discovery.
             This ensures every page has outgoing links to every other page.
             ============================================================ */}
-        <nav 
+        <nav
           aria-label="Complete site navigation"
           className="sr-only"
-          style={{ 
-            position: 'absolute', 
-            left: '-9999px', 
-            top: 'auto', 
-            width: '1px', 
-            height: '1px', 
-            overflow: 'hidden' 
+          style={{
+            position: 'absolute',
+            left: '-9999px',
+            top: 'auto',
+            width: '1px',
+            height: '1px',
+            overflow: 'hidden'
           }}
         >
           <h2>All MicroJPEG Pages</h2>
-          
+
           {/* Main Pages */}
           <ul>
             <li><a href="/">Home</a></li>
@@ -239,6 +266,27 @@ export default function SEOFooter() {
             <li><a href="/wordpress-plugin/install">WordPress Installation</a></li>
             <li><a href="/blog">Blog</a></li>
             <li><a href="/support">Support</a></li>
+          </ul>
+
+          {/* Web Tools */}
+          <ul>
+            {WEB_TOOLS.map(href => (
+              <li key={href}><a href={href}>{href.split('/').pop()?.replace(/-/g, ' ').toUpperCase()}</a></li>
+            ))}
+          </ul>
+
+          {/* WordPress & API */}
+          <ul>
+            {EXTRA_WORDPRESS_PAGES.map(href => (
+              <li key={href}><a href={href}>WP {href.split('/').pop()?.toUpperCase()}</a></li>
+            ))}
+          </ul>
+
+          {/* Blog Posts */}
+          <ul>
+            {BLOG_POSTS.map(href => (
+              <li key={href}><a href={href}>{href.split('/').pop()?.replace(/-/g, ' ')}</a></li>
+            ))}
           </ul>
 
           {/* Legal Pages */}

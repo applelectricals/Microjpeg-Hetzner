@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { sessionManager } from '@/lib/sessionManager';
 import Header from '@/components/header';
 import { SEOHead } from '@/components/SEOHead';
+import SEOFooter from '@/components/SEOFooter';
 import { useLocation, useParams } from 'wouter';
 import ConversionOutputModal from '@/components/ConversionOutputModal';
 import ButtonsSection from "@/components/ButtonsSection";
@@ -25,7 +26,7 @@ import {
   CONVERSIONS,
   FORMATS,
   getConversionByPair,
-  getFormatInfo, 
+  getFormatInfo,
   validateFile as validateFileFromMatrix,
   type ConversionConfig,
   type FormatInfo
@@ -87,7 +88,7 @@ const MAX_CONCURRENT = 1;
 
 // Supported file types (same as main landing page)
 const SUPPORTED_FORMATS = [
-  'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif', 
+  'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/avif',
   'image/svg+xml', 'image/tiff', 'image/tif'
 ];
 
@@ -127,7 +128,7 @@ const simulateProgress = (
   return new Promise((resolve) => {
     let progress = 0;
     const interval = duration / 100;
-    
+
     const timer = setInterval(() => {
       progress += Math.random() * 3 + 1;
       if (progress >= 100) {
@@ -165,7 +166,7 @@ const getFormatDisplayInfo = (format: string) => {
       textColor: formatInfo.textColor
     };
   }
-  
+
   return {
     icon: jpegIcon,
     color: '#6B7280',
@@ -184,19 +185,19 @@ const parseConversionFromParams = (params: any, location: string): { from: strin
       return { from, to, operation: 'convert' };
     }
   }
-  
+
   // Handle /tools/:format and /compress/:format patterns (e.g., jpg)
   if (params.format) {
     // Determine the current URL pattern to provide correct redirects
     const isCompressRoute = location.includes('/compress/');
     const currentPrefix = isCompressRoute ? '/compress' : '/tools';
     const newPrefix = isCompressRoute ? '/compress' : '/compress'; // Always redirect to /compress for consistency
-    
+
     // Check for malformed compress routes like /tools/jpg-to-jpg or /compress/jpg-to-jpg
     const malformedMatch = params.format.match(/^([a-z0-9]+)-to-([a-z0-9]+)$/);
     if (malformedMatch) {
       const [, from, to] = malformedMatch;
-      
+
       // If source and target are the same, it's a compression operation - redirect to new format
       if (from === to) {
         console.warn(`Malformed compress route detected: ${currentPrefix}/${params.format}. Redirecting to /compress/${from}`);
@@ -209,28 +210,28 @@ const parseConversionFromParams = (params: any, location: string): { from: strin
         return null;
       }
     }
-    
+
     // Normal compression format - redirect old /tools/ URLs to new /compress/ URLs
     if (!isCompressRoute && location.includes('/tools/')) {
       console.log(`Redirecting from /tools/${params.format} to /compress/${params.format}`);
       window.location.replace(`/compress/${params.format}`);
       return null;
     }
-    
+
     return { from: params.format, to: params.format, operation: 'compress' };
   }
-  
+
   // Fallback: parse from URL path with malformed route detection
   const convertMatch = location.match(/\/convert\/([a-z0-9]+)-to-([a-z0-9]+)$/);
   const newCompressMatch = location.match(/\/compress\/([a-z0-9]+)$/);
   const oldCompressMatch = location.match(/\/tools\/([a-z0-9]+)$/);
   const malformedNewCompressMatch = location.match(/\/compress\/([a-z0-9]+)-to-([a-z0-9]+)$/);
   const malformedOldCompressMatch = location.match(/\/tools\/([a-z0-9]+)-to-([a-z0-9]+)$/);
-  
+
   // Handle malformed compress URLs in fallback
   if (malformedNewCompressMatch) {
     const [, from, to] = malformedNewCompressMatch;
-    
+
     if (from === to) {
       console.warn(`Malformed compress URL detected: ${location}. Redirecting to /compress/${from}`);
       window.location.replace(`/compress/${from}`);
@@ -241,10 +242,10 @@ const parseConversionFromParams = (params: any, location: string): { from: strin
       return null;
     }
   }
-  
+
   if (malformedOldCompressMatch) {
     const [, from, to] = malformedOldCompressMatch;
-    
+
     if (from === to) {
       console.warn(`Malformed compress URL detected: ${location}. Redirecting to /compress/${from}`);
       window.location.replace(`/compress/${from}`);
@@ -255,17 +256,17 @@ const parseConversionFromParams = (params: any, location: string): { from: strin
       return null;
     }
   }
-  
+
   if (convertMatch) {
     const [, from, to] = convertMatch;
     return { from, to, operation: 'convert' };
   }
-  
+
   if (newCompressMatch) {
     const [, format] = newCompressMatch;
     return { from: format, to: format, operation: 'compress' };
   }
-  
+
   if (oldCompressMatch) {
     const [, format] = oldCompressMatch;
     // Redirect old /tools/ URLs to new /compress/ URLs
@@ -273,13 +274,13 @@ const parseConversionFromParams = (params: any, location: string): { from: strin
     window.location.replace(`/compress/${format}`);
     return null;
   }
-  
+
   return null;
 };
 
 // Session Management Utilities  
 const SESSION_LIMITS = {
-  free: { 
+  free: {
     compressions: 500,  // Match landing page (500 monthly operations)
     conversions: 500,   // Match landing page 
     maxFileSize: 25 * 1024 * 1024,  // Keep 25MB for conversions
@@ -296,10 +297,10 @@ export default function ConversionPage() {
   const params = useParams();
   const { toast } = useToast();
   const { user } = useAuth();
-  
+
   // Add dark mode state to component (moved to top)
   const { isDark, setIsDark } = useDarkMode();
-  
+
   // Parse conversion config from route parameters
   const urlParams = parseConversionFromParams(params, location);
   const conversionConfig = urlParams ? getConversionByPair(urlParams.from, urlParams.to) : null;
@@ -310,11 +311,11 @@ export default function ConversionPage() {
   const pageContent =
     urlParams && fromFormat && toFormat
       ? getConversionPageContent(
-          urlParams.from,
-          urlParams.to,
-          fromFormat.displayName,
-          toFormat.displayName
-        )
+        urlParams.from,
+        urlParams.to,
+        fromFormat.displayName,
+        toFormat.displayName
+      )
       : null;
 
   // Get FAQ content early in the component
@@ -324,11 +325,12 @@ export default function ConversionPage() {
       : [];
 
   // Generate canonical URL and structured data for SEO
+  // Ensure canonical URL is strictly lowercase to prevent duplicates
   const canonicalUrl =
     urlParams && fromFormat && toFormat && conversionConfig
       ? `https://microjpeg.com${conversionConfig.operation === "compress"
-          ? `/compress/${urlParams.from}`
-          : `/convert/${urlParams.from}-to-${urlParams.to}`}`
+        ? `/compress/${urlParams.from.toLowerCase()}`
+        : `/convert/${urlParams.from.toLowerCase()}-to-${urlParams.to.toLowerCase()}`}`
       : "https://microjpeg.com/tools/convert";
 
   // Use optimized meta title if available
@@ -336,27 +338,27 @@ export default function ConversionPage() {
     pageContent?.metaTitle
       ? pageContent.metaTitle
       : conversionConfig?.operation === "compress"
-      ? `Compress ${fromFormat?.displayName} Images Online - Free | MicroJPEG`
-      : `Convert ${fromFormat?.displayName} to ${toFormat?.displayName} - Free Online | MicroJPEG`;
+        ? `Compress ${fromFormat?.displayName} Images Online - Free | MicroJPEG`
+        : `Convert ${fromFormat?.displayName} to ${toFormat?.displayName} - Free Online | MicroJPEG`;
 
   // Use optimized intro for meta description if available
   const metaDescription =
     pageContent?.metaDescription
       ? pageContent.metaDescription
       : pageContent?.intro
-      ? pageContent.intro.slice(0, 155) // Google typically shows 155-160 characters
-      : conversionConfig?.description || "Convert and compress images online with MicroJPEG";
+        ? pageContent.intro.slice(0, 155) // Google typically shows 155-160 characters
+        : conversionConfig?.description || "Convert and compress images online with MicroJPEG";
 
   // Build comprehensive structured data array
   const structuredData =
     urlParams && fromFormat && toFormat && conversionConfig
       ? [
-          getHowToSchema(urlParams.from, urlParams.to, canonicalUrl),
-          getSoftwareAppSchema(urlParams.from, urlParams.to, canonicalUrl),
-          getFaqSchema(urlParams.from, urlParams.to, canonicalUrl),
-          getBreadcrumbSchema(urlParams.from, urlParams.to),
-          getWebPageSchema(urlParams.from, urlParams.to, metaTitle, metaDescription)
-        ].filter(Boolean)
+        getHowToSchema(urlParams.from, urlParams.to, canonicalUrl),
+        getSoftwareAppSchema(urlParams.from, urlParams.to, canonicalUrl),
+        getFaqSchema(urlParams.from, urlParams.to, canonicalUrl),
+        getBreadcrumbSchema(urlParams.from, urlParams.to),
+        getWebPageSchema(urlParams.from, urlParams.to, metaTitle, metaDescription)
+      ].filter(Boolean)
       : undefined;
 
   // If no valid conversion found, show 404
@@ -391,7 +393,7 @@ export default function ConversionPage() {
     );
   }
 
-  
+
 
   // State management
   const [selectedFiles, setSelectedFiles] = useState<FileWithPreview[]>([]);
@@ -406,7 +408,7 @@ export default function ConversionPage() {
   const [processingFileIds, setProcessingFileIds] = useState<Set<string>>(new Set());
   const [qualityPercent, setQualityPercent] = useState(conversionConfig.defaultQuality);
   const [sizePercent, setSizePercent] = useState(conversionConfig.defaultSize);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [session, setSession] = useState<SessionData>({
@@ -421,24 +423,24 @@ export default function ConversionPage() {
   // File validation with proper RAW vs regular file size limits
   const validateFile = useCallback((file: File): string | null => {
     const fileExtension = file.name.toLowerCase().split('.').pop() || '';
-    
+
     // Comprehensive RAW format detection (without dots)
     const RAW_FORMATS = ['cr2', 'cr3', 'arw', 'srf', 'dng', 'nef', 'nrw', 'orf', 'raf', 'rw2', 'pef', 'srw', 'x3f', 'raw', 'crw'];
     const isRawFormat = RAW_FORMATS.includes(fileExtension);
-    
+
     if (!SUPPORTED_FORMATS.includes(file.type.toLowerCase()) && !isRawFormat) {
       return `${file.name}: Unsupported format. Please use JPEG, PNG, WebP, AVIF, TIFF, SVG, or RAW formats (CR2, ARW, DNG, NEF, ORF, RAF, RW2).`;
     }
-    
+
     // Use different file size limits for RAW vs regular files
     const maxSize = isRawFormat ? MAX_RAW_FILE_SIZE : MAX_FILE_SIZE;
     const sizeLabel = isRawFormat ? "25MB" : "10MB";
     const fileType = isRawFormat ? "RAW" : "regular";
-    
+
     if (file.size > maxSize) {
       return `${file.name}: File too large. Maximum size is ${sizeLabel} for ${fileType} files.`;
     }
-    
+
     return null;
   }, []);
 
@@ -490,14 +492,14 @@ export default function ConversionPage() {
         });
         return newMap;
       });
-      
+
       setSelectedFiles(prev => [...prev, ...validFiles]);
       setNewlyAddedFiles(validFiles);
       sessionManager.trackActivity();
-      
+
       // Auto-start conversion
       setTimeout(() => startConversion(validFiles), 100);
-      
+
       const actionText = conversionConfig.operation === 'compress' ? 'Compressing' : 'Converting';
       toast({
         title: `Files added - ${actionText}...`,
@@ -516,33 +518,33 @@ export default function ConversionPage() {
     setProcessingFileIds(new Set(files.map(f => f.id)));
 
     try {
-    // Use the same successful pattern as landing page
-    const formData = new FormData();
-    files.forEach(file => {
-    formData.append('files', file);
-  });
-  
-    // Normalize jpg → jpeg for backend compatibility
-    const normalizedFormat = urlParams!.to === 'jpg' ? 'jpeg' : urlParams!.to;
-  
-    // Prepare settings for /api/compress endpoint (EXACT COPY from landing page)
-    const settings = {
-    quality: qualityPercent || 95, // Use simple quality like landing page
-    outputFormat: [normalizedFormat], // ← Use normalized format
-    resizeOption: 'keep-original', // Landing page uses keep-original for RAW files
-    compressionAlgorithm: 'standard', // Same as landing page
-    webOptimization: 'optimize-web',
-    pageIdentifier: conversionConfig.pageIdentifier,
-    sessionId: Math.random().toString(36).substr(2, 9) // Generate session ID
- };
+      // Use the same successful pattern as landing page
+      const formData = new FormData();
+      files.forEach(file => {
+        formData.append('files', file);
+      });
+
+      // Normalize jpg → jpeg for backend compatibility
+      const normalizedFormat = urlParams!.to === 'jpg' ? 'jpeg' : urlParams!.to;
+
+      // Prepare settings for /api/compress endpoint (EXACT COPY from landing page)
+      const settings = {
+        quality: qualityPercent || 95, // Use simple quality like landing page
+        outputFormat: [normalizedFormat], // ← Use normalized format
+        resizeOption: 'keep-original', // Landing page uses keep-original for RAW files
+        compressionAlgorithm: 'standard', // Same as landing page
+        webOptimization: 'optimize-web',
+        pageIdentifier: conversionConfig.pageIdentifier,
+        sessionId: Math.random().toString(36).substr(2, 9) // Generate session ID
+      };
 
       formData.append('settings', JSON.stringify(settings));
 
       // Start proper progress simulation
-      const estimatedTime = fromFormat!.category === 'raw' 
+      const estimatedTime = fromFormat!.category === 'raw'
         ? Math.max(30000, files.length * 15000) // RAW files take longer
         : Math.max(10000, files.length * 5000);
-      
+
       const progressPromise = simulateProgress(estimatedTime, (progress) => {
         setProcessingProgress(progress);
       });
@@ -562,15 +564,15 @@ export default function ConversionPage() {
       }
 
       const result = await response.json();
-      
+
       // Handle results (same structure as landing page)
       if (result.results && Array.isArray(result.results)) {
         console.log('Raw API result:', result);
         console.log('Processing results for', urlParams!.from, 'to', urlParams!.to);
-        
+
         const convertedResults = result.results.map((r: any) => {
           console.log('Processing result:', r);
-          
+
           // Ensure compressionRatio is valid - more robust validation
           let compressionRatio = r.compressionRatio;
           if (typeof compressionRatio !== 'number' || isNaN(compressionRatio) || !isFinite(compressionRatio)) {
@@ -580,11 +582,11 @@ export default function ConversionPage() {
             compressionRatio = Math.round(((originalSize - compressedSize) / originalSize) * 100);
             console.log(`Calculated compression ratio: ${compressionRatio}% (${originalSize} -> ${compressedSize})`);
           }
-          
+
           // Ensure sizes are valid
           const originalSize = typeof r.originalSize === 'number' && !isNaN(r.originalSize) && r.originalSize > 0 ? r.originalSize : 1;
           const compressedSize = typeof r.compressedSize === 'number' && !isNaN(r.compressedSize) && r.compressedSize > 0 ? r.compressedSize : 1;
-          
+
           const processedResult = {
             id: r.id,
             originalName: r.originalName,
@@ -596,11 +598,11 @@ export default function ConversionPage() {
             outputFormat: urlParams!.to,
             wasConverted: conversionConfig.operation === 'convert'
           };
-          
+
           console.log('Processed result:', processedResult);
           return processedResult;
         });
-        
+
         setSession(prev => ({
           ...prev,
           results: [...prev.results, ...convertedResults]
@@ -612,7 +614,7 @@ export default function ConversionPage() {
       setProcessingProgress(100);
       setModalState('results');
       setConsecutiveUploads(prev => prev + 1);
-      
+
       // Show pricing cards after 3 uploads
       if (consecutiveUploads >= 2) {
         setShowPricingCards(true);
@@ -634,7 +636,7 @@ export default function ConversionPage() {
     } finally {
       setIsProcessing(false);
       setProcessingFileIds(new Set());
-      
+
       // Refresh counter after operation
       window.dispatchEvent(new Event('refreshUniversalCounter'));
     }
@@ -652,7 +654,7 @@ export default function ConversionPage() {
 
     try {
       const resultIds = session.results.map(result => result.id);
-      
+
       const response = await fetch('/api/create-session-zip', {
         method: 'POST',
         headers: {
@@ -707,7 +709,7 @@ export default function ConversionPage() {
     e.preventDefault();
     e.stopPropagation();
     setDragActive(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       handleFiles(e.dataTransfer.files);
     }
@@ -729,14 +731,14 @@ export default function ConversionPage() {
       }
       groups[result.originalName].push(result);
     });
-    
+
     return Object.entries(groups).map(([originalName, results]) => ({
       originalName,
       results
     }));
   };
 
-  
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-brand-cream via-white to-brand-light dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col transition-colors duration-300">
       {/* ← PERFECT PER-PAGE SEO — Google sees this instantly on SSR */}
@@ -814,16 +816,16 @@ export default function ConversionPage() {
 
               {/* CTA Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   onClick={() => window.location.href = '/pricing'}
                   className="w-full sm:w-auto bg-brand-gold hover:bg-brand-gold-dark text-white font-semibold px-8 py-4 text-lg rounded-lg animate-pulse-glow min-h-[48px]"
                   data-testid="button-plans-pricing"
                 >
                   Plans & Pricing
                 </Button>
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   variant="outline"
                   onClick={() => window.location.href = '/checkout?plan=starter'}
                   className="w-full sm:w-auto px-8 py-4 text-lg border-2 border-brand-gold text-brand-dark hover:bg-brand-gold/10 min-h-[48px]"
@@ -839,13 +841,12 @@ export default function ConversionPage() {
               <Card className="p-4 sm:p-6 lg:p-8 bg-white/95 dark:bg-gray-800/95 backdrop-blur border-2 border-brand-gold/20 dark:border-brand-gold/30 shadow-2xl w-full transition-colors">
                 {/* Drag & Drop Zone */}
                 <div
-                  className={`relative border-3 border-dashed rounded-xl p-4 sm:p-6 lg:p-8 text-center transition-all duration-300 ${
-                    isProcessing 
-                      ? 'cursor-not-allowed opacity-50 bg-gray-50 dark:bg-gray-700/50' 
-                      : dragActive 
-                      ? 'border-brand-teal bg-brand-teal/5 dark:bg-brand-teal/10 scale-105 cursor-pointer' 
+                  className={`relative border-3 border-dashed rounded-xl p-4 sm:p-6 lg:p-8 text-center transition-all duration-300 ${isProcessing
+                    ? 'cursor-not-allowed opacity-50 bg-gray-50 dark:bg-gray-700/50'
+                    : dragActive
+                      ? 'border-brand-teal bg-brand-teal/5 dark:bg-brand-teal/10 scale-105 cursor-pointer'
                       : 'border-gray-300 dark:border-gray-600 hover:border-brand-gold hover:bg-brand-cream/50 dark:hover:bg-gray-700/50 cursor-pointer'
-                  }`}
+                    }`}
                   onDragEnter={isProcessing ? undefined : handleDrag}
                   onDragLeave={isProcessing ? undefined : handleDrag}
                   onDragOver={isProcessing ? undefined : handleDrag}
@@ -857,13 +858,13 @@ export default function ConversionPage() {
                     <div className="w-12 h-12 sm:w-16 sm:h-16 bg-brand-teal/10 rounded-xl mx-auto flex items-center justify-center">
                       <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-brand-teal" />
                     </div>
-                    
+
                     <div className="space-y-2">
                       <p className="text-sm sm:text-base font-medium text-gray-700 dark:text-gray-200 transition-colors">
                         Drop {fromFormat.displayName} files here or click to upload
                       </p>
                       <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 transition-colors">
-                        {conversionConfig.operation === 'compress' 
+                        {conversionConfig.operation === 'compress'
                           ? `Compress ${fromFormat.displayName} files`
                           : `Convert ${fromFormat.displayName} files to ${toFormat.displayName} format`
                         }
@@ -872,8 +873,8 @@ export default function ConversionPage() {
                         {fromFormat.extensions.map(ext => ext.toUpperCase()).join(', ')} files only
                       </p>
                       <p className="text-xs text-gray-500 dark:text-gray-400 transition-colors">
-                        {fromFormat.category === 'raw' 
-                          ? 'Up to 25MB for RAW files' 
+                        {fromFormat.category === 'raw'
+                          ? 'Up to 25MB for RAW files'
                           : 'Up to 10MB (25MB for RAW files)'
                         }
                       </p>
@@ -901,7 +902,7 @@ export default function ConversionPage() {
                             }}
                           />
                         </div>
-                        
+
                         {/* Quality Slider - only show if target format supports quality */}
                         {toFormat.supportsQuality && (
                           <div className="space-y-1">
@@ -926,7 +927,7 @@ export default function ConversionPage() {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Hidden file input */}
                   <input
                     ref={fileInputRef}
@@ -1006,13 +1007,13 @@ export default function ConversionPage() {
         </div>
       )}
 
-{/* Test Premium for $9 Section */}
+      {/* Test Premium for $9 Section */}
       <section className="py-16 bg-gradient-to-r from-gray-800 via-gray-900 to-gray-800 relative overflow-hidden">
         <div className="max-w-4xl mx-auto px-4 text-center relative">
-          
+
           <div className="bg-gradient-to-br from-white to-gray-50 rounded-3xl shadow-2xl p-8 border border-brand-gold/20 relative">
             {/* Premium Badge - Fixed Mobile Layout */}
-            <div 
+            <div
               className="absolute -top-3 sm:-top-4 left-1/2 transform -translate-x-1/2"
               style={{
                 position: 'absolute' as const,
@@ -1022,7 +1023,7 @@ export default function ConversionPage() {
                 zIndex: '10 !important'
               }}
             >
-              <div 
+              <div
                 className="bg-gradient-to-r from-brand-gold to-amber-400 px-3 py-1.5 sm:px-6 sm:py-2 text-xs sm:text-sm font-bold shadow-lg rounded-lg text-black"
                 style={{
                   backgroundColor: '#f59e0b !important',
@@ -1040,17 +1041,17 @@ export default function ConversionPage() {
                 <span className="inline sm:hidden" style={{ color: '#000000 !important' }}>⭐ STARTER $9</span>
               </div>
             </div>
-            
+
             <div className="mt-8 sm:mt-6">
               <h2 className="text-xl sm:text-3xl lg:text-4xl font-bold font-poppins text-black mb-4 px-2">
                 Experience <span className="text-brand-teal">Premium Features</span><br />
                 <span className="text-brand-gold text-lg sm:text-3xl lg:text-4xl">Only $9 per month</span>
               </h2>
-              
+
               <p className="text-lg text-gray-600 font-opensans mb-8 max-w-2xl mx-auto">
                 Perfect for Product Hunt reviewers, colleagues, developers and photographers wanting to test our full Premium experience before committing.
               </p>
-              
+
               {/* Features Grid */}
               <div className="grid md:grid-cols-3 gap-6 mb-8">
                 <div className="text-center">
@@ -1075,9 +1076,9 @@ export default function ConversionPage() {
                   <p className="text-base sm:text-lg font-semibold text-black dark:text-black">Save up to 51% with annual plans</p>
                 </div>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-                <Button 
+                <Button
                   size="lg"
                   onClick={() => window.location.href = '/checkout?plan=starter'}
                   className="bg-gradient-to-r from-brand-teal to-brand-teal-dark hover:from-brand-teal-dark hover:to-brand-teal text-[#AD0000] font-bold px-8 py-4 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
@@ -1095,8 +1096,8 @@ export default function ConversionPage() {
         </div>
       </section>
 
-<ButtonsSection />
-        {/* ====== FINAL BULLETPROOF SEO BLOCK — USES urlParams (NEVER FAILS) ====== */}
+      <ButtonsSection />
+      {/* ====== FINAL BULLETPROOF SEO BLOCK — USES urlParams (NEVER FAILS) ====== */}
       <section className="py-16 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 text-center">
           {(() => {
@@ -1147,9 +1148,9 @@ export default function ConversionPage() {
               </p>
             </div>
           </div>
-          
-          
-          
+
+
+
         </div>
       </section>
       {/* ====== END SEO BLOCK ====== */}
@@ -1348,67 +1349,10 @@ export default function ConversionPage() {
               </div>
             </div>
           </section>
-      )}
+        )}
 
-      {/* Footer */}
-      <footer className="bg-gray-100 dark:bg-gray-800 text-black dark:text-white py-12">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            {/* Brand */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <img src={logoUrl} alt="MicroJPEG Logo" className="w-10 h-10" />
-                <span className="text-xl font-bold font-poppins">MicroJPEG</span>
-              </div>
-              <p className="text-gray-600 dark:text-gray-300 font-opensans">
-                The smartest way to compress and optimize your images for the web.
-              </p>
-            </div>
-
-            {/* Product */}
-            <div>
-              <h4 className="font-semibold font-poppins mb-4">Product</h4>
-              <ul className="space-y-2 text-gray-600 dark:text-gray-300 font-opensans">
-                <li><a href="/features" className="hover:text-black dark:hover:text-white">Features</a></li>
-                <li><a href="/pricing" className="hover:text-black dark:hover:text-white">Pricing</a></li>
-                <li><a href="/api-docs" className="hover:text-black dark:hover:text-white">API</a></li>
-                <li><a href="/api-docs" className="hover:text-black dark:hover:text-white">Documentation</a></li>
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h4 className="font-semibold font-poppins mb-4">Company</h4>
-              <ul className="space-y-2 text-gray-600 dark:text-gray-300 font-opensans">
-                <li><a href="/about" className="hover:text-black dark:hover:text-white">About</a></li>
-                <li><a href="/blog" className="hover:text-black dark:hover:text-white">Blog</a></li>
-                <li><a href="/contact" className="hover:text-black dark:hover:text-white">Contact</a></li>
-                <li><a href="/support" className="hover:text-black dark:hover:text-white">Support</a></li>
-              </ul>
-            </div>
-
-            {/* Legal */}
-            <div>
-              <h4 className="font-semibold font-poppins mb-4">Legal</h4>
-              <ul className="space-y-2 text-gray-600 dark:text-gray-300 font-opensans">
-                <li><a href="/privacy-policy" className="hover:text-black dark:hover:text-white">Privacy Policy</a></li>
-                <li><a href="/terms-of-service" className="hover:text-black dark:hover:text-white">Terms of Service</a></li>
-                <li><a href="/cookie-policy" className="hover:text-black dark:hover:text-white">Cookie Policy</a></li>
-                <li><a href="/cancellation-policy" className="hover:text-black dark:hover:text-white">Cancellation Policy</a></li>
-                <li><a href="/privacy-policy" className="hover:text-black dark:hover:text-white">GDPR</a></li>
-              </ul>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-300 dark:border-gray-600 pt-8 text-center text-gray-500 dark:text-gray-400 font-opensans">
-            <p>© 2025 MicroJPEG. All rights reserved. Making the web faster, one image at a time.</p>
-            <p className="text-xs mt-2 opacity-75">
-              Background photo by <a href="https://www.pexels.com/photo/selective-focus-photo-of-white-petaled-flowers-96627/" target="_blank" rel="noopener noreferrer" className="hover:underline">AS Photography</a>
-            </p>
-          </div>
-          
-        </div>
-      </footer>
+      {/* Replaced Inline Footer with Global SEO Footer */}
+      <SEOFooter />
     </div>
   );
 }
