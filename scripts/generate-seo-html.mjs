@@ -123,54 +123,69 @@ console.log(`📊 Total SEO pages to generate: ${SEO_PAGES.length}\n`);
 /**
  * BULLETPROOF: Completely rewrite the <head> section with correct meta tags
  */
-function fixHeadSection(html, pageConfig) {
-  const pageUrl = pageConfig.url;
-  const fullUrl = `https://microjpeg.com${pageUrl === '/' ? '' : pageUrl}`;
-  
-  // Extract title from H1 if possible
-  let pageTitle = 'MicroJPEG';
-  let pageDescription = 'Free online image compression and conversion tool.';
-  
-  const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
-  if (h1Match) {
-    pageTitle = h1Match[1]
-      .replace(/<[^>]*>/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-    if (pageTitle.length > 60) {
-      pageTitle = pageTitle.substring(0, 57) + '...';
-    }
-  }
-  
-  // Generate description based on page type
-  if (pageUrl.startsWith('/convert/')) {
-    const conversion = pageUrl.replace('/convert/', '');
-    const [from, to] = conversion.split('-to-');
-    pageDescription = `Convert ${from.toUpperCase()} to ${to.toUpperCase()} online for free. Fast, secure, and high-quality image conversion. No signup required.`;
-    if (!pageTitle.toLowerCase().includes(from.toLowerCase())) {
-      pageTitle = `Convert ${from.toUpperCase()} to ${to.toUpperCase()} Online | Free Converter`;
-    }
-  } else if (pageUrl.startsWith('/compress/')) {
-    const format = pageUrl.replace('/compress/', '').split('-')[0];
-    pageDescription = `Compress ${format.toUpperCase()} images online for free. Reduce file size up to 90% without losing quality.`;
-    if (!pageTitle.toLowerCase().includes('compress')) {
-      pageTitle = `Compress ${format.toUpperCase()} Images Online | Free Compressor`;
-    }
-  } else if (pageUrl === '/') {
-    pageTitle = 'MicroJPEG - Smart Image Compression & Conversion | Free Online Tool';
-    pageDescription = 'Free online image compression and conversion tool. Compress JPG, PNG, WEBP up to 90% smaller. Convert RAW files (CR2, NEF, ARW) to JPG, PNG, WEBP. No signup required.';
-  }
-  
-  // Remove ALL existing meta tags
-  html = html.replace(/<title>[\s\S]*?<\/title>/gi, '');
+// CHECK: Does the page already have a good title?
+const existingTitle = (html.match(/<title>([\s\S]*?)<\/title>/i) || [])[1] || '';
+const hasGoodTitle = existingTitle && !existingTitle.includes('Vite') && !existingTitle.includes('React');
+
+// CHECK: Does it have a description?
+const hasDescription = /<meta[^>]*name=["']description["'][^>]*>/i.test(html);
+
+// If we have good metadata from React, TRUST IT! 
+// Only normalize the Canonical URL.
+if (hasGoodTitle && hasDescription) {
+  // Just ensure canonical is correct and absolute
   html = html.replace(/<link[^>]*rel=["']canonical["'][^>]*>/gi, '');
-  html = html.replace(/<meta[^>]*name=["']description["'][^>]*>/gi, '');
-  html = html.replace(/<meta[^>]*name=["']keywords["'][^>]*>/gi, '');
-  html = html.replace(/<meta[^>]*property=["']og:[^"']*["'][^>]*>/gi, '');
-  html = html.replace(/<meta[^>]*name=["']twitter:[^"']*["'][^>]*>/gi, '');
-  
-  // Build new meta tags
-  const newMetaTags = `
+  const canonicalTag = `<link rel="canonical" href="${fullUrl}">`;
+  html = html.replace(/<\/head>/i, `${canonicalTag}\n</head>`);
+  return html;
+}
+
+// Fallback: If metadata is missing or generic, use the generated one (logic below)
+
+// Extract title from H1 if possible
+let pageTitle = 'MicroJPEG';
+let pageDescription = 'Free online image compression and conversion tool.';
+
+const h1Match = html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
+if (h1Match) {
+  pageTitle = h1Match[1]
+    .replace(/<[^>]*>/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (pageTitle.length > 60) {
+    pageTitle = pageTitle.substring(0, 57) + '...';
+  }
+}
+
+// Generate description based on page type
+if (pageUrl.startsWith('/convert/')) {
+  const conversion = pageUrl.replace('/convert/', '');
+  const [from, to] = conversion.split('-to-');
+  pageDescription = `Convert ${from.toUpperCase()} to ${to.toUpperCase()} online for free. Fast, secure, and high-quality image conversion. No signup required.`;
+  if (!pageTitle.toLowerCase().includes(from.toLowerCase())) {
+    pageTitle = `Convert ${from.toUpperCase()} to ${to.toUpperCase()} Online | Free Converter`;
+  }
+} else if (pageUrl.startsWith('/compress/')) {
+  const format = pageUrl.replace('/compress/', '').split('-')[0];
+  pageDescription = `Compress ${format.toUpperCase()} images online for free. Reduce file size up to 90% without losing quality.`;
+  if (!pageTitle.toLowerCase().includes('compress')) {
+    pageTitle = `Compress ${format.toUpperCase()} Images Online | Free Compressor`;
+  }
+} else if (pageUrl === '/') {
+  pageTitle = 'MicroJPEG - Smart Image Compression & Conversion | Free Online Tool';
+  pageDescription = 'Free online image compression and conversion tool. Compress JPG, PNG, WEBP up to 90% smaller. Convert RAW files (CR2, NEF, ARW) to JPG, PNG, WEBP. No signup required.';
+}
+
+// Remove ALL existing meta tags
+html = html.replace(/<title>([\s\S]*?)<\/title>/gi, '');
+html = html.replace(/<link[^>]*rel=["']canonical["'][^>]*>/gi, '');
+html = html.replace(/<meta[^>]*name=["']description["'][^>]*>/gi, '');
+html = html.replace(/<meta[^>]*name=["']keywords["'][^>]*>/gi, '');
+html = html.replace(/<meta[^>]*property=["']og:[^"']*["'][^>]*>/gi, '');
+html = html.replace(/<meta[^>]*name=["']twitter:[^"']*["'][^>]*>/gi, '');
+
+// Build new meta tags
+const newMetaTags = `
     <title>${pageTitle}</title>
     <link rel="canonical" href="${fullUrl}">
     <meta name="description" content="${pageDescription}">
@@ -185,11 +200,11 @@ function fixHeadSection(html, pageConfig) {
     <meta name="twitter:description" content="${pageDescription}">
     <meta name="twitter:image" content="https://microjpeg.com/og-image.jpg">
 `;
-  
-  // Insert after <head>
-  html = html.replace(/<head>/i, `<head>${newMetaTags}`);
-  
-  return html;
+
+// Insert after <head>
+html = html.replace(/<head>/i, `<head>${newMetaTags}`);
+
+return html;
 }
 
 async function generatePage(browser, pageConfig) {
@@ -211,18 +226,36 @@ async function generatePage(browser, pageConfig) {
 
     // Wait for React
     console.log(`   ⏳ Waiting for React...`);
-    
+
     await page.waitForFunction(
       () => document.querySelector('#root')?.children.length > 0,
       { timeout: 30000 }
-    ).catch(() => {});
+    ).catch(() => { });
 
     await page.waitForSelector('h1', { timeout: 15000 })
       .then(() => console.log('   ✅ H1 found'))
       .catch(() => console.log('   ⚠️ No H1'));
 
     // Wait for content
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Wait for Footer (Critical for Link Mesh)
+    try {
+      await page.waitForSelector('footer', { timeout: 15000 });
+      console.log('   ✅ Footer found');
+    } catch (e) {
+      console.log('   ⚠️ Footer NOT found - page might be incomplete');
+    }
+
+    // Wait for Link Mesh (ensure lots of links > 20)
+    try {
+      await page.waitForFunction(() => document.querySelectorAll('a').length > 20, { timeout: 10000 });
+      const linkCount = await page.evaluate(() => document.querySelectorAll('a').length);
+      console.log(`   ✅ Link mesh found (${linkCount} links)`);
+    } catch (e) {
+      console.log('   ⚠️ Link mesh missing or too small');
+    }
+
+    // Explicit small delay for final hydration
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     let html = await page.content();
 
@@ -277,7 +310,7 @@ async function main() {
     console.log(`\n⚠️ SEO generation requires the live site to be accessible.`);
     console.log(`   Skipping SEO generation - deploy first, then run manually:`);
     console.log(`   node scripts/generate-seo-html.mjs\n`);
-    
+
     // Create a placeholder file
     fs.writeFileSync(
       path.join(OUTPUT_DIR, 'README.txt'),
