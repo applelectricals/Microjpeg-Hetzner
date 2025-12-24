@@ -20,7 +20,7 @@ const BOT_USER_AGENTS = [
   'yandexbot',       // Yandex
   'sogou',           // Sogou
   'exabot',          // Exalead
-  
+
   // SEO Tools - CRITICAL FOR AUDITS
   'ahrefsbot',       // Ahrefs ← THIS WAS MISSING!
   'semrushbot',      // SEMrush
@@ -31,7 +31,7 @@ const BOT_USER_AGENTS = [
   'sitebulb',        // Sitebulb
   'seokicks',        // SEOkicks
   'petalbot',        // Huawei/Petal
-  
+
   // Social Media
   'facebookexternalhit', // Facebook
   'twitterbot',          // Twitter
@@ -41,7 +41,7 @@ const BOT_USER_AGENTS = [
   'slackbot',            // Slack
   'discordbot',          // Discord
   'pinterest',           // Pinterest
-  
+
   // Other
   'applebot',            // Apple
   'ia_archiver',         // Alexa
@@ -54,7 +54,7 @@ const BOT_USER_AGENTS = [
  */
 export function isBot(userAgent: string): boolean {
   if (!userAgent) return false;
-  
+
   const ua = userAgent.toLowerCase();
   return BOT_USER_AGENTS.some(bot => ua.includes(bot.toLowerCase()));
 }
@@ -64,9 +64,9 @@ export function isBot(userAgent: string): boolean {
  */
 function getStaticHTMLPath(route: string): string | null {
   const seoDir = path.join(process.cwd(), 'dist/seo');
-  
-  // Clean the route - remove query strings and trailing slashes
-  const cleanRoute = route.split('?')[0].replace(/\/$/, '') || '/';
+
+  // Clean the route - remove query strings and trailing slashes AND lowercase
+  const cleanRoute = (route.split('?')[0].replace(/\/$/, '') || '/').toLowerCase();
 
   // Map routes to files - COMPLETE LIST
   const routeMap: Record<string, string> = {
@@ -78,26 +78,26 @@ function getStaticHTMLPath(route: string): string | null {
     '/features': 'features.html',
     '/support': 'support.html',
     '/blog': 'blog.html',
-    
+
     // API Docs
     '/api-docs': 'api-docs.html',
-    
+
     // WordPress
     '/wordpress-plugin': 'wordpress-plugin.html',
     '/wordpress-plugin/install': 'wordpress-plugin-install.html',
     '/wordpress-plugin/docs': 'wordpress-plugin-docs.html',
-    
+
     // Legal pages - THESE WERE MISSING!
     '/legal/terms': 'legal-terms.html',
     '/legal/privacy': 'legal-privacy.html',
     '/legal/cookies': 'legal-cookies.html',
     '/legal/cancellation': 'legal-cancellation.html',
     '/legal/payment-protection': 'legal-payment-protection.html',
-    
+
     // AI Tools - THESE WERE MISSING!
     '/remove-background': 'remove-background.html',
     '/enhance-image': 'enhance-image.html',
-    
+
     // Legacy redirects (in case bots hit old URLs)
     '/privacy-policy': 'legal-privacy.html',
     '/terms-of-service': 'legal-terms.html',
@@ -134,20 +134,20 @@ function getStaticHTMLPath(route: string): string | null {
     const compressPath = cleanRoute.replace('/compress/', '');
     const fileName = `compress-${compressPath}.html`;
     const filePath = path.join(seoDir, fileName);
-    
+
     if (fs.existsSync(filePath)) {
       return filePath;
     }
-    
+
     // Try short format: compress-jpg.html
     const format = compressPath.split('-')[0];
     const shortFileName = `compress-${format}.html`;
     const shortFilePath = path.join(seoDir, shortFileName);
-    
+
     if (fs.existsSync(shortFilePath)) {
       return shortFilePath;
     }
-    
+
     return null;
   }
 
@@ -169,13 +169,13 @@ function getStaticHTMLPath(route: string): string | null {
  */
 export function botDetectionMiddleware(req: Request, res: Response, next: NextFunction) {
   // Skip API routes and static assets
-  if (req.path.startsWith('/api') || 
-      req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|map|json|webp|avif)$/i)) {
+  if (req.path.startsWith('/api') ||
+    req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|map|json|webp|avif)$/i)) {
     return next();
   }
-  
+
   const userAgent = req.get('user-agent') || '';
-  
+
   // Check if this is a bot
   if (!isBot(userAgent)) {
     return next();
@@ -188,11 +188,11 @@ export function botDetectionMiddleware(req: Request, res: Response, next: NextFu
 
   if (staticHTMLPath) {
     console.log(`   ✅ Serving: ${path.basename(staticHTMLPath)}`);
-    
+
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.setHeader('X-Rendered-By', 'MicroJPEG-SEO-Static');
     res.setHeader('X-SEO-Bot', 'true');
-    
+
     return res.sendFile(staticHTMLPath);
   } else {
     console.log(`   ⚠️ No static HTML for ${req.path}`);
@@ -206,9 +206,9 @@ export function botDetectionMiddleware(req: Request, res: Response, next: NextFu
 export function seoDebugEndpoint(req: Request, res: Response) {
   const userAgent = req.get('user-agent') || '';
   const isBotRequest = isBot(userAgent);
-  
+
   const seoDir = path.join(process.cwd(), 'dist/seo');
-  const seoFiles = fs.existsSync(seoDir) 
+  const seoFiles = fs.existsSync(seoDir)
     ? fs.readdirSync(seoDir).filter(f => f.endsWith('.html'))
     : [];
 
