@@ -21,7 +21,7 @@ import { db } from "./db";
 import { and, eq, gt, sql } from "drizzle-orm";
 import { compressToTargetSize, generateOptimizationInsights } from "./compressionUtils";
 import { calculateQualityMetrics } from "./qualityAssessment";
-import  paymentRouter  from "./paymentRoutes";
+import paymentRouter from "./paymentRoutes";
 import { r2Service, R2_FOLDERS } from './r2Service';
 import { pageIdentifierMiddleware } from './pageIdentifierMiddleware';
 import { DualUsageTracker } from './services/DualUsageTracker';
@@ -37,12 +37,10 @@ import paypalSubscribe from './routes/paypalSubscribe';
 import paypalCheckout from './routes/paypalCheckout';
 import paypalApprovals from './routes/paypalApprovals';
 import PaymentSuccessPage from './pages/PaymentSuccess';
-import { promises as fs } from 'fs';
-import path from 'path';import instamojoRoutes from './routes/instamojoRoutes';
-import bcrypt from 'bcrypt';
-import crypto from 'crypto';
 import { removeBackground, checkReplicateHealth, getEstimatedCost } from './services/replicateAI';
 import { enhanceImage, getEnhancementCost, calculateOutputDimensions } from './services/imageEnhancer';
+import { enhanceVideo } from './services/videoEnhancer';
+import instamojoRoutes from './routes/instamojoRoutes';
 
 // ============================================================================
 // RATE LIMITING FOR SIGNUP
@@ -113,26 +111,26 @@ const checkConcurrentSessions = async (req: any, res: any, next: any) => {
 
   const userId = req.user.id;
   const userIP = req.ip || req.connection.remoteAddress || 'unknown';
-  
+
   try {
     // Get user's seat count
     const user = await storage.getUser(userId);
     const allowedSeats = user.seats || 1;
-    
+
     // Get or create session set for this user
     if (!activeSessions.has(userId)) {
       activeSessions.set(userId, new Set());
     }
-    
+
     const userSessions = activeSessions.get(userId)!;
-    
+
     // Add current IP to active sessions
     userSessions.add(userIP);
-    
+
     // Check if exceeded seat limit
     if (userSessions.size > allowedSeats) {
       console.log(`⚠️ Concurrent session limit exceeded for user ${userId}: ${userSessions.size}/${allowedSeats} sessions`);
-      
+
       return res.status(429).json({
         success: false,
         error: `Concurrent session limit exceeded. Your plan allows ${allowedSeats} concurrent session${allowedSeats > 1 ? 's' : ''}.`,
@@ -140,14 +138,14 @@ const checkConcurrentSessions = async (req: any, res: any, next: any) => {
         activeSessions: userSessions.size
       });
     }
-    
+
     // Log session info
     console.log(`✅ Session allowed for user ${userId}: ${userSessions.size}/${allowedSeats} active sessions`);
-    
+
     // Store session info in request
     req.user.activeIP = userIP;
     req.user.allowedSeats = allowedSeats;
-    
+
     next();
   } catch (error) {
     console.error('Session check error:', error);
@@ -173,10 +171,10 @@ async function cleanupOldFiles() {
   try {
     const uploadsDir = path.join(process.cwd(), 'uploads');
     const compressedDir = path.join(process.cwd(), 'compressed');
-    
+
     // Clean files older than 1 hour
     const oneHourAgo = Date.now() - (60 * 60 * 1000);
-    
+
     for (const dir of [uploadsDir, compressedDir]) {
       try {
         const files = await fs.readdir(dir);
@@ -207,12 +205,12 @@ const execAsync = promisify(exec);
 // Enhanced format normalization utilities with MIME type detection
 function getNormalizedFormat(filename: string, mimeType?: string): string {
   const ext = filename.toLowerCase().split('.').pop();
-  
+
   // Handle TIFF specifically - browsers often misidentify TIFF MIME types
   if (ext === 'tif' || ext === 'tiff') {
     return 'tiff';
   }
-  
+
   // Handle other formats  
   const formatMap: Record<string, string> = {
     'jpg': 'jpeg',
@@ -233,7 +231,7 @@ function getNormalizedFormat(filename: string, mimeType?: string): string {
     'raf': 'raf',
     'crw': 'crw'
   };
-  
+
   return formatMap[ext || ''] || ext || 'jpeg';
 }
 
@@ -244,17 +242,17 @@ const normalizeFormat = (format: string): string => {
     // JPEG aliases
     'jpg': 'jpeg',
     'jpeg': 'jpeg',
-    
+
     // TIFF aliases  
     'tif': 'tiff',
     'tiff': 'tiff',
-    
+
     // Other formats (no change needed)
     'png': 'png',
     'webp': 'webp',
     'avif': 'avif',
     'svg': 'svg',
-    
+
     // RAW formats (keep as-is for processing)
     'cr2': 'cr2',
     'cr3': 'cr3',
@@ -265,7 +263,7 @@ const normalizeFormat = (format: string): string => {
     'raf': 'raf',
     'crw': 'crw'
   };
-  
+
   return formatMap[normalized] || normalized;
 };
 
@@ -279,7 +277,7 @@ const getFileExtension = (format: string): string => {
     'avif': 'avif',
     'svg': 'svg'
   };
-  
+
   return extensionMap[normalized] || normalized;
 };
 
@@ -293,11 +291,11 @@ function generateBrandedFilename(
 ): string {
   // Extract original name without extension
   const nameWithoutExt = path.parse(originalFilename).name;
-  
+
   // Normalize formats for display
   const formatMap: Record<string, string> = {
     'jpeg': 'jpg',
-    'jpg': 'jpg', 
+    'jpg': 'jpg',
     'png': 'png',
     'webp': 'webp',
     'avif': 'avif',
@@ -305,16 +303,16 @@ function generateBrandedFilename(
     'tif': 'tiff',
     'svg': 'svg'
   };
-  
+
   const displayInputFormat = formatMap[inputFormat.toLowerCase()] || inputFormat.toLowerCase();
   const displayOutputFormat = formatMap[outputFormat.toLowerCase()] || outputFormat.toLowerCase();
-  
+
   // Determine the actual file extension
   const extension = displayOutputFormat === 'jpg' ? 'jpg' : displayOutputFormat;
-  
+
   // Build the branded filename
   let brandedName: string;
-  
+
   if (operation === 'compress' && inputFormat.toLowerCase() === outputFormat.toLowerCase()) {
     // For compression (same format)
     brandedName = `microjpeg_${displayInputFormat}_compressed`;
@@ -322,19 +320,19 @@ function generateBrandedFilename(
     // For conversion (different formats)  
     brandedName = `microjpeg_${displayInputFormat}_to_${displayOutputFormat}`;
   }
-  
+
   // Add original filename (clean it to be filesystem-safe)
   const cleanName = nameWithoutExt.replace(/[^a-zA-Z0-9_-]/g, '_').substring(0, 50);
   brandedName += `_${cleanName}`;
-  
+
   // Add timestamp if requested (useful for batch processing)
   if (includeTimestamp) {
     brandedName += `_${Date.now()}`;
   }
-  
+
   // Add extension
   brandedName += `.${extension}`;
-  
+
   return brandedName;
 }
 
@@ -343,7 +341,7 @@ function getMimeTypeForDownload(format: string): string {
   const mimeTypes: Record<string, string> = {
     'jpeg': 'image/jpeg',
     'jpg': 'image/jpeg',
-    'png': 'image/png', 
+    'png': 'image/png',
     'webp': 'image/webp',
     'avif': 'image/avif',
     'tiff': 'image/tiff',
@@ -364,12 +362,12 @@ function formatFileSize(bytes: number): string {
 
 // Helper function to generate README content for ZIP downloads
 function generateZipReadmeContent(
-  files: Array<{name: string, path: string, originalName?: string}>,
+  files: Array<{ name: string, path: string, originalName?: string }>,
   operation: string = 'compress'
 ): string {
   const timestamp = new Date().toISOString();
   const fileCount = files.length;
-  
+
   let content = `========================================
 MICROJPEG - Image Processing Report
 ========================================
@@ -387,7 +385,7 @@ PROCESSED FILES:
   files.forEach((file, index) => {
     const ext = path.extname(file.name).slice(1).toLowerCase();
     const format = normalizeFormat(ext);
-    
+
     content += `
 ${index + 1}. File: ${file.name}
    Format: ${format.toUpperCase()}
@@ -419,11 +417,11 @@ Support: support@microjpeg.com
 
 // Process a single compression job with advanced settings
 async function processCompressionJob(
-  jobId: string, 
-  originalPath: string, 
-  originalFilename: string, 
-  settings: any, 
-  userId: string | null, 
+  jobId: string,
+  originalPath: string,
+  originalFilename: string,
+  settings: any,
+  userId: string | null,
   sessionId: string,
   userType: string = 'anonymous',
   pageIdentifier: string = 'free-no-auth'
@@ -446,18 +444,18 @@ async function processCompressionJob(
     } else {
       rawOutputFormat = settings.outputFormat;
     }
-    
+
     const normalizedFormat = normalizeFormat(rawOutputFormat);
     const outputExtension = getFileExtension(normalizedFormat);
     // 🔧 CONSISTENCY FIX: Use 'converted' directory for all formats (same as special format conversion)
     const outputPath = path.join("converted", `${jobId}.${outputExtension}`);
-    
+
     // Get quality from settings
     const quality = settings.customQuality || 95;
     const outputFormat = normalizedFormat;
-    
+
     console.log(`🖼️ Processing job ${jobId}: rawFormat=${rawOutputFormat}, normalizedFormat=${normalizedFormat}, outputExtension=${outputExtension}, quality=${quality}, originalFile=${originalFilename}`);
-    
+
     // Use the compression engine with advanced settings - now with normalized format
     const result = await CompressionEngine.compressWithAdvancedSettings(
       originalPath,
@@ -475,39 +473,39 @@ async function processCompressionJob(
         tiffPredictor: settings.tiffPredictor || 'horizontal'
       }
     );
-    
+
     // Get original file size
     const originalStats = await fs.stat(originalPath);
-    const compressionRatio = originalStats.size > 0 
+    const compressionRatio = originalStats.size > 0
       ? Math.round(((originalStats.size - result.finalSize) / originalStats.size) * 100)
       : 0; // Prevent NaN when original size is 0
-    
+
     // 🔧 CRITICAL FIX: Generate thumbnail for ALL formats consistently
     let thumbnailPath: string | undefined;
     try {
       // Ensure previews directory exists in the root
       const previewsDir = path.join(process.cwd(), 'previews');
       await fs.mkdir(previewsDir, { recursive: true });
-      
+
       // Use job ID for consistent naming (same as generateThumbnailFromRaw)
       thumbnailPath = path.join(previewsDir, jobId + '_thumb.jpg');
-      
+
       // Generate thumbnail from the compressed output file for ALL formats
       const thumbnailCommand = `convert "${outputPath}" -resize "256x256>" -quality 60 -strip "${thumbnailPath}"`;
       console.log(`🖼️ Generating thumbnail for ${outputFormat}: ${thumbnailCommand}`);
-      
+
       await execAsync(thumbnailCommand);
       console.log(`✅ Thumbnail generated: ${thumbnailPath}`);
     } catch (thumbnailError) {
       console.warn(`⚠️ Thumbnail generation failed for ${jobId}:`, thumbnailError);
       thumbnailPath = undefined;
     }
-    
+
     // Upload compressed image to R2 CDN
     let r2UploadResult = null;
     try {
       console.log(`📤 Uploading compressed image to R2: ${jobId}.${outputExtension}`);
-      
+
       r2UploadResult = await r2Service.uploadFile(outputPath, `${jobId}.${outputExtension}`, {
         folder: R2_FOLDERS.COMPRESSED,
         contentType: `image/${outputFormat}`,
@@ -524,9 +522,9 @@ async function processCompressionJob(
           processedAt: new Date().toISOString()
         }
       });
-      
+
       console.log(`✅ Successfully uploaded to R2: ${r2UploadResult.cdnUrl}`);
-      
+
       // Clean up local compressed file after successful R2 upload
       try {
         await fs.unlink(outputPath);
@@ -534,12 +532,12 @@ async function processCompressionJob(
       } catch (cleanupError) {
         console.warn(`Failed to clean up compressed file ${outputPath}:`, cleanupError);
       }
-      
+
     } catch (r2Error) {
       console.error(`❌ Failed to upload to R2: ${r2Error instanceof Error ? r2Error.message : 'Unknown error'}`);
       // Continue without R2 upload - use local file as fallback
     }
-    
+
     // Update job with completion data including R2 CDN URLs
     await storage.updateCompressionJob(jobId, {
       status: "completed",
@@ -553,7 +551,7 @@ async function processCompressionJob(
       cdnUrl: r2UploadResult?.cdnUrl,
       completedAt: new Date()
     });
-    
+
     // Record successful operation with DualUsageTracker
     try {
       const dualTracker = new DualUsageTracker(userId, sessionId, userType);
@@ -562,9 +560,9 @@ async function processCompressionJob(
     } catch (recordError) {
       console.error(`❌ Failed to record operation in processCompressionJob:`, recordError);
     }
-    
+
     console.log(`Successfully processed job ${jobId}: ${originalStats.size} → ${result.finalSize} bytes (${compressionRatio}% reduction)`);
-    
+
   } catch (error) {
     console.error(`Failed to process job ${jobId}:`, error);
     await storage.updateCompressionJob(jobId, {
@@ -574,12 +572,12 @@ async function processCompressionJob(
   }
 }
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { 
-  createRazorpayOrder, 
-  verifyRazorpayPayment, 
-  processPayPalPayment, 
-  getSubscriptionStatus, 
-  cancelSubscription 
+import {
+  createRazorpayOrder,
+  verifyRazorpayPayment,
+  processPayPalPayment,
+  getSubscriptionStatus,
+  cancelSubscription
 } from "./payment";
 import { createPaypalOrder, capturePaypalOrder, loadPaypalDefault } from "./paypal";
 import { hashPassword, verifyPassword } from "./auth";
@@ -628,7 +626,7 @@ const upload = multer({
     const user = req.user;
     const planId = user ? 'free' : 'anonymous';
     const fileExtension = file.originalname.split('.').pop()?.toLowerCase() || '';
-    
+
     const formatCheck = checkFormatAccess(planId, fileExtension);
     if (formatCheck.allowed) {
       cb(null, true);
@@ -653,16 +651,16 @@ const specialUpload = multer({
       'image/CR2', // Some browsers use this MIME type for CR2 files
       'image/x-nikon-nef', 'image/x-sony-arw'
     ];
-    
+
     const fileName = file.originalname.toLowerCase();
-    const hasValidExtension = 
+    const hasValidExtension =
       fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') ||
       fileName.endsWith('.tiff') || fileName.endsWith('.tif') || fileName.endsWith('.svg') ||
       fileName.endsWith('.dng') || fileName.endsWith('.cr2') ||
       fileName.endsWith('.nef') || fileName.endsWith('.arw');
-    
+
     console.log(`Special upload: ${file.originalname}, MIME: ${file.mimetype}, Valid extension: ${hasValidExtension}`);
-    
+
     if (specialAllowedTypes.includes(file.mimetype) || hasValidExtension) {
       cb(null, true);
     } else {
@@ -683,7 +681,7 @@ async function ensureDirectories() {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   await ensureDirectories();
-  
+
   app.use('/api', instamojoRoutes);
 
   app.use(seoPreRenderMiddleware);
@@ -720,7 +718,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     next();
   });
-  
+
   // Setup authentication middleware first
   await setupAuth(app);
 
@@ -741,7 +739,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const allTiers = await tierLimitService.getAllTierLimits();
       const freeTier = await tierLimitService.getTierLimits('free');
-      
+
       res.json({
         success: true,
         message: 'Tier system working!',
@@ -761,9 +759,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } : null
       });
     } catch (error: any) {
-      res.status(500).json({ 
+      res.status(500).json({
         success: false,
-        error: error.message 
+        error: error.message
       });
     }
   });
@@ -773,7 +771,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { r2Service } = await import('./r2Service');
       const healthStatus = await r2Service.healthCheck();
-      
+
       if (healthStatus.status === 'healthy') {
         res.json({
           status: 'healthy',
@@ -799,7 +797,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { getQueueServiceStatus } = await import('./queueService');
       const status = await getQueueServiceStatus();
-      
+
       if (status.redis && Object.values(status.queues).every(Boolean)) {
         res.json({
           status: 'healthy',
@@ -829,7 +827,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { cachedStorage } = await import('./cachedStorage');
       const cacheStats = await cachedStorage.getCacheStats();
-      
+
       res.json({
         status: 'healthy',
         cache: cacheStats
@@ -848,9 +846,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { userId } = req.params;
       const { cachedStorage } = await import('./cachedStorage');
-      
+
       await cachedStorage.clearUserCache(userId);
-      
+
       res.json({
         success: true,
         message: `Cache cleared for user ${userId}`
@@ -867,7 +865,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { cachedStorage } = await import('./cachedStorage');
       await cachedStorage.clearAllCache();
-      
+
       res.json({
         success: true,
         message: 'All cache cleared'
@@ -885,16 +883,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { jobId } = req.params;
       const { getJobStatus } = await import('./queueService');
-      
+
       const jobStatus = await getJobStatus(jobId);
-      
+
       if (!jobStatus) {
         return res.status(404).json({
           error: 'Job not found',
           jobId
         });
       }
-      
+
       res.json({
         success: true,
         job: jobStatus
@@ -913,15 +911,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { jobType, jobData, options = {} } = req.body;
       const { addJobToQueue } = await import('./queueService');
-      
+
       if (!jobType || !jobData) {
         return res.status(400).json({
           error: 'Missing required fields: jobType, jobData'
         });
       }
-      
+
       const job = await addJobToQueue(jobType, jobData, 'standard', options);
-      
+
       res.json({
         success: true,
         jobId: job.id,
@@ -1136,7 +1134,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         // Cleanup original upload
-        await fs.unlink(file.path).catch(() => {});
+        await fs.unlink(file.path).catch(() => { });
 
       } catch (error: any) {
         console.error('❌ Background removal error:', error);
@@ -1205,7 +1203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 };
               } finally {
                 // Cleanup
-                await fs.unlink(file.path).catch(() => {});
+                await fs.unlink(file.path).catch(() => { });
               }
             })
           );
@@ -1406,10 +1404,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
 
         // Cleanup original upload
-        await fs.unlink(file.path).catch(() => {});
+        await fs.unlink(file.path).catch(() => { });
 
       } catch (error: any) {
         console.error('❌ Image enhancement error:', error);
+        res.status(500).json({ error: error.message || 'Processing failed' });
+      }
+    }
+  );
+
+  // AI Video Enhancement endpoint
+  app.post('/api/enhance-video',
+    upload.single('file'),
+    async (req, res) => {
+      console.log('=== AI VIDEO ENHANCEMENT REQUEST ===');
+      const startTime = Date.now();
+
+      try {
+        const file = req.file;
+        if (!file) {
+          return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        // Get user tier and check limits
+        const { userId, sessionId, tierName, email, firstName } = await getUserTierInfo(req);
+        const limits = await tierLimitService.canUseEnhancement(userId, sessionId, tierName);
+        const tierLimits = await tierLimitService.getTierLimits(tierName);
+
+        if (!limits.allowed) {
+          return res.status(429).json({
+            error: 'limit_reached',
+            message: `You've used all ${limits.limit} AI enhancements this month.`,
+            showUpgradePrompt: true,
+          });
+        }
+
+        // Process video
+        const requestedScale = parseInt(req.body.scale) || 2;
+        const faceEnhance = req.body.faceEnhance === 'true';
+
+        const result = await enhanceVideo(file.path, 'converted', {
+          upscale: requestedScale as 2 | 4,
+          faceEnhance,
+        });
+
+        if (!result.success) {
+          return res.status(500).json({ error: result.error });
+        }
+
+        // Increment usage
+        await tierLimitService.incrementEnhanceUsage(userId, sessionId);
+
+        const newRemaining = limits.remaining - 1;
+        const jobId = path.basename(result.outputPath!, path.extname(result.outputPath!));
+        const processingTime = Date.now() - startTime;
+
+        res.json({
+          success: true,
+          result: {
+            id: jobId,
+            originalName: file.originalname,
+            originalSize: result.originalSize,
+            processedSize: result.processedSize,
+            format: result.format,
+            processingTime,
+            downloadUrl: `/api/download/${jobId}`,
+          },
+          usage: {
+            used: limits.limit - newRemaining,
+            remaining: newRemaining,
+            limit: limits.limit,
+          }
+        });
+
+        // Cleanup original
+        await fs.unlink(file.path).catch(() => { });
+
+      } catch (error: any) {
+        console.error('❌ Video enhancement error:', error);
         res.status(500).json({ error: error.message || 'Processing failed' });
       }
     }
@@ -1492,7 +1564,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               error: err.message,
             });
           } finally {
-            await fs.unlink(file.path).catch(() => {});
+            await fs.unlink(file.path).catch(() => { });
           }
         }
 
@@ -1600,21 +1672,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register API v1 routes
   app.use('/api/v1', apiRouter);
-  
+
   // Register API management routes (for web interface)
   app.use('/api', apiManagementRouter);
-  
-  
+
+
   // Register payment routes (Razorpay + PayPal)
   app.use('/api/payment', paymentRouter);
-  
+
   // Register subscription routes
   app.use('/api/subscriptions', subscriptionRoutes);
   app.use('/api/paypal', paypalWebhook);
   app.use('/api/paypal', paypalSubscribe);
   app.use('/api/paypal', paypalCheckout);
   app.use('/api/paypal', paypalApprovals);
-  
+
   // PayPal config endpoint
   app.get('/api/paypal/config', (req, res) => {
     res.json({
@@ -1622,13 +1694,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       mode: process.env.PAYPAL_MODE || 'live'
     });
   });
-  
+
   // Register new subscription routes - DISABLED: Using legacy endpoint instead to avoid PayPal product creation errors
   // registerNewSubscriptionRoutes(app);
-  
+
   // Register webhook routes (must be before body parsing middleware)
   app.use('/webhooks', express.raw({ type: 'application/json' }), webhookRouter);
-  
+
   // Register API documentation
   app.use('/api/v1', apiDocsRouter);
 
@@ -1637,20 +1709,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/preview/:id', (req, res) => {
     try {
       const { id } = req.params;
-      
+
       // Sanitize the ID to prevent path traversal
       if (!id.match(/^[a-zA-Z0-9_-]+$/)) {
         return res.status(400).json({ error: "Invalid preview ID" });
       }
-      
+
       const previewPath = path.join(process.cwd(), 'previews', id + '_thumb.jpg');
-      
+
       // Check if preview file exists
       fs.access(previewPath)
         .then(() => {
           res.setHeader('Content-Type', 'image/jpeg');
           res.setHeader('Cache-Control', 'public, max-age=86400'); // 24 hours cache
-          
+
           const fileStream = createReadStream(previewPath);
           fileStream.pipe(res);
         })
@@ -1681,19 +1753,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/download/:id', (req, res) => {
     try {
       const { id } = req.params;
-      
+
       // Sanitize the ID to prevent path traversal
       if (!id.match(/^[a-zA-Z0-9_-]+$/)) {
         return res.status(400).json({ error: "Invalid download ID" });
       }
-      
+
       const findAndServeFile = async () => {
         // First, try to get the job from database to know the correct output format
         try {
           const job = await storage.getCompressionJob(id);
           if (job && job.outputFormat) {
             console.log(`🔽 Download request for job ${id}: expected format=${job.outputFormat}`);
-            
+
             // Get the correct extension for the output format
             const getExtension = (format: string) => {
               switch (format.toLowerCase()) {
@@ -1706,20 +1778,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 default: return format.toLowerCase();
               }
             };
-            
+
             const correctExt = getExtension(job.outputFormat);
-            
+
             // Try the correct format first in both directories
             const directories = ['converted', 'compressed'];
-            
+
             for (const dir of directories) {
               const filePath = path.join(process.cwd(), dir, `${id}.${correctExt}`);
               try {
                 await fs.access(filePath);
-                
+
                 // Determine content type using our helper
                 const contentType = getMimeTypeForDownload(correctExt);
-                
+
                 // Generate branded filename
                 const inputFormat = job.inputFormat || path.extname(job.originalFilename || '').slice(1) || 'jpg';
                 const outputFormat = job.outputFormat;
@@ -1730,14 +1802,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   outputFormat,
                   operation
                 );
-                
+
                 const stats = await fs.stat(filePath);
-                
+
                 res.setHeader('Content-Type', contentType);
                 res.setHeader('Content-Length', stats.size);
                 res.setHeader('Content-Disposition', `attachment; filename="${brandedFilename}"`);
                 res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour cache
-                
+
                 console.log(`✅ Serving correct format: ${filePath} (${contentType})`);
                 const fileStream = createReadStream(filePath);
                 return fileStream.pipe(res);
@@ -1750,19 +1822,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } catch (dbError) {
           console.log(`⚠️ Could not get job from database: ${dbError}, falling back to file extension search`);
         }
-        
+
         // Fallback: try all possible extensions (but prioritize non-jpg formats to avoid serving previews)
         const possibleExtensions = ['tiff', 'png', 'webp', 'avif', 'svg', 'jpg', 'jpeg'];
-        
+
         // First try converted directory for special formats
         for (const ext of possibleExtensions) {
           const convertedPath = path.join(process.cwd(), 'converted', `${id}.${ext}`);
           try {
             await fs.access(convertedPath);
-            
+
             // Determine content type using helper
             const contentType = getMimeTypeForDownload(ext);
-            
+
             // Generate simple branded filename (conversion assumed since in converted directory)
             const brandedFilename = generateBrandedFilename(
               `download_${id}`,
@@ -1770,14 +1842,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ext,
               'convert' // Assume conversion since it's in converted directory
             );
-            
+
             const stats = await fs.stat(convertedPath);
-            
+
             res.setHeader('Content-Type', contentType);
             res.setHeader('Content-Length', stats.size);
             res.setHeader('Content-Disposition', `attachment; filename="${brandedFilename}"`);
             res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour cache
-            
+
             console.log(`📁 Serving from converted: ${convertedPath} (${contentType})`);
             const fileStream = createReadStream(convertedPath);
             return fileStream.pipe(res);
@@ -1786,16 +1858,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             continue;
           }
         }
-        
+
         // If not found in converted, try compressed directory (regular compression)
         for (const ext of possibleExtensions) {
           const compressedPath = path.join(process.cwd(), 'compressed', `${id}.${ext}`);
           try {
             await fs.access(compressedPath);
-            
+
             // Determine content type using helper
             const contentType = getMimeTypeForDownload(ext);
-            
+
             // Generate simple branded filename (compression assumed since in compressed directory)
             const brandedFilename = generateBrandedFilename(
               `download_${id}`,
@@ -1803,14 +1875,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
               ext,
               'compress' // Assume compression since it's in compressed directory
             );
-            
+
             const stats = await fs.stat(compressedPath);
-            
+
             res.setHeader('Content-Type', contentType);
             res.setHeader('Content-Length', stats.size);
             res.setHeader('Content-Disposition', `attachment; filename="${brandedFilename}"`);
             res.setHeader('Cache-Control', 'public, max-age=3600'); // 1 hour cache
-            
+
             console.log(`📁 Serving from compressed: ${compressedPath} (${contentType})`);
             const fileStream = createReadStream(compressedPath);
             return fileStream.pipe(res);
@@ -1819,16 +1891,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             continue;
           }
         }
-        
+
         // File not found in either location
         res.status(404).json({ error: "Download file not found" });
       };
-      
+
       findAndServeFile().catch(error => {
         console.error("Error serving download:", error);
         res.status(500).json({ error: "Failed to serve download" });
       });
-      
+
     } catch (error) {
       console.error("Error processing download:", error);
       res.status(500).json({ error: "Failed to process download" });
@@ -1848,31 +1920,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
       const user = isUserAuthenticated ? req.user : null;
       // Parse settings to get sessionId
-let sessionId = req.sessionID; // Default to server session
-try {
-  const settings = typeof req.body.settings === 'string' 
-    ? JSON.parse(req.body.settings) 
-    : req.body.settings;
-  
-  if (settings?.sessionId) {
-    sessionId = settings.sessionId;
-    console.log(`🔧 Using client sessionId from settings: ${sessionId}`);
-  } else {
-    console.log(`🔧 Using server sessionId (no client session provided): ${sessionId}`);
-  }
-} catch (e) {
-  console.log(`🔧 Using server sessionId (settings parse failed): ${sessionId}`);
-}
+      let sessionId = req.sessionID; // Default to server session
+      try {
+        const settings = typeof req.body.settings === 'string'
+          ? JSON.parse(req.body.settings)
+          : req.body.settings;
+
+        if (settings?.sessionId) {
+          sessionId = settings.sessionId;
+          console.log(`🔧 Using client sessionId from settings: ${sessionId}`);
+        } else {
+          console.log(`🔧 Using server sessionId (no client session provided): ${sessionId}`);
+        }
+      } catch (e) {
+        console.log(`🔧 Using server sessionId (settings parse failed): ${sessionId}`);
+      }
       const userId = (user as any)?.claims?.sub || null;
-      
+
       // Get user tier configuration
       const userPlan = getUserPlan(user);
-      
-      
+
+
       // Check batch limits (max 20 files for all users)
       if (files.length > 20) {
-        return res.status(400).json({ 
-          error: "Batch size limit exceeded", 
+        return res.status(400).json({
+          error: "Batch size limit exceeded",
           message: "Maximum 20 files per batch",
 
         });
@@ -1886,10 +1958,10 @@ try {
         try {
           const jobId = randomUUID();
           const originalPath = file.path; // Multer stores the file
-          
+
           // Get original format from file extension
           const originalFormat = file.originalname.split('.').pop()?.toLowerCase() || 'unknown';
-          
+
           // Create job entry for uploaded file (not compressed yet)
           const job = await storage.createCompressionJob({
             userId,
@@ -1907,17 +1979,17 @@ try {
             originalSize: file.size,
             status: 'uploaded'
           });
-          
+
           console.log(`Created upload job ${job.id} for file ${file.originalname}`);
         } catch (error) {
           console.error(`Failed to create upload job for ${file.originalname}:`, error);
-          return res.status(500).json({ 
-            error: `Failed to upload ${file.originalname}: ${error instanceof Error ? error.message : 'Unknown error'}` 
+          return res.status(500).json({
+            error: `Failed to upload ${file.originalname}: ${error instanceof Error ? error.message : 'Unknown error'}`
           });
         }
       }
 
-      res.json({ 
+      res.json({
         results,
         message: `Successfully uploaded ${files.length} file${files.length > 1 ? 's' : ''}. Use advanced settings to process them.`
       });
@@ -1936,77 +2008,77 @@ try {
     const timeoutMs = planLimits.limits.processingTimeout * 1000;
     req.setTimeout(timeoutMs);
     res.setTimeout(timeoutMs);
-    
+
     try {
       const { jobIds, settings } = req.body;
-      
+
       if (!jobIds || !Array.isArray(jobIds) || jobIds.length === 0) {
         return res.status(400).json({ error: "No job IDs provided" });
       }
-      
+
       console.log('Compression settings received:', settings);
-      
+
       const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
       const user = isUserAuthenticated ? req.user : null;
       const sessionId = req.sessionID;
       const userId = (user as any)?.claims?.sub || null;
-      
+
       // Determine userType for DualUsageTracker
       let userType = 'anonymous';
       if (user) {
         const userData = await storage.getUser((user as any)?.claims?.sub);
         userType = userData?.subscriptionTier || 'free';
       }
-      
+
       // Use generic processing page identifier
       const pageIdentifier = 'advanced-process';
-      
+
       // Get jobs to process
       const jobs = await storage.getJobsByIds(jobIds);
-      
+
       if (jobs.length === 0) {
         return res.status(404).json({ error: "No valid jobs found to process" });
       }
-      
-      // Usage limits are now checked by DualUsageTracker earlier in the request
-    // (Removed old UsageTracker.checkLimit call to avoid conflicts)
 
-const results = [];
-      
+      // Usage limits are now checked by DualUsageTracker earlier in the request
+      // (Removed old UsageTracker.checkLimit call to avoid conflicts)
+
+      const results = [];
+
       for (const job of jobs) {
         try {
           // Update job status to processing
-          await storage.updateCompressionJob(job.id, { 
+          await storage.updateCompressionJob(job.id, {
             status: 'processing',
-            compressionSettings: settings 
+            compressionSettings: settings
           });
-          
+
           // Start async compression and wait for it to complete
           await processCompressionJob(job.id, job.originalPath, job.originalFilename, settings, userId, sessionId, userType, pageIdentifier);
-          
+
           // Get the updated job status after compression
           const updatedJob = await storage.getCompressionJob(job.id);
-          
+
           results.push({
             id: job.id,
             status: updatedJob?.status || 'completed',
             originalName: job.originalFilename
           });
-          
+
         } catch (error) {
           console.error(`Failed to start processing job ${job.id}:`, error);
-          await storage.updateCompressionJob(job.id, { 
+          await storage.updateCompressionJob(job.id, {
             status: 'failed',
             errorMessage: `Processing failed: ${error.message}`
           });
         }
       }
-      
-      res.json({ 
+
+      res.json({
         results,
         message: `Started processing ${results.length} file${results.length > 1 ? 's' : ''}`
       });
-      
+
     } catch (error) {
       console.error("Process error:", error);
       res.status(500).json({ error: "Failed to process files" });
@@ -2014,72 +2086,72 @@ const results = [];
   });
 
 
-// Compression endpoint for both guest and authenticated users  
-app.post("/api/compress", checkConcurrentSessions, upload.array('files', 20), requireScopeFromAuth, async (req, res) => {
-  console.log('=== COMPRESS REQUEST STARTED ===');
-  console.log('Timestamp:', new Date().toISOString());
-  console.log('User:', req.user?.email || 'anonymous');
-  console.log('Files count:', req.files?.length);
-  console.log('Files sizes:', req.files?.map(f => `${f.originalname}: ${f.size} bytes`));
-  try {
-    const files = req.files as Express.Multer.File[];
-    if (!files || files.length === 0) {
-      return res.status(400).json({ error: "No files uploaded" });
-    }
-
-    // 🔍 DEBUG LOGS - Add these lines right after file validation
-    console.log('🔍 DEBUG - req.body.settings type:', typeof req.body.settings);
-    console.log('🔍 DEBUG - req.body.settings value:', req.body.settings);
-    
-    if (req.body.settings) {
-      try {
-        const parsed = typeof req.body.settings === 'string' 
-          ? JSON.parse(req.body.settings) 
-          : req.body.settings;
-        console.log('🔍 DEBUG - Parsed settings:', parsed);
-        console.log('🔍 DEBUG - SessionId in settings:', parsed.sessionId);
-      } catch (e) {
-        console.log('🔍 DEBUG - Failed to parse settings:', e);
+  // Compression endpoint for both guest and authenticated users  
+  app.post("/api/compress", checkConcurrentSessions, upload.array('files', 20), requireScopeFromAuth, async (req, res) => {
+    console.log('=== COMPRESS REQUEST STARTED ===');
+    console.log('Timestamp:', new Date().toISOString());
+    console.log('User:', req.user?.email || 'anonymous');
+    console.log('Files count:', req.files?.length);
+    console.log('Files sizes:', req.files?.map(f => `${f.originalname}: ${f.size} bytes`));
+    try {
+      const files = req.files as Express.Multer.File[];
+      if (!files || files.length === 0) {
+        return res.status(400).json({ error: "No files uploaded" });
       }
-    } else {
-      console.log('🔍 DEBUG - No settings found in request body');
-    }
-    // 🔍 END DEBUG LOGS
 
-    // Check if user is authenticated
-    console.log('Authentication check:', {
-      hasIsAuthenticated: !!req.isAuthenticated,
-      isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
-      hasUser: !!req.user,
-      sessionID: req.sessionID,
-      session: req.session
-    });
-      
+      // 🔍 DEBUG LOGS - Add these lines right after file validation
+      console.log('🔍 DEBUG - req.body.settings type:', typeof req.body.settings);
+      console.log('🔍 DEBUG - req.body.settings value:', req.body.settings);
+
+      if (req.body.settings) {
+        try {
+          const parsed = typeof req.body.settings === 'string'
+            ? JSON.parse(req.body.settings)
+            : req.body.settings;
+          console.log('🔍 DEBUG - Parsed settings:', parsed);
+          console.log('🔍 DEBUG - SessionId in settings:', parsed.sessionId);
+        } catch (e) {
+          console.log('🔍 DEBUG - Failed to parse settings:', e);
+        }
+      } else {
+        console.log('🔍 DEBUG - No settings found in request body');
+      }
+      // 🔍 END DEBUG LOGS
+
+      // Check if user is authenticated
+      console.log('Authentication check:', {
+        hasIsAuthenticated: !!req.isAuthenticated,
+        isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+        hasUser: !!req.user,
+        sessionID: req.sessionID,
+        session: req.session
+      });
+
       const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
       let user = isUserAuthenticated ? req.user : null;
-      
+
       // Fallback: If Passport auth failed but session has userId, use that
       if (!user && req.session && req.session.userId) {
         console.log('Using session userId as fallback:', req.session.userId);
         try {
           user = await storage.getUser(req.session.userId);
-          console.log('Fetched user data from session fallback:', { 
-            id: user?.id, 
-            isPremium: user?.isPremium, 
-            subscriptionStatus: user?.subscriptionStatus 
+          console.log('Fetched user data from session fallback:', {
+            id: user?.id,
+            isPremium: user?.isPremium,
+            subscriptionStatus: user?.subscriptionStatus
           });
         } catch (error) {
           console.log('Error fetching user from session fallback:', error.message);
         }
       }
-      
+
       // If user is authenticated, ensure we have complete user data with subscription info
       if (user && user.id) {
         console.log('User authenticated, ensuring complete data for ID:', user.id);
       } else {
         console.log('No authenticated user found');
       }
-      
+
       // ✅ COMPREHENSIVE PAGE-SPECIFIC RULES VALIDATION
       // Extract page-aware settings for complete validation
       let pageIdentifier = 'free-no-auth'; // Default fallback
@@ -2092,7 +2164,7 @@ app.post("/api/compress", checkConcurrentSessions, upload.array('files', 20), re
         compressionAlgorithm: 'standard',
         webOptimization: 'optimize-web'
       };
-      
+
       // Parse settings to extract pageIdentifier and sessionId
       if (req.body.settings) {
         try {
@@ -2104,10 +2176,10 @@ app.post("/api/compress", checkConcurrentSessions, upload.array('files', 20), re
           console.error('Failed to parse settings:', error);
         }
       }
-      
+
       // ✅ Import and validate page rules
       const { getPageLimits, isValidPageIdentifier, validateFileSize, validateFileFormat, ALLOWED_PAGE_IDENTIFIERS } = await import('./pageRules');
-      
+
       // ✅ CRITICAL: Validate pageIdentifier against allowed values
       if (!isValidPageIdentifier(pageIdentifier)) {
         return res.status(400).json({
@@ -2120,10 +2192,10 @@ app.post("/api/compress", checkConcurrentSessions, upload.array('files', 20), re
       // ============================================================================
       // ADD THIS ENTIRE SECTION HERE (AFTER LINE 1295)
       // ============================================================================
-      
+
       // Determine userType from pageIdentifier for usage tracking
       let userType = 'anonymous';
-      
+
       if (user && user.id) {
         // Authenticated user - get subscription tier from database
         try {
@@ -2137,11 +2209,11 @@ app.post("/api/compress", checkConcurrentSessions, upload.array('files', 20), re
       } else {
         // Not authenticated - infer from pageIdentifier
         console.log('🔍 Not authenticated, inferring userType from pageIdentifier:', pageIdentifier);
-        
-        if (pageIdentifier === 'premium-29' || 
-            pageIdentifier.includes('premium') || 
-            pageIdentifier.includes('starter') ||
-            pageIdentifier === 'paid') {
+
+        if (pageIdentifier === 'premium-29' ||
+          pageIdentifier.includes('premium') ||
+          pageIdentifier.includes('starter') ||
+          pageIdentifier === 'paid') {
           userType = 'premium';
           console.log('✅ SET userType = PREMIUM (75MB limit)');
         } else if (pageIdentifier.includes('pro')) {
@@ -2154,33 +2226,33 @@ app.post("/api/compress", checkConcurrentSessions, upload.array('files', 20), re
           console.log('⚠️ Free/anonymous page, userType = anonymous');
         }
       }
-      
+
       console.log('🎯 FINAL userType:', userType, '| pageIdentifier:', pageIdentifier);
-      
+
       // Get client IP for tracking
-      const clientIP = req.headers['x-forwarded-for']?.toString().split(',')[0].trim() || 
-                       req.headers['x-real-ip']?.toString() || 
-                       req.socket.remoteAddress || 
-                       'unknown';
-      
+      const clientIP = req.headers['x-forwarded-for']?.toString().split(',')[0].trim() ||
+        req.headers['x-real-ip']?.toString() ||
+        req.socket.remoteAddress ||
+        'unknown';
+
       const trackingId = user?.id || `ip_${clientIP}`;
       const finalSessionId = sessionId || req.sessionID;
-      
+
       // Create DualUsageTracker with correct userType
       const dualTracker = new DualUsageTracker(trackingId, finalSessionId, userType, {
         ipAddress: clientIP
       });
-      
+
       // Check limits for each file BEFORE processing
       for (const file of files) {
         console.log(`📁 Checking: ${file.originalname} (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
-        
+
         const canPerform = await dualTracker.canPerformOperation(
           file.originalname,
           file.size,
           pageIdentifier
         );
-        
+
         if (!canPerform.allowed) {
           console.log('❌ LIMIT EXCEEDED:', canPerform.reason);
           return res.status(429).json({
@@ -2193,23 +2265,23 @@ app.post("/api/compress", checkConcurrentSessions, upload.array('files', 20), re
             upgradeRequired: canPerform.upgradeRequired
           });
         }
-        
+
         console.log('✅ File passed limit check');
       }
-      
+
       console.log('✅ All files passed checks, proceeding with compression\n');
-      
+
       // ============================================================================
       // END OF NEW CODE - Continue with existing compression logic below
       // ============================================================================
 
       // Check page-specific usage limits BEFORE processing
-      
 
-    
+
+
 
       // ✅ Check usage limits using DualUsageTracker (single source of truth)
-      
+
 
       // First check if user is authenticated
       if (user) {
@@ -2240,40 +2312,40 @@ app.post("/api/compress", checkConcurrentSessions, upload.array('files', 20), re
 
       console.log('🎯 FINAL userType:', userType);
       console.log('🎯 pageIdentifier:', pageIdentifier);
-      
+
       // Get client IP address for anonymous user tracking
-      
-                       req.headers['x-real-ip']?.toString() || 
-                       req.socket.remoteAddress || 
-                       'unknown';
-      
-      
+
+      req.headers['x-real-ip']?.toString() ||
+        req.socket.remoteAddress ||
+        'unknown';
+
+
       // Check limits for each file
-for (const file of files) {
-  console.log('=== DUAL TRACKER CHECK ===');
-  console.log('File:', file.originalname);
-  console.log('Size:', file.size, 'bytes (', (file.size / 1024 / 1024).toFixed(2), 'MB)');
-  console.log('Page:', pageIdentifier);
-  
-  const canPerform = await dualTracker.canPerformOperation(file.originalname, file.size, pageIdentifier);
-  
-  console.log('Check result:', canPerform);
-  console.log('Allowed:', canPerform.allowed);
-  console.log('Reason:', canPerform.reason);
-  console.log('Usage:', canPerform.usage);
-  console.log('Limits:', canPerform.limits);
-  console.log('========================');
-  
-  if (!canPerform.allowed) {
-    return res.status(429).json({
-      error: 'Usage limit exceeded',
-      message: canPerform.reason,
-      pageIdentifier,
-      usage: canPerform.usage,
-      limits: canPerform.limits
-    });
-  }
-}
+      for (const file of files) {
+        console.log('=== DUAL TRACKER CHECK ===');
+        console.log('File:', file.originalname);
+        console.log('Size:', file.size, 'bytes (', (file.size / 1024 / 1024).toFixed(2), 'MB)');
+        console.log('Page:', pageIdentifier);
+
+        const canPerform = await dualTracker.canPerformOperation(file.originalname, file.size, pageIdentifier);
+
+        console.log('Check result:', canPerform);
+        console.log('Allowed:', canPerform.allowed);
+        console.log('Reason:', canPerform.reason);
+        console.log('Usage:', canPerform.usage);
+        console.log('Limits:', canPerform.limits);
+        console.log('========================');
+
+        if (!canPerform.allowed) {
+          return res.status(429).json({
+            error: 'Usage limit exceeded',
+            message: canPerform.reason,
+            pageIdentifier,
+            usage: canPerform.usage,
+            limits: canPerform.limits
+          });
+        }
+      }
 
       console.log(`✅ DualUsageTracker check passed for ${pageIdentifier}: ${files.length} operations allowed`);
 
@@ -2285,23 +2357,23 @@ for (const file of files) {
 
       const results = [];
       const jobs = [];
-      
+
       console.log("Compression settings received:", settings);
       console.log("Files to process:", files.map(f => ({ name: f.originalname, ext: f.originalname.split('.').pop() })));
       console.log("=== PROCESSING FILES WITH SHARP + IMAGEMAGICK ===");
-      
+
       // Create database jobs for each file and format combination
       for (const file of files) {
         // Handle multiple output formats
         const fileExtension = file.originalname.split('.').pop()?.toLowerCase() || 'jpg';
         console.log(`File: ${file.originalname}, extension: ${fileExtension}, settings.outputFormat: ${settings.outputFormat}`);
-        
-        let outputFormats = Array.isArray(settings.outputFormat) 
-          ? settings.outputFormat 
-          : settings.outputFormat === 'keep-original' 
-            ? [fileExtension] 
+
+        let outputFormats = Array.isArray(settings.outputFormat)
+          ? settings.outputFormat
+          : settings.outputFormat === 'keep-original'
+            ? [fileExtension]
             : [settings.outputFormat];
-            
+
         console.log(`Determined outputFormats: [${outputFormats.join(', ')}]`);
 
         // Create a separate job for each format
@@ -2324,18 +2396,18 @@ for (const file of files) {
             errorMessage: null,
             compressedPath: null,
           });
-          
+
           console.log(`Created job ${job.id} for user ${user?.id || 'guest'}`);
           jobs.push({ job, file, outputFormat });
         }
       }
-      
+
       // Process jobs and update them
       for (const { job, file, outputFormat } of jobs) {
         try {
           // PNG conversion is now enabled for all users including free users
           // Leveraging our optimized compression engine for fast processing
-          
+
           // Map format names to proper file extensions
           const getFileExtension = (format: string) => {
             switch (format) {
@@ -2355,18 +2427,18 @@ for (const file of files) {
               default: return format;
             }
           };
-          
+
           const fileExtension = getFileExtension(outputFormat);
           const outputPath = path.join("compressed", `${job.id}.${fileExtension}`);
-          
+
           console.log(`Processing ${file.originalname} -> ${outputFormat.toUpperCase()} (parallel)`);
-          
+
           // Check if this is a RAW file that needs special processing
           const inputFormat = getFileFormat(file.originalname);
           const fileExtName = file.originalname.split('.').pop()?.toLowerCase() || '';
           const isRawFile = ['dng', 'cr2', 'nef', 'arw', 'orf', 'raf', 'rw2'].includes(fileExtName);
           console.log(`File: ${file.originalname}, inputFormat: ${inputFormat}, fileExt: ${fileExtName}, isRawFile: ${isRawFile}`);
-          
+
           let result;
           if (isRawFile || inputFormat === 'svg' || (inputFormat === 'svg' && outputFormat === 'tiff')) {
             // Use the EXACT same engine as /professional-formats/convert for RAW files and SVG conversions
@@ -2376,8 +2448,8 @@ for (const file of files) {
               // Calculate resize dimensions if needed  
               // Handle both premium page format (resizeOption) and CR2 page format (direct resize parameter)
               const shouldResize = (settings.resizeOption === 'resize-percentage' && settings.resizePercentage && settings.resizePercentage < 100) ||
-                                   (settings.resize && settings.resizePercentage && settings.resizePercentage < 100);
-              
+                (settings.resize && settings.resizePercentage && settings.resizePercentage < 100);
+
               result = await processSpecialFormatConversion(
                 file.path,
                 outputPath,
@@ -2400,7 +2472,7 @@ for (const file of files) {
           } else {
             // Use Sharp for standard image formats (JPEG, PNG, WEBP, etc.) - much faster
             let sharpOperation = sharp(file.path);
-            
+
             // Apply resize if specified
             if (settings.resizeOption === 'resize-percentage' && settings.resizePercentage && settings.resizePercentage < 100) {
               const metadata = await sharpOperation.metadata();
@@ -2415,63 +2487,63 @@ for (const file of files) {
                 });
               }
             }
-            
+
             // CRITICAL FIX: Handle TIFF compression properly with LZW
             const formatOptions: any = {
-                quality: settings.quality,
-                ...(outputFormat === 'png' && { compressionLevel: 8 }),
-                ...(outputFormat === 'webp' && { effort: 4 }),
-                ...(outputFormat === 'avif' && { effort: 2 }), // Faster AVIF processing
-                ...(outputFormat === 'tiff' && { 
-                  compression: 'lzw', // LZW compression for TIFF
-                  predictor: 'horizontal', // Better compression for photos
-                  quality: settings.quality // Quality setting for TIFF
-                })
-              };
-            
+              quality: settings.quality,
+              ...(outputFormat === 'png' && { compressionLevel: 8 }),
+              ...(outputFormat === 'webp' && { effort: 4 }),
+              ...(outputFormat === 'avif' && { effort: 2 }), // Faster AVIF processing
+              ...(outputFormat === 'tiff' && {
+                compression: 'lzw', // LZW compression for TIFF
+                predictor: 'horizontal', // Better compression for photos
+                quality: settings.quality // Quality setting for TIFF
+              })
+            };
+
             console.log(`🖼️ Sharp compression: ${file.originalname} -> ${outputFormat} with options:`, formatOptions);
             sharpOperation = sharpOperation.toFormat(outputFormat as keyof sharp.FormatEnum, formatOptions)
               .toFile(outputPath);
-            
+
             // Apply 30-second timeout
             await Promise.race([
               sharpOperation,
-              new Promise((_, reject) => 
+              new Promise((_, reject) =>
                 setTimeout(() => reject(new Error(`Processing timeout after 30 seconds for ${outputFormat}`)), 30000)
               )
             ]);
-            
+
             const stats = await fs.stat(outputPath);
             result = { success: true, outputSize: stats.size };
           }
-          
+
           // Get file stats - enhanced validation for RAW files
           const originalStats = await fs.stat(file.path);
-          
+
           // Check if output file was actually created and has reasonable size
           const outputExists = await fs.access(outputPath).then(() => true).catch(() => false);
           if (!outputExists) {
             throw new Error(`Output file was not created: ${outputPath}`);
           }
-          
+
           const compressedStats = await fs.stat(outputPath);
-          
+
           // CRITICAL: Check for suspiciously small files (likely conversion failures)
           if (compressedStats.size < 100) { // Less than 100 bytes is likely a failure
             console.error(`⚠️  Suspiciously small output file: ${compressedStats.size} bytes for ${file.originalname}`);
             console.error(`Original size: ${originalStats.size} bytes`);
             console.error(`Output path: ${outputPath}`);
-            
+
             // For RAW files, this is likely a dcraw failure
             if (isRawFile) {
               throw new Error(`RAW conversion failed: Output file too small (${compressedStats.size} bytes). Check dcraw.js installation.`);
             }
           }
-          
+
           // CRITICAL: Ensure file sizes are valid numbers
           const originalSize = originalStats.size && !isNaN(originalStats.size) && originalStats.size > 0 ? originalStats.size : 1;
           const compressedSize = compressedStats.size && !isNaN(compressedStats.size) && compressedStats.size > 0 ? compressedStats.size : 1;
-          
+
           // Calculate compression ratio with validation - prevent NaN
           let compressionRatio = 0;
           if (originalSize > 0 && compressedSize > 0) {
@@ -2481,7 +2553,7 @@ for (const file of files) {
               compressionRatio = 0;
             }
           }
-          
+
           console.log(`📊 File stats for ${file.originalname}:`, {
             originalSize,
             compressedSize,
@@ -2489,7 +2561,7 @@ for (const file of files) {
             isRawFile,
             outputFormat
           });
-          
+
           // Update job with compression results - wrap in try/catch to prevent database crashes
           try {
             await storage.updateCompressionJob(job.id, {
@@ -2530,18 +2602,18 @@ for (const file of files) {
             quality: result?.qualityUsed || settings.quality // Use actual quality used
           });
           results.push(resultData);
-          
-        } catch (jobError) {
-  console.error(`Error processing job for ${file.originalname}:`, jobError);
 
-  // Clean up file on job error
-  try {
-    if (file.path) {
-      await fs.unlink(file.path).catch(() => {});
-    }
-  } catch (e) {
-    // Ignore cleanup errors
-  }
+        } catch (jobError) {
+          console.error(`Error processing job for ${file.originalname}:`, jobError);
+
+          // Clean up file on job error
+          try {
+            if (file.path) {
+              await fs.unlink(file.path).catch(() => { });
+            }
+          } catch (e) {
+            // Ignore cleanup errors
+          }
           // Update job with error - wrap in try/catch to prevent secondary crashes
           try {
             await storage.updateCompressionJob(job.id, {
@@ -2551,7 +2623,7 @@ for (const file of files) {
           } catch (dbError) {
             console.error(`Database update failed for failed job ${job.id}:`, dbError);
           }
-          
+
           results.push({
             id: job.id,
             originalName: file.originalname,
@@ -2559,7 +2631,7 @@ for (const file of files) {
           });
         }
       }
-      
+
       // Clean up original uploaded files (only after processing all formats)
       const processedFiles = new Set();
       for (const { file } of jobs) {
@@ -2572,7 +2644,7 @@ for (const file of files) {
           }
         }
       }
-      
+
       // Track usage for successful compressions using DualUsageTracker
       const successfulJobs = results.filter(r => !r.error);
       if (successfulJobs.length > 0) {
@@ -2586,92 +2658,92 @@ for (const file of files) {
             console.error(`❌ Failed to record operation for ${result.originalName}:`, recordError);
           }
         }
-        
+
         console.log(`✅ Recorded ${successfulJobs.length} successful operations via DualUsageTracker`);
       }
-      
+
       // Generate batch ID and store file list for ZIP download
       const batchId = randomUUID();
       const successfulFiles = results
         .filter(r => !r.error && r.compressedFileName)
         .map(r => r.compressedFileName);
       // ADD THESE DEBUG LOGS HERE:
-console.log(`🔍 Total results: ${results.length}`);
-console.log(`🔍 Successful jobs: ${successfulJobs.length}`);
-console.log(`🔍 Results array:`, JSON.stringify(results, null, 2));
+      console.log(`🔍 Total results: ${results.length}`);
+      console.log(`🔍 Successful jobs: ${successfulJobs.length}`);
+      console.log(`🔍 Results array:`, JSON.stringify(results, null, 2));
 
-if (successfulJobs.length > 0) {
-  // Record each successful operation with DualUsageTracker
-  for (const result of successfulJobs) {
-    try {
-      console.log(`🔧 DualTracker info: userId=${userId}, sessionId=${sessionId}, userType=${userType}`);
-      console.log(`🔧 Recording operation: ${result.originalName} (${result.originalSize} bytes) on page ${pageIdentifier}`);
-      await dualTracker.recordOperation(result.originalName, result.originalSize, pageIdentifier);
-      console.log(`✅ Operation recorded successfully for ${result.originalName}`);
-    } catch (recordError) {
-      console.error(`❌ Failed to record operation for ${result.originalName}:`, recordError);
-    }
-  }
-  
-  console.log(`✅ Recorded ${successfulJobs.length} successful operations via DualUsageTracker`);
-} else {
-  console.log(`⚠️ No successful jobs to record!`);
-}
+      if (successfulJobs.length > 0) {
+        // Record each successful operation with DualUsageTracker
+        for (const result of successfulJobs) {
+          try {
+            console.log(`🔧 DualTracker info: userId=${userId}, sessionId=${sessionId}, userType=${userType}`);
+            console.log(`🔧 Recording operation: ${result.originalName} (${result.originalSize} bytes) on page ${pageIdentifier}`);
+            await dualTracker.recordOperation(result.originalName, result.originalSize, pageIdentifier);
+            console.log(`✅ Operation recorded successfully for ${result.originalName}`);
+          } catch (recordError) {
+            console.error(`❌ Failed to record operation for ${result.originalName}:`, recordError);
+          }
+        }
+
+        console.log(`✅ Recorded ${successfulJobs.length} successful operations via DualUsageTracker`);
+      } else {
+        console.log(`⚠️ No successful jobs to record!`);
+      }
       // Store batch info in memory (you could use Redis in production)
       global.batchFiles = global.batchFiles || {};
       global.batchFiles[batchId] = {
         files: successfulFiles,
         timestamp: Date.now()
       };
-      
-      res.json({ 
+
+      res.json({
         results,
         batchId: batchId,
         batchDownloadUrl: `/api/download-zip/${batchId}`
       });
-      
+
     } catch (error) {
-  console.error('Compression error:', error);
+      console.error('Compression error:', error);
 
-  // Clean up uploaded files on error
-  try {
-    const files = req.files as Express.Multer.File[];
-    if (files && files.length > 0) {
-      for (const file of files) {
-        if (file.path) {
-          await fs.unlink(file.path).catch(() => {});
-          console.log(`🗑️ Cleaned up file after error: ${file.originalname}`);
+      // Clean up uploaded files on error
+      try {
+        const files = req.files as Express.Multer.File[];
+        if (files && files.length > 0) {
+          for (const file of files) {
+            if (file.path) {
+              await fs.unlink(file.path).catch(() => { });
+              console.log(`🗑️ Cleaned up file after error: ${file.originalname}`);
+            }
+          }
         }
+      } catch (cleanupError) {
+        console.log('Could not clean up files after error:', cleanupError.message);
       }
-    }
-  } catch (cleanupError) {
-    console.log('Could not clean up files after error:', cleanupError.message);
-  }
 
-  res.status(500).json({
-    error: 'Compression failed',
-    message: error.message
+      res.status(500).json({
+        error: 'Compression failed',
+        message: error.message
+      });
+    }  // ← ADD THIS CLOSING BRACE
   });
-}  // ← ADD THIS CLOSING BRACE
-});
 
   // Download endpoint for compressed files by job ID
   app.get("/api/download/compressed/:jobId", async (req, res) => {
     try {
       const jobId = req.params.jobId;
       const job = await storage.getCompressionJob(jobId);
-      
+
       if (!job || job.status !== "completed") {
         return res.status(404).json({ error: "Compressed file not found" });
       }
-      
+
       // Generate a user-friendly filename
       const originalName = job.originalFilename;
       const outputFormat = job.outputFormat || 'jpeg';
       const extension = outputFormat === 'jpeg' ? '.jpg' : `.${outputFormat}`;
       const baseName = path.parse(originalName).name;
       const downloadName = `${baseName}_compressed${extension}`;
-      
+
       // Priority 1: If CDN URL is available, redirect to it with download headers
       if (job.cdnUrl) {
         console.log(`🌐 Redirecting download to CDN: ${job.cdnUrl}`);
@@ -2679,19 +2751,19 @@ if (successfulJobs.length > 0) {
         res.setHeader('Content-Disposition', `attachment; filename="${downloadName}"`);
         return res.redirect(302, job.cdnUrl);
       }
-      
+
       // Priority 2: Fallback to local file download
       if (!job.compressedPath) {
         return res.status(404).json({ error: "Compressed file not found" });
       }
-      
+
       // Check if local file exists
       await fs.access(job.compressedPath);
-      
+
       // Set proper headers for download
       res.setHeader('Content-Disposition', `attachment; filename="${downloadName}"`);
       res.setHeader('Content-Type', 'application/octet-stream');
-      
+
       console.log(`📁 Serving local download: ${job.compressedPath}`);
       res.download(job.compressedPath, downloadName, (err) => {
         if (err) {
@@ -2712,25 +2784,25 @@ if (successfulJobs.length > 0) {
     try {
       const jobId = req.params.jobId;
       const job = await storage.getCompressionJob(jobId);
-      
+
       if (!job || job.status !== "completed") {
         return res.status(404).json({ error: "Image not found" });
       }
-      
+
       // Priority 1: Redirect to CDN URL if available
       if (job.cdnUrl) {
         console.log(`🌐 Serving from CDN: ${job.cdnUrl}`);
         return res.redirect(302, job.cdnUrl);
       }
-      
+
       // Priority 2: Fallback to local file serving
       if (!job.compressedPath) {
         return res.status(404).json({ error: "Image not found" });
       }
-      
+
       // Check if local file exists
       await fs.access(job.compressedPath);
-      
+
       // Determine content type based on file extension or output format
       const outputFormat = job.outputFormat || 'jpeg';
       let contentType = 'image/jpeg'; // default
@@ -2742,11 +2814,11 @@ if (successfulJobs.length > 0) {
         case 'jpg': case 'jpeg': contentType = 'image/jpeg'; break;
         default: contentType = 'image/jpeg';
       }
-      
+
       // Set proper headers for image display (not download)
       res.setHeader('Content-Type', contentType);
       res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache for 1 hour
-      
+
       // Send the local file directly
       console.log(`📁 Serving local file: ${job.compressedPath}`);
       res.sendFile(path.resolve(job.compressedPath));
@@ -2761,24 +2833,24 @@ if (successfulJobs.length > 0) {
     try {
       const batchId = req.params.batchId;
       const compressedDir = "compressed";
-      
+
       // Get batch info from memory
       global.batchFiles = global.batchFiles || {};
       const batchInfo = global.batchFiles[batchId];
-      
+
       if (!batchInfo) {
         return res.status(404).json({ error: "Batch not found or expired" });
       }
-      
+
       // Check if batch is still valid (within 24 hours for better UX)
       const twentyFourHoursAgo = Date.now() - (24 * 60 * 60 * 1000);
       if (batchInfo.timestamp < twentyFourHoursAgo) {
         delete global.batchFiles[batchId];
         return res.status(404).json({ error: "Batch expired" });
       }
-      
+
       const validFiles = [];
-      
+
       // Only include files from this specific batch
       for (const filename of batchInfo.files) {
         try {
@@ -2804,23 +2876,23 @@ if (successfulJobs.length > 0) {
           console.log(`File ${filename} not found in either compressed/ or converted/, skipping`);
         }
       }
-      
+
       if (validFiles.length === 0) {
         return res.status(404).json({ error: "No files found for download" });
       }
-      
+
       console.log(`Creating ZIP for batch ${batchId} with ${validFiles.length} files:`, validFiles.map(f => f.name));
-      
+
       // Set response headers for ZIP download with branded name
       const zipFilename = `microjpeg_batch_compress_${Date.now()}.zip`;
       res.setHeader('Content-Type', 'application/zip');
       res.setHeader('Content-Disposition', `attachment; filename="${zipFilename}"`);
-      
+
       // Create zip archive
       const archive = archiver('zip', {
         zlib: { level: 9 } // Best compression
       });
-      
+
       // Handle archive errors
       archive.on('error', (err) => {
         console.error('Archive error:', err);
@@ -2828,23 +2900,23 @@ if (successfulJobs.length > 0) {
           res.status(500).json({ error: 'Failed to create archive' });
         }
       });
-      
+
       // Pipe archive to response
       archive.pipe(res);
-      
+
       // Add files to archive with branded names
       for (const file of validFiles) {
         try {
           await fs.access(file.path);
-          
+
           // Extract the file format from the filename
           const fileExt = path.extname(file.name).slice(1).toLowerCase();
           const format = normalizeFormat(fileExt);
-          
+
           // Use clean filename without timestamp prefix as base
           const cleanName = file.name.replace(/^compressed_\d+_/, '');
           const baseNameWithoutExt = path.parse(cleanName).name;
-          
+
           // Generate branded filename for ZIP entry
           const brandedName = generateBrandedFilename(
             baseNameWithoutExt + path.extname(cleanName),
@@ -2853,23 +2925,23 @@ if (successfulJobs.length > 0) {
             'compress', // Assume compression for batch
             false // No additional timestamp
           );
-          
+
           archive.file(file.path, { name: brandedName });
         } catch (err) {
           console.error(`Failed to add file ${file.name} to archive:`, err);
         }
       }
-      
+
       // Add branded README file to ZIP
       const readmeContent = generateZipReadmeContent(validFiles, 'compress');
       archive.append(readmeContent, { name: 'microjpeg_README.txt' });
-      
+
       // Finalize the archive
       await archive.finalize();
-      
+
       // Note: Batch info cleanup is handled by the 24-hour expiration check
       // No immediate cleanup to allow multiple downloads of the same ZIP
-      
+
     } catch (error) {
       console.error("ZIP download error:", error);
       if (!res.headersSent) {
@@ -2882,13 +2954,13 @@ if (successfulJobs.length > 0) {
   app.post("/api/create-session-zip", async (req, res) => {
     try {
       const { resultIds } = req.body;
-      
+
       if (!resultIds || !Array.isArray(resultIds) || resultIds.length === 0) {
         return res.status(400).json({ error: "No result IDs provided" });
       }
-      
+
       const validFiles = [];
-      
+
       // Find all completed jobs and converted files for the provided result IDs
       for (const resultId of resultIds) {
         try {
@@ -2897,7 +2969,7 @@ if (successfulJobs.length > 0) {
           if (job && job.compressedPath && job.status === "completed") {
             // Check if file exists
             await fs.access(job.compressedPath);
-            
+
             // Extract filename from the path
             const filename = path.basename(job.compressedPath);
             validFiles.push({
@@ -2910,7 +2982,7 @@ if (successfulJobs.length > 0) {
             // Check TIFF first since JPG might be a preview file, not the actual conversion
             const specialFormatExtensions = ['tiff', 'avif', 'webp', 'png', 'jpg', 'jpeg'];
             let filePath = null;
-            
+
             for (const ext of specialFormatExtensions) {
               const potentialPath = path.join("converted", `${resultId}.${ext}`);
               try {
@@ -2921,7 +2993,7 @@ if (successfulJobs.length > 0) {
                 // File doesn't exist with this extension, try next
               }
             }
-            
+
             if (filePath) {
               const filename = path.basename(filePath);
               validFiles.push({
@@ -2935,30 +3007,30 @@ if (successfulJobs.length > 0) {
           console.log(`File for result ${resultId} not found, skipping`);
         }
       }
-      
+
       if (validFiles.length === 0) {
         return res.status(404).json({ error: "No valid files found for download" });
       }
-      
+
       // Generate batch ID and store file list for comprehensive ZIP
       const batchId = randomUUID();
       const fileNames = validFiles.map(f => f.name);
-      
+
       // Store batch info in memory 
       global.batchFiles = global.batchFiles || {};
       global.batchFiles[batchId] = {
         files: fileNames,
         timestamp: Date.now()
       };
-      
+
       console.log(`Created comprehensive ZIP batch ${batchId} with ${validFiles.length} files from session`);
-      
-      res.json({ 
+
+      res.json({
         batchId: batchId,
         batchDownloadUrl: `/api/download-zip/${batchId}`,
         fileCount: validFiles.length
       });
-      
+
     } catch (error) {
       console.error("Session ZIP creation error:", error);
       res.status(500).json({ error: "Failed to create session ZIP" });
@@ -2971,7 +3043,7 @@ if (successfulJobs.length > 0) {
     console.log("Session ID:", req.sessionID);
     console.log("Session userId:", req.session.userId);
     console.log("Session data:", JSON.stringify(req.session, null, 2));
-    
+
     if (!req.session.userId) {
       console.log("No userId in session, returning 401");
       return res.status(401).json({ message: "Unauthorized" });
@@ -2981,13 +3053,13 @@ if (successfulJobs.length > 0) {
       const user = await storage.getUser(req.session.userId);
       if (!user) {
         console.log("User not found in database, destroying session");
-        req.session.destroy(() => {});
+        req.session.destroy(() => { });
         return res.status(401).json({ message: "Unauthorized" });
       }
 
       console.log("User found:", user.email);
       req.user = user;
-      
+
       // Don't send password in response
       const { password, ...userWithoutPassword } = user;
       res.json(userWithoutPassword);
@@ -3002,16 +3074,16 @@ if (successfulJobs.length > 0) {
     try {
       const user = req.user;
       const userId = (user as any)?.id;
-      
+
       if (!userId) {
         return res.status(401).json({ error: 'User ID not found' });
       }
 
       console.log(`🎁 Bonus operations claim attempt by user: ${userId}`);
-      
+
       // Attempt to claim the bonus operations
       const result = await storage.claimBonusOperations(userId);
-      
+
       if (result.success) {
         console.log(`✅ Bonus operations claimed successfully for user: ${userId}`);
         res.json({
@@ -3046,10 +3118,10 @@ if (successfulJobs.length > 0) {
     try {
       // Disable caching for real-time updates
       res.setHeader('Cache-Control', 'no-store');
-      
+
       const sessionId = req.sessionID;
       const userId = req.user?.id;
-      
+
       // Determine user type and bonus status
       let userType = 'anonymous';
       let hasBonusOperations = false;
@@ -3058,21 +3130,21 @@ if (successfulJobs.length > 0) {
         userType = user?.subscriptionTier || 'free';
         hasBonusOperations = (user?.purchasedCredits || 0) > 0;
       }
-      
+
       // Create tracker instance - use exact same logic as recordOperation
       const tracker = new DualUsageTracker(userId, sessionId, userType);
       const stats = await tracker.getUsageStats();
-      
+
       // Apply bonus operations for signed-in free users who have claimed it
       if (userType === 'free_registered' && hasBonusOperations) {
         stats.regular.monthly.limit = 600;
         stats.combined.monthly.limit = stats.raw.monthly.limit + 600;
       }
-      
+
       // Debug logging to trace the issue
       console.log(`🔧 Stats API called: userId=${userId}, sessionId=${sessionId}, userType=${userType}`);
       console.log(`🔧 Stats returned:`, JSON.stringify(stats, null, 2));
-      
+
       res.json({
         userType,
         stats,
@@ -3089,16 +3161,16 @@ if (successfulJobs.length > 0) {
     const { filename, fileSize, pageIdentifier } = req.body;
     const sessionId = req.sessionID;
     const userId = req.user?.id;
-    
+
     let userType = 'anonymous';
     if (userId) {
       const user = await storage.getUser(userId);
       userType = user?.subscriptionTier || 'free';
     }
-    
+
     const tracker = new DualUsageTracker(userId, sessionId, userType);
     const result = await tracker.canPerformOperation(filename, fileSize, pageIdentifier);
-    
+
     res.json(result);
   });
 
@@ -3108,10 +3180,10 @@ if (successfulJobs.length > 0) {
       console.log(`🔧 UNIFIED USAGE STATS: pageIdentifier=${req.params.pageIdentifier}`);
       const { pageIdentifier } = req.params;
       const sessionId = getSessionIdFromRequest(req);
-      
+
       // ✅ Use new page-specific rules system
       const { getPageLimits, isValidPageIdentifier, ALLOWED_PAGE_IDENTIFIERS } = await import('./pageRules');
-      
+
       // ✅ Validate pageIdentifier against allowed values
       if (!isValidPageIdentifier(pageIdentifier)) {
         return res.status(400).json({
@@ -3120,7 +3192,7 @@ if (successfulJobs.length > 0) {
           allowedPages: ALLOWED_PAGE_IDENTIFIERS
         });
       }
-      
+
       // ✅ Get page-specific limits from new rules system
       const pageLimits = getPageLimits(pageIdentifier);
       const PAGE_LIMITS = {
@@ -3128,38 +3200,38 @@ if (successfulJobs.length > 0) {
         hourly: pageLimits.hourly,
         monthly: pageLimits.monthly
       };
-      
- // Get page-specific usage using DualUsageTracker
-const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
-const userId = isUserAuthenticated && req.user ? req.user.claims?.sub : req.session?.userId || undefined;
 
-// Determine user type for DualUsageTracker
-let userType = 'anonymous';
-if (userId) {
-  const user = await storage.getUser(userId);
-  userType = user?.subscriptionTier || 'free';
-}
+      // Get page-specific usage using DualUsageTracker
+      const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
+      const userId = isUserAuthenticated && req.user ? req.user.claims?.sub : req.session?.userId || undefined;
 
-const dualTracker = new DualUsageTracker(userId, sessionId, userType);
-const statsResult = await dualTracker.getUsageStats();
+      // Determine user type for DualUsageTracker
+      let userType = 'anonymous';
+      if (userId) {
+        const user = await storage.getUser(userId);
+        userType = user?.subscriptionTier || 'free';
+      }
 
-// Paid users have unlimited operations
-const isPaidUser = ['premium', 'pro', 'business', 'enterprise'].includes(userType);
+      const dualTracker = new DualUsageTracker(userId, sessionId, userType);
+      const statsResult = await dualTracker.getUsageStats();
 
-return res.json({
-  pageIdentifier,
-  operations: {
-    dailyUsed: 0,  // No daily limits anymore
-    dailyLimit: null,  // null = unlimited
-    used: isPaidUser ? 0 : statsResult.combined.monthly.used,
-    limit: isPaidUser ? null : statsResult.combined.monthly.limit,
-    unlimited: isPaidUser
-  }
-});
-      
+      // Paid users have unlimited operations
+      const isPaidUser = ['premium', 'pro', 'business', 'enterprise'].includes(userType);
+
+      return res.json({
+        pageIdentifier,
+        operations: {
+          dailyUsed: 0,  // No daily limits anymore
+          dailyLimit: null,  // null = unlimited
+          used: isPaidUser ? 0 : statsResult.combined.monthly.used,
+          limit: isPaidUser ? null : statsResult.combined.monthly.limit,
+          unlimited: isPaidUser
+        }
+      });
+
     } catch (error) {
       console.error('Error fetching page-specific usage stats:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to fetch usage statistics',
         message: 'Internal server error'
       });
@@ -3171,25 +3243,25 @@ return res.json({
     try {
       const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
       // Handle both session-based and OAuth authentication
-      let userId = isUserAuthenticated && req.user ? req.user.claims?.sub : 
-                   req.session?.userId || undefined;
-      
+      let userId = isUserAuthenticated && req.user ? req.user.claims?.sub :
+        req.session?.userId || undefined;
+
       // Enhanced fallback for session authentication
       if (!userId && req.session && req.session.userId) {
         console.log(`🐛 DEBUG usage-stats: Using session userId fallback: ${req.session.userId}`);
         userId = req.session.userId;
       }
-      
+
       const sessionId = getSessionIdFromRequest(req);
-      
+
       // Get pageIdentifier-based usage stats (enforced by middleware) 
       const pageIdentifier = (req as any).context?.pageIdentifier || '/'; // Set by pageIdentifierMiddleware
       const scope = req.trackingScope!; // Set by requireScopeFromAuth middleware
       console.log(`🔧 PAGE IDENTIFIER usage-stats: userId=${userId}, pageIdentifier=${pageIdentifier}, scope=${scope}, sessionId=${sessionId}`);
-      
+
       // Using DualUsageTracker system only
       const operationStats = { monthlyUsed: 0, monthlyLimit: 200, dailyUsed: 0, dailyLimit: 25, hourlyUsed: 0, hourlyLimit: 5 };
-      
+
       // Check for lead magnet credits if user is authenticated
       let leadMagnetCredits = null;
       if (isUserAuthenticated && req.user?.email) {
@@ -3199,21 +3271,21 @@ return res.json({
           console.log("No lead magnet credits found for user");
         }
       }
-      
+
       // Legacy stats removed - using DualUsageTracker only
       const legacyStats = { operations: { monthly: { used: 0, limit: 500 } } };
-      
+
       // Calculate total available operations including lead magnet credits
       let totalAvailableOperations = operationStats.monthlyUsed;
       let totalOperationLimit = operationStats.monthlyLimit;
       let bonusCredits = 0;
-      
+
       if (leadMagnetCredits?.hasCredits) {
         bonusCredits = leadMagnetCredits.creditsRemaining;
         // Add lead magnet credits to available operations
         totalOperationLimit = (operationStats.monthlyLimit || 0) + leadMagnetCredits.creditsGranted;
       }
-      
+
       // Return unified stats with operation-based structure
       const unifiedStats = {
         // New unified operation structure
@@ -3232,18 +3304,18 @@ return res.json({
           bonusCredits: bonusCredits,
           bonusCreditsExpiry: leadMagnetCredits?.expiresAt || null,
         },
-        
+
         // Legacy credit structure for backward compatibility
         totalCredits: legacyStats.usage?.totalCredits || 0,
         usedCredits: legacyStats.usage?.usedCredits || 0,
         remainingCredits: legacyStats.usage?.remainingCredits || 0,
         freeCredits: legacyStats.usage?.freeCredits || 0,
         purchasedCredits: legacyStats.usage?.purchasedCredits || 0,
-        
+
         // Keep existing structure for now
         usage: legacyStats.usage
       };
-      
+
       res.json(unifiedStats);
     } catch (error) {
       console.error("Error fetching usage stats:", error);
@@ -3256,22 +3328,22 @@ return res.json({
     try {
       const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
       // Handle both session-based and OAuth authentication
-      let userId = isUserAuthenticated && req.user ? req.user.claims?.sub : 
-                   req.session?.userId || undefined;
-      
+      let userId = isUserAuthenticated && req.user ? req.user.claims?.sub :
+        req.session?.userId || undefined;
+
       // Enhanced fallback for session authentication
       if (!userId && req.session && req.session.userId) {
         console.log(`🐛 DEBUG ${pageIdentifier} usage-stats: Using session userId fallback: ${req.session.userId}`);
         userId = req.session.userId;
       }
-      
+
       const sessionId = getSessionIdFromRequest(req);
-      
+
       console.log(`🔧 PAGE SPECIFIC usage-stats: pageIdentifier=${pageIdentifier}, userId=${userId}, sessionId=${sessionId}`);
-      
+
       // Using DualUsageTracker system only
       const operationStats = { monthlyUsed: 0, monthlyLimit: 200, dailyUsed: 0, dailyLimit: 25, hourlyUsed: 0, hourlyLimit: 5 };
-      
+
       // Check for lead magnet credits if user is authenticated
       let leadMagnetCredits = null;
       if (isUserAuthenticated && req.user?.email) {
@@ -3281,26 +3353,26 @@ return res.json({
           console.log("No lead magnet credits found for user");
         }
       }
-      
+
       // Legacy stats removed - using DualUsageTracker only
       const legacyStats = { operations: { monthly: { used: 0, limit: 500 } } };
-      
+
       // Calculate total available operations including lead magnet credits
       let totalAvailableOperations = operationStats.monthlyUsed;
       let totalOperationLimit = operationStats.monthlyLimit;
       let bonusCredits = 0;
-      
+
       if (leadMagnetCredits?.hasCredits) {
         bonusCredits = leadMagnetCredits.creditsRemaining;
         // Add lead magnet credits to available operations
         totalOperationLimit = (operationStats.monthlyLimit || 0) + leadMagnetCredits.creditsGranted;
       }
-      
+
       // Return unified stats with operation-based structure
       const unifiedStats = {
         // Page identifier for verification
         pageIdentifier: pageIdentifier,
-        
+
         // New unified operation structure
         operations: {
           used: operationStats.monthlyUsed,
@@ -3317,18 +3389,18 @@ return res.json({
           bonusCredits: bonusCredits,
           bonusCreditsExpiry: leadMagnetCredits?.expiresAt || null,
         },
-        
+
         // Legacy credit structure for backward compatibility
         totalCredits: legacyStats.usage?.totalCredits || 0,
         usedCredits: legacyStats.usage?.usedCredits || 0,
         remainingCredits: legacyStats.usage?.remainingCredits || 0,
         freeCredits: legacyStats.usage?.freeCredits || 0,
         purchasedCredits: legacyStats.usage?.purchasedCredits || 0,
-        
+
         // Keep existing structure for now
         usage: legacyStats.usage
       };
-      
+
       res.json(unifiedStats);
     } catch (error) {
       console.error(`Error fetching ${pageIdentifier} usage stats:`, error);
@@ -3337,37 +3409,37 @@ return res.json({
   }
 
   // Separate usage endpoints for each page-specific system
-  
+
   // Main landing page usage stats
   app.get('/api/usage-stats/main', requireScopeFromAuth, async (req, res) => {
     const pageIdentifier = (req as any).context?.pageIdentifier || (req as any).context?.pageIdentifierCanonical || '/';
     await getPageSpecificUsageStats(pageIdentifier, req, res);
   });
-  
+
   // Free tier usage stats
   app.get('/api/usage-stats/free', requireScopeFromAuth, async (req, res) => {
     const pageIdentifier = (req as any).context?.pageIdentifier || (req as any).context?.pageIdentifierCanonical || '/compress-free';
     await getPageSpecificUsageStats(pageIdentifier, req, res);
   });
-  
+
   // Premium tier usage stats  
   app.get('/api/usage-stats/premium', requireScopeFromAuth, async (req, res) => {
     const pageIdentifier = (req as any).context?.pageIdentifier || (req as any).context?.pageIdentifierCanonical || '/compress-premium';
     await getPageSpecificUsageStats(pageIdentifier, req, res);
   });
-  
+
   // Test premium usage stats
   app.get('/api/usage-stats/test-premium', requireScopeFromAuth, async (req, res) => {
     const pageIdentifier = (req as any).context?.pageIdentifier || (req as any).context?.pageIdentifierCanonical || '/test-premium';
     await getPageSpecificUsageStats(pageIdentifier, req, res);
   });
-  
+
   // Enterprise usage stats
   app.get('/api/usage-stats/enterprise', requireScopeFromAuth, async (req, res) => {
     const pageIdentifier = (req as any).context?.pageIdentifier || (req as any).context?.pageIdentifierCanonical || '/compress-enterprise';
     await getPageSpecificUsageStats(pageIdentifier, req, res);
   });
-  
+
   // CR2 converter usage stats
   app.get('/api/usage-stats/cr2-converter', requireScopeFromAuth, async (req, res) => {
     const pageIdentifier = (req as any).context?.pageIdentifier || (req as any).context?.pageIdentifierCanonical || '/convert/cr2-to-jpg';
@@ -3379,20 +3451,20 @@ return res.json({
     try {
       const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
       const userId = isUserAuthenticated && req.user ? req.user.claims?.sub : req.session?.userId;
-      
+
       if (!userId) {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
       // Get user limits based on user type/tier  
       const { determineUserType, USER_LIMITS } = await import('./userLimits');
-      
+
       const userType = determineUserType(req.user?.subscription);
       const limits = USER_LIMITS[userType];
-      
+
       // Using DualUsageTracker system only
       const usage = { monthlyUsed: 0 };
-      
+
       res.json({
         used: usage.monthlyUsed,
         limit: limits.monthly.total,
@@ -3408,13 +3480,13 @@ return res.json({
     try {
       const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
       const userId = isUserAuthenticated && req.user ? req.user.claims?.sub : req.session?.userId;
-      
+
       if (!userId) {
         return res.status(401).json({ error: 'User not authenticated' });
       }
 
       // Using DualUsageTracker system only - no additional recording needed
-      
+
       res.json({ success: true });
     } catch (error) {
       console.error('Error recording usage:', error);
@@ -3426,7 +3498,7 @@ return res.json({
   app.post('/api/loyalty-share', async (req, res) => {
     try {
       const { platform, postUrl } = req.body;
-      
+
       if (!platform) {
         return res.status(400).json({ error: "Platform is required" });
       }
@@ -3460,14 +3532,14 @@ return res.json({
       const today = new Date();
       const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
       const rateLimitKey = `loyalty_${identifier}_${platform}_${dateKey}`;
-      
+
       // Simple in-memory rate limiting (in production, use Redis or database)
       if (UsageTracker.hasClaimedTodayReward(rateLimitKey)) {
-        
-        return res.status(429).json({ 
-        error: "Daily limit reached", 
-        message: `You can only earn rewards once per day per platform. Try again tomorrow!`,
-        nextClaimTime: "tomorrow"
+
+        return res.status(429).json({
+          error: "Daily limit reached",
+          message: `You can only earn rewards once per day per platform. Try again tomorrow!`,
+          nextClaimTime: "tomorrow"
         });
       }
 
@@ -3476,19 +3548,19 @@ return res.json({
 
       // If URL provided, store it for future verification
       if (postUrl) {
-      console.log(`URL verification: User ${identifier} shared on ${platform}: ${postUrl}`);
-      //Store for later verification - in production, add to verification queue
+        console.log(`URL verification: User ${identifier} shared on ${platform}: ${postUrl}`);
+        //Store for later verification - in production, add to verification queue
       }
 
       // Award operations (works for both authenticated and guest users)
       await UsageTracker.addBonusOperations(userId, sessionId, operationsToAdd, `Social share on ${platform}`);
 
-      res.json({ 
-       success: true, 
-       operations: operationsToAdd,
-       platform: platform,
-       message: `You earned ${operationsToAdd} bonus operations for sharing on ${platform}!`,
-       nextClaimTime: "tomorrow"
+      res.json({
+        success: true,
+        operations: operationsToAdd,
+        platform: platform,
+        message: `You earned ${operationsToAdd} bonus operations for sharing on ${platform}!`,
+        nextClaimTime: "tomorrow"
       });
 
     } catch (error) {
@@ -3513,11 +3585,11 @@ return res.json({
       let effectiveTier = user.subscriptionTier || 'free_registered';
       let subscriptionStatus = user.subscriptionStatus || 'inactive';
       let isExpired = false;
-      
+
       if (effectiveTier === 'test_premium' && user.subscriptionEndDate) {
         const now = new Date();
         const endDate = new Date(user.subscriptionEndDate);
-        
+
         if (now > endDate) {
           // Test premium has expired, but haven't run cleanup yet
           effectiveTier = 'free_registered';
@@ -3528,7 +3600,7 @@ return res.json({
 
       // Determine premium status - must be active/paid tier OR manual premium flag
       let isPremium = false;
-      
+
       if (isExpired || subscriptionStatus === 'expired' || subscriptionStatus === 'cancelled') {
         // Explicitly expired or cancelled
         isPremium = false;
@@ -3555,7 +3627,7 @@ return res.json({
         subscriptionEndDate: user.subscriptionEndDate || null,
         stripeCustomerId: user.stripeCustomerId || null,
         stripeSubscriptionId: user.stripeSubscriptionId || null,
-        timeUntilExpiry: effectiveTier === 'test_premium' && user.subscriptionEndDate ? 
+        timeUntilExpiry: effectiveTier === 'test_premium' && user.subscriptionEndDate ?
           Math.max(0, new Date(user.subscriptionEndDate).getTime() - new Date().getTime()) : null
       };
 
@@ -3573,7 +3645,7 @@ return res.json({
       if (!email) {
         return res.status(400).json({ message: "Email is required" });
       }
-      
+
       const existingUser = await storage.getUserByEmail(email);
       res.json({ available: !existingUser });
     } catch (error) {
@@ -3587,9 +3659,9 @@ return res.json({
     try {
       const result = signupSchema.safeParse(req.body);
       if (!result.success) {
-        return res.status(400).json({ 
-          message: "Validation failed", 
-          errors: result.error.flatten().fieldErrors 
+        return res.status(400).json({
+          message: "Validation failed",
+          errors: result.error.flatten().fieldErrors
         });
       }
 
@@ -3624,8 +3696,8 @@ return res.json({
       // Send verification email
       try {
         await emailService.sendVerificationEmail(
-          user.email, 
-          verificationToken, 
+          user.email,
+          verificationToken,
           user.firstName || undefined
         );
         console.log(`Verification email sent to ${user.email}`);
@@ -3642,7 +3714,7 @@ return res.json({
 
       // Return user without password
       const { password: _, ...userWithoutPassword } = user;
-      res.status(201).json({ 
+      res.status(201).json({
         user: userWithoutPassword,
         message: "Account created successfully. Please check your email to verify your account."
       });
@@ -3792,9 +3864,9 @@ return res.json({
     try {
       const result = loginSchema.safeParse(req.body);
       if (!result.success) {
-        return res.status(400).json({ 
-          message: "Validation failed", 
-          errors: result.error.flatten().fieldErrors 
+        return res.status(400).json({
+          message: "Validation failed",
+          errors: result.error.flatten().fieldErrors
         });
       }
 
@@ -3814,7 +3886,7 @@ return res.json({
 
       // Set session
       req.session.userId = user.id;
-      
+
       // Manually save session to ensure it's persisted
       await new Promise((resolve, reject) => {
         req.session.save((err) => {
@@ -3846,7 +3918,7 @@ return res.json({
   app.get('/api/auth/verify-email/:token', async (req, res) => {
     try {
       const { token } = req.params;
-      
+
       if (!token) {
         return res.status(400).json({ message: "Verification token is required" });
       }
@@ -3873,7 +3945,7 @@ return res.json({
       // Send welcome email
       try {
         await emailService.sendWelcomeEmail(
-          verifiedUser.email, 
+          verifiedUser.email,
           verifiedUser.firstName || undefined
         );
       } catch (emailError) {
@@ -3881,7 +3953,7 @@ return res.json({
         // Continue even if welcome email fails
       }
 
-      res.json({ 
+      res.json({
         message: "Email verified successfully! Welcome to JPEG Compressor.",
         user: {
           id: verifiedUser.id,
@@ -3923,8 +3995,8 @@ return res.json({
       // Send verification email
       try {
         await emailService.sendVerificationEmail(
-          user.email, 
-          verificationToken, 
+          user.email,
+          verificationToken,
           user.firstName || undefined
         );
         res.json({ message: "Verification email sent successfully" });
@@ -4044,7 +4116,7 @@ return res.json({
       }
 
       const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
-      
+
       res.json({
         status: subscription.status,
         subscription: {
@@ -4082,7 +4154,7 @@ return res.json({
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
         const customer = await stripe.customers.retrieve(subscription.customer as string);
-        
+
         if ('email' in customer && customer.email) {
           const user = await storage.getUserByEmail(customer.email);
           if (user) {
@@ -4099,7 +4171,7 @@ return res.json({
                 const priceId = subscription.items.data[0]?.price?.id;
                 let planName = 'Premium';
                 let amount = '$9.99';
-                
+
                 // Map price IDs to plan names
                 if (priceId?.includes('business')) {
                   planName = 'Business';
@@ -4129,11 +4201,11 @@ return res.json({
         }
         break;
       }
-      
+
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
         const customer = await stripe.customers.retrieve(subscription.customer as string);
-        
+
         if ('email' in customer && customer.email) {
           const user = await storage.getUserByEmail(customer.email);
           if (user) {
@@ -4156,7 +4228,7 @@ return res.json({
 
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
-        
+
         if (invoice.customer && invoice.customer_email) {
           const user = await storage.getUserByEmail(invoice.customer_email);
           if (user) {
@@ -4188,42 +4260,42 @@ return res.json({
 
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        
+
         // Check if this is a credit purchase (has packageId in metadata)
         if (paymentIntent.metadata.packageId) {
           try {
             console.log(`Processing credit purchase payment: ${paymentIntent.id}`);
-            
+
             // Import necessary modules
             const { creditPurchases } = await import('@shared/schema');
             const { db } = await import('./db');
             const { eq } = await import('drizzle-orm');
-            
+
             // Update purchase record to completed
             await db
               .update(creditPurchases)
-              .set({ 
-                status: 'completed', 
-                completedAt: new Date() 
+              .set({
+                status: 'completed',
+                completedAt: new Date()
               })
               .where(eq(creditPurchases.stripePaymentIntentId, paymentIntent.id));
-            
+
             // Add credits to user account if authenticated
             const userId = paymentIntent.metadata.userId;
             if (userId && userId !== 'guest') {
               const credits = parseInt(paymentIntent.metadata.credits);
-              
+
               // Get current user
               const user = await storage.getUser(userId);
               if (user) {
                 // Add credits to user account
                 const newCredits = (user.purchasedCredits || 0) + credits;
-                await storage.updateUser(userId, { 
-                  purchasedCredits: newCredits 
+                await storage.updateUser(userId, {
+                  purchasedCredits: newCredits
                 });
-                
+
                 console.log(`Added ${credits} credits to user ${userId}. Total: ${newCredits}`);
-                
+
                 // Send credit-specific confirmation email if we have user email
                 if (user.email) {
                   try {
@@ -4239,11 +4311,11 @@ return res.json({
                         credits: credits
                       }
                     );
-                    
+
                     // Also send detailed receipt
                     const packageName = paymentIntent.metadata.packageName || `${credits} Credits`;
                     const pricePerCredit = `${(paymentIntent.amount / 100 / credits).toFixed(3)}¢`;
-                    
+
                     await emailService.sendCreditPurchaseReceipt(
                       user.email,
                       user.firstName || 'Valued Customer',
@@ -4262,7 +4334,7 @@ return res.json({
                 }
               }
             }
-            
+
             console.log(`Successfully processed credit purchase for ${paymentIntent.metadata.credits} credits`);
           } catch (error) {
             console.error('Error processing credit purchase:', error);
@@ -4295,7 +4367,7 @@ return res.json({
 
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
-        
+
         if (invoice.customer && invoice.customer_email) {
           const user = await storage.getUserByEmail(invoice.customer_email);
           if (user) {
@@ -4318,17 +4390,17 @@ return res.json({
 
       case 'payment_intent.payment_failed': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        
+
         // Check if this is a credit purchase that failed
         if (paymentIntent.metadata.packageId && paymentIntent.metadata.userId) {
           try {
             const userId = paymentIntent.metadata.userId;
             const user = await storage.getUser(userId);
-            
+
             if (user && user.email) {
               const packageName = paymentIntent.metadata.packageName || `${paymentIntent.metadata.credits} Credits`;
               const amount = `$${(paymentIntent.amount / 100).toFixed(2)}`;
-              
+
               // Send credit purchase failure notification
               await emailService.sendPaymentFailureForCredits(
                 user.email,
@@ -4337,15 +4409,15 @@ return res.json({
                 amount
               );
               console.log(`Credit purchase failure notification sent to ${user.email}`);
-              
+
               // Update purchase record to failed
               const { creditPurchases } = await import('@shared/schema');
               const { db } = await import('./db');
               const { eq } = await import('drizzle-orm');
-              
+
               await db
                 .update(creditPurchases)
-                .set({ 
+                .set({
                   status: 'failed',
                   completedAt: new Date()
                 })
@@ -4369,7 +4441,7 @@ return res.json({
   app.post("/api/monitor-usage", async (req, res) => {
     try {
       const { email, firstName, tierName, compressions, conversions, usagePercent } = req.body;
-      
+
       if (!email || !firstName || !tierName) {
         return res.status(400).json({ error: "Missing required fields" });
       }
@@ -4405,7 +4477,7 @@ return res.json({
   app.post("/api/send-daily-report", async (req, res) => {
     try {
       const { email, firstName, stats } = req.body;
-      
+
       if (!email || !firstName || !stats) {
         return res.status(400).json({ error: "Missing required fields" });
       }
@@ -4425,7 +4497,7 @@ return res.json({
     try {
       const { operationType, fileFormat, fileSizeMb, interface: interfaceType } = req.body;
       const sessionId = req.headers['x-session-id'] as string;
-      
+
       if (!operationType || !fileFormat || !fileSizeMb) {
         return res.status(400).json({ error: "Missing required fields" });
       }
@@ -4440,7 +4512,7 @@ return res.json({
         const user = await storage.getUser(userId);
         userType = user?.subscriptionTier || 'free';
       }
-      
+
       const dualTracker = new DualUsageTracker(userId, sessionId, userType);
       // Create a fake filename for tracking - format determines the file type
       const fakeFilename = `file.${fileFormat}`;
@@ -4518,7 +4590,7 @@ return res.json({
 
       const { tier } = req.body;
       const sessionUser = req.user;
-      
+
       if (!sessionUser) {
         return res.status(404).json({ message: "User not found" });
       }
@@ -4607,7 +4679,7 @@ return res.json({
 
       // Check subscription status properly (including development toggle)
       let isPremium = false;
-      
+
       // Check if manually set to premium (for development/testing)
       if (user.isPremium) {
         isPremium = true;
@@ -4620,7 +4692,7 @@ return res.json({
           isPremium = false;
         }
       }
-      
+
       if (isPremium) {
         return res.json({
           isPremium: true,
@@ -4696,12 +4768,12 @@ return res.json({
       const user = req.user;
       const sessionId = req.body.sessionId || req.sessionID;
       const userId = user?.id || null; // Now optional for guest users
-      
+
       // Apply tier-based restrictions
       if (user) {
         // Check batch size limits (max 20 files for all users)
         if (files.length > 20) {
-          return res.status(400).json({ 
+          return res.status(400).json({
             error: "Maximum 20 files per batch",
             limit: 20,
             current: files.length,
@@ -4724,10 +4796,10 @@ return res.json({
       } else {
         // Anonymous user limits using unified plan configuration
         const anonPlan = getUnifiedPlan('anonymous');
-        
+
         // Enforce 1 concurrent upload for anonymous users
         if (files.length > anonPlan.limits.maxConcurrentUploads) {
-          return res.status(400).json({ 
+          return res.status(400).json({
             error: `Free users can only upload ${anonPlan.limits.maxConcurrentUploads} file at a time. Sign up for batch uploads!`,
             limit: anonPlan.limits.maxConcurrentUploads,
             current: files.length
@@ -4738,7 +4810,7 @@ return res.json({
         for (const file of files) {
           if (file.size > anonPlan.limits.maxFileSize) {
             const maxSizeMB = Math.round(anonPlan.limits.maxFileSize / (1024 * 1024));
-            return res.status(413).json({ 
+            return res.status(413).json({
               error: `File "${file.originalname}" exceeds the ${maxSizeMB}MB limit for free users. Sign up for larger files!`,
               limit: anonPlan.limits.maxFileSize,
               fileSize: file.size,
@@ -4748,9 +4820,9 @@ return res.json({
         }
       }
 
-      const { 
-        qualityLevel = "medium", 
-        resizeOption = "none", 
+      const {
+        qualityLevel = "medium",
+        resizeOption = "none",
         outputFormat = "jpeg",
         customQuality = 95,
         compressionAlgorithm = "standard",
@@ -4764,18 +4836,18 @@ return res.json({
       } = req.body;
 
       // All output formats are supported for all users
-      
+
       // Check operation limits using unified counter
       for (const file of files) {
         // Use DualUsageTracker for limit checking
         const pageIdentifier = (req as any).context?.pageIdentifier || '/';
         const dualTracker = new DualUsageTracker(userId, req.sessionID, 'anonymous'); // Guest compression always uses anonymous plan
-        
+
         const operationCheck = await dualTracker.canPerformOperation(file.originalname, file.size, pageIdentifier);
-        
+
         if (!operationCheck.allowed) {
-          
-          
+
+
           return res.status(429).json({
             error: "Operation limit exceeded",
             message: operationCheck.reason,
@@ -4847,15 +4919,15 @@ return res.json({
         'Pragma': 'no-cache',
         'Expires': '0'
       });
-      
+
       const job = await storage.getCompressionJob(req.params.id);
       if (!job) {
         return res.status(404).json({ error: "Job not found" });
       }
-      
+
       // Add preview images as base64 data URLs
       let jobWithPreview: any = { ...job };
-      
+
       // Add original image preview
       if (job.originalPath) {
         try {
@@ -4866,7 +4938,7 @@ return res.json({
           console.warn(`Could not read original preview for job ${job.id}:`, fileError);
         }
       }
-      
+
       // Add compressed image preview (only if compression is completed)
       if (job.status === "completed" && job.compressedPath) {
         try {
@@ -4884,7 +4956,7 @@ return res.json({
           console.warn(`Could not read compressed preview for job ${job.id}:`, fileError);
         }
       }
-      
+
       res.json(jobWithPreview);
     } catch (error) {
       console.error("Get job error:", error);
@@ -4904,9 +4976,9 @@ return res.json({
 
       const sessionId = req.query.sessionId as string || req.sessionID;
       const user = req.user;
-      
+
       console.log(`/api/jobs called - User authenticated: ${!!req.isAuthenticated?.()}, User ID: ${user?.id}, Session ID: ${sessionId}`);
-      
+
       let jobs;
       if (req.isAuthenticated?.() && user?.id) {
         // Authenticated user - get their jobs
@@ -4919,7 +4991,7 @@ return res.json({
         jobs = await storage.getCompressionJobsBySession(sessionId);
         console.log(`Found ${jobs.length} jobs for session ${sessionId}`);
       }
-      
+
       res.json(jobs || []);
     } catch (error) {
       console.error("Get jobs error:", error);
@@ -4933,12 +5005,12 @@ return res.json({
     try {
       console.log(`Requesting original preview for job: ${req.params.id}`);
       const job = await storage.getCompressionJob(req.params.id);
-      
+
       if (!job) {
         console.log(`Job not found: ${req.params.id}`);
         return res.status(404).json({ error: "Original image not found" });
       }
-      
+
       if (!job.originalPath) {
         console.log(`No original path for job: ${req.params.id}`);
         return res.status(404).json({ error: "Original image path not found" });
@@ -4964,7 +5036,7 @@ return res.json({
       // Stream the file efficiently using createReadStream for better performance
       const stream = createReadStream(job.originalPath);
       stream.pipe(res);
-      
+
       // Handle stream errors
       stream.on('error', (streamError) => {
         console.error(`Stream error for job ${req.params.id}:`, streamError);
@@ -5009,7 +5081,7 @@ return res.json({
       // Stream the file efficiently using createReadStream for better performance
       const stream = createReadStream(job.compressedPath);
       stream.pipe(res);
-      
+
       // Handle stream errors
       stream.on('error', (streamError) => {
         console.error('Stream error:', streamError);
@@ -5032,7 +5104,7 @@ return res.json({
         // Check TIFF first since JPG might be a preview file, not the actual conversion
         const specialFormatExtensions = ['tiff', 'avif', 'webp', 'png', 'jpg', 'jpeg'];
         let filePath = null;
-        
+
         for (const ext of specialFormatExtensions) {
           const potentialPath = path.join("converted", `${req.params.id}.${ext}`);
           try {
@@ -5043,15 +5115,15 @@ return res.json({
             // File doesn't exist with this extension, try next
           }
         }
-        
+
         if (!filePath) {
           return res.status(404).json({ error: "Compressed file not found" });
         }
-        
+
         // Handle special format conversion download
         const stats = await fs.stat(filePath);
         const ext = path.extname(filePath).substring(1).toLowerCase();
-        
+
         let contentType;
         switch (ext) {
           case 'png': contentType = 'image/png'; break;
@@ -5062,16 +5134,16 @@ return res.json({
           case 'tiff': contentType = 'image/tiff'; break;
           default: contentType = 'application/octet-stream';
         }
-        
+
         const downloadName = `converted_image.${ext}`;
-        
+
         res.setHeader('Content-Type', contentType);
         res.setHeader('Content-Disposition', `attachment; filename="${downloadName}"`);
         res.setHeader('Content-Length', stats.size);
-        
+
         const fileStream = createReadStream(filePath);
         fileStream.pipe(res);
-        
+
         console.log(`Special format download: ${filePath} (${stats.size} bytes) as ${downloadName}`);
         return;
       }
@@ -5085,7 +5157,7 @@ return res.json({
       // Set correct filename with proper extension based on output format
       const originalName = job.originalFilename.replace(/\.[^/.]+$/, ""); // Remove original extension
       let extension, contentType;
-      
+
       switch (job.outputFormat) {
         case 'webp':
           extension = 'webp';
@@ -5109,32 +5181,32 @@ return res.json({
           contentType = 'image/jpeg';
           break;
       }
-      
+
       const filename = `compressed_${originalName}.${extension}`;
-      
+
       console.log(`Download filename: ${filename}`);
       console.log(`Content-Type: ${contentType}`);
       console.log(`Extension: ${extension}`);
-      
+
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.setHeader('Content-Type', contentType);
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.setHeader('Pragma', 'no-cache');
       res.setHeader('Expires', '0');
-      
+
       // Check if local file exists, if not fallback to R2 CDN
       try {
         const stats = await fs.stat(job.compressedPath);
         console.log(`File size: ${stats.size} bytes`);
         console.log(`=== END DOWNLOAD DEBUG ===`);
-        
+
         // Set Content-Length header for better download performance
         res.setHeader('Content-Length', stats.size);
-        
+
         // Stream the file efficiently instead of loading into memory
         const stream = createReadStream(job.compressedPath);
         stream.pipe(res);
-        
+
         stream.on('error', (streamError) => {
           console.error('Download stream error:', streamError);
           if (!res.headersSent) {
@@ -5143,7 +5215,7 @@ return res.json({
         });
       } catch (localFileError) {
         console.log(`Local file not found: ${job.compressedPath}, checking R2 CDN...`);
-        
+
         // Local file not found, check if we have R2 CDN URL
         if (job.cdnUrl) {
           console.log(`Redirecting to R2 CDN: ${job.cdnUrl}`);
@@ -5242,7 +5314,7 @@ return res.json({
         } catch (accessError) {
           console.warn(`Original file ${job.originalPath} already deleted or not found`);
         }
-        
+
         // Check and delete compressed file
         if (job.compressedPath) {
           try {
@@ -5271,7 +5343,7 @@ return res.json({
     try {
       const sessionId = req.query.sessionId as string || req.sessionID;
       const user = req.user;
-      
+
       let jobs;
       if (req.isAuthenticated?.() && user?.id) {
         // Authenticated user - get their jobs
@@ -5282,7 +5354,7 @@ return res.json({
         console.log(`Clearing jobs for guest session: ${sessionId}`);
         jobs = await storage.getCompressionJobsBySession(sessionId);
       }
-      
+
       // Delete all files with proper existence checks
       for (const job of jobs) {
         try {
@@ -5294,7 +5366,7 @@ return res.json({
           } catch (accessError) {
             console.warn(`Original file for job ${job.id} already deleted: ${job.originalPath}`);
           }
-          
+
           // Check and delete compressed file
           if (job.compressedPath) {
             try {
@@ -5305,7 +5377,7 @@ return res.json({
               console.warn(`Compressed file for job ${job.id} already deleted: ${job.compressedPath}`);
             }
           }
-          
+
           // Delete job from storage after files are handled
           await storage.deleteCompressionJob(job.id);
         } catch (fileError) {
@@ -5409,21 +5481,21 @@ return res.json({
       }
 
       const results = [];
-      
+
       for (const file of files) {
         if (file.size > GUEST_FILE_SIZE_LIMIT) {
-          return res.status(400).json({ 
-            error: `File ${file.originalname} is too large (max 5MB in guest mode)` 
+          return res.status(400).json({
+            error: `File ${file.originalname} is too large (max 5MB in guest mode)`
           });
         }
 
         const jobId = randomUUID();
         const timestamp = new Date().toISOString();
-        
+
         try {
           // Debug file information
           console.log(`Processing file: ${file.originalname}, path: ${file.path}, size: ${file.size}`);
-          
+
           // Check if file exists
           try {
             await fs.access(file.path);
@@ -5431,16 +5503,16 @@ return res.json({
             console.error(`File does not exist at path: ${file.path}`);
             throw new Error(`File not found: ${file.path}`);
           }
-          
+
           // Read the file from disk since multer stores it there
           const fileBuffer = await fs.readFile(file.path);
           console.log(`File buffer size: ${fileBuffer.length}`);
-          
+
           // Validate that we have a valid image buffer
           if (fileBuffer.length === 0) {
             throw new Error('Empty file buffer');
           }
-          
+
           // Compress the image
           const compressedBuffer = await sharp(fileBuffer)
             .jpeg({ quality: GUEST_QUALITY, progressive: true })
@@ -5462,8 +5534,8 @@ return res.json({
 
         } catch (error) {
           console.error(`Error compressing ${file.originalname}:`, error);
-          return res.status(500).json({ 
-            error: `Failed to compress ${file.originalname}` 
+          return res.status(500).json({
+            error: `Failed to compress ${file.originalname}`
           });
         } finally {
           // Clean up temporary file
@@ -5478,7 +5550,7 @@ return res.json({
       // Track usage after successful compression using DualUsageTracker
       const pageIdentifier = (req as any).context?.pageIdentifier || '/';
       const dualTracker = new DualUsageTracker(userId, req.sessionID, 'anonymous'); // Guest compression always uses anonymous plan
-      
+
       for (const file of files) {
         await dualTracker.recordOperation(file.originalname, file.size, pageIdentifier);
       }
@@ -5494,7 +5566,7 @@ return res.json({
     try {
       const { fileId } = req.params;
       const guestFile = storage.getGuestFile(fileId);
-      
+
       if (!guestFile) {
         return res.status(404).json({ error: 'File not found' });
       }
@@ -5566,7 +5638,7 @@ return res.json({
       if (userId) {
         try {
           const updatedRewards = await storage.addRewardPoints(userId, rewardPoints, 'social_share', share.id);
-          
+
           // Check if they unlocked a new discount level
           const newDiscountPercent = calculateDiscountFromPoints(updatedRewards.totalPoints);
           if (newDiscountPercent > updatedRewards.currentDiscountPercent) {
@@ -5584,7 +5656,7 @@ return res.json({
         shareId: share.id,
         rewardPoints: userId ? rewardPoints : 0,
         discountMessage,
-        message: userId 
+        message: userId
           ? `Share recorded! You earned ${rewardPoints} reward points.`
           : 'Share recorded! Sign up to start earning reward points.'
       });
@@ -5606,10 +5678,10 @@ return res.json({
 
       // Get user's rewards info
       const rewards = await storage.getUserRewards(userId);
-      
+
       // Get recent shares
       const recentShares = await storage.getUserShares(userId, 10);
-      
+
       // Get referral info
       const referralInfo = await storage.getUserReferral(userId);
 
@@ -5646,7 +5718,7 @@ return res.json({
 
       // Check if user already has a referral code
       let referralInfo = await storage.getUserReferral(userId);
-      
+
       if (!referralInfo) {
         // Generate new referral code
         const referralCode = generateReferralCode();
@@ -5669,11 +5741,11 @@ return res.json({
   // Social sharing tracking endpoint (simple version)
   app.post('/api/social-share', async (req, res) => {
     const { platform, timestamp } = req.body;
-    
+
     // Points system for social sharing
     const points = {
       twitter: 5,
-      linkedin: 7, 
+      linkedin: 7,
       facebook: 6,
       instagram: 8,
       twitter_app: 5,
@@ -5687,15 +5759,15 @@ return res.json({
     };
 
     const earnedPoints = points[platform as keyof typeof points] || 0;
-    
+
     // Here you could save to database if needed
     console.log(`Social share tracked: ${platform} at ${timestamp}, earned ${earnedPoints} points`);
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       platform,
       points: earnedPoints,
-      timestamp 
+      timestamp
     });
   });
 
@@ -5705,30 +5777,30 @@ return res.json({
       // Use the same session logic as the conversion endpoint
       const sessionId = req.query.sessionId as string || req.sessionID;
       const TRIAL_LIMIT = 5; // 5 free special format conversions
-      
+
       // Get current trial usage from session
       const sessionKey = `special_trial_${sessionId}`;
       let trialUsage = 0;
-      
+
       // In a real implementation, you'd store this in Redis or database
       // For now, using in-memory storage (will reset on server restart)
       if (!global.trialUsage) {
         global.trialUsage = new Map();
       }
-      
+
       trialUsage = global.trialUsage.get(sessionKey) || 0;
       const remaining = Math.max(0, TRIAL_LIMIT - trialUsage);
       const allowed = remaining > 0;
-      
+
       // Debug logging
       console.log(`Trial status check - SessionID: ${sessionId}, SessionKey: ${sessionKey}, Usage: ${trialUsage}, Remaining: ${remaining}`);
-      
+
       res.json({
         allowed,
         remaining,
         total: TRIAL_LIMIT,
         used: trialUsage,
-        message: remaining === 0 
+        message: remaining === 0
           ? "Free trial exhausted. Upgrade to premium for unlimited professional format conversions."
           : `${remaining} free conversions remaining`
       });
@@ -5742,39 +5814,39 @@ return res.json({
   app.post('/api/lead-magnet', async (req, res) => {
     try {
       const { email, firstName } = req.body;
-      
+
       if (!email || !email.includes('@')) {
         return res.status(400).json({ error: 'Valid email address is required' });
       }
-      
+
       const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
       const userAgent = req.headers['user-agent'] || 'unknown';
-      
+
       // Check for existing signup with same email
       const existingSignup = await storage.getLeadMagnetSignup(email);
       if (existingSignup) {
-        return res.status(409).json({ 
+        return res.status(409).json({
           error: 'Email already registered for free credits',
-          message: 'This email has already received the free credits and guide. Check your inbox or contact support.' 
+          message: 'This email has already received the free credits and guide. Check your inbox or contact support.'
         });
       }
-      
+
       // Check for IP-based abuse (max 3 signups per IP per day)
       const ipSignupCount = await storage.getLeadMagnetSignupCountByIP(ipAddress);
       if (ipSignupCount >= 3) {
-        
-        return res.status(429).json({ 
+
+        return res.status(429).json({
           error: 'Too many signups from this location',
-          message: 'Maximum 3 signups per day from the same location. Please try again tomorrow.' 
+          message: 'Maximum 3 signups per day from the same location. Please try again tomorrow.'
         });
       }
-      
+
       console.log(`Processing lead magnet signup for: ${email}`);
-      
+
       // Create lead magnet signup record with 90-day credit expiry
       const expiresAt = new Date();
       expiresAt.setDate(expiresAt.getDate() + 90); // Credits expire in 90 days
-      
+
       const signupRecord = await storage.createLeadMagnetSignup({
         email,
         firstName: firstName || null,
@@ -5785,14 +5857,14 @@ return res.json({
         status: 'active',
         expiresAt,
       });
-      
+
       // Send email with improved deliverability
       const success = await emailService.sendLeadMagnetGuide(email, firstName);
-      
+
       if (success) {
         console.log(`✓ Lead magnet guide sent successfully to ${email}`);
-        res.json({ 
-          success: true, 
+        res.json({
+          success: true,
           message: 'Guide sent successfully! Check your email for your free credits and optimization guide.',
           credits: 1000,
           expiresAt: expiresAt.toISOString()
@@ -5801,8 +5873,8 @@ return res.json({
         // If email fails, remove the signup record to allow retry
         await storage.deleteLeadMagnetSignup(signupRecord.id);
         console.error(`✗ Failed to send lead magnet guide to ${email}`);
-        res.status(500).json({ 
-          error: 'Failed to send guide. Please try again.' 
+        res.status(500).json({
+          error: 'Failed to send guide. Please try again.'
         });
       }
     } catch (error) {
@@ -5815,7 +5887,7 @@ return res.json({
   app.post('/api/test-emails', async (req: any, res) => {
     try {
       const { emailType, testEmail } = req.body;
-      
+
       if (!testEmail || !emailType) {
         return res.status(400).json({ error: 'Email address and email type are required' });
       }
@@ -5913,8 +5985,8 @@ return res.json({
           break;
 
         default:
-          return res.status(400).json({ 
-            error: 'Invalid email type. Use: conversion_complete, trial_warning, trial_exhausted, standard_compression_complete, daily_limit_warning, upgrade_file_size, upgrade_daily_limit, upgrade_advanced_features' 
+          return res.status(400).json({
+            error: 'Invalid email type. Use: conversion_complete, trial_warning, trial_exhausted, standard_compression_complete, daily_limit_warning, upgrade_file_size, upgrade_daily_limit, upgrade_advanced_features'
           });
       }
 
@@ -5927,7 +5999,7 @@ return res.json({
 
     } catch (error) {
       console.error('Email test error:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Failed to send test email',
         message: error instanceof Error ? error.message : 'Unknown error'
       });
@@ -5938,7 +6010,7 @@ return res.json({
   app.post("/api/reset-raw-usage", async (req, res) => {
     try {
       console.log('🔧 Universal RAW reset initiated for all anonymous users');
-      
+
       // Reset ALL anonymous users' RAW counters to be robust
       const result = await db.update(userUsage)
         .set({
@@ -5948,12 +6020,12 @@ return res.json({
           updatedAt: new Date()
         })
         .where(eq(userUsage.userId, 'anonymous'));
-        
+
       console.log('🔧 Universal reset result:', result);
-      
-      res.json({ 
-        success: true, 
-        message: "All RAW usage counters reset to 0", 
+
+      res.json({
+        success: true,
+        message: "All RAW usage counters reset to 0",
         resetType: "universal_anonymous"
       });
     } catch (error) {
@@ -5974,20 +6046,20 @@ return res.json({
       if (!outputFormat) {
         return res.status(400).json({ error: "Output format is required" });
       }
-      
+
       // Parse advanced quality settings with proper percentage handling
       const qualityValue = quality ? parseInt(quality, 10) : 95;
       const shouldResize = resize === 'true';
       const resizePercentageValue = resizePercentage ? parseInt(resizePercentage, 10) : 100;
-      
+
       // Only use width/height if NOT using percentage mode (to fix resize bug)
       const customWidth = (!shouldResize || resizePercentageValue === 100) ? (width ? parseInt(width, 10) : 2560) : 0;
       const customHeight = (!shouldResize || resizePercentageValue === 100) ? (height ? parseInt(height, 10) : 2560) : 0;
       const maintainAspectRatio = maintainAspect !== 'false';
-      
+
       console.log(`🔧 CR2 RESIZE DEBUG: resize=${resize}, shouldResize=${shouldResize}, resizePercentage=${resizePercentageValue}, width=${customWidth}, height=${customWidth}`);
       console.log(`🔧 CR2 RAW BODY:`, JSON.stringify(req.body, null, 2));
-      
+
 
       // Check if user is authenticated
       const isUserAuthenticated = req.isAuthenticated && req.isAuthenticated();
@@ -6005,24 +6077,24 @@ return res.json({
           console.warn('Failed to check subscription status:', error);
         }
       }
-      
+
       // Check trial limits for guest users
       if (!isUserAuthenticated) {
         const sessionKey = `special_trial_${sessionId}`;
         const TRIAL_LIMIT = 5;
-        
+
         if (!global.trialUsage) {
           global.trialUsage = new Map();
         }
-        
+
         const trialUsage = global.trialUsage.get(sessionKey) || 0;
         const remaining = Math.max(0, TRIAL_LIMIT - trialUsage);
-        
+
         if (remaining <= 0) {
-          return res.status(403).json({ 
-            error: "Trial limit exceeded", 
+          return res.status(403).json({
+            error: "Trial limit exceeded",
             message: "Free trial exhausted. Upgrade to premium for unlimited professional format conversions.",
-            requiresUpgrade: true 
+            requiresUpgrade: true
           });
         }
       }
@@ -6030,10 +6102,10 @@ return res.json({
       // Special formats require premium subscription for authenticated users
       // Allow guest users with trial limits
       if (isUserAuthenticated && !isPremiumUser) {
-        return res.status(403).json({ 
-          error: "Premium subscription required", 
+        return res.status(403).json({
+          error: "Premium subscription required",
           message: "Special format conversions require a premium subscription. Please upgrade to continue.",
-          requiresUpgrade: true 
+          requiresUpgrade: true
         });
       }
 
@@ -6054,8 +6126,8 @@ return res.json({
 
       // Check batch limits
       if (files.length > 20) {
-        return res.status(400).json({ 
-          error: "Batch size limit exceeded", 
+        return res.status(400).json({
+          error: "Batch size limit exceeded",
           message: "Maximum 20 files per batch",
 
         });
@@ -6069,7 +6141,7 @@ return res.json({
         try {
           const jobId = randomUUID();
           const originalFormat = getFileFormat(file.originalname);
-          
+
           // Determine output extension
           const outputExtension = outputFormat === 'jpeg' ? 'jpg' : outputFormat;
           const outputPath = path.join("converted", `${jobId}.${outputExtension}`);
@@ -6091,7 +6163,7 @@ return res.json({
             maintainAspect: maintainAspectRatio,
             resizePercentage: resizePercentageValue
           });
-          
+
           const conversionResult = await processSpecialFormatConversion(
             file.path,
             outputPath,
@@ -6107,7 +6179,7 @@ return res.json({
             }
           );
           const convertedStats = await fs.stat(outputPath);
-          
+
           // For special format conversions, skip database operations to prevent crashes
           // Just create a simple job object with the conversion results
           const job = {
@@ -6118,13 +6190,13 @@ return res.json({
             outputFormat,
             status: 'completed'
           };
-          
+
           console.log(`Conversion completed: ${file.originalname} -> ${outputPath}`);
 
           // Generate thumbnail for ALL formats (not just TIFF) and include download/preview URLs
           let previewUrl: string | undefined;
           let downloadUrl: string;
-          
+
           // Generate thumbnail for ALL CR2 conversions for consistent UI experience
           try {
             const thumbnailPath = await generateThumbnailFromRaw(outputPath, path.dirname(outputPath), jobId);
@@ -6135,7 +6207,7 @@ return res.json({
           } catch (thumbnailError) {
             console.warn(`⚠️ Thumbnail generation failed for ${jobId} (${outputFormat}):`, thumbnailError);
           }
-          
+
           // Always include download URL
           downloadUrl = `/api/download/${jobId}`;
 
@@ -6159,7 +6231,7 @@ return res.json({
               const pageIdentifier = '/convert/cr2-to-png';
               const userType = isUserAuthenticated ? 'authenticated' : 'anonymous';
               const dualTracker = new (await import('./services/DualUsageTracker')).DualUsageTracker(
-                userId || undefined, 
+                userId || undefined,
                 sessionId,
                 userType
               );
@@ -6177,7 +6249,7 @@ return res.json({
             const newUsage = currentUsage + 1;
             global.trialUsage.set(sessionKey, newUsage);
             console.log(`Trial usage incremented - SessionID: ${sessionId}, SessionKey: ${sessionKey}, Usage: ${newUsage}/5`);
-            
+
             // Send trial warning email when reaching 80% usage (4/5)
             if (newUsage === 4) {
               console.log('Trial warning threshold reached (4/5 conversions used)');
@@ -6188,7 +6260,7 @@ return res.json({
               //   console.error('Failed to send trial warning email:', emailError);
               // }
             }
-            
+
             // Send trial exhausted email when limit is reached (5/5)
             if (newUsage >= 5) {
               console.log('Trial limit exhausted - sending notification email');
@@ -6218,19 +6290,19 @@ return res.json({
         const totalConvertedSize = completedResults.reduce((sum, r) => sum + (r.convertedSize || 0), 0);
         const originalFormats = [...new Set(completedResults.map(r => r.originalFormat).filter(Boolean))];
         const conversionTypes = originalFormats.map(format => `${format?.toUpperCase()} → ${outputFormat.toUpperCase()}`);
-        
+
         // Get trial status for email content
         const sessionKey = `special_trial_${sessionId}`;
         const currentTrialUsage = global.trialUsage?.get(sessionKey) || 0;
         const trialRemaining = Math.max(0, 5 - currentTrialUsage);
-        
+
         // Send email notification for guest users or authenticated users with email
         const shouldSendEmail = !isUserAuthenticated; // For now, only send to guest users
-        
+
         if (shouldSendEmail) {
           // For guest users, we don't have email - could be enhanced to collect email for notifications
           console.log('Email notification skipped for guest user (no email collected)');
-          
+
           // When we have email collection for guest users or authenticated users:
           // try {
           //   await emailService.sendSpecialFormatConversionComplete(
@@ -6261,7 +6333,7 @@ return res.json({
 
     } catch (error) {
       console.error("Special format conversion error:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Failed to process special format conversion",
         message: error instanceof Error ? error.message : "Unknown error"
       });
@@ -6331,17 +6403,17 @@ return res.json({
 
       console.log(`PayPal subscription activated for user ${userId}: Plan=${plan}, Payment=${paymentId}`);
 
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         message: 'Subscription activated successfully',
         plan: plan,
         validUntil: subscriptionEndDate
       });
     } catch (error) {
       console.error('PayPal subscription activation error:', error);
-      res.status(500).json({ 
-        success: false, 
-        error: 'Failed to activate subscription' 
+      res.status(500).json({
+        success: false,
+        error: 'Failed to activate subscription'
       });
     }
   });
@@ -6367,10 +6439,10 @@ return res.json({
         'enterprise': 'enterprise',
         'free': 'free'
       };
-  
+
       const plan = planMapping[planId] || 'free';
       const subscriptionEndDate = new Date();
-      
+
       if (plan !== 'free') {
         subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1); // 1 month subscription
       }
@@ -6387,8 +6459,8 @@ return res.json({
         })
         .where(eq(users.id, userId));
 
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         message: `Successfully upgraded to ${plan} plan`,
         subscription: {
           plan,
@@ -6399,29 +6471,29 @@ return res.json({
 
     } catch (error) {
       console.error('Legacy subscription creation failed:', error);
-      res.status(500).json({ 
-        success: false, 
+      res.status(500).json({
+        success: false,
         message: 'Failed to create subscription',
-        error: error.message 
+        error: error.message
       });
     }
   });
 
-   // ✅ ADD THE NEW ENDPOINT HERE (AFTER the closing bracket above):
+  // ✅ ADD THE NEW ENDPOINT HERE (AFTER the closing bracket above):
   app.post('/api/payment/paypal/onetime', isAuthenticated, async (req, res) => {
     const { plan, paypal_order_id, amount, duration, billing } = req.body;
-    
+
     try {
       const userId = req.user?.id;
-      
+
       if (!userId) {
         return res.status(401).json({ success: false, error: 'Not authenticated' });
       }
-      
+
       // Calculate expiry date
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + (duration || 30));
-      
+
       // Update user subscription
       await storage.updateUser(userId, {
         subscriptionTier: plan.includes('starter') ? 'starter' : plan.includes('pro') ? 'premium' : 'enterprise',
@@ -6429,15 +6501,15 @@ return res.json({
         subscriptionEndDate: expiryDate,
         stripeSubscriptionId: paypal_order_id
       });
-      
+
       console.log(`One-time payment processed: User ${userId}, Plan ${plan}, Order ${paypal_order_id}`);
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         message: 'Subscription activated',
-        expiry: expiryDate 
+        expiry: expiryDate
       });
-      
+
     } catch (error) {
       console.error('One-time payment error:', error);
       res.status(500).json({ success: false, error: 'Failed to process payment' });
@@ -6448,7 +6520,7 @@ return res.json({
   app.post("/api/contact", async (req, res) => {
     try {
       const { name, email, subject, message } = req.body;
-      
+
       if (!name || !email || !message) {
         return res.status(400).json({ message: "Missing required fields" });
       }
@@ -6484,7 +6556,7 @@ return res.json({
   app.post("/api/feedback", async (req, res) => {
     try {
       const { message, email } = req.body;
-      
+
       if (!message) {
         return res.status(400).json({ message: "Feedback message is required" });
       }
@@ -6563,7 +6635,7 @@ async function compressImage(
 ) {
   try {
     console.log(`Starting advanced compression for job ${jobId} with algorithm: ${options.compressionAlgorithm}`);
-    
+
     // Update job status to processing
     await storage.updateCompressionJob(jobId, { status: "processing" });
     console.log(`Updated job ${jobId} status to processing`);
@@ -6595,8 +6667,8 @@ async function compressImage(
 
     // Get original image metadata
     const metadata = await sharpInstance.metadata();
-    console.log(`Image metadata for job ${jobId}:`, { 
-      width: metadata.width, 
+    console.log(`Image metadata for job ${jobId}:`, {
+      width: metadata.width,
       height: metadata.height,
       format: metadata.format,
       colorSpace: metadata.space,
@@ -6606,11 +6678,11 @@ async function compressImage(
     // Fast mode always enabled for maximum speed
     console.log(`Fast mode enabled for job ${jobId} - minimal processing for speed`);
     // Skipping all expensive operations for speed
-    
+
     // Apply advanced resize options
     if (options.resizeOption !== "none" && metadata.width && metadata.height) {
       let targetWidth: number, targetHeight: number;
-      
+
       if (options.resizeOption === "custom" && options.customWidth && options.customHeight) {
         targetWidth = options.customWidth;
         targetHeight = options.customHeight;
@@ -6619,7 +6691,7 @@ async function compressImage(
         targetWidth = Math.round(metadata.width * scale);
         targetHeight = Math.round(metadata.height * scale);
       }
-      
+
       // Use advanced resampling for better quality
       sharpInstance = sharpInstance.resize(targetWidth, targetHeight, {
         kernel: options.fastMode ? sharp.kernel.nearest : sharp.kernel.lanczos3, // Fast vs high-quality resampling
@@ -6631,7 +6703,7 @@ async function compressImage(
     // Determine output format and extension
     let fileExtension: string;
     let mimeType: string;
-    
+
     switch (options.outputFormat) {
       case "png":
         fileExtension = "png";
@@ -6649,10 +6721,10 @@ async function compressImage(
         fileExtension = "jpg";
         mimeType = "image/jpeg";
     }
-    
+
     const outputPath = path.join("compressed", `${jobId}.${fileExtension}`);
     console.log(`Output path for job ${jobId}: ${outputPath}`);
-    
+
     // Apply format-specific compression with advanced options
     if (options.outputFormat === "png") {
       // PNG compression with optimization
@@ -6664,84 +6736,84 @@ async function compressImage(
         colors: quality < 60 ? 64 : quality < 80 ? 128 : 256, // Reduce colors for smaller files
         dither: 1.0 // Add dithering to reduce banding
       };
-      
+
       // Progressive PNG for larger images
       if (metadata.width && metadata.height && metadata.width * metadata.height > 500000) {
         pngOptions.progressive = true;
       }
-      
+
       sharpInstance = sharpInstance.png(pngOptions);
     } else if (options.outputFormat === "webp") {
-  // WebP optimization: Check file size and adjust settings
-  let webpEffort = 6;  // Default effort
-  
-  try {
-    const fileStats = await fs.stat(file.path);
-    const fileSizeMB = fileStats.size / (1024 * 1024);
-    
-    console.log(`📊 WebP processing: ${fileSizeMB.toFixed(1)}MB file`);
-    
-    if (fileSizeMB > 50) {
-      // Very large files: use fastest settings
-      webpEffort = 3;
-      console.log(`⚡ Very large file - WebP effort:3`);
-    } else if (fileSizeMB > 30) {
-      // Large files: use fast settings
-      webpEffort = 4;
-      console.log(`⚡ Large file - WebP effort:4`);
-    } else if (fileSizeMB > 10) {
-      // Medium files: balanced settings
-      webpEffort = 5;
-      console.log(`📊 Medium file - WebP effort:5`);
-    }
-    // Small files (<10MB) use default effort:6
-  } catch (err) {
-    console.error('⚠️ Could not check file size for WebP:', err);
-    webpEffort = 4; // Default to faster setting for safety
-  }
-  
-  sharpInstance = sharpInstance.webp({
-    quality,
-    effort: webpEffort, // Dynamic effort based on file size (was always 6)
-    lossless: quality >= 95,
-    nearLossless: quality >= 90 && quality < 95,
-    smartSubsample: true
-  });
+      // WebP optimization: Check file size and adjust settings
+      let webpEffort = 6;  // Default effort
+
+      try {
+        const fileStats = await fs.stat(file.path);
+        const fileSizeMB = fileStats.size / (1024 * 1024);
+
+        console.log(`📊 WebP processing: ${fileSizeMB.toFixed(1)}MB file`);
+
+        if (fileSizeMB > 50) {
+          // Very large files: use fastest settings
+          webpEffort = 3;
+          console.log(`⚡ Very large file - WebP effort:3`);
+        } else if (fileSizeMB > 30) {
+          // Large files: use fast settings
+          webpEffort = 4;
+          console.log(`⚡ Large file - WebP effort:4`);
+        } else if (fileSizeMB > 10) {
+          // Medium files: balanced settings
+          webpEffort = 5;
+          console.log(`📊 Medium file - WebP effort:5`);
+        }
+        // Small files (<10MB) use default effort:6
+      } catch (err) {
+        console.error('⚠️ Could not check file size for WebP:', err);
+        webpEffort = 4; // Default to faster setting for safety
+      }
+
+      sharpInstance = sharpInstance.webp({
+        quality,
+        effort: webpEffort, // Dynamic effort based on file size (was always 6)
+        lossless: quality >= 95,
+        nearLossless: quality >= 90 && quality < 95,
+        smartSubsample: true
+      });
     } else if (options.outputFormat === "avif") {
-  // AVIF optimization: Check file size and adjust settings
-  let avifEffort = 6;  // Default effort
-  let avifQuality = quality;
-  
-  try {
-    const fileStats = await fs.stat(file.path);
-    const fileSizeMB = fileStats.size / (1024 * 1024);
-    
-    if (fileSizeMB > 50) {
-      // Very large files: use fastest settings
-      avifEffort = 2;
-      avifQuality = Math.min(quality, 65);
-      console.log(`⚠️ Very large file (${fileSizeMB.toFixed(1)}MB) - AVIF effort:2, quality:${avifQuality}`);
-    } else if (fileSizeMB > 30) {
-      // Large files: use fast settings
-      avifEffort = 3;
-      avifQuality = Math.min(quality, 70);
-      console.log(`⚠️ Large file (${fileSizeMB.toFixed(1)}MB) - AVIF effort:3, quality:${avifQuality}`);
-    } else if (fileSizeMB > 10) {
-      // Medium files: balanced settings
-      avifEffort = 4;
-      console.log(`📊 Medium file (${fileSizeMB.toFixed(1)}MB) - AVIF effort:4`);
-    }
-    // Small files (<10MB) use default effort:6
-  } catch (err) {
-    console.log('⚠️ Could not check file size, using default AVIF settings');
-  }
-  
-  sharpInstance = sharpInstance.avif({
-    quality: avifQuality,
-    effort: avifEffort, // Dynamic effort based on file size
-    lossless: false, // Disable lossless for speed
-    chromaSubsampling: '4:2:0' // Always 4:2:0 for speed
-  });
+      // AVIF optimization: Check file size and adjust settings
+      let avifEffort = 6;  // Default effort
+      let avifQuality = quality;
+
+      try {
+        const fileStats = await fs.stat(file.path);
+        const fileSizeMB = fileStats.size / (1024 * 1024);
+
+        if (fileSizeMB > 50) {
+          // Very large files: use fastest settings
+          avifEffort = 2;
+          avifQuality = Math.min(quality, 65);
+          console.log(`⚠️ Very large file (${fileSizeMB.toFixed(1)}MB) - AVIF effort:2, quality:${avifQuality}`);
+        } else if (fileSizeMB > 30) {
+          // Large files: use fast settings
+          avifEffort = 3;
+          avifQuality = Math.min(quality, 70);
+          console.log(`⚠️ Large file (${fileSizeMB.toFixed(1)}MB) - AVIF effort:3, quality:${avifQuality}`);
+        } else if (fileSizeMB > 10) {
+          // Medium files: balanced settings
+          avifEffort = 4;
+          console.log(`📊 Medium file (${fileSizeMB.toFixed(1)}MB) - AVIF effort:4`);
+        }
+        // Small files (<10MB) use default effort:6
+      } catch (err) {
+        console.log('⚠️ Could not check file size, using default AVIF settings');
+      }
+
+      sharpInstance = sharpInstance.avif({
+        quality: avifQuality,
+        effort: avifEffort, // Dynamic effort based on file size
+        lossless: false, // Disable lossless for speed
+        chromaSubsampling: '4:2:0' // Always 4:2:0 for speed
+      });
     } else {
       // JPEG compression options (optimized for fast mode)
       const jpegOptions: any = {
@@ -6752,19 +6824,19 @@ async function compressImage(
         overshootDeringing: true, // Reduce ringing artifacts
         trellisQuantisation: options.compressionAlgorithm === "mozjpeg"
       };
-      
+
       // Advanced JPEG features
       if (options.arithmeticCoding && options.compressionAlgorithm === "mozjpeg") {
         jpegOptions.arithmeticCoding = true;
       }
-      
+
       // Optimize for web: use 4:2:0 chroma subsampling for smaller files
       if (options.optimizeForWeb && quality < 85) {
         jpegOptions.chromaSubsampling = '4:2:0';
       } else if (quality >= 85) {
         jpegOptions.chromaSubsampling = '4:4:4'; // Better quality
       }
-      
+
       sharpInstance = sharpInstance.jpeg(jpegOptions);
     }
 
@@ -6780,7 +6852,7 @@ async function compressImage(
     const startTime = Date.now();
     await sharpInstance.toFile(outputPath);
     const compressionTime = Date.now() - startTime;
-    
+
     console.log(`Compression completed for job ${jobId} in ${compressionTime}ms using ${options.compressionAlgorithm} algorithm`);
     console.log(`Advanced compression completed for job ${jobId}, file saved to ${outputPath}`);
 
@@ -6789,9 +6861,9 @@ async function compressImage(
     const compressedSize = stats.size;
     const compressionRatio = Math.round(((file.size - compressedSize) / file.size) * 100);
     // Calculate compression metrics
-    const compressionEfficiency = compressionRatio > 0 ? 'Excellent' : 
-                                 compressionRatio > -10 ? 'Good' : 'Limited';
-    
+    const compressionEfficiency = compressionRatio > 0 ? 'Excellent' :
+      compressionRatio > -10 ? 'Good' : 'Limited';
+
     console.log(`Job ${jobId} - Original: ${file.size} bytes, Compressed: ${compressedSize} bytes`);
     console.log(`Compression ratio: ${compressionRatio}% (${compressionEfficiency}), Algorithm: ${options.compressionAlgorithm}`);
     console.log(`Quality setting: ${quality}%, Web optimized: ${options.optimizeForWeb}`);
@@ -6808,7 +6880,7 @@ async function compressImage(
       outputFormat: options.outputFormat
     });
     console.log(`Successfully updated job ${jobId} to completed status with ${options.compressionAlgorithm} compression`);
-    
+
     // Generate optimization insights
     const optimizationInsights = generateOptimizationInsights({
       originalSize: file.size,
@@ -6818,9 +6890,9 @@ async function compressImage(
       algorithm: options.compressionAlgorithm,
       webOptimized: options.optimizeForWeb
     });
-    
+
     console.log(`Optimization insights for job ${jobId}:`, optimizationInsights.join('; '));
-    
+
     // Log compression analytics
     if (compressionRatio > 0) {
       console.log(`✅ Successful compression: ${compressionRatio}% size reduction`);
@@ -6847,15 +6919,15 @@ async function compressImage(
 // Helper function to detect file format
 function getFileFormat(filename: string): string {
   const ext = filename.split('.').pop()?.toLowerCase() || '';
-  
+
   // RAW formats
   const rawFormats = ['cr2', 'nef', 'arw', 'dng', 'orf', 'raf', 'pef', 'crw', 'erf', 'dcr', 'k25', 'kdc', 'mrw', 'raw', 'sr2', 'srf'];
   if (rawFormats.includes(ext)) return 'raw';
-  
+
   // Standard formats
   if (ext === 'svg') return 'svg';
   if (['tiff', 'tif'].includes(ext)) return 'tiff';
-  
+
   return ext;
 }
 
@@ -6865,7 +6937,7 @@ function getFileFormat(filename: string): string {
 async function getOrCreateTrialRecord(ipAddress: string, userAgent: string, browserFingerprint?: string): Promise<SpecialFormatTrial> {
   const now = new Date();
   const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
-  
+
   // First, clean up expired records
   await db.delete(specialFormatTrials).where(
     gt(now, specialFormatTrials.expiresAt)
@@ -6908,9 +6980,9 @@ async function checkTrialLimit(ipAddress: string, userAgent: string, browserFing
   message?: string;
 }> {
   const trial = await getOrCreateTrialRecord(ipAddress, userAgent, browserFingerprint);
-  
+
   const remaining = trial.maxConversions - trial.conversionsUsed;
-  
+
   if (remaining <= 0) {
     return {
       allowed: false,
@@ -6946,14 +7018,14 @@ async function generateThumbnailFromRaw(inputPath: string, outputDir: string, jo
     // Ensure previews directory exists in the root
     const previewsDir = path.join(process.cwd(), 'previews');
     await fs.mkdir(previewsDir, { recursive: true });
-    
+
     // Use job ID for consistent naming
     const thumbnailPath = path.join(previewsDir, jobId + '_thumb.jpg');
-    
+
     // Generate small, fast JPEG thumbnail from any input format
     const thumbnailCommand = `convert "${inputPath}" -resize "256x256>" -quality 60 -strip "${thumbnailPath}"`;
     console.log(`🖼️ Generating thumbnail from ${inputPath}: ${thumbnailCommand}`);
-    
+
     await execAsync(thumbnailCommand);
     console.log(`✅ Fast thumbnail generated: ${thumbnailPath}`);
     return thumbnailPath;
@@ -6977,14 +7049,14 @@ async function processSpecialFormatConversion(
     maintainAspect: boolean;
     resizePercentage?: number;
   } = {
-    quality: 95,
-    resize: false,
-    width: 2560,
-    height: 2560,
-    maintainAspect: true
-  }
+      quality: 95,
+      resize: false,
+      width: 2560,
+      height: 2560,
+      maintainAspect: true
+    }
 ): Promise<{ success: boolean; outputSize: number; previewPath?: string }> {
-  
+
   // Ensure output directory exists
   const outputDir = path.dirname(outputPath);
   await fs.mkdir(outputDir, { recursive: true });
@@ -6997,38 +7069,38 @@ async function processSpecialFormatConversion(
       // For RAW files, use dcraw to extract to PPM, then convert with ImageMagick
       // This bypasses ImageMagick's TIFF parsing issues with RAW files
       console.log(`Converting RAW file ${inputPath} to ${outputFormat} using dcraw_emu + ImageMagick...`);
-      
+
       // Verify input file exists before conversion
       const inputExists = await fs.access(inputPath).then(() => true).catch(() => false);
       console.log(`Input file exists: ${inputExists}`);
-      
+
       // Step 1: Use dcraw_emu (from libraw) to extract RAW to PPM format (uncompressed RGB)
       const tempPpmPath = inputPath + '_temp.ppm';
       const dcrawCommand = `dcraw_emu -w -T "${inputPath}"`;
       console.log(`Running dcraw_emu command: ${dcrawCommand}`);
       await execAsync(dcrawCommand);
-      
+
       // dcraw_emu creates a .tiff file with the same base name
       const baseName = inputPath.replace(/\.[^/.]+$/, "");
       const tempTiffPath = baseName + '.tiff';
       console.log(`Expected TIFF output: ${tempTiffPath}`);
-      
+
       // Verify TIFF file was created
       const tiffExists = await fs.access(tempTiffPath).then(() => true).catch(() => false);
       console.log(`TIFF file created: ${tiffExists}`);
-      
+
       // Step 2: Convert TIFF to final format using ImageMagick with compression
       let convertCommand;
       let resizeParam = '';
-      
-      
+
+
       // FORCE PNG RESIZE: If resize is requested, get actual dimensions from TIFF and calculate target size
       // Check both explicit resize flag AND percentage < 100 (fallback for parameter issues)  
       const shouldResizeImage = options.resize === true || options.resize === 'true';
       const hasValidPercentage = options.resizePercentage && options.resizePercentage < 100 && options.resizePercentage > 0;
-      
+
       console.log(`🔧 RESIZE CONDITIONS: shouldResizeImage=${shouldResizeImage}, hasValidPercentage=${hasValidPercentage}, resizePercentage=${options.resizePercentage}`);
-      
+
       if ((shouldResizeImage && hasValidPercentage) || hasValidPercentage) {
         // Get actual dimensions from the TIFF file
         const identifyCommand = `identify -ping -format "%wx%h" "${tempTiffPath}"`;
@@ -7036,19 +7108,19 @@ async function processSpecialFormatConversion(
         const dimensionsOutput = await execAsync(identifyCommand);
         const dimensions = dimensionsOutput.stdout.trim();
         const [actualWidth, actualHeight] = dimensions.split('x').map(Number);
-        
+
         console.log(`🔧 RAW actual dimensions: ${actualWidth}x${actualHeight}, Resize to: ${options.resizePercentage}%`);
-        
+
         // Calculate target dimensions based on actual image size and percentage
         const targetWidth = Math.round(actualWidth * (options.resizePercentage / 100));
         const targetHeight = Math.round(actualHeight * (options.resizePercentage / 100));
-        
+
         console.log(`🔧 RAW target dimensions: ${targetWidth}x${targetHeight}`);
         resizeParam = `-resize "${targetWidth}x${targetHeight}!"`;  // Added ! to force exact dimensions
       } else {
         console.log(`🔧 RESIZE DEBUG: No resize requested - options.resize=${options.resize}, options.resizePercentage=${options.resizePercentage}`);
       }
-      
+
       switch (outputFormat) {
         case 'jpeg':
           convertCommand = `convert "${tempTiffPath}" -quality ${options.quality} ${resizeParam} "${outputPath}"`;
@@ -7065,13 +7137,13 @@ async function processSpecialFormatConversion(
         case 'avif':
           convertCommand = `convert "${tempTiffPath}" -quality ${options.quality} ${resizeParam} "${outputPath}"`;
           break;
-          
+
         default:
           throw new Error(`Unsupported output format: ${outputFormat}`);
       }
-      
+
       console.log(`Running ImageMagick convert command: ${convertCommand}`);
-      
+
       // For TIFF output, generate thumbnail in parallel for immediate preview
       let thumbnailPromise: Promise<string | undefined> | undefined;
       if (outputFormat === 'tiff') {
@@ -7079,35 +7151,35 @@ async function processSpecialFormatConversion(
         const outputFilename = path.basename(outputPath, path.extname(outputPath));
         thumbnailPromise = generateThumbnailFromRaw(tempTiffPath, path.dirname(outputPath), outputFilename);
       }
-      
+
       await execAsync(convertCommand);
-      
+
       // Verify output file was created
       const outputExists = await fs.access(outputPath).then(() => true).catch(() => false);
       console.log(`Output file created: ${outputExists}`);
-      
+
       let previewPath: string | undefined;
-      
+
       // Generate preview for TIFF files
       if (outputFormat === 'tiff') {
         try {
           const previewsDir = path.dirname(outputPath).replace('/converted', '/previews');
           await fs.mkdir(previewsDir, { recursive: true });
-          
+
           const outputFilename = path.basename(outputPath, path.extname(outputPath));
           previewPath = path.join(previewsDir, outputFilename + '.jpg');
-          
+
           const previewCommand = `convert "${tempTiffPath}" -resize "512x512>" -quality 70 "${previewPath}"`;
           console.log(`Generating TIFF preview: ${previewCommand}`);
           await execAsync(previewCommand);
-          
+
           console.log(`TIFF preview generated: ${previewPath}`);
         } catch (previewError) {
           console.warn(`Failed to generate TIFF preview:`, previewError);
           previewPath = undefined;
         }
       }
-      
+
       // Clean up temp TIFF file
       try {
         await fs.unlink(tempTiffPath);
@@ -7115,7 +7187,7 @@ async function processSpecialFormatConversion(
       } catch (cleanupError) {
         console.warn(`Failed to clean up temporary TIFF file ${tempTiffPath}:`, cleanupError);
       }
-      
+
       // Wait for thumbnail generation if it was started
       let thumbnailPath: string | undefined;
       if (thumbnailPromise) {
@@ -7126,21 +7198,21 @@ async function processSpecialFormatConversion(
           console.warn(`Thumbnail generation failed:`, thumbnailError);
         }
       }
-      
+
       // Skip Sharp processing for RAW files since we handled everything
       const stats = await fs.stat(outputPath);
       const outputSize = stats.size;
-      
+
       console.log(`✅ RAW conversion completed:`, {
         inputPath,
         outputPath,
         outputSize,
         success: true
       });
-      
+
       return { success: true, outputSize: outputSize, previewPath: thumbnailPath || previewPath };
-      
-help      // Clean up temp file after processing (we'll do this in finally block)
+
+      help      // Clean up temp file after processing (we'll do this in finally block)
     } else if (inputFormat === 'svg') {
       // For SVG files, Sharp handles them natively
       sharpInstance = sharp(inputPath, {
@@ -7164,88 +7236,88 @@ help      // Clean up temp file after processing (we'll do this in finally block
       };
       sharpInstance = sharpInstance.resize(resizeOptions);
     }
-    
+
     // Apply output format conversion
     switch (outputFormat) {
       case 'jpeg':
         await sharpInstance
-          .jpeg({ 
+          .jpeg({
             quality: options.quality,
             progressive: true,
             mozjpeg: true
           })
           .toFile(outputPath);
         break;
-        
+
       case 'png':
         await sharpInstance
-          .png({ 
+          .png({
             quality: options.quality,
             compressionLevel: 8,
             adaptiveFiltering: true
           })
           .toFile(outputPath);
         break;
-        
+
       case 'webp':
         await sharpInstance
-          .webp({ 
+          .webp({
             quality: options.quality,
             effort: 4
           })
           .toFile(outputPath);
         break;
-        
+
       case 'tiff':
         await sharpInstance
-          .tiff({ 
+          .tiff({
             compression: 'jpeg',
             quality: options.quality,
             predictor: 'horizontal'
           })
           .toFile(outputPath);
         break;
-        
+
       case 'avif':
         await sharpInstance
-          .avif({ 
+          .avif({
             quality: 70,  // Slightly lower quality for speed
             effort: 4,    // 0-9, lower = faster (default is 4)
             chromaSubsampling: '4:2:0'  // Reduces quality slightly but much faster
           })
           .toFile(outputPath);
         break;
-        
+
       default:
         throw new Error(`Unsupported output format: ${outputFormat}`);
     }
 
     const stats = await fs.stat(outputPath);
-    
+
     let previewPath: string | undefined;
-    
+
     // Generate preview for TIFF files
     if (outputFormat === 'tiff') {
       try {
         const previewsDir = path.dirname(outputPath).replace('/converted', '/previews');
         await fs.mkdir(previewsDir, { recursive: true });
-        
+
         const outputFilename = path.basename(outputPath, path.extname(outputPath));
         previewPath = path.join(previewsDir, outputFilename + '.jpg');
-        
+
         // Generate preview using Sharp for better quality
         await sharp(outputPath)
           .resize(512, 512, { fit: 'inside', withoutEnlargement: true })
           .jpeg({ quality: 95, progressive: true, mozjpeg: true })
           .toFile(previewPath);
-        
+
         console.log(`TIFF preview generated: ${previewPath}`);
       } catch (previewError) {
         console.warn(`Failed to generate TIFF preview:`, previewError);
         previewPath = undefined;
       }
     }
-    
+
     return { success: true, outputSize: stats.size, previewPath };
 
   } catch (error) {
@@ -7256,23 +7328,23 @@ help      // Clean up temp file after processing (we'll do this in finally block
 
 // Background quality assessment function with timeout
 async function calculateQualityMetricsInBackground(
-  jobId: string, 
-  originalPath: string, 
+  jobId: string,
+  originalPath: string,
   compressedPath: string
 ): Promise<void> {
   const timeoutMs = 10000; // 10 second timeout
-  
+
   try {
     console.log(`Calculating quality metrics for job ${jobId} in background...`);
-    
+
     // Race between quality calculation and timeout
     const qualityMetrics = await Promise.race([
       calculateQualityMetrics(originalPath, compressedPath),
-      new Promise((_, reject) => 
+      new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Quality analysis timeout')), timeoutMs)
       )
     ]) as any;
-    
+
     console.log(`Quality assessment completed - PSNR: ${qualityMetrics.psnr}, SSIM: ${qualityMetrics.ssim}%, Score: ${qualityMetrics.qualityScore}, Grade: ${qualityMetrics.qualityGrade}`);
 
     // Update job with quality metrics
@@ -7282,7 +7354,7 @@ async function calculateQualityMetricsInBackground(
       qualityScore: qualityMetrics.qualityScore,
       qualityGrade: qualityMetrics.qualityGrade,
     });
-    
+
     console.log(`Quality metrics updated for job ${jobId}`);
   } catch (error) {
     if (error instanceof Error && error.message.includes('timeout')) {
@@ -7302,9 +7374,9 @@ export function registerResetEndpoints(app: Express) {
     try {
       const sessionId = req.headers['x-session-id'] || req.body?.sessionId || req.body?.clientSessionId;
       const pageIdentifier = req.headers['x-page-identifier'] || req.body?.pageIdentifier || 'cr2-free';
-      
+
       console.log(`🔧 DEV: Reset counter request - sessionId: ${sessionId}, pageIdentifier: ${pageIdentifier}`);
-      
+
       if (!sessionId) {
         return res.status(400).json({ error: 'Session ID required' });
       }
@@ -7314,7 +7386,7 @@ export function registerResetEndpoints(app: Express) {
       // Try various cache key patterns that might be used
       const cacheKeys = [
         `usage:${sessionId}:${pageIdentifier}`,
-        `session:${sessionId}:${pageIdentifier}`, 
+        `session:${sessionId}:${pageIdentifier}`,
         `counters:${sessionId}:${pageIdentifier}`,
         `daily:${sessionId}:${pageIdentifier}`,
         `monthly:${sessionId}:${pageIdentifier}`
@@ -7370,8 +7442,8 @@ export function registerResetEndpoints(app: Express) {
         console.warn('🔧 DEV: operationLog clear failed:', dbError);
       }
 
-      res.json({ 
-        success: true, 
+      res.json({
+        success: true,
         message: `ALL tracking systems reset for session ${sessionId}`,
         cleared: {
           sessionId,
@@ -7381,7 +7453,7 @@ export function registerResetEndpoints(app: Express) {
           database: ['anonymousSessionScopes', 'userUsage', 'operationLog']
         }
       });
-      
+
     } catch (error) {
       console.error('🔧 DEV: Counter reset failed:', error);
       res.status(500).json({ error: 'Reset failed', details: error instanceof Error ? error.message : 'Unknown error' });
@@ -7392,7 +7464,7 @@ export function registerResetEndpoints(app: Express) {
   app.post('/api/dev-nuclear-reset', async (req, res) => {
     try {
       console.log(`🚨 DEV: NUCLEAR RESET - Clearing ALL anonymous usage data`);
-      
+
       let clearedItems = 0;
 
       // Clear all anonymous userUsage records
@@ -7438,7 +7510,7 @@ export function registerResetEndpoints(app: Express) {
 
   // ==================== SUPERUSER ADMINISTRATIVE API ENDPOINTS ====================
   // These endpoints require superuser authentication and provide administrative controls
-  
+
   /**
    * Enable/disable superuser bypass for current session
    * POST /api/admin/superuser/bypass
@@ -7446,9 +7518,9 @@ export function registerResetEndpoints(app: Express) {
   app.post('/api/admin/superuser/bypass', ensureSuperuser, async (req, res) => {
     try {
       const { enabled, reason } = req.body;
-      
+
       if (typeof enabled !== 'boolean') {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: 'Invalid request',
           message: 'enabled field must be a boolean'
         });
@@ -7456,13 +7528,13 @@ export function registerResetEndpoints(app: Express) {
 
       // Set bypass in session
       setSuperuserBypass(req, enabled, reason);
-      
+
       // Also update global app settings to enable/disable the bypass feature
       await updateAppSettings(
         { superuserBypassEnabled: enabled },
         req.user!.id
       );
-      
+
       // Log the action
       await logAdminAction(
         req.user!.id,
@@ -7473,10 +7545,10 @@ export function registerResetEndpoints(app: Express) {
         req.ip,
         req.get('User-Agent')
       );
-      
+
       console.log(`🔧 Superuser bypass ${enabled ? 'ENABLED' : 'DISABLED'} by ${req.user!.email} (global setting: ${enabled})`);
-      
-      res.json({ 
+
+      res.json({
         success: true,
         bypassEnabled: enabled,
         message: `Superuser bypass ${enabled ? 'enabled' : 'disabled'} globally and for current session`,
@@ -7484,7 +7556,7 @@ export function registerResetEndpoints(app: Express) {
       });
     } catch (error) {
       console.error('Error managing superuser bypass:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Internal server error',
         message: 'Failed to manage bypass settings'
       });
@@ -7498,7 +7570,7 @@ export function registerResetEndpoints(app: Express) {
   app.get('/api/admin/app-settings', ensureSuperuser, async (req, res) => {
     try {
       const settings = await getAppSettings();
-      
+
       res.json({
         success: true,
         settings: {
@@ -7509,7 +7581,7 @@ export function registerResetEndpoints(app: Express) {
       });
     } catch (error) {
       console.error('Error fetching app settings:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Internal server error',
         message: 'Failed to fetch app settings'
       });
@@ -7523,24 +7595,24 @@ export function registerResetEndpoints(app: Express) {
   app.put('/api/admin/app-settings', ensureSuperuser, async (req, res) => {
     try {
       const { countersEnforcement, adminUiEnabled, superuserBypassEnabled } = req.body;
-      
+
       // Validate input
       if (countersEnforcement && typeof countersEnforcement !== 'object') {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: 'Invalid request',
           message: 'countersEnforcement must be an object'
         });
       }
-      
+
       if (adminUiEnabled !== undefined && typeof adminUiEnabled !== 'boolean') {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: 'Invalid request',
           message: 'adminUiEnabled must be a boolean'
         });
       }
-      
+
       if (superuserBypassEnabled !== undefined && typeof superuserBypassEnabled !== 'boolean') {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: 'Invalid request',
           message: 'superuserBypassEnabled must be a boolean'
         });
@@ -7551,7 +7623,7 @@ export function registerResetEndpoints(app: Express) {
         { countersEnforcement, adminUiEnabled, superuserBypassEnabled },
         req.user!.id
       );
-      
+
       // Log the action
       await logAdminAction(
         req.user!.id,
@@ -7562,13 +7634,13 @@ export function registerResetEndpoints(app: Express) {
         req.ip,
         req.get('User-Agent')
       );
-      
+
       console.log(`⚙️ App settings updated by ${req.user!.email}:`, { countersEnforcement, adminUiEnabled });
-      
+
       // Return updated settings
       const updatedSettings = await getAppSettings();
-      
-      res.json({ 
+
+      res.json({
         success: true,
         message: 'App settings updated successfully',
         settings: {
@@ -7579,7 +7651,7 @@ export function registerResetEndpoints(app: Express) {
       });
     } catch (error) {
       console.error('Error updating app settings:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Internal server error',
         message: 'Failed to update app settings'
       });
@@ -7593,14 +7665,14 @@ export function registerResetEndpoints(app: Express) {
   app.get('/api/admin/audit-logs', ensureSuperuser, async (req, res) => {
     try {
       const { limit = 50, offset = 0 } = req.query;
-      
+
       const logs = await db.select()
         .from(adminAuditLogs)
         .orderBy(desc(adminAuditLogs.createdAt))
         .limit(Math.min(Number(limit), 100))
         .offset(Number(offset));
-      
-      res.json({ 
+
+      res.json({
         success: true,
         logs,
         pagination: {
@@ -7611,7 +7683,7 @@ export function registerResetEndpoints(app: Express) {
       });
     } catch (error) {
       console.error('Error fetching audit logs:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Internal server error',
         message: 'Failed to fetch audit logs'
       });
@@ -7623,76 +7695,76 @@ export function registerResetEndpoints(app: Express) {
    * POST /api/admin/counters/reset
    */
   app.post('/api/admin/counters/reset', ensureSuperuser, async (req, res) => {
-  try {
-    const { userId, sessionId, resetType } = req.body;
-    
-    if (!userId && !sessionId) {
-      return res.status(400).json({ 
-        error: 'Invalid request',
-        message: 'Either userId or sessionId must be provided'
+    try {
+      const { userId, sessionId, resetType } = req.body;
+
+      if (!userId && !sessionId) {
+        return res.status(400).json({
+          error: 'Invalid request',
+          message: 'Either userId or sessionId must be provided'
+        });
+      }
+
+      if (!['monthly', 'all'].includes(resetType)) {
+        return res.status(400).json({
+          error: 'Invalid request',
+          message: 'resetType must be one of: monthly, all (hourly/daily removed)'
+        });
+      }
+
+      // Reset all counters (we only use monthly now, but reset all for cleanliness)
+      const updateData: any = {
+        regularMonthly: 0,
+        rawMonthly: 0,
+        regularDaily: 0,    // Not used but reset for cleanliness
+        rawDaily: 0,        // Not used but reset for cleanliness
+        regularHourly: 0,   // Not used but reset for cleanliness
+        rawHourly: 0,       // Not used but reset for cleanliness
+        monthlyBandwidthMb: 0,
+        monthlyResetAt: new Date(),
+        dailyResetAt: new Date(),
+        hourlyResetAt: new Date(),
+        updatedAt: new Date()
+      };
+
+      // Build where condition
+      let whereCondition;
+      if (userId) {
+        whereCondition = eq(userUsage.userId, userId);
+      } else {
+        whereCondition = eq(userUsage.sessionId, sessionId!);
+      }
+
+      // Perform the reset
+      await db.update(userUsage)
+        .set(updateData)
+        .where(whereCondition);
+
+      // Log the action
+      await logAdminAction(
+        req.user!.id,
+        'COUNTERS_RESET',
+        userId,
+        sessionId,
+        { resetType, updateData },
+        req.ip,
+        req.get('User-Agent')
+      );
+
+      return res.json({
+        success: true,
+        message: 'Counters reset successfully',
+        resetData: updateData
+      });
+
+    } catch (error) {
+      console.error('Counter reset error:', error);
+      return res.status(500).json({
+        error: 'Failed to reset counters',
+        message: error instanceof Error ? error.message : 'Unknown error'
       });
     }
-    
-    if (!['monthly', 'all'].includes(resetType)) {
-      return res.status(400).json({ 
-        error: 'Invalid request',
-        message: 'resetType must be one of: monthly, all (hourly/daily removed)'
-      });
-    }
-
-    // Reset all counters (we only use monthly now, but reset all for cleanliness)
-    const updateData: any = { 
-      regularMonthly: 0,
-      rawMonthly: 0,
-      regularDaily: 0,    // Not used but reset for cleanliness
-      rawDaily: 0,        // Not used but reset for cleanliness
-      regularHourly: 0,   // Not used but reset for cleanliness
-      rawHourly: 0,       // Not used but reset for cleanliness
-      monthlyBandwidthMb: 0,
-      monthlyResetAt: new Date(),
-      dailyResetAt: new Date(),
-      hourlyResetAt: new Date(),
-      updatedAt: new Date()
-    };
-
-    // Build where condition
-    let whereCondition;
-    if (userId) {
-      whereCondition = eq(userUsage.userId, userId);
-    } else {
-      whereCondition = eq(userUsage.sessionId, sessionId!);
-    }
-    
-    // Perform the reset
-    await db.update(userUsage)
-      .set(updateData)
-      .where(whereCondition);
-    
-    // Log the action
-    await logAdminAction(
-      req.user!.id,
-      'COUNTERS_RESET',
-      userId,
-      sessionId,
-      { resetType, updateData },
-      req.ip,
-      req.get('User-Agent')
-    );
-    
-    return res.json({
-      success: true,
-      message: 'Counters reset successfully',
-      resetData: updateData
-    });
-    
-  } catch (error) {
-    console.error('Counter reset error:', error);
-    return res.status(500).json({
-      error: 'Failed to reset counters',
-      message: error instanceof Error ? error.message : 'Unknown error'
-    });
-  }
-});
+  });
 
   /**
    * Get current superuser status and bypass information
@@ -7703,10 +7775,10 @@ export function registerResetEndpoints(app: Express) {
       const session = req.session as any;
       const bypassEnabled = session?.superBypassEnabled === true;
       const bypassReason = session?.superBypassReason;
-      
+
       const appSettings = await getAppSettings();
-      
-      res.json({ 
+
+      res.json({
         success: true,
         superuser: {
           id: req.user!.id,
@@ -7722,7 +7794,7 @@ export function registerResetEndpoints(app: Express) {
       });
     } catch (error) {
       console.error('Error fetching admin status:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: 'Internal server error',
         message: 'Failed to fetch admin status'
       });

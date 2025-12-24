@@ -79,6 +79,7 @@ const SUPPORTED_FORMATS = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
 export default function EnhanceImagePage() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   // State
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -88,6 +89,8 @@ export default function EnhanceImagePage() {
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState<ProcessedImage | null>(null);
   const [resultPreview, setResultPreview] = useState<string | null>(null);
+  const [videoResult, setVideoResult] = useState<any | null>(null);
+  const [videoPreviewUrl, setVideoPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [activeTab, setActiveTab] = useState<'image' | 'video'>('image');
   const [demoSample, setDemoSample] = useState(SAMPLES[0]);
@@ -193,6 +196,33 @@ export default function EnhanceImagePage() {
       img.src = dataUrl;
     };
     reader.readAsDataURL(file);
+  }, [toast]);
+
+  const handleVideoSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('video/')) {
+      toast({
+        title: "Unsupported format",
+        description: "Please upload a valid video file (MP4, MOV, etc).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (file.size > 100 * 1024 * 1024) { // 100MB limit for video
+      toast({
+        title: "File too large",
+        description: `Maximum video size is 100MB. Your file is ${(file.size / 1024 / 1024).toFixed(1)}MB.`,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSelectedFile(file);
+    setVideoResult(null);
+    setVideoPreviewUrl(URL.createObjectURL(file));
   }, [toast]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -305,6 +335,59 @@ export default function EnhanceImagePage() {
       }
     } catch (error: any) {
       console.error('Enhancement error:', error);
+      toast({
+        title: "Enhancement failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+      setProgress(0);
+    }
+  };
+
+  const handleEnhanceVideo = async () => {
+    if (!selectedFile) return;
+
+    setIsProcessing(true);
+    setProgress(5);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('scale', scale.toString());
+      formData.append('faceEnhance', faceEnhance.toString());
+
+      // Simulate initial progress while starting Replicate
+      const progressInterval = setInterval(() => {
+        setProgress(prev => Math.min(prev + 1, 95));
+      }, 3000);
+
+      const response = await fetch('/api/enhance-video', {
+        method: 'POST',
+        body: formData,
+      });
+
+      clearInterval(progressInterval);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Processing failed');
+      }
+
+      setProgress(100);
+
+      if (data.success) {
+        setVideoResult(data.result);
+        refetchLimits();
+
+        toast({
+          title: "Video enhanced!",
+          description: "Your video is ready for download.",
+        });
+      }
+    } catch (error: any) {
+      console.error('Video enhancement error:', error);
       toast({
         title: "Enhancement failed",
         description: error.message,
@@ -454,32 +537,151 @@ export default function EnhanceImagePage() {
               </div>
             </div>
           ) : activeTab === 'video' ? (
-            /* Video Enhancer Coming Soon */
-            <div className="mb-24 animate-in fade-in zoom-in duration-500">
-              <div className="bg-gray-800/40 backdrop-blur-xl rounded-[3rem] border border-gray-700/50 p-12 lg:p-24 text-center relative overflow-hidden">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-yellow-500/5 to-transparent pointer-events-none" />
-                <div className="relative z-10 max-w-2xl mx-auto space-y-8">
-                  <div className="inline-flex items-center gap-2 bg-yellow-500/10 text-yellow-500 px-4 py-2 rounded-full border border-yellow-500/20 font-bold text-xs uppercase tracking-widest">
-                    Next Feature
-                  </div>
-                  <h2 className="text-5xl lg:text-7xl font-bold text-white">
-                    AI Video <span className="text-yellow-500">Upscaler</span>
-                  </h2>
-                  <p className="text-xl text-gray-400">
-                    Enhance and upscale videos to 4K at 60fps. Our new models are currently in training.
-                  </p>
-                  <div className="pt-8">
-                    <div className="bg-gray-900/60 rounded-3xl p-8 border border-gray-700/30 inline-block">
-                      <div className="flex items-center gap-6">
-                        <div className="w-16 h-16 rounded-full border-4 border-yellow-500/10 border-t-yellow-500 animate-spin" />
-                        <div className="text-left">
-                          <div className="text-white font-black text-xl tracking-tighter uppercase">Model Training</div>
-                          <div className="text-yellow-500 font-bold text-sm opacity-70">92% Complete • Q1 2026</div>
-                        </div>
-                      </div>
+            /* Video Enhancer Section */
+            <div className="max-w-5xl mx-auto mb-24 animate-in fade-in zoom-in duration-500">
+              <div className="bg-gray-800/40 backdrop-blur-xl rounded-[3rem] border border-gray-700/50 p-8 lg:p-12 shadow-3xl">
+                {!selectedFile ? (
+                  <div className="text-center space-y-8 py-12">
+                    <div className="inline-flex items-center gap-2 bg-yellow-500/10 text-yellow-500 px-4 py-2 rounded-full border border-yellow-500/20 font-bold text-xs uppercase tracking-widest">
+                      Live Feature
+                    </div>
+                    <h2 className="text-5xl lg:text-7xl font-bold text-white">
+                      AI Video <span className="text-yellow-500">Upscaler</span>
+                    </h2>
+                    <p className="text-xl text-gray-400 max-w-xl mx-auto">
+                      Upscale videos to 4K resolution with AI. Professional frame interpolation and face enhancement.
+                    </p>
+                    <div className="pt-8">
+                      <input
+                        type="file"
+                        ref={videoInputRef}
+                        onChange={handleVideoSelect}
+                        accept="video/*"
+                        className="hidden"
+                      />
+                      <Button
+                        size="lg"
+                        onClick={() => videoInputRef.current?.click()}
+                        className="bg-yellow-500 hover:bg-yellow-400 text-black font-extrabold h-20 px-12 text-xl rounded-2xl shadow-xl shadow-yellow-500/20 group transition-all"
+                      >
+                        <Upload className="w-8 h-8 mr-4 group-hover:-translate-y-1 transition-transform" />
+                        Select Video File
+                      </Button>
+                      <p className="mt-4 text-gray-500 text-sm">Supports MP4, MOV, AVI up to 100MB</p>
                     </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="space-y-12">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-2xl font-bold text-white">
+                        {videoResult ? 'Enhanced Video' : 'Video Preview'}
+                      </h2>
+                      <Button variant="ghost" onClick={handleReset} className="text-gray-400 hover:text-white">
+                        <X className="w-5 h-5 mr-2" /> Cancel
+                      </Button>
+                    </div>
+
+                    <div className="relative aspect-video bg-gray-900/50 rounded-3xl overflow-hidden border border-gray-700/30">
+                      {videoResult ? (
+                        <video
+                          src={videoResult.downloadUrl}
+                          controls
+                          className="w-full h-full"
+                          autoPlay
+                          loop
+                        />
+                      ) : (
+                        <video
+                          src={videoPreviewUrl!}
+                          controls
+                          className="w-full h-full"
+                        />
+                      )}
+
+                      {isProcessing && (
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-8 z-20">
+                          <div className="w-24 h-24 rounded-full border-4 border-yellow-500/10 border-t-yellow-500 animate-spin mb-6" />
+                          <div className="text-center space-y-2">
+                            <h3 className="text-2xl font-bold text-white uppercase tracking-tighter">Upscaling Video...</h3>
+                            <p className="text-gray-400 max-w-xs">{progress < 95 ? 'Analyzing frames and enhancing resolution' : 'Finalizing video file...'}</p>
+                            <div className="w-64 h-2 bg-gray-800 rounded-full mt-4 overflow-hidden">
+                              <div
+                                className="h-full bg-yellow-500 transition-all duration-500"
+                                style={{ width: `${progress}%` }}
+                              />
+                            </div>
+                            <p className="text-yellow-500 font-bold mt-2">{progress}%</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {!videoResult && !isProcessing && (
+                      <div className="max-w-md mx-auto space-y-8">
+                        <div className="space-y-4">
+                          <label className="text-center block text-sm font-bold text-gray-400 uppercase tracking-widest font-mono">Upscale Target</label>
+                          <div className="grid grid-cols-2 gap-4">
+                            {([2, 4] as const).map(s => (
+                              <button
+                                key={s}
+                                onClick={() => setScale(s)}
+                                className={`p-6 rounded-2xl border-2 transition-all ${scale === s ? 'border-yellow-500 bg-yellow-500/10 text-yellow-500' : 'border-gray-700 text-gray-400 hover:border-gray-500'
+                                  }`}
+                              >
+                                <div className="text-3xl font-black">{s}x</div>
+                                <div className="text-xs font-bold opacity-60 uppercase">{s === 2 ? 'HD' : '4K'}</div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <Button
+                          onClick={handleEnhanceVideo}
+                          className="w-full bg-yellow-500 hover:bg-yellow-400 text-black font-extrabold h-16 rounded-2xl shadow-xl shadow-yellow-500/20"
+                        >
+                          Enhance This Video
+                        </Button>
+                      </div>
+                    )}
+
+                    {videoResult && (
+                      <div className="flex flex-col items-center gap-6">
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+                          <div className="bg-gray-900/50 p-4 rounded-2xl border border-gray-700/30">
+                            <p className="text-xs text-gray-500 font-bold uppercase mb-1">Original</p>
+                            <p className="text-white font-medium">{(videoResult.originalSize / 1024 / 1024).toFixed(1)} MB</p>
+                          </div>
+                          <div className="bg-gray-900/50 p-4 rounded-2xl border border-gray-700/30">
+                            <p className="text-xs text-gray-500 font-bold uppercase mb-1">Enhanced</p>
+                            <p className="text-yellow-500 font-bold">{(videoResult.processedSize / 1024 / 1024).toFixed(1)} MB</p>
+                          </div>
+                          <div className="bg-gray-900/50 p-4 rounded-2xl border border-gray-700/30">
+                            <p className="text-xs text-gray-500 font-bold uppercase mb-1">Format</p>
+                            <p className="text-white font-medium">{videoResult.format}</p>
+                          </div>
+                          <div className="bg-gray-900/50 p-4 rounded-2xl border border-gray-700/30">
+                            <p className="text-xs text-gray-500 font-bold uppercase mb-1">Scale</p>
+                            <p className="text-white font-medium">{scale}x</p>
+                          </div>
+                        </div>
+                        <Button
+                          onClick={() => {
+                            const link = document.createElement('a');
+                            link.href = videoResult.downloadUrl;
+                            link.download = `enhanced_${selectedFile?.name}`;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                          }}
+                          size="lg"
+                          className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold rounded-2xl px-12 h-16 shadow-lg shadow-yellow-500/20"
+                        >
+                          <Download className="w-6 h-6 mr-3" /> Download Video
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           ) : (
