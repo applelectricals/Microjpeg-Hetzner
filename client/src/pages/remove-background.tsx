@@ -1,5 +1,6 @@
 // client/src/pages/remove-background.tsx
 // AI Background Removal Page - Dark Theme matching landing page
+// UPDATED: Hide usage indicator for paid users, show upgrade prompt only when limits exhausted
 
 import React, { useState, useCallback, useRef } from 'react';
 import { Upload, Download, Sparkles, Image as ImageIcon, Loader2, Check, X, Wand2, AlertCircle } from 'lucide-react';
@@ -15,7 +16,6 @@ import { useQuery } from '@tanstack/react-query';
 import {
   UpgradePrompt,
   useUpgradePrompt,
-  UsageIndicator,
   LimitReachedBanner
 } from '@/components/UpgradePrompt';
 
@@ -45,6 +45,17 @@ const SEO_DESCRIPTION = "Remove background from images instantly with AI. Unlike
 const SUPPORTED_INPUT_FORMATS = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 const UNSUPPORTED_FORMATS = ['image/avif', 'image/heic', 'image/heif'];
 
+// Helper to check if user is on paid tier
+const isPaidTier = (tier: string): boolean => {
+  if (!tier) return false;
+  const normalizedTier = tier.toLowerCase();
+  return normalizedTier.includes('starter') || 
+         normalizedTier.includes('pro') || 
+         normalizedTier.includes('business') ||
+         normalizedTier.includes('premium') ||
+         normalizedTier.includes('paid');
+};
+
 export default function RemoveBackgroundPage() {
   const { toast } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -67,6 +78,12 @@ export default function RemoveBackgroundPage() {
     queryKey: ['/api/ai/bg-removal/limits'],
     retry: false,
   }) as { data: LimitsResponse | undefined; refetch: () => void };
+
+  // Determine if user is on paid tier
+  const userIsPaid = bgLimits ? isPaidTier(bgLimits.tier) : false;
+  
+  // For free users: check if limit reached
+  const isLimitReached = !userIsPaid && bgLimits && bgLimits.remaining <= 0;
 
   // Setup upgrade prompt
   const upgradePrompt = useUpgradePrompt({
@@ -147,8 +164,8 @@ export default function RemoveBackgroundPage() {
   const handleRemoveBackground = async () => {
     if (!selectedFile) return;
 
-    // Check limits before processing
-    if (bgLimits && bgLimits.remaining <= 0) {
+    // Check limits for free users before processing
+    if (!userIsPaid && bgLimits && bgLimits.remaining <= 0) {
       upgradePrompt.setIsOpen(true);
       return;
     }
@@ -194,41 +211,32 @@ export default function RemoveBackgroundPage() {
       if (data.success) {
         setResult(data.result);
 
-        const previewResponse = await fetch(data.result.downloadUrl);
-        if (previewResponse.ok) {
-          const blob = await previewResponse.blob();
-          setResultPreview(URL.createObjectURL(blob));
+        // Fetch the processed image preview
+        if (data.result.downloadUrl) {
+          try {
+            const previewResponse = await fetch(data.result.downloadUrl);
+            if (previewResponse.ok) {
+              const blob = await previewResponse.blob();
+              setResultPreview(URL.createObjectURL(blob));
+            }
+          } catch (err) {
+            console.error('Failed to load preview:', err);
+          }
         }
 
-        // Refetch limits to update UI
+        // Refresh limits after successful operation
         refetchLimits();
-
-        // Check if should show upgrade prompt after successful operation
-        if (data.usage?.showUpgradePrompt) {
-          // Small delay so user can see the result first
-          setTimeout(() => {
-            upgradePrompt.checkAndShowPrompt(data.usage);
-          }, 1500);
-        }
 
         toast({
           title: "Background removed!",
           description: `Saved as ${outputFormat.toUpperCase()} (${(data.result.processedSize / 1024).toFixed(1)} KB)`,
         });
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Background removal error:', error);
-
-      let errorMessage = error.message;
-      if (error.message.includes('cannot identify image file')) {
-        errorMessage = 'This image format is not supported. Please use JPG, PNG, or WebP.';
-      } else if (error.message.includes('CUDA out of memory')) {
-        errorMessage = 'Image is too large to process. Please try a smaller image.';
-      }
-
       toast({
         title: "Processing failed",
-        description: errorMessage,
+        description: error instanceof Error ? error.message : "An error occurred",
         variant: "destructive",
       });
     } finally {
@@ -237,15 +245,28 @@ export default function RemoveBackgroundPage() {
     }
   };
 
-  const handleDownload = () => {
-    if (!result) return;
-    
-    const link = document.createElement('a');
-    link.href = result.downloadUrl;
-    link.download = `${selectedFile?.name.split('.')[0]}_no_bg.${outputFormat}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownload = async () => {
+    if (!result?.downloadUrl) return;
+
+    try {
+      const response = await fetch(result.downloadUrl);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = result.originalName.replace(/\.[^/.]+$/, '') + `-nobg.${outputFormat}`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      toast({
+        title: "Download failed",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleReset = () => {
@@ -271,20 +292,8 @@ export default function RemoveBackgroundPage() {
         <Header />
 
         <main className="max-w-6xl mx-auto px-4 py-12">
-          {/* Usage Indicator */}
-          {bgLimits && (
-            <div className="mb-6">
-              <UsageIndicator
-                feature="background_removal"
-                used={bgLimits.limit - bgLimits.remaining}
-                limit={bgLimits.limit}
-                onUpgradeClick={() => upgradePrompt.setIsOpen(true)}
-              />
-            </div>
-          )}
-
-          {/* Limit Reached Banner */}
-          {bgLimits && bgLimits.remaining <= 0 && (
+          {/* Limit Reached Banner - Only show for FREE users when limit is reached */}
+          {isLimitReached && (
             <LimitReachedBanner
               feature="background_removal"
               onUpgradeClick={() => upgradePrompt.setIsOpen(true)}
@@ -350,19 +359,16 @@ export default function RemoveBackgroundPage() {
               ) : (
                 <div className="relative">
                   <img
-                    src={previewUrl!}
+                    src={previewUrl || ''}
                     alt="Original"
-                    className="w-full rounded-lg max-h-96 object-contain bg-gray-700/50"
+                    className="w-full rounded-xl"
                   />
                   <button
                     onClick={handleReset}
-                    className="absolute top-2 right-2 p-2 bg-gray-800/80 rounded-full hover:bg-gray-700 transition-colors"
+                    className="absolute top-2 right-2 p-2 bg-gray-900/80 hover:bg-gray-900 rounded-lg text-white transition-colors"
                   >
-                    <X className="w-4 h-4 text-gray-300" />
+                    <X className="w-4 h-4" />
                   </button>
-                  <div className="mt-3 text-sm text-gray-400">
-                    {selectedFile.name} ({(selectedFile.size / 1024).toFixed(1)} KB)
-                  </div>
                 </div>
               )}
             </div>
@@ -370,127 +376,126 @@ export default function RemoveBackgroundPage() {
             {/* Result / Options Section */}
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-2xl p-6 border border-gray-700/50">
               <h2 className="text-lg font-semibold mb-4 text-white">
-                {result ? 'Result - Background Removed' : 'Output Options'}
+                {result ? 'Result (Background Removed)' : 'Output Options'}
               </h2>
 
               {result && resultPreview ? (
-                <div>
-                  {/* Checkered background for transparency */}
-                  <div 
-                    className="relative rounded-lg p-4"
-                    style={{
-                      backgroundImage: `url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAMklEQVQ4T2P8////fwYKAOOoAQyjYcAwGgYMo2HAMIEQGPURMD4cRsMAAYChFAbjoxYGAMUuH/H5JhuzAAAAAElFTkSuQmCC")`,
-                      backgroundRepeat: 'repeat'
-                    }}
-                  >
+                <div className="space-y-4">
+                  {/* Result Preview */}
+                  <div className="relative bg-[url('/checkerboard.png')] bg-repeat rounded-xl overflow-hidden">
                     <img
                       src={resultPreview}
                       alt="Result"
-                      className="w-full max-h-80 object-contain"
+                      className="w-full"
                     />
                   </div>
-                  
-                  <div className="mt-4 space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Format:</span>
-                      <span className="font-medium text-white">{result.format}</span>
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="bg-gray-700/30 rounded-lg p-3">
+                      <p className="text-sm text-gray-400">Original</p>
+                      <p className="text-lg font-semibold text-white">
+                        {(result.originalSize / 1024).toFixed(1)} KB
+                      </p>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Size:</span>
-                      <span className="font-medium text-white">{(result.processedSize / 1024).toFixed(1)} KB</span>
+                    <div className="bg-gray-700/30 rounded-lg p-3">
+                      <p className="text-sm text-gray-400">New Size</p>
+                      <p className="text-lg font-semibold text-teal-400">
+                        {(result.processedSize / 1024).toFixed(1)} KB
+                      </p>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-400">Processing time:</span>
-                      <span className="font-medium text-white">{(result.processingTime / 1000).toFixed(1)}s</span>
+                    <div className="bg-gray-700/30 rounded-lg p-3">
+                      <p className="text-sm text-gray-400">Format</p>
+                      <p className="text-lg font-semibold text-white uppercase">
+                        {result.format}
+                      </p>
                     </div>
                   </div>
 
-                  <div className="mt-6 flex gap-3">
-                    <Button 
-                      onClick={handleDownload} 
-                      className="flex-1 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white"
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Download {outputFormat.toUpperCase()}
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      onClick={handleReset}
-                      className="border-gray-600 text-gray-300 hover:bg-gray-700 hover:text-white"
-                    >
-                      New Image
-                    </Button>
-                  </div>
+                  {/* Download Button */}
+                  <Button
+                    onClick={handleDownload}
+                    className="w-full h-12 text-lg bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700"
+                  >
+                    <Download className="w-5 h-5 mr-2" />
+                    Download
+                  </Button>
+
+                  {/* Process Another */}
+                  <Button
+                    onClick={handleReset}
+                    variant="outline"
+                    className="w-full border-gray-600 text-gray-300 hover:bg-gray-700"
+                  >
+                    Process Another Image
+                  </Button>
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {/* Output Format */}
+                  {/* Output Format Selection */}
                   <div>
-                    <label className="block text-sm font-medium text-gray-200 mb-2">
+                    <label className="block text-sm font-medium text-gray-300 mb-3">
                       Output Format
-                      <span className="ml-2 text-xs text-teal-400 bg-teal-500/20 px-2 py-0.5 rounded">
-                        Unique Feature!
-                      </span>
                     </label>
                     <div className="grid grid-cols-4 gap-2">
-                      {(['png', 'webp', 'avif', 'jpg'] as const).map((fmt) => (
-                        <button
-                          key={fmt}
-                          onClick={() => setOutputFormat(fmt)}
-                          className={`p-3 rounded-lg border-2 text-center transition-all duration-200 ${
-                            outputFormat === fmt
-                              ? 'border-teal-500 bg-teal-500/20 text-teal-400'
-                              : 'border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white'
-                          }`}
-                        >
-                          <div className="font-medium uppercase text-sm">{fmt}</div>
-                          <div className="text-xs text-gray-500">
-                            {fmt === 'png' && 'Transparent'}
-                            {fmt === 'webp' && '~30% smaller'}
-                            {fmt === 'avif' && '~50% smaller'}
-                            {fmt === 'jpg' && 'White BG'}
-                          </div>
-                        </button>
-                      ))}
+                      {(['png', 'webp', 'avif', 'jpg'] as const).map((format) => {
+                        // For free users, restrict to PNG only
+                        const isRestricted = !userIsPaid && format !== 'png';
+                        
+                        return (
+                          <button
+                            key={format}
+                            onClick={() => {
+                              if (isRestricted) {
+                                upgradePrompt.showRestrictedFeaturePrompt(`${format.toUpperCase()} output`);
+                              } else {
+                                setOutputFormat(format);
+                              }
+                            }}
+                            className={`py-3 rounded-lg text-sm font-medium transition-all relative ${
+                              outputFormat === format
+                                ? 'bg-teal-500 text-white'
+                                : isRestricted
+                                  ? 'bg-gray-700/50 text-gray-500 cursor-not-allowed'
+                                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                            }`}
+                          >
+                            {format.toUpperCase()}
+                            {isRestricted && (
+                              <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center">
+                                <span className="text-xs text-black font-bold">★</span>
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
-                    <p className="mt-2 text-xs text-gray-500">
-                      💡 Other tools only output PNG. MicroJPEG lets you save as WebP/AVIF for faster websites!
-                    </p>
-                    {outputFormat === 'jpg' && (
-                      <p className="mt-1 text-xs text-amber-400">
-                        ⚠️ JPG doesn't support transparency - background will be white
+                    {!userIsPaid && (
+                      <p className="mt-2 text-xs text-gray-500">
+                        ★ WebP, AVIF, JPG require Starter plan
                       </p>
                     )}
                   </div>
 
-                  {/* Quality Slider */}
-                  {outputFormat !== 'png' && (
+                  {/* Quality Slider (for lossy formats) */}
+                  {(outputFormat === 'webp' || outputFormat === 'jpg' || outputFormat === 'avif') && (
                     <div>
-                      <label className="block text-sm font-medium text-gray-200 mb-3">
-                        Quality: <span className="text-teal-400 font-bold">{quality}%</span>
+                      <label className="block text-sm font-medium text-gray-300 mb-3">
+                        Quality: {quality}%
                       </label>
-                      <div className="relative">
-                        <input
-                          type="range"
-                          min="50"
-                          max="100"
-                          value={quality}
-                          onChange={(e) => setQuality(parseInt(e.target.value))}
-                          className="w-full h-3 rounded-lg appearance-none cursor-pointer"
-                          style={{
-                            background: `linear-gradient(to right, #14b8a6 0%, #14b8a6 ${(quality - 50) * 2}%, #374151 ${(quality - 50) * 2}%, #374151 100%)`
-                          }}
-                        />
-                      </div>
-                      <div className="flex justify-between text-xs text-gray-500 mt-2">
-                        <span>50% (Smaller file)</span>
-                        <span>100% (Best quality)</span>
-                      </div>
+                      <input
+                        type="range"
+                        min="50"
+                        max="100"
+                        value={quality}
+                        onChange={(e) => setQuality(Number(e.target.value))}
+                        className="w-full"
+                      />
                     </div>
                   )}
 
                   {/* AI Model Info */}
-                  <div className="p-3 bg-gray-700/30 rounded-lg border border-gray-600/50">
+                  <div className="bg-gray-700/30 rounded-lg p-4">
                     <div className="flex items-center gap-2 text-sm text-gray-300">
                       <Sparkles className="w-4 h-4 text-teal-400" />
                       <span className="font-medium">AI Model: Standard</span>
@@ -503,10 +508,10 @@ export default function RemoveBackgroundPage() {
                   {/* Process Button */}
                   <Button
                     onClick={handleRemoveBackground}
-                    disabled={!selectedFile || isProcessing || (bgLimits?.remaining || 0) <= 0}
+                    disabled={!selectedFile || isProcessing || isLimitReached}
                     className="w-full h-12 text-lg bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {(bgLimits?.remaining || 0) <= 0 ? (
+                    {isLimitReached ? (
                       'Limit Reached - Upgrade to Continue'
                     ) : isProcessing ? (
                       <>
@@ -618,68 +623,52 @@ export default function RemoveBackgroundPage() {
           </div>
         </main>
 
-        {/* Footer spacing */}
-        <div className="h-16"></div>
-              {/* Footer */}
-              <footer className="bg-gray-100 text-black py-12">
-                <div className="max-w-7xl mx-auto px-4">
-                  <div className="grid md:grid-cols-4 gap-8">
-                    {/* Brand */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-3">
-                        <img src={logoUrl} alt="MicroJPEG Logo" className="w-10 h-10" />
-                        <span className="text-xl font-bold font-poppins">MicroJPEG</span>
-                      </div>
-                      <p className="text-gray-600 font-opensans">
-                        The smartest way to compress and optimize your images for the web.
-                      </p>
-                    </div>
-        
-                    {/* Product */}
-                    <div>
-                      <h4 className="font-semibold font-poppins mb-4">Product</h4>
-                      <ul className="space-y-2 text-gray-600 font-opensans">
-                        <li><a href="/features" className="hover:text-black">Features</a></li>
-                        <li><a href="/pricing" className="hover:text-black">Pricing</a></li>
-                        <li><a href="/api-docs" className="hover:text-black">API</a></li>
-                        <li><a href="/api-docs" className="hover:text-black">Documentation</a></li>
-                      </ul>
-                    </div>
-        
-                    {/* Company */}
-                    <div>
-                      <h4 className="font-semibold font-poppins mb-4">Company</h4>
-                      <ul className="space-y-2 text-gray-600 font-opensans">
-                        <li><a href="/about" className="hover:text-black">About</a></li>
-                        <li><a href="/blog" className="hover:text-black">Blog</a></li>
-                        <li><a href="/contact" className="hover:text-black">Contact</a></li>
-                        <li><a href="/support" className="hover:text-black">Support</a></li>
-                      </ul>
-                    </div>
-        
-                    {/* Legal */}
-                    <div>
-                      <h4 className="font-semibold font-poppins mb-4">Legal</h4>
-                      <ul className="space-y-2 text-gray-600 font-opensans">
-                        <li><a href="/privacy-policy" className="hover:text-black">Privacy Policy</a></li>
-                        <li><a href="/terms-of-service" className="hover:text-black">Terms of Service</a></li>
-                        <li><a href="/cookie-policy" className="hover:text-black">Cookie Policy</a></li>
-                        <li><a href="/cancellation-policy" className="hover:text-black">Cancellation Policy</a></li>
-                        <li><a href="/privacy-policy" className="hover:text-black">GDPR</a></li>
-                      </ul>
-                    </div>
-                  </div>
-        
-        
-                  <div className="border-t border-gray-300 pt-8 text-center text-gray-500 font-opensans">
-                    <p>© 2025 MicroJPEG. All rights reserved. Making the web faster, one image at a time.</p>
-                    <p className="text-xs mt-2 opacity-75">
-                      Background photo by <a href="https://www.pexels.com/photo/selective-focus-photo-of-white-petaled-flowers-96627/" target="_blank" rel="noopener noreferrer" className="hover:underline">AS Photography</a>
-                    </p>
-                  </div>
-                  
+        {/* Footer */}
+        <footer className="bg-gray-100 text-black py-12 mt-16">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="grid md:grid-cols-4 gap-8">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <img src={logoUrl} alt="MicroJPEG Logo" className="w-10 h-10" />
+                  <span className="text-xl font-bold font-poppins">MicroJPEG</span>
                 </div>
-              </footer>
+                <p className="text-gray-600 font-opensans">
+                  The smartest way to compress and optimize your images for the web.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold font-poppins mb-4">Product</h4>
+                <ul className="space-y-2 text-gray-600 font-opensans">
+                  <li><a href="/features" className="hover:text-black">Features</a></li>
+                  <li><a href="/pricing" className="hover:text-black">Pricing</a></li>
+                  <li><a href="/api-docs" className="hover:text-black">API</a></li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-semibold font-poppins mb-4">Company</h4>
+                <ul className="space-y-2 text-gray-600 font-opensans">
+                  <li><a href="/about" className="hover:text-black">About</a></li>
+                  <li><a href="/blog" className="hover:text-black">Blog</a></li>
+                  <li><a href="/contact" className="hover:text-black">Contact</a></li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-semibold font-poppins mb-4">Legal</h4>
+                <ul className="space-y-2 text-gray-600 font-opensans">
+                  <li><a href="/privacy-policy" className="hover:text-black">Privacy</a></li>
+                  <li><a href="/terms-of-service" className="hover:text-black">Terms</a></li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-300 pt-8 mt-8 text-center text-gray-500 font-opensans">
+              <p>© 2025 MicroJPEG. All rights reserved.</p>
+            </div>
+          </div>
+        </footer>
       </div>
 
       {/* Upgrade Prompt Modal */}

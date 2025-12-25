@@ -44,6 +44,17 @@ interface LimitsResponse {
   tier: string;
 }
 
+// Helper to check if user is on paid tier
+const isPaidTier = (tier: string): boolean => {
+  if (!tier) return false;
+  const normalizedTier = tier.toLowerCase();
+  return normalizedTier.includes('starter') ||
+         normalizedTier.includes('pro') ||
+         normalizedTier.includes('business') ||
+         normalizedTier.includes('premium') ||
+         normalizedTier.includes('paid');
+};
+
 // Sample Data
 const SAMPLES = [
   {
@@ -117,6 +128,12 @@ export default function EnhanceImagePage() {
     } : null,
     tierName: enhanceLimits?.tier || 'free',
   });
+
+  // Determine if user is on paid tier
+  const userIsPaid = enhanceLimits ? isPaidTier(enhanceLimits.tier) : false;
+
+  // For free users: check if limit reached
+  const isLimitReached = !userIsPaid && enhanceLimits && enhanceLimits.remaining <= 0;
 
   // Calculate preview dimensions
   const calculatePreview = () => {
@@ -433,21 +450,13 @@ export default function EnhanceImagePage() {
         <Header />
 
         <main className="max-w-7xl mx-auto px-4 py-12">
-          {/* Usage Alerts */}
-          {enhanceLimits && (
-            <div className="mb-8 space-y-4">
-              <UsageIndicator
+          {/* Limit Reached Banner - Only show for FREE users when limit is exhausted */}
+          {isLimitReached && (
+            <div className="max-w-5xl mx-auto mb-8">
+              <LimitReachedBanner
                 feature="image_enhancement"
-                used={enhanceLimits.limit - enhanceLimits.remaining}
-                limit={enhanceLimits.limit}
                 onUpgradeClick={() => upgradePrompt.setIsOpen(true)}
               />
-              {enhanceLimits.remaining <= 0 && (
-                <LimitReachedBanner
-                  feature="image_enhancement"
-                  onUpgradeClick={() => upgradePrompt.setIsOpen(true)}
-                />
-              )}
             </div>
           )}
 
@@ -747,25 +756,59 @@ export default function EnhanceImagePage() {
                       <div className="space-y-4">
                         <label className="text-center block text-sm font-bold text-gray-400 uppercase tracking-widest">Upscale Factor</label>
                         <div className="grid grid-cols-3 gap-4">
-                          {([2, 4, 8] as const).map(s => (
-                            <button
-                              key={s}
-                              onClick={() => setScale(s)}
-                              className={`p-6 rounded-2xl border-2 transition-all ${scale === s ? 'border-yellow-500 bg-yellow-500/10 text-yellow-500' : 'border-gray-700 text-gray-400 hover:border-gray-500'
+                          {([2, 4, 8] as const).map(s => {
+                            // For free users, restrict to 2x only
+                            const isRestricted = !userIsPaid && s > 2;
+
+                            return (
+                              <button
+                                key={s}
+                                onClick={() => {
+                                  if (isRestricted) {
+                                    upgradePrompt.showRestrictedFeaturePrompt(`${s}x upscale`);
+                                  } else {
+                                    setScale(s);
+                                  }
+                                }}
+                                className={`p-6 rounded-2xl border-2 transition-all relative ${
+                                  scale === s
+                                    ? 'border-yellow-500 bg-yellow-500/10 text-yellow-500'
+                                    : isRestricted
+                                      ? 'border-gray-700/50 text-gray-600 cursor-not-allowed'
+                                      : 'border-gray-700 text-gray-400 hover:border-gray-500'
                                 }`}
-                            >
-                              <div className="text-3xl font-black">{s}x</div>
-                              <div className="text-xs font-bold opacity-60 uppercase">{s === 4 ? 'Best' : s === 8 ? 'Ultra' : 'Fast'}</div>
-                            </button>
-                          ))}
+                              >
+                                <div className="text-3xl font-black">{s}x</div>
+                                <div className="text-xs font-bold opacity-60 uppercase">
+                                  {s === 4 ? 'Best' : s === 8 ? 'Ultra' : 'Fast'}
+                                </div>
+                                {isRestricted && (
+                                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center">
+                                    <span className="text-xs text-black font-bold">★</span>
+                                  </span>
+                                )}
+                              </button>
+                            );
+                          })}
                         </div>
                       </div>
 
                       <div className="grid md:grid-cols-2 gap-6">
                         <button
-                          onClick={() => setFaceEnhance(!faceEnhance)}
-                          className={`p-6 rounded-2xl border-2 flex items-center justify-between transition-all ${faceEnhance ? 'border-yellow-500 bg-yellow-500/10 text-yellow-500' : 'border-gray-700 text-gray-400'
-                            }`}
+                          onClick={() => {
+                            if (!userIsPaid) {
+                              upgradePrompt.showRestrictedFeaturePrompt('Face Enhancement');
+                            } else {
+                              setFaceEnhance(!faceEnhance);
+                            }
+                          }}
+                          className={`p-6 rounded-2xl border-2 flex items-center justify-between transition-all relative ${
+                            faceEnhance
+                              ? 'border-yellow-500 bg-yellow-500/10 text-yellow-500'
+                              : !userIsPaid
+                                ? 'border-gray-700/50 text-gray-600'
+                                : 'border-gray-700 text-gray-400'
+                          }`}
                         >
                           <div className="flex items-center gap-4">
                             <User className="w-6 h-6" />
@@ -777,6 +820,11 @@ export default function EnhanceImagePage() {
                           <div className={`w-10 h-5 rounded-full relative ${faceEnhance ? 'bg-yellow-500' : 'bg-gray-700'}`}>
                             <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${faceEnhance ? 'right-1' : 'left-1'}`} />
                           </div>
+                          {!userIsPaid && (
+                            <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center">
+                              <span className="text-xs text-black font-bold">★</span>
+                            </span>
+                          )}
                         </button>
 
                         <div className="p-6 rounded-2xl border-2 border-gray-700 bg-gray-900/30">

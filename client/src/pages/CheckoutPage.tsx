@@ -13,12 +13,6 @@ const RAZORPAY_BUTTON_IDS = {
   yearly: 'pl_RlwkI8y1JWtyrV',   // Starter Yearly
 };
 
-// Razorpay Plan IDs for reference
-const RAZORPAY_PLAN_IDS = {
-  'starter-monthly': 'plan_Rkbt8vVdqEAWtB',   // $9
-  'starter-yearly': 'plan_RkdJ0gPYJrRvtH',    // $49
-};
-
 const PAYPAL_CLIENT_ID = 'BAA6hsJNpHbcTBMWxqcfbZs22QgzO7knIaUhASkWYLR-u6AtMlYgibBGR9pInXEWV7kartihrWi0wTu9O8';
 
 // Plan details for display
@@ -57,50 +51,71 @@ function useDarkMode() {
   return { isDark, setIsDark };
 }
 
-// Razorpay Monthly Button Component
-function RazorpayMonthlyButton() {
+// Razorpay Button Component - Renders based on cycle prop
+function RazorpayButton({ cycle }: { cycle: 'monthly' | 'yearly' }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const buttonIdRef = useRef<string>('');
 
   useEffect(() => {
     if (!containerRef.current) return;
+    
+    const buttonId = RAZORPAY_BUTTON_IDS[cycle];
+    
+    // If same button, don't re-render
+    if (buttonIdRef.current === buttonId) {
+      return;
+    }
+    
+    buttonIdRef.current = buttonId;
+    setIsLoading(true);
+    
+    // Clear existing content
+    containerRef.current.innerHTML = '';
 
     const form = document.createElement('form');
+    form.id = `razorpay-form-${cycle}`;
+    
     const script = document.createElement('script');
     script.src = 'https://cdn.razorpay.com/static/widget/subscription-button.js';
-    script.setAttribute('data-subscription_button_id', RAZORPAY_BUTTON_IDS.monthly);
+    script.setAttribute('data-subscription_button_id', buttonId);
     script.setAttribute('data-button_theme', 'brand-color');
     script.async = true;
+    
+    script.onload = () => {
+      console.log(`✅ Razorpay ${cycle} button loaded`);
+      setIsLoading(false);
+    };
+    
+    script.onerror = () => {
+      console.error(`❌ Failed to load Razorpay ${cycle} button`);
+      setIsLoading(false);
+    };
 
     form.appendChild(script);
     containerRef.current.appendChild(form);
+    
+    // Cleanup function
+    return () => {
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+    };
+  }, [cycle]);
 
-    console.log('✅ Monthly button loaded');
-  }, []);
-
-  return <div ref={containerRef} className="min-h-[50px] flex justify-center items-center" />;
-}
-
-// Razorpay Yearly Button Component
-function RazorpayYearlyButton() {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const form = document.createElement('form');
-    const script = document.createElement('script');
-    script.src = 'https://cdn.razorpay.com/static/widget/subscription-button.js';
-    script.setAttribute('data-subscription_button_id', RAZORPAY_BUTTON_IDS.yearly);
-    script.setAttribute('data-button_theme', 'brand-color');
-    script.async = true;
-
-    form.appendChild(script);
-    containerRef.current.appendChild(form);
-
-    console.log('✅ Yearly button loaded');
-  }, []);
-
-  return <div ref={containerRef} className="min-h-[50px] flex justify-center items-center" />;
+  return (
+    <div className="relative min-h-[60px]">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Loader2 className="w-6 h-6 text-teal-500 animate-spin" />
+        </div>
+      )}
+      <div 
+        ref={containerRef} 
+        className={`flex justify-center items-center ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+      />
+    </div>
+  );
 }
 
 export default function CheckoutPage() {
@@ -111,7 +126,6 @@ export default function CheckoutPage() {
   const [selectedCycle, setSelectedCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
-  const paypalRendered = useRef(false);
 
   // Get cycle from URL params
   useEffect(() => {
@@ -327,7 +341,7 @@ export default function CheckoutPage() {
               </CardContent>
             </Card>
 
-            {/* Razorpay Payment */}
+            {/* Razorpay Payment - Using key prop to force remount on cycle change */}
             <Card className="bg-gray-800/50 backdrop-blur-xl border border-teal-500/50">
               <CardHeader className="pb-2">
                 <CardTitle className="text-white text-center">
@@ -338,11 +352,8 @@ export default function CheckoutPage() {
                 </p>
               </CardHeader>
               <CardContent className="pt-4">
-                {selectedCycle === 'monthly' ? (
-                  <RazorpayMonthlyButton />
-                ) : (
-                  <RazorpayYearlyButton />
-                )}
+                {/* Key prop forces component remount when cycle changes */}
+                <RazorpayButton key={selectedCycle} cycle={selectedCycle} />
               </CardContent>
             </Card>
 
