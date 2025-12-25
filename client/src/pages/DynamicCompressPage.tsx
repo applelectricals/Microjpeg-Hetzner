@@ -76,46 +76,65 @@ interface TierResponse {
 }
 
 // ============================================
-// ✅ FIXED: Tier-aware limits (NO hardcoded PAGE_IDENTIFIER)
+// ✅ SIMPLIFIED 2-TIER STRUCTURE: Free + Starter
 // ============================================
 const getTierLimits = (tier: string) => {
-  const limits: Record<string, { regular: number; raw: number; batch: number }> = {
-    'starter-m': { regular: 75, raw: 75, batch: 1 },
-    'starter-y': { regular: 75, raw: 75, batch: 1 },
-    'pro-m': { regular: 150, raw: 150, batch: 1 },
-    'pro-y': { regular: 150, raw: 150, batch: 1 },
-    'business-m': { regular: 200, raw: 200, batch: 1 },
-    'business-y': { regular: 200, raw: 200, batch: 1 },
-    'free': { regular: 7, raw: 15, batch: 1 }, // Free tier limits
-  };
-  
-  // Return tier limits or default to starter-m (75MB) instead of free
-  return limits[tier] || limits['starter-m'];
+  // Normalize tier name
+  const normalizedTier = tier.toLowerCase().replace('-m', '-monthly').replace('-y', '-yearly');
+
+  // Check if it's any Starter tier variant
+  const isStarterTier = normalizedTier.includes('starter') ||
+                        normalizedTier.includes('pro') ||
+                        normalizedTier.includes('business') ||
+                        normalizedTier.includes('premium');
+
+  if (isStarterTier) {
+    // Starter plan: "Unlimited" (actual 75MB)
+    return { regular: 75, raw: 100, batch: 1 };
+  }
+
+  // Free tier limits
+  return { regular: 5, raw: 10, batch: 1 };
 };
 
-// ✅ FIXED: Maps tiers to legacy backend identifiers
+// ✅ Maps tiers to legacy backend identifiers
 const getTierPageIdentifier = (tier: string): string => {
-  const tierMap: Record<string, string> = {
-    'starter-m': 'premium-29',
-    'starter-y': 'premium-29',
-    'pro-m': 'premium-29',
-    'pro-y': 'premium-29',
-    'business-m': 'enterprise-99',
-    'business-y': 'enterprise-99',
-  };
-  return tierMap[tier] || 'premium-29';
+  const normalizedTier = tier.toLowerCase();
+
+  // Any paid tier maps to starter
+  if (normalizedTier.includes('starter') ||
+      normalizedTier.includes('pro') ||
+      normalizedTier.includes('business') ||
+      normalizedTier.includes('premium')) {
+    return 'starter';
+  }
+
+  return 'free';
 };
 
 const getTierDisplayName = (tier: string) => {
-  const names: Record<string, string> = {
-    'starter-m': '75MB Unlimited',
-    'starter-y': '75MB Unlimited',
-    'pro-m': '150 MB Unlimited',
-    'pro-y': '150MB Unlimited',
-    'business-m': '200MB Unlimited',
-    'business-y': '200MB Unlimited',
-  };
-  return names[tier] || 'Free Forever';
+  const normalizedTier = tier.toLowerCase();
+
+  // Any paid tier displays as Starter
+  if (normalizedTier.includes('starter') ||
+      normalizedTier.includes('pro') ||
+      normalizedTier.includes('business') ||
+      normalizedTier.includes('premium')) {
+    return 'Starter Plan - Unlimited';
+  }
+
+  return 'Free Plan';
+};
+
+// ============================================
+// ADDITIONAL: Check if user is on paid tier
+// ============================================
+const isPaidTier = (tier: string): boolean => {
+  const normalizedTier = tier.toLowerCase();
+  return normalizedTier.includes('starter') ||
+         normalizedTier.includes('pro') ||
+         normalizedTier.includes('business') ||
+         normalizedTier.includes('premium');
 };
 
 // FAQ Data Structure

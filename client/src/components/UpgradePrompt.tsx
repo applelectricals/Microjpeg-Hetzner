@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 interface UpgradePromptProps {
   isOpen: boolean;
   onClose: () => void;
-  feature: 'background_removal' | 'image_enhancement';
+  feature: 'background_removal' | 'image_enhancement' | 'compression';
   usageStats: {
     used: number;
     remaining: number;
@@ -33,20 +33,36 @@ export function UpgradePrompt({
       icon: Eraser,
       name: 'Background Removal',
       gradient: 'from-pink-500 to-rose-500',
+      freeLimit: '10/month',
+      paidLimit: '300/month',
       benefits: [
-        { free: '5/month', paid: '200-1000/month' },
+        { free: '10/month', paid: '300/month' },
         { free: 'PNG only', paid: 'PNG, WebP, AVIF, JPG' },
-        { free: '10MB max', paid: 'Up to 25MB' },
+        { free: '10MB max', paid: 'Unlimited' },
       ],
     },
     image_enhancement: {
       icon: Sparkles,
       name: 'Image Enhancement',
       gradient: 'from-violet-500 to-purple-500',
+      freeLimit: '10/month',
+      paidLimit: '300/month',
       benefits: [
-        { free: '3/month', paid: '200-1000/month' },
+        { free: '10/month', paid: '300/month' },
         { free: '2x upscale', paid: 'Up to 8x upscale' },
         { free: 'No face enhance', paid: 'Face enhancement included' },
+      ],
+    },
+    compression: {
+      icon: Zap,
+      name: 'Compression',
+      gradient: 'from-teal-500 to-cyan-500',
+      freeLimit: '30/month',
+      paidLimit: 'Unlimited',
+      benefits: [
+        { free: '30/month', paid: 'Unlimited' },
+        { free: '5MB / 10MB RAW', paid: 'Unlimited file size' },
+        { free: 'Standard processing', paid: 'Priority processing' },
       ],
     },
   };
@@ -92,7 +108,7 @@ export function UpgradePrompt({
                 {isLimitReached 
                   ? `You've used all ${usageStats.limit} operations this month`
                   : restrictedFeature
-                    ? `This feature requires a paid plan`
+                    ? `This feature requires the Starter plan`
                     : `${usageStats.remaining} of ${usageStats.limit} remaining`
                 }
               </p>
@@ -119,7 +135,7 @@ export function UpgradePrompt({
         {/* Content */}
         <div className="p-6">
           <h3 className="font-semibold text-slate-900 dark:text-white mb-4">
-            Upgrade to unlock:
+            Upgrade to Starter to unlock:
           </h3>
           
           <div className="space-y-3 mb-6">
@@ -137,42 +153,28 @@ export function UpgradePrompt({
             ))}
           </div>
 
-          {/* Pricing Cards */}
-          <div className="grid grid-cols-3 gap-3 mb-6">
-            <button 
-              className="text-center p-3 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
-              onClick={() => setLocation('/pricing?plan=starter')}
-            >
-              <div className="text-lg font-bold text-slate-900 dark:text-white">$9</div>
-              <div className="text-xs text-slate-500">Starter/mo</div>
-              <div className="text-xs text-blue-600 mt-1">200 ops</div>
-            </button>
-            <button 
-              className="text-center p-3 border-2 border-blue-500 rounded-xl bg-blue-50 dark:bg-blue-950/30 relative"
-              onClick={() => setLocation('/pricing?plan=pro')}
-            >
-              <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-blue-500 text-white text-xs rounded-full">
-                Popular
+          {/* Pricing - Simple 2-tier */}
+          <div className="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-950/30 dark:to-cyan-950/30 rounded-xl p-4 mb-6 border border-teal-200 dark:border-teal-800">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-yellow-500" />
+                <span className="font-bold text-slate-900 dark:text-white">Starter Plan</span>
               </div>
-              <div className="text-lg font-bold text-slate-900 dark:text-white">$19</div>
-              <div className="text-xs text-slate-500">Pro/mo</div>
-              <div className="text-xs text-blue-600 mt-1">500 ops</div>
-            </button>
-            <button 
-              className="text-center p-3 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-blue-300 dark:hover:border-blue-700 transition-colors"
-              onClick={() => setLocation('/pricing?plan=business')}
-            >
-              <div className="text-lg font-bold text-slate-900 dark:text-white">$49</div>
-              <div className="text-xs text-slate-500">Business/mo</div>
-              <div className="text-xs text-blue-600 mt-1">1000 ops</div>
-            </button>
+              <div className="text-right">
+                <span className="text-2xl font-bold text-teal-600">$9</span>
+                <span className="text-slate-500">/month</span>
+              </div>
+            </div>
+            <div className="text-sm text-slate-600 dark:text-slate-400">
+              or <span className="font-semibold text-teal-600">$49/year</span> (save 55%)
+            </div>
           </div>
 
           {/* CTA Buttons */}
           <div className="flex gap-3">
             <Button
-              onClick={() => setLocation('/pricing')}
-              className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white gap-2"
+              onClick={() => window.location.href = '/checkout?plan=starter&cycle=yearly'}
+              className="flex-1 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white gap-2"
             >
               <Crown className="w-4 h-4" />
               Upgrade Now
@@ -188,7 +190,7 @@ export function UpgradePrompt({
 
           {/* Note */}
           <p className="text-center text-xs text-slate-500 mt-4">
-            Limits reset on the 1st of each month. Cancel anytime.
+            14-day money-back guarantee • Cancel anytime
           </p>
         </div>
       </div>
@@ -201,7 +203,7 @@ export function UpgradePrompt({
 // ============================================================================
 
 interface UseUpgradePromptOptions {
-  feature: 'background_removal' | 'image_enhancement';
+  feature: 'background_removal' | 'image_enhancement' | 'compression';
   usageStats: {
     used: number;
     remaining: number;
@@ -236,9 +238,10 @@ export function useUpgradePrompt({ feature, usageStats, tierName }: UseUpgradePr
     }
 
     // Show when hitting free tier limits
-    const isFreeTier = tierName === 'free' || tierName === 'free_registered';
+    const isFreeTier = tierName === 'free' || tierName === 'free_registered' || tierName === 'free_anonymous';
     if (isFreeTier && usageStats) {
-      const threshold = feature === 'background_removal' ? 5 : 3;
+      // Free tier limits based on 2-tier structure
+      const threshold = feature === 'compression' ? 30 : 10;
       if (usageStats.used >= threshold && usageStats.remaining === 0) {
         setIsOpen(true);
         setHasShownThisSession(true);
@@ -280,7 +283,7 @@ export function useUpgradePrompt({ feature, usageStats, tierName }: UseUpgradePr
 // ============================================================================
 
 interface UsageIndicatorProps {
-  feature: 'background_removal' | 'image_enhancement';
+  feature: 'background_removal' | 'image_enhancement' | 'compression';
   used: number;
   limit: number;
   onUpgradeClick: () => void;
@@ -296,7 +299,12 @@ export function UsageIndicator({ feature, used, limit, onUpgradeClick }: UsageIn
 
   if (limit === 0) return null;
 
-  const featureName = feature === 'background_removal' ? 'removals' : 'enhancements';
+  const featureNames: Record<string, string> = {
+    background_removal: 'removals',
+    image_enhancement: 'enhancements',
+    compression: 'compressions',
+  };
+  const featureName = featureNames[feature] || 'operations';
 
   return (
     <div className={`
@@ -340,12 +348,17 @@ export function UsageIndicator({ feature, used, limit, onUpgradeClick }: UsageIn
 // ============================================================================
 
 interface LimitReachedBannerProps {
-  feature: 'background_removal' | 'image_enhancement';
+  feature: 'background_removal' | 'image_enhancement' | 'compression';
   onUpgradeClick: () => void;
 }
 
 export function LimitReachedBanner({ feature, onUpgradeClick }: LimitReachedBannerProps) {
-  const featureName = feature === 'background_removal' ? 'background removal' : 'image enhancement';
+  const featureNames: Record<string, string> = {
+    background_removal: 'background removal',
+    image_enhancement: 'image enhancement',
+    compression: 'compression',
+  };
+  const featureName = featureNames[feature] || 'operation';
   
   return (
     <div className="bg-gradient-to-r from-red-500 to-rose-500 text-white px-4 py-3 rounded-lg mb-6">
@@ -356,7 +369,7 @@ export function LimitReachedBanner({ feature, onUpgradeClick }: LimitReachedBann
           </div>
           <div>
             <p className="font-medium">Monthly {featureName} limit reached</p>
-            <p className="text-sm text-white/80">Upgrade to continue processing images</p>
+            <p className="text-sm text-white/80">Upgrade to Starter for more operations</p>
           </div>
         </div>
         <Button
@@ -364,7 +377,7 @@ export function LimitReachedBanner({ feature, onUpgradeClick }: LimitReachedBann
           className="bg-white text-red-600 hover:bg-white/90 gap-2"
         >
           <Crown className="w-4 h-4" />
-          Upgrade Now
+          Upgrade to Starter
         </Button>
       </div>
     </div>
@@ -398,8 +411,8 @@ export function FeatureRestricted({ featureName, children, onUpgradeClick }: Fea
       {showTooltip && (
         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-slate-900 text-white text-xs rounded-lg whitespace-nowrap z-10">
           <div className="flex items-center gap-2">
-            <Crown className="w-3 h-3 text-amber-400" />
-            <span>{featureName} requires upgrade</span>
+            <Crown className="w-3 h-3 text-yellow-400" />
+            <span>{featureName} requires Starter plan</span>
           </div>
           <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900" />
         </div>

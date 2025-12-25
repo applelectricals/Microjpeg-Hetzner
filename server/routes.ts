@@ -41,6 +41,7 @@ import { removeBackground, checkReplicateHealth, getEstimatedCost } from './serv
 import { enhanceImage, getEnhancementCost, calculateOutputDimensions } from './services/imageEnhancer';
 import { enhanceVideo } from './services/videoEnhancer';
 import instamojoRoutes from './routes/instamojoRoutes';
+import { normalizeTierName, getTierConfig, getTierDisplayName, isPaidTier, getTierFromRazorpayPlan } from '@shared/tierConfig';
 
 // ============================================================================
 // RATE LIMITING FOR SIGNUP
@@ -6386,13 +6387,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1); // 1 month for $29/$99 plans
       }
 
-      // Map plan names correctly
-      let subscriptionTier = 'premium'; // default
-      if (plan === 'test_premium') {
-        subscriptionTier = 'test_premium';
-      } else if (plan === 'enterprise') {
-        subscriptionTier = 'enterprise';
-      }
+      // Normalize tier name: all paid plans map to 'starter' in 2-tier structure
+      const subscriptionTier = normalizeTierName(plan);
 
       await storage.updateUser(userId, {
         subscriptionTier: subscriptionTier,
@@ -6448,12 +6444,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Update user subscription
+      // Normalize tier name: all paid plans map to 'starter' in 2-tier structure
+      const normalizedPlan = normalizeTierName(plan);
       await db.update(users)
         .set({
-          subscriptionTier: plan,
-          subscriptionStatus: plan === 'free' ? 'inactive' : 'active',
+          subscriptionTier: normalizedPlan,
+          subscriptionStatus: normalizedPlan === 'free' ? 'inactive' : 'active',
           subscriptionStartDate: new Date(),
-          subscriptionEndDate: plan === 'free' ? null : subscriptionEndDate,
+          subscriptionEndDate: normalizedPlan === 'free' ? null : subscriptionEndDate,
           monthlyOperations: 0, // Reset operations count
           updatedAt: new Date()
         })
@@ -6495,8 +6493,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       expiryDate.setDate(expiryDate.getDate() + (duration || 30));
 
       // Update user subscription
+      // Normalize tier name: all paid plans map to 'starter' in 2-tier structure
+      const tierName = normalizeTierName(plan);
       await storage.updateUser(userId, {
-        subscriptionTier: plan.includes('starter') ? 'starter' : plan.includes('pro') ? 'premium' : 'enterprise',
+        subscriptionTier: tierName,
         subscriptionStatus: 'active',
         subscriptionEndDate: expiryDate,
         stripeSubscriptionId: paypal_order_id

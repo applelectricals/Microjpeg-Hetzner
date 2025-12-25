@@ -1,10 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Crown } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
 import logoUrl from '@assets/mascot-logo-optimized.png';
 import { Moon, Sun } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 
 
 interface HeaderProps {
@@ -13,11 +14,23 @@ interface HeaderProps {
 }
 
 export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
-  const { user, isAuthenticated, logout } = useAuth(); // Use logout from useAuth if available
+  const { user, isAuthenticated, logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [usageStats, setUsageStats] = useState<any>(null);
   const [location, setLocation] = useLocation();
   const [isSigningOut, setIsSigningOut] = useState(false);
+
+  // Fetch tier info to determine if user is paid
+  const { data: tierInfo } = useQuery({
+    queryKey: ['/api/user/tier-info'],
+    enabled: isAuthenticated,
+    retry: false,
+    staleTime: 60000, // Cache for 1 minute
+  });
+
+  // Check if user is on a paid tier (Starter)
+  const isPaidUser = tierInfo?.tier?.tierName && 
+    !['free', 'free_registered', 'free_anonymous'].includes(tierInfo.tier.tierName);
 
   // Silent tracking - fetch stats but don't display counter
   useEffect(() => {
@@ -174,6 +187,16 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
             
             {/* Navigation - Using <a> tags for reliable navigation */}
             <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
+              {/* Premium Tools Link - Only show for paid users */}
+              {isPaidUser && (
+                <a 
+                  href="/compress" 
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-medium hover:from-teal-600 hover:to-teal-700 transition-all shadow-sm"
+                >
+                  <Crown className="w-4 h-4" />
+                  <span>Premium Tools</span>
+                </a>
+              )}
               <a href="/tools/convert" className="text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
                 Convert
               </a>
@@ -269,6 +292,18 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
             </div>
 
             <div className="px-4 pb-4 space-y-3">
+              {/* Premium Tools Link - Only show for paid users (Mobile) */}
+              {isPaidUser && (
+                <a
+                  href="/compress"
+                  className="flex items-center gap-2 py-2 px-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg font-medium"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  <Crown className="w-4 h-4" />
+                  Premium Tools
+                </a>
+              )}
+              
               {/* Navigation Links - Using <a> tags */}
               <div>
                 <a
