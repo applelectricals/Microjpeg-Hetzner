@@ -51,30 +51,19 @@ function useDarkMode() {
   return { isDark, setIsDark };
 }
 
-// Razorpay Button Component - Renders based on cycle prop
-function RazorpayButton({ cycle }: { cycle: 'monthly' | 'yearly' }) {
+// Single Razorpay Button that loads once and stays loaded
+function RazorpayButtonStatic({ buttonId, isVisible }: { buttonId: string; isVisible: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const buttonIdRef = useRef<string>('');
+  const [isLoaded, setIsLoaded] = useState(false);
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    if (!containerRef.current) return;
-    
-    const buttonId = RAZORPAY_BUTTON_IDS[cycle];
-    
-    // If same button, don't re-render
-    if (buttonIdRef.current === buttonId) {
-      return;
-    }
-    
-    buttonIdRef.current = buttonId;
-    setIsLoading(true);
-    
-    // Clear existing content
-    containerRef.current.innerHTML = '';
+    // Only initialize once
+    if (hasInitialized.current || !containerRef.current) return;
+    hasInitialized.current = true;
 
     const form = document.createElement('form');
-    form.id = `razorpay-form-${cycle}`;
+    form.id = `razorpay-form-${buttonId}`;
     
     const script = document.createElement('script');
     script.src = 'https://cdn.razorpay.com/static/widget/subscription-button.js';
@@ -83,37 +72,30 @@ function RazorpayButton({ cycle }: { cycle: 'monthly' | 'yearly' }) {
     script.async = true;
     
     script.onload = () => {
-      console.log(`✅ Razorpay ${cycle} button loaded`);
-      setIsLoading(false);
+      console.log(`✅ Razorpay button ${buttonId} loaded`);
+      setIsLoaded(true);
     };
     
     script.onerror = () => {
-      console.error(`❌ Failed to load Razorpay ${cycle} button`);
-      setIsLoading(false);
+      console.error(`❌ Failed to load Razorpay button ${buttonId}`);
+      setIsLoaded(true); // Set to true to hide loader even on error
     };
 
     form.appendChild(script);
     containerRef.current.appendChild(form);
-    
-    // Cleanup function
-    return () => {
-      if (containerRef.current) {
-        containerRef.current.innerHTML = '';
-      }
-    };
-  }, [cycle]);
+  }, [buttonId]);
 
   return (
-    <div className="relative min-h-[60px]">
-      {isLoading && (
-        <div className="absolute inset-0 flex items-center justify-center">
+    <div 
+      className={`transition-all duration-300 ${isVisible ? 'block' : 'hidden'}`}
+    >
+      {!isLoaded && isVisible && (
+        <div className="flex items-center justify-center py-4">
           <Loader2 className="w-6 h-6 text-teal-500 animate-spin" />
+          <span className="ml-2 text-gray-400 text-sm">Loading payment...</span>
         </div>
       )}
-      <div 
-        ref={containerRef} 
-        className={`flex justify-center items-center ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
-      />
+      <div ref={containerRef} className="flex justify-center items-center min-h-[50px]" />
     </div>
   );
 }
@@ -126,6 +108,7 @@ export default function CheckoutPage() {
   const [selectedCycle, setSelectedCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [paypalLoaded, setPaypalLoaded] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const paypalContainerRef = useRef<HTMLDivElement>(null);
 
   // Get cycle from URL params
   useEffect(() => {
@@ -156,22 +139,19 @@ export default function CheckoutPage() {
     document.body.appendChild(script);
   }, []);
 
-  // Render PayPal button
+  // Render PayPal button - re-render when cycle changes
   useEffect(() => {
-    if (!paypalLoaded) return;
+    if (!paypalLoaded || !paypalContainerRef.current) return;
 
     const currentPrice = PLAN_PRICES[selectedCycle];
     const planName = `Starter ${selectedCycle === 'monthly' ? 'Monthly' : 'Yearly'}`;
     
-    const containerId = `paypal-button-${selectedCycle}`;
-    const mainContainer = document.getElementById('paypal-button-container');
-    if (!mainContainer) return;
-    
-    mainContainer.innerHTML = '';
+    // Clear and re-render PayPal button
+    paypalContainerRef.current.innerHTML = '';
     
     const buttonContainer = document.createElement('div');
-    buttonContainer.id = containerId;
-    mainContainer.appendChild(buttonContainer);
+    buttonContainer.id = `paypal-btn-${selectedCycle}-${Date.now()}`;
+    paypalContainerRef.current.appendChild(buttonContainer);
     
     // @ts-ignore
     if (window.paypal) {
@@ -200,7 +180,6 @@ export default function CheckoutPage() {
             const order = await actions.order.capture();
             console.log('✅ PayPal order completed:', order);
             
-            // Send to backend to update user tier
             const response = await fetch('/api/payments/paypal/capture', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -214,7 +193,6 @@ export default function CheckoutPage() {
             });
             
             if (response.ok) {
-              // Redirect to premium tools page
               window.location.href = '/compress?welcome=true';
             } else {
               alert('Payment recorded but there was an issue. Please contact support.');
@@ -230,7 +208,7 @@ export default function CheckoutPage() {
           console.error('PayPal error:', err);
           alert('Payment failed. Please try again.');
         },
-      }).render(`#${containerId}`);
+      }).render(`#${buttonContainer.id}`);
     }
   }, [paypalLoaded, selectedCycle]);
 
@@ -341,7 +319,7 @@ export default function CheckoutPage() {
               </CardContent>
             </Card>
 
-            {/* Razorpay Payment - Using key prop to force remount on cycle change */}
+            {/* Razorpay Payment - Both buttons loaded, show/hide based on selection */}
             <Card className="bg-gray-800/50 backdrop-blur-xl border border-teal-500/50">
               <CardHeader className="pb-2">
                 <CardTitle className="text-white text-center">
@@ -352,8 +330,15 @@ export default function CheckoutPage() {
                 </p>
               </CardHeader>
               <CardContent className="pt-4">
-                {/* Key prop forces component remount when cycle changes */}
-                <RazorpayButton key={selectedCycle} cycle={selectedCycle} />
+                {/* Load BOTH buttons, but show only the selected one */}
+                <RazorpayButtonStatic 
+                  buttonId={RAZORPAY_BUTTON_IDS.monthly} 
+                  isVisible={selectedCycle === 'monthly'} 
+                />
+                <RazorpayButtonStatic 
+                  buttonId={RAZORPAY_BUTTON_IDS.yearly} 
+                  isVisible={selectedCycle === 'yearly'} 
+                />
               </CardContent>
             </Card>
 
@@ -368,7 +353,7 @@ export default function CheckoutPage() {
                 </p>
               </CardHeader>
               <CardContent>
-                <div id="paypal-button-container" className="min-h-[50px]"></div>
+                <div ref={paypalContainerRef} className="min-h-[50px]"></div>
                 {!paypalLoaded && (
                   <div className="text-center py-4">
                     <Loader2 className="w-6 h-6 text-blue-500 mx-auto animate-spin" />
