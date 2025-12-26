@@ -29,7 +29,7 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
   });
 
   // Check if user is on a paid tier (Starter)
-  const isPaidUser = tierInfo?.tier?.tierName && 
+  const isPaidUser = tierInfo?.tier?.tierName &&
     !['free', 'free_registered', 'free_anonymous'].includes(tierInfo.tier.tierName);
 
   // Silent tracking - fetch stats but don't display counter
@@ -41,7 +41,7 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
           credentials: 'include',
           cache: 'no-store',
         });
-        
+
         if (response.ok) {
           const data = await response.json();
           setUsageStats(data);
@@ -54,9 +54,9 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
     fetchStats();
     const interval = setInterval(fetchStats, 30000);
     const handleRefresh = () => fetchStats();
-    
+
     window.addEventListener('refreshUniversalCounter', handleRefresh);
-    
+
     return () => {
       clearInterval(interval);
       window.removeEventListener('refreshUniversalCounter', handleRefresh);
@@ -69,24 +69,24 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
       e.preventDefault();
       e.stopPropagation();
     }
-    
+
     if (isSigningOut) return;
-    
+
     setIsSigningOut(true);
     console.log('[Header] Sign out initiated');
-    
+
     try {
       // Clear all local storage
       localStorage.clear();
       sessionStorage.clear();
-      
+
       // Try multiple logout endpoints - your backend might use different ones
       const logoutEndpoints = [
         { url: '/api/auth/logout', method: 'POST' },
         { url: '/api/logout', method: 'POST' },
         { url: '/api/logout', method: 'GET' },
       ];
-      
+
       for (const endpoint of logoutEndpoints) {
         try {
           const response = await fetch(endpoint.url, {
@@ -96,7 +96,7 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
               'Content-Type': 'application/json',
             },
           });
-          
+
           if (response.ok) {
             console.log(`[Header] Logout successful via ${endpoint.url}`);
             break;
@@ -105,12 +105,12 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
           // Continue to next endpoint
         }
       }
-      
+
       // If useAuth has a logout method, call it too
       if (typeof logout === 'function') {
         await logout();
       }
-      
+
     } catch (error) {
       console.error('[Header] Sign out error:', error);
     } finally {
@@ -149,7 +149,7 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
               )}
             </Button>
           )}
-          
+
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="p-2 border border-gray-300 dark:border-gray-600 rounded bg-transparent"
@@ -173,13 +173,13 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
                 <span className="text-xs font-opensans text-brand-dark/70 dark:text-gray-300/70 tracking-widest">PICTURE PERFECT</span>
               </div>
             </a>
-            
+
             {/* Navigation - Using <a> tags with uniform alignment */}
             <nav className="hidden lg:flex items-center gap-5 xl:gap-6">
               {/* Subscriber Badge - Only show for paid users */}
               {isPaidUser && (
-                <a 
-                  href="/compress" 
+                <a
+                  href="/compress"
                   className="flex items-center gap-1 px-2.5 py-1 bg-gradient-to-r from-yellow-500 to-amber-500 text-white text-xs font-bold rounded tracking-wide hover:from-yellow-600 hover:to-amber-600 transition-all shadow-sm"
                 >
                   <Crown className="w-3 h-3" />
@@ -191,6 +191,9 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
               </a>
               <a href="/api-docs#overview" className="text-sm text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
                 API
+              </a>
+              <a href="/airtable-extension" className="text-sm text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
+                Airtable
               </a>
               <a href="/remove-background" className="text-sm text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
                 BG Remover
@@ -244,7 +247,7 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
                   </button>
                 </div>
               ) : (
-                <a 
+                <a
                   href="/login"
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-brand-gold hover:bg-brand-gold-dark text-white h-9 px-4"
                 >
@@ -258,19 +261,19 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div 
-          className="lg:hidden fixed inset-0 z-40" 
-          onClick={() => setIsMobileMenuOpen(false)} 
+        <div
+          className="lg:hidden fixed inset-0 z-40"
+          onClick={() => setIsMobileMenuOpen(false)}
           style={{ backgroundColor: 'rgba(0,0,0,0.3)' }}
         >
-          <div 
-            className="absolute top-16 right-4 w-60 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border dark:border-gray-700" 
+          <div
+            className="absolute top-16 right-4 w-60 bg-white dark:bg-gray-800 rounded-lg shadow-2xl border dark:border-gray-700"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <div className="flex justify-end p-2">
-              <button 
-                onClick={() => setIsMobileMenuOpen(false)} 
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
                 className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
                 aria-label="Close menu"
                 type="button"
@@ -291,7 +294,7 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
                   SUBSCRIBER ACCESS
                 </a>
               )}
-              
+
               {/* Navigation Links */}
               <div>
                 <a
@@ -307,6 +310,13 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   API
+                </a>
+                <a
+                  href="/airtable-extension"
+                  className="block py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  Airtable
                 </a>
                 <a
                   href="/remove-background"
@@ -340,9 +350,9 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
 
               {/* Dark Mode Toggle in Menu */}
               {onToggleDark && (
-                <button 
+                <button
                   type="button"
-                  onClick={() => onToggleDark()} 
+                  onClick={() => onToggleDark()}
                   className="flex items-center gap-2 w-full text-left py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2 bg-transparent border-none cursor-pointer"
                 >
                   {isDark ? (
@@ -364,14 +374,14 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
               {/* Auth Buttons - Mobile */}
               {isAuthenticated ? (
                 <div className="space-y-2">
-                  <a 
+                  <a
                     href="/dashboard"
                     className="flex items-center justify-start w-full py-2 px-3 text-sm font-medium rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
                     Dashboard
                   </a>
-                  <button 
+                  <button
                     type="button"
                     disabled={isSigningOut}
                     onClick={(e) => {
@@ -384,7 +394,7 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
                   </button>
                 </div>
               ) : (
-                <a 
+                <a
                   href="/login"
                   className="flex items-center justify-center w-full py-2 px-3 text-sm font-medium rounded-md bg-brand-gold hover:bg-brand-gold-dark text-white"
                   onClick={() => setIsMobileMenuOpen(false)}

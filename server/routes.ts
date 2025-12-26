@@ -40,6 +40,9 @@ import PaymentSuccessPage from './pages/PaymentSuccess';
 import { removeBackground, checkReplicateHealth, getEstimatedCost } from './services/replicateAI';
 import { enhanceImage, getEnhancementCost, calculateOutputDimensions } from './services/imageEnhancer';
 import { enhanceVideo } from './services/videoEnhancer';
+import { airtableService } from './services/airtableService';
+import { trackApiUsage } from './apiSubscriptions';
+import { authenticateApiKey } from './apiAuth';
 import instamojoRoutes from './routes/instamojoRoutes';
 import { normalizeTierName, getTierConfig, getTierDisplayName, isPaidTier, getTierFromRazorpayPlan } from '@shared/tierConfig';
 
@@ -1484,6 +1487,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error: any) {
         console.error('❌ Video enhancement error:', error);
         res.status(500).json({ error: error.message || 'Processing failed' });
+      }
+    }
+  );
+
+  // ============================================================================
+  // AIRTABLE EXTENSION ROUTES
+  // ============================================================================
+
+  /**
+   * Airtable script integration endpoint (TinyPNG style)
+   * URL format: /api/airtable/compress
+   * Usage: POST { "url": "...", "quality": 75 }
+   * Auth: Authorization: Bearer sk_test_... OR api_key=sk_test_... in query
+   */
+  app.post('/api/airtable/compress',
+    async (req, res, next) => {
+      // Use API authentication for Airtable scripts
+      await authenticateApiKey(req, res, next);
+    },
+    async (req, res) => {
+      console.log('=== AIRTABLE COMPRESSION REQUEST ===');
+      const startTime = Date.now();
+
+      try {
+        // Support both TinyPNG's structure and direct url
+        const requestedUrl = req.body.url || req.body?.source?.url;
+        const quality = parseInt(req.body.quality) || 75;
+
+        if (!requestedUrl) {
+          return res.status(400).json({ error: 'No image URL provided' });
+        }
+
+        // Process compression
+        const result = await airtableService.compressFromUrl(requestedUrl, quality);
+
+        if (!result.success) {
+          return res.status(500).json({ error: result.error });
+        }
+
+        // Track usage for the API key owner
+        if (req.apiKey) {
+          await trackApiUsage(req.apiKey.userId, req.apiKey.id, '/api/airtable/compress');
+        }
+
+        const processingTime = Date.now() - startTime;
+
+        res.json({
+          success: true,
+          output: {
+            url: result.cdnUrl,
+            size: result.compressedSize,
+            ratio: result.ratio / 100, // Matching TinyPNG's ratio format (0.xx)
+          },
+          input: {
+            size: result.originalSize,
+          },
+          stats: {
+            processingTime,
+          }
+        });
+
+      } catch (error: any) {
+        console.error('❌ Airtable route error:', error);
+        res.status(500).json({ error: 'Internal server error' });
       }
     }
   );

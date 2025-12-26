@@ -63,6 +63,7 @@ const LegalPrivacy = lazy(() => import("@/pages/legal-privacy"));
 const LegalCookies = lazy(() => import("@/pages/legal-cookies"));
 const LegalCancellation = lazy(() => import("@/pages/legal-cancellation"));
 const LegalPaymentProtection = lazy(() => import("@/pages/legal-payment-protection"));
+const AirtableExtension = lazy(() => import("@/pages/airtable-extension"));
 
 // 404 Page
 const NotFound = () => (
@@ -81,14 +82,14 @@ const NotFound = () => (
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
-  
+
   console.log('[ProtectedRoute] isLoading:', isLoading, 'isAuthenticated:', isAuthenticated);
-  
+
   // Show loader while checking auth
   if (isLoading) {
     return <PageLoader />;
   }
-  
+
   // Redirect if not authenticated
   if (!isAuthenticated) {
     console.log('[ProtectedRoute] Not authenticated, redirecting to login');
@@ -96,7 +97,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     window.location.href = '/login';
     return <PageLoader />;
   }
-  
+
   return <>{children}</>;
 };
 
@@ -117,10 +118,10 @@ const DebugRoute = ({ path, children }: { path: string; children: React.ReactNod
 
 function AppRouter() {
   const [location] = useLocation();
-  
+
   // Debug: Log current location on every render
   console.log('[AppRouter] Current location:', location);
-  
+
   return (
     <Suspense fallback={<PageLoader />}>
       <Switch>
@@ -138,7 +139,7 @@ function AppRouter() {
             );
           }}
         </Route>
-        
+
         <Route path="/profile">
           {() => {
             console.log('[Route /profile] Matched!');
@@ -149,7 +150,7 @@ function AppRouter() {
             );
           }}
         </Route>
-        
+
         <Route path="/compress">
           {() => {
             console.log('[Route /compress] Matched!');
@@ -160,7 +161,7 @@ function AppRouter() {
             );
           }}
         </Route>
-        
+
         {/* AUTH ROUTES */}
         <Route path="/login">
           {() => {
@@ -175,22 +176,23 @@ function AppRouter() {
           }}
         </Route>
         <Route path="/verify-email" component={EmailVerification} />
-        
+
         {/* PRICING & CHECKOUT */}
         <Route path="/pricing" component={EnhancedPricingPage} />
         <Route path="/checkout" component={CheckoutPage} />
         <Route path="/simple-pricing" component={SimplePricing} />
-        
+
         {/* API PAGES */}
         <Route path="/api-docs" component={ApiDocs} />
         <Route path="/api-signup" component={ApiSignup} />
         <Route path="/api-demo" component={ApiDemo} />
         <Route path="/api-dashboard" component={ApiDashboard} />
-        
+
         {/* AI TOOLS */}
         <Route path="/remove-background" component={RemoveBackgroundPage} />
         <Route path="/enhance-image" component={EnhanceImagePage} />
-        
+        <Route path="/airtable-extension" component={AirtableExtension} />
+
         {/* TOOLS - Specific paths before wildcard */}
         <Route path="/tools/compress" component={ToolsCompress} />
         <Route path="/tools/convert" component={ToolsConvert} />
@@ -199,33 +201,33 @@ function AppRouter() {
         <Route path="/tools/bulk" component={BulkImageCompression} />
         <Route path="/tools/raw" component={CompressRawFiles} />
         <Route path="/tools" component={Tools} />
-        
+
         {/* COMPRESSION TIERS */}
         <Route path="/premium" component={PremiumCompress} />
         <Route path="/enterprise" component={EnterpriseCompress} />
         <Route path="/test-premium" component={TestPremiumCompress} />
-        
+
         {/* CONTENT PAGES */}
         <Route path="/about" component={About} />
         <Route path="/contact" component={Contact} />
         <Route path="/support" component={Support} />
         <Route path="/features" component={Features} />
         <Route path="/blog" component={Blog} />
-        
+
         {/* LEGAL PAGES */}
         <Route path="/legal/terms" component={LegalTerms} />
         <Route path="/legal/privacy" component={LegalPrivacy} />
         <Route path="/legal/cookies" component={LegalCookies} />
         <Route path="/legal/cancellation" component={LegalCancellation} />
         <Route path="/legal/payment-protection" component={LegalPaymentProtection} />
-        
+
         {/* WORDPRESS */}
         <Route path="/wordpress-plugin/install" component={WordPressInstallation} />
         <Route path="/wordpress-plugin/docs" component={WordPressImagePlugin} />
         <Route path="/wordpress-plugin/api" component={WordPressDevelopment} />
         <Route path="/wordpress-plugin/download" component={WordPressDetails} />
         <Route path="/wordpress-plugin" component={WordPressDetails} />
-        
+
         {/* ========================================
             LEGACY REDIRECTS
             ======================================== */}
@@ -254,7 +256,7 @@ function AppRouter() {
         <Route path="/web/convert">{() => <RedirectTo to="/tools/convert" />}</Route>
         <Route path="/compress-raw-files">{() => <RedirectTo to="/tools" />}</Route>
         <Route path="/bulk-image-compression">{() => <RedirectTo to="/tools" />}</Route>
-        
+
         {/* ========================================
             DYNAMIC ROUTES - MUST BE AFTER ALL STATIC ROUTES
             ======================================== */}
@@ -262,7 +264,7 @@ function AppRouter() {
         <Route path="/convert/:conversion" component={ConversionPage} />
         <Route path="/compress/:format" component={ConversionPage} />
         <Route path="/tools/:format" component={ConversionPage} />
-        
+
         {/* ========================================
             HOME - Put near the end to avoid matching other routes
             ======================================== */}
@@ -272,7 +274,7 @@ function AppRouter() {
             return <Landing />;
           }}
         </Route>
-        
+
         {/* 404 - Absolute last */}
         <Route>
           {() => {
