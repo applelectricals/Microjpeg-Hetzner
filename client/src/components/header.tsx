@@ -192,8 +192,8 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
               <a href="/api-docs#overview" className="text-sm text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
                 API
               </a>
-              <a href="/airtable-extension" className="text-sm text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
-                Airtable
+              <a href="/integrations" className="text-sm text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
+                Integrations
               </a>
               <a href="/remove-background" className="text-sm text-brand-dark/80 dark:text-gray-300/80 hover:text-brand-dark dark:hover:text-white font-opensans font-medium transition-colors">
                 BG Remover
@@ -312,11 +312,11 @@ export default function Header({ isDark, onToggleDark }: HeaderProps = {}) {
                   API
                 </a>
                 <a
-                  href="/airtable-extension"
+                  href="/integrations"
                   className="block py-2 text-brand-dark dark:text-white font-medium hover:bg-gray-50 dark:hover:bg-gray-700 rounded px-2"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
-                  Airtable
+                  Integrations
                 </a>
                 <a
                   href="/remove-background"

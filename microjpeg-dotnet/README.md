@@ -1,7 +1,7 @@
 # MicroJpeg for .NET
 
 [![MicroJPEG on NuGet](https://img.shields.io/nuget/v/microjpeg.svg?maxAge=2000)](https://www.nuget.org/packages/MicroJpeg)
-[![MIT license](https://img.shields.io/github/license/microjpeg/microjpeg-dotnet.svg?maxAge=2592000)](LICENSE)
+[![MIT license](https://img.shields.io/github/license/applelectricals/microjpeg-dotnet.svg?maxAge=2592000)](LICENSE)
 
 This is a .NET wrapper around the [MicroJPEG](https://microjpeg.com) image compression and optimization API.
 
@@ -22,6 +22,25 @@ Install via `dotnet`:
 
 ```bash
 dotnet add package MicroJpeg
+```
+
+### Installation via GitHub Packages
+
+If you prefer to use GitHub Packages, add a `nuget.config` file to your project:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <packageSources>
+    <add key="GitHub" value="https://nuget.pkg.github.com/applelectricals/index.json" />
+  </packageSources>
+</configuration>
+```
+
+Then install via `dotnet`:
+
+```bash
+dotnet add package MicroJpeg --source https://nuget.pkg.github.com/applelectricals/index.json
 ```
 
 ## Quickstart

@@ -64,6 +64,7 @@ const LegalCookies = lazy(() => import("@/pages/legal-cookies"));
 const LegalCancellation = lazy(() => import("@/pages/legal-cancellation"));
 const LegalPaymentProtection = lazy(() => import("@/pages/legal-payment-protection"));
 const AirtableExtension = lazy(() => import("@/pages/airtable-extension"));
+const IntegrationsPage = lazy(() => import("@/pages/IntegrationsPage"));
 
 // 404 Page
 const NotFound = () => (
@@ -192,6 +193,7 @@ function AppRouter() {
         <Route path="/remove-background" component={RemoveBackgroundPage} />
         <Route path="/enhance-image" component={EnhanceImagePage} />
         <Route path="/airtable-extension" component={AirtableExtension} />
+        <Route path="/integrations" component={IntegrationsPage} />
 
         {/* TOOLS - Specific paths before wildcard */}
         <Route path="/tools/compress" component={ToolsCompress} />
