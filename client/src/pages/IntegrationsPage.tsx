@@ -6,7 +6,6 @@ import { Puzzle, ArrowRight, ExternalLink, Github, Database } from 'lucide-react
 import { Link } from 'wouter';
 import Header from '@/components/header';
 import { SEOHead } from '@/components/SEOHead';
-import ButtonsSection from '@/components/ButtonsSection';
 import logoUrl from '@assets/mascot-logo-optimized.png';
 
 export default function IntegrationsPage() {
@@ -40,7 +39,7 @@ export default function IntegrationsPage() {
                     <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
                         Connect MicroJPEG to your existing workflows with our official libraries, extensions, and plugins.
                     </p>
-                    <ButtonsSection />
+                
                 </div>
 
                 {/* Integration Cards */}
