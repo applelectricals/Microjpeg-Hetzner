@@ -20,6 +20,7 @@ dist-ssr
 *.ntvs*
 *.njsproj
 *.sln
+!microjpeg-dotnet/*.sln
 *.sw?
 
 # Dependencies
