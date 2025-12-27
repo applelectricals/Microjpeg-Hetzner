@@ -1,0 +1,61 @@
+MicroJPEG Image Optimizer for JoomShopping - Complete!
+I've created a TinyPNG-style image optimizer plugin for JoomShopping. Here's what's included:
+Plugin Structure
+plg_jshoppingproducts_microjpeg/
+├── microjpeg.xml                    # Plugin manifest
+├── script.php                       # Install/update script
+├── README.md                        # Documentation
+├── services/
+│   └── provider.php                 # Joomla 4+ DI container
+├── src/
+│   ├── Extension/
+│   │   └── MicroJpeg.php           # Main plugin class
+│   └── Field/
+│       └── MicrojpegstatusField.php # Custom field for API status
+└── language/en-GB/
+    ├── plg_jshoppingproducts_microjpeg.ini
+    └── plg_jshoppingproducts_microjpeg.sys.ini
+Features
+FeatureDescriptionAuto CompressionCompresses images when saving products/categories/manufacturersProduct ImagesCompresses main, thumbnail (thumb_), and full-size (full_) imagesCategory ImagesCompresses category imagesManufacturer LogosCompresses manufacturer logosFormat ConversionOptional conversion to WebP, AVIF, JPEG, PNGQuality ControlAdjustable quality (50-100)Usage StatsShows compression count in admin messagesAPI Status WidgetDisplays monthly usage in plugin settingsError LoggingDetailed logs for troubleshootingPretty Install ScreenBranded install message with setup instructions
+Plugin Settings (3 Fieldsets)
+Basic Settings:
+
+API Key
+Compress Products (Yes/No)
+Compress Categories (Yes/No)
+Compress Manufacturers (Yes/No)
+
+Compression Settings:
+
+Quality (50-100 slider)
+Output Format (Keep Original, JPEG, PNG, WebP, AVIF)
+Compress Thumbnails (Yes/No)
+Compress Full Size (Yes/No)
+
+Advanced Settings:
+
+Show Statistics (Yes/No)
+Log Errors (Yes/No)
+API Status (live usage display)
+
+How It Works
+
+User saves a product in JoomShopping admin
+Plugin triggers onAfterSaveProduct event
+Plugin sends image to MicroJPEG API for compression
+Compressed image is downloaded and replaces original
+Success message shows: "MicroJPEG: 3 image(s) optimized, 45.2 KB saved!"
+
+Installation
+
+Upload ZIP in Joomla: System → Install → Extensions
+Enable plugin: System → Plugins → search "MicroJPEG"
+Configure: Click plugin → enter API key
+Done! Images now auto-optimize on save
+
+Requirements
+
+Joomla 4.x or 5.x
+JoomShopping 5.x
+PHP 8.0+
+cURL extension

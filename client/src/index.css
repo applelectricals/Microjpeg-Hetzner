@@ -737,3 +737,25 @@
 .feature-demo .absolute.bottom-4 div:nth-child(2) { animation: progressDot 16s infinite; animation-delay: 4s; }
 .feature-demo .absolute.bottom-4 div:nth-child(3) { animation: progressDot 16s infinite; animation-delay: 8s; }
 .feature-demo .absolute.bottom-4 div:nth-child(4) { animation: progressDot 16s infinite; animation-delay: 12s; }
+
+/* Flip Card Styles */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}
+
+.group:hover .group-hover\:rotate-y-180 {
+  transform: rotateY(180deg);
+}
