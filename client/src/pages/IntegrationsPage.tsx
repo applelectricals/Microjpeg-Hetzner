@@ -7,8 +7,9 @@ import { Link } from 'wouter';
 import Header from '@/components/header';
 import { SEOHead } from '@/components/SEOHead';
 import logoUrl from '@assets/mascot-logo-optimized.png';
-import airtableLogo from '@assets/airtable_logo_premium.png';
-import joomLogo from '@assets/joomshopping_logo_premium.png';
+import airtableLogo from '@assets/Airtable_Logo.png';
+import joomLogo from '@assets/Joom_Shopping.png';
+import dotnetLogo from '@assets/dotnet.svg';
 
 export default function IntegrationsPage() {
     const integrations = [
@@ -19,7 +20,7 @@ export default function IntegrationsPage() {
             description: 'Official MicroJPEG wrapper for .NET. Supports .NET Core, .NET 6/7/8, and full .NET Framework. Non-blocking async APIs.',
             longDescription: 'A robust, high-performance library for C# developers. Features include automatic retry logic, streamlined error handling, and support for all MicroJPEG AI features like background removal and upscaling.',
             icon: <Terminal className="w-12 h-12 text-purple-400" />,
-            logo: null,
+            logo: dotnetLogo,
             color: 'from-purple-500/20 to-indigo-500/20',
             actionText: 'GitHub Repo',
             actionLink: 'https://github.com/applelectricals/microjpeg-dotnet',
