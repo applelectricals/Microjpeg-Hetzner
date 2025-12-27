@@ -351,6 +351,50 @@ const isConversionRequest = (originalFormat: string, targetFormat: string): bool
 };
 
 
+// Festive Snowfall Component
+const Snowfall = () => {
+  const snowflakes = Array.from({ length: 30 });
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden select-none z-20">
+      {snowflakes.map((_, i) => (
+        <div
+          key={i}
+          className="snowflake"
+          style={{
+            left: `${Math.random() * 100}%`,
+            animationDelay: `${Math.random() * 10}s, ${Math.random() * 3}s`,
+            opacity: Math.random(),
+            fontSize: `${Math.random() * 1.5 + 0.5}em`
+          }}
+        >
+          ❄
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// Festive Icon Component (Santa Hat)
+const SantaHat = ({ className }: { className?: string }) => (
+  <svg className={className} viewBox="0 0 100 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M10 50 C 10 20, 60 5, 85 30 L 75 40 C 55 20, 20 40, 25 55 Z" fill="#EF4444" stroke="#B91C1C" strokeWidth="2" />
+    <ellipse cx="85" cy="30" rx="8" ry="8" fill="white" />
+    <rect x="5" y="50" width="30" height="12" rx="6" fill="white" />
+  </svg>
+);
+
+// Christmas Tree Decoration
+const ChristmasTree = ({ className }: { className?: string }) => (
+  <svg className={`${className} christmas-tree-glow`} viewBox="0 0 100 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M50 10 L 20 50 L 35 50 L 15 85 L 40 85 L 20 120 L 80 120 L 60 85 L 85 85 L 65 50 L 80 50 Z" fill="#15803D" />
+    <rect x="45" y="120" width="10" height="15" fill="#78350F" />
+    <circle cx="35" cy="45" r="3" fill="#EF4444" />
+    <circle cx="65" cy="65" r="3" fill="#EAB308" />
+    <circle cx="45" cy="95" r="3" fill="#3B82F6" />
+    <path d="M50 5 L 54 12 L 46 12 Z" fill="#EAB308" />
+  </svg>
+);
+
 export default function MicroJPEGLanding() {
   const { isAuthenticated, user } = useAuth();
 
@@ -1493,6 +1537,15 @@ export default function MicroJPEGLanding() {
 
               {/* Right side - Upload Interface */}
               <div className="relative mt-8 lg:mt-0 upload-interface">
+                <Snowfall />
+                {/* Decorative Trees */}
+                <ChristmasTree className="absolute -top-12 -left-12 w-24 h-24 hidden lg:block opacity-60 transition-transform hover:scale-110" />
+                <ChristmasTree className="absolute -bottom-8 -left-16 w-32 h-32 hidden xl:block opacity-40 rotate-12 transition-transform hover:scale-110" />
+                <div className="absolute -top-6 -right-4 flex gap-2 hidden sm:flex">
+                  <div className="w-4 h-4 rounded-full bg-red-500 animate-pulse shadow-[0_0_10px_red]"></div>
+                  <div className="w-4 h-4 rounded-full bg-blue-500 animate-pulse delay-700 shadow-[0_0_10px_blue]"></div>
+                  <div className="w-4 h-4 rounded-full bg-yellow-500 animate-pulse delay-300 shadow-[0_0_10px_yellow]"></div>
+                </div>
                 {/* Upload Card - ADD FIXED DIMENSIONS */}
                 <div className="bg-gray-800/50 backdrop-blur-xl border border-gray-700/50 rounded-2xl p-6 sm:p-8 shadow-2xl min-h-[500px] max-w-full">
                   {/* Drag & Drop Zone with aspect-[4/3] */}
@@ -1553,8 +1606,8 @@ export default function MicroJPEGLanding() {
                                   }
                                 }}
                                 className={`h-8 sm:h-9 text-xs font-medium transition-all ${isSelected
-                                    ? "bg-teal-500 text-white shadow-lg shadow-teal-500/50"
-                                    : "bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 border border-gray-600"
+                                  ? "bg-teal-500 text-white shadow-lg shadow-teal-500/50"
+                                  : "bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 border border-gray-600"
                                   } ${isVisuallyDisabled ? "opacity-50 cursor-not-allowed bg-gray-800 text-gray-500" : ""
                                   } ${isProcessing ? "cursor-not-allowed" : ""
                                   }`}
@@ -1585,9 +1638,13 @@ export default function MicroJPEGLanding() {
                     />
                   </div>
 
-                  {/* Mascot */}
-                  <div className="hidden sm:block absolute -bottom-4 -right-4 w-16 h-16 lg:w-24 lg:h-24 animate-float">
-                    <img src={mascotUrl} alt="MicroJPEG Mascot" className="w-full h-full object-contain" />
+                  {/* Mascot with Santa Hat */}
+                  <div className="hidden sm:block absolute -bottom-4 -right-4 w-16 h-16 lg:w-24 lg:h-24 animate-float group z-30">
+                    <SantaHat className="absolute -top-4 left-6 w-12 h-10 -rotate-12 drop-shadow-lg z-40 transition-transform group-hover:scale-110" />
+                    <img src={mascotUrl} alt="MicroJPEG Mascot" className="w-full h-full object-contain relative z-30" />
+                    <div className="absolute -top-10 -right-4 bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-white opacity-0 group-hover:opacity-100 transition-opacity border border-white/20">
+                      Happy Holidays! 🎄
+                    </div>
                   </div>
                 </div>
               </div>
@@ -2361,8 +2418,8 @@ export default function MicroJPEGLanding() {
                       key={category}
                       onClick={() => switchCategory(category)}
                       className={`w-full text-left px-6 py-4 rounded-lg font-medium transition-all duration-200 ${activeCategory === category
-                          ? 'bg-teal-500 text-white shadow-lg'
-                          : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
+                        ? 'bg-teal-500 text-white shadow-lg'
+                        : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
                         }`}
                       data-testid={`faq-category-${category.toLowerCase()}`}
                     >
