@@ -5,33 +5,45 @@
 
 :root {
   /* MicroJPEG Brand Colors */
-  --brand-gold: 51 93% 41%; /* #D5B814 */
-  --brand-gold-dark: 46 74% 46%; /* #CCA822 */
-  --brand-cream: 40 33% 93%; /* #F2EDEB */
-  --brand-red: 0 100% 34%; /* #AD0000 */
-  --brand-dark: 0 7% 19%; /* #33312D */
-  --brand-teal: 172 75% 41%; /* Mascot teal color */
-  --brand-navy: 222 84% 23%; /* Mascot navy color */
-  
+  --brand-gold: 51 93% 41%;
+  /* #D5B814 */
+  --brand-gold-dark: 46 74% 46%;
+  /* #CCA822 */
+  --brand-cream: 40 33% 93%;
+  /* #F2EDEB */
+  --brand-red: 0 100% 34%;
+  /* #AD0000 */
+  --brand-dark: 0 7% 19%;
+  /* #33312D */
+  --brand-teal: 172 75% 41%;
+  /* Mascot teal color */
+  --brand-navy: 222 84% 23%;
+  /* Mascot navy color */
+
   --background: hsl(0 0% 100%);
-  --foreground: hsl(0 7% 19%); /* brand-dark */
+  --foreground: hsl(0 7% 19%);
+  /* brand-dark */
   --card: hsl(0 0% 100%);
   --card-foreground: hsl(0 7% 19%);
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(0 7% 19%);
-  --primary: hsl(51 93% 41%); /* brand-gold */
+  --primary: hsl(51 93% 41%);
+  /* brand-gold */
   --primary-foreground: hsl(0 0% 100%);
   --primary-50: hsl(51 93% 95%);
   --primary-500: hsl(51 93% 41%);
   --primary-600: hsl(46 74% 46%);
   --primary-700: hsl(46 74% 36%);
-  --secondary: hsl(40 33% 93%); /* brand-cream */
+  --secondary: hsl(40 33% 93%);
+  /* brand-cream */
   --secondary-foreground: hsl(0 7% 19%);
   --muted: hsl(40 33% 93%);
   --muted-foreground: hsl(0 7% 50%);
-  --accent: hsl(172 75% 41%); /* brand-teal */
+  --accent: hsl(172 75% 41%);
+  /* brand-teal */
   --accent-foreground: hsl(0 0% 100%);
-  --destructive: hsl(0 100% 34%); /* brand-red */
+  --destructive: hsl(0 100% 34%);
+  /* brand-red */
   --destructive-foreground: hsl(0 0% 100%);
   --border: hsl(40 20% 90%);
   --input: hsl(40 20% 95%);
@@ -80,17 +92,18 @@
 
   /* Force mobile header layout with absolute positioning */
   @media (max-width: 1023px) {
+
     /* Override any styles that might interfere */
     header * {
       box-sizing: border-box !important;
     }
-    
+
     /* Force all flex containers to be row-based on mobile */
     .lg\\:hidden {
       display: block !important;
     }
-    
-    .lg\\:hidden > div {
+
+    .lg\\:hidden>div {
       position: relative !important;
       height: 64px !important;
       width: 100% !important;
@@ -121,7 +134,8 @@
     cursor: pointer;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
     border: 2px solid white;
-    margin-top: -5px; /* Center thumb on track */
+    margin-top: -5px;
+    /* Center thumb on track */
   }
 
   input[type="range"]::-moz-range-track {
@@ -191,17 +205,23 @@
   }
 
   /* Cross-browser compatibility fixes */
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
   }
 
   /* Touch targets for mobile */
   @media (max-width: 768px) {
-    button, [role="button"], input[type="button"], input[type="submit"] {
+
+    button,
+    [role="button"],
+    input[type="button"],
+    input[type="submit"] {
       min-height: 44px;
       min-width: 44px;
     }
-    
+
     a {
       min-height: 44px;
       display: inline-flex;
@@ -234,32 +254,34 @@
 
   /* Desktop enhancements (1024px+) */
   @media (min-width: 1024px) {
+
     /* Improved hover states */
     .hover-lift {
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    
+
     .hover-lift:hover {
       transform: translateY(-2px);
       box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     }
-    
+
     /* Enhanced animations for large screens */
     .animate-fade-in-up {
       animation: fadeInUp 0.6s ease-out;
     }
-    
+
     @keyframes fadeInUp {
       from {
         opacity: 0;
         transform: translateY(30px);
       }
+
       to {
         opacity: 1;
         transform: translateY(0);
       }
     }
-    
+
     /* Better spacing for large content */
     .container-xl {
       max-width: 1400px;
@@ -271,7 +293,7 @@
     .container-ultra {
       max-width: 1600px;
     }
-    
+
     /* Prevent overly long lines of text */
     .max-reading-width {
       max-width: 65ch;
@@ -279,7 +301,9 @@
   }
 
   /* Cross-browser form input fixes */
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
@@ -308,7 +332,8 @@
   }
 
   /* High DPI display optimizations */
-  @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  @media (-webkit-min-device-pixel-ratio: 2),
+  (min-resolution: 192dpi) {
     .crisp-edges {
       image-rendering: -webkit-optimize-contrast;
       image-rendering: crisp-edges;
@@ -317,7 +342,10 @@
 
   /* Reduced motion preferences */
   @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
+
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
@@ -325,9 +353,9 @@
   }
 
   /* Focus indicators for accessibility */
-  button:focus-visible, 
-  input:focus-visible, 
-  select:focus-visible, 
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
   textarea:focus-visible,
   [role="button"]:focus-visible {
     outline: 2px solid #D5B814;
@@ -339,50 +367,50 @@
     .text-brand-dark {
       color: #000000 !important;
     }
-    
+
     .bg-white {
       background-color: #ffffff !important;
     }
-    
+
     button {
       border: 2px solid currentColor !important;
     }
   }
-  
+
   /* Typography Classes */
   .font-poppins {
     font-family: var(--font-poppins);
   }
-  
+
   .font-opensans {
     font-family: var(--font-opensans);
   }
-  
+
   /* Brand specific utilities */
   .text-brand-gold {
     color: hsl(var(--brand-gold));
   }
-  
+
   .text-brand-teal {
     color: hsl(var(--brand-teal));
   }
-  
+
   .bg-brand-gold {
     background-color: hsl(var(--brand-gold));
   }
-  
+
   .bg-brand-cream {
     background-color: hsl(var(--brand-cream));
   }
-  
+
   .bg-brand-teal {
     background-color: hsl(var(--brand-teal));
   }
-  
+
   .border-brand-gold {
     border-color: hsl(var(--brand-gold));
   }
-  
+
   /* Hero background styling */
   .hero-background {
     background-image: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), url('./assets/background.webp');
@@ -391,7 +419,7 @@
     background-repeat: no-repeat;
     background-attachment: fixed;
   }
-  
+
   /* Premium page background styling */
   .hero-background-premium {
     background-image: linear-gradient(rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6)), url('./assets/premium-background.webp');
@@ -400,22 +428,36 @@
     background-repeat: no-repeat;
     background-attachment: fixed;
   }
-  
+
   /* Custom animations */
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-10px);
+    }
   }
-  
+
   .animate-float {
     animation: float 3s ease-in-out infinite;
   }
-  
+
   @keyframes pulse-glow {
-    0%, 100% { box-shadow: 0 0 20px hsla(var(--brand-gold), 0.3); }
-    50% { box-shadow: 0 0 40px hsla(var(--brand-gold), 0.6); }
+
+    0%,
+    100% {
+      box-shadow: 0 0 20px hsla(var(--brand-gold), 0.3);
+    }
+
+    50% {
+      box-shadow: 0 0 40px hsla(var(--brand-gold), 0.6);
+    }
   }
-  
+
   .animate-pulse-glow {
     animation: pulse-glow 2s ease-in-out infinite;
   }
@@ -455,108 +497,123 @@
     padding-right: 1rem !important;
     max-width: 100% !important;
   }
-  
+
   /* Typography scaling */
   h1 {
-    font-size: 1.75rem !important; /* 28px */
+    font-size: 1.75rem !important;
+    /* 28px */
     line-height: 1.2 !important;
     margin-bottom: 1rem !important;
   }
-  
+
   h2 {
-    font-size: 1.5rem !important; /* 24px */
+    font-size: 1.5rem !important;
+    /* 24px */
     line-height: 1.3 !important;
     margin-bottom: 0.75rem !important;
   }
-  
+
   h3 {
-    font-size: 1.25rem !important; /* 20px */
+    font-size: 1.25rem !important;
+    /* 20px */
     line-height: 1.4 !important;
     margin-bottom: 0.5rem !important;
   }
-  
+
   p {
     font-size: 0.9rem !important;
     line-height: 1.5 !important;
   }
-  
+
   /* Button improvements */
   button {
-    min-height: 44px !important; /* iOS touch target */
+    min-height: 44px !important;
+    /* iOS touch target */
     font-size: 0.9rem !important;
     padding: 0.75rem 1rem !important;
   }
-  
+
   /* Form field sizing */
-  input, textarea, select {
+  input,
+  textarea,
+  select {
     min-height: 44px !important;
-    font-size: 16px !important; /* Prevent zoom on iOS */
+    font-size: 16px !important;
+    /* Prevent zoom on iOS */
   }
-  
+
   /* Card responsiveness */
-  .card, [class*="card"] {
+  .card,
+  [class*="card"] {
     padding: 1rem !important;
     margin-bottom: 1rem !important;
   }
-  
+
   /* Grid improvements */
   .grid {
     gap: 1rem !important;
   }
-  
-  .grid-cols-1, .grid-cols-2, .grid-cols-3, .grid-cols-4,
-  .sm\\:grid-cols-2, .md\\:grid-cols-2, .lg\\:grid-cols-3, .lg\\:grid-cols-4 {
+
+  .grid-cols-1,
+  .grid-cols-2,
+  .grid-cols-3,
+  .grid-cols-4,
+  .sm\\:grid-cols-2,
+  .md\\:grid-cols-2,
+  .lg\\:grid-cols-3,
+  .lg\\:grid-cols-4 {
     grid-template-columns: 1fr !important;
   }
-  
+
   /* Flex improvements - EXCEPT for header */
   .flex:not(header):not(header *) {
     flex-direction: column !important;
     gap: 0.75rem !important;
   }
-  
+
   .flex-mobile-stack:not(header):not(header *) {
     flex-direction: column !important;
     gap: 0.75rem !important;
   }
-  
+
   /* Section spacing */
   section {
     padding-top: 1.5rem !important;
     padding-bottom: 1.5rem !important;
   }
-  
+
   /* Hero section specific */
   .hero-section {
     padding: 2rem 1rem !important;
   }
-  
+
   /* Upload area mobile */
   .upload-area {
     padding: 1.5rem !important;
     min-height: 200px !important;
   }
-  
+
   /* Image responsiveness */
   img {
     max-width: 100% !important;
     height: auto !important;
   }
-  
+
   /* AdSense responsive adjustments */
   .sidebar-ad {
-    display: none !important; /* Hide sidebar ads on mobile */
+    display: none !important;
+    /* Hide sidebar ads on mobile */
   }
-  
+
   .footer-ad .adsbygoogle {
     min-height: 60px !important;
   }
-  
+
   /* Navigation improvements */
   nav {
     padding: 0.5rem 1rem !important;
   }
-  
+
   /* Logo scaling */
   .logo {
     width: 32px !important;
@@ -567,118 +624,135 @@
 /* Extra small screens */
 @media (max-width: 480px) {
   h1 {
-    font-size: 1.5rem !important; /* 24px */
+    font-size: 1.5rem !important;
+    /* 24px */
   }
-  
+
   h2 {
-    font-size: 1.25rem !important; /* 20px */
+    font-size: 1.25rem !important;
+    /* 20px */
   }
-  
+
   h3 {
-    font-size: 1.125rem !important; /* 18px */
+    font-size: 1.125rem !important;
+    /* 18px */
   }
-  
+
   .container {
     padding-left: 0.75rem !important;
     padding-right: 0.75rem !important;
   }
-  
+
   /* Full width buttons on very small screens */
   .flex-col button,
   .sm\\:flex-row button {
     width: 100% !important;
     margin-bottom: 0.5rem !important;
   }
-  
+
   /* Better spacing for cards */
-  .card, [class*="card"] {
+  .card,
+  [class*="card"] {
     padding: 0.75rem !important;
   }
 }
 
 /* Force mobile layout on specific elements */
 @media (max-width: 768px) {
+
   /* Override Tailwind responsive classes - EXCEPT for header */
   .sm\\:flex-row:not(header):not(header *) {
     flex-direction: column !important;
   }
-  
-  .sm\\:grid-cols-2, .md\\:grid-cols-2, .lg\\:grid-cols-3, .lg\\:grid-cols-4 {
+
+  .sm\\:grid-cols-2,
+  .md\\:grid-cols-2,
+  .lg\\:grid-cols-3,
+  .lg\\:grid-cols-4 {
     grid-template-columns: 1fr !important;
   }
-  
+
   /* Header improvements */
   header .container {
     padding: 0.5rem 1rem !important;
   }
-  
+
   header h1 {
     font-size: 1.25rem !important;
   }
-  
+
   /* Prevent large images/mascots from covering content on mobile */
   body {
     overflow-x: hidden !important;
   }
-  
+
   /* Ensure content is above any background elements */
-  main, .container {
+  main,
+  .container {
     position: relative !important;
     z-index: 10 !important;
   }
-  
+
   /* Hide any large decorative elements on mobile */
-  .decorative-large, .mascot-large {
+  .decorative-large,
+  .mascot-large {
     display: none !important;
   }
-  
+
   /* Prevent any images from overflowing on mobile */
   img {
     max-width: 100% !important;
     max-height: 100% !important;
     object-fit: contain !important;
   }
-  
+
   /* Specific header logo constraints */
   header img {
     max-width: 40px !important;
     max-height: 40px !important;
   }
-  
+
   /* Ensure mobile header is always visible */
   .block.lg\\:hidden {
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
   }
-  
+
   /* Performance optimizations */
   * {
     will-change: auto;
   }
-  
+
   /* Optimize animations for better performance */
   .hover\\:scale-105:hover,
   .hover\\:shadow-xl:hover {
     transform: scale(1.05);
     transition: transform 0.2s ease-in-out;
   }
-  
+
   /* Better text sizing on mobile */
-  .text-xl, .text-2xl, .text-3xl, .text-4xl, .text-5xl, .text-6xl {
+  .text-xl,
+  .text-2xl,
+  .text-3xl,
+  .text-4xl,
+  .text-5xl,
+  .text-6xl {
     font-size: 1.125rem !important;
     line-height: 1.4 !important;
   }
-  
+
   .text-lg {
     font-size: 1rem !important;
   }
-  
+
   /* Ensure proper spacing */
-  .mb-6, .mb-8, .mb-12 {
+  .mb-6,
+  .mb-8,
+  .mb-12 {
     margin-bottom: 1.5rem !important;
   }
-  
+
   .py-16 {
     padding-top: 2rem !important;
     padding-bottom: 2rem !important;
@@ -687,36 +761,46 @@
 
 /* Feature Demo Animation */
 @keyframes fadeInOut {
-  0%, 22% { 
-    opacity: 1; 
-    transform: scale(1) translateY(0); 
+
+  0%,
+  22% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
     filter: blur(0px);
   }
-  25%, 97% { 
-    opacity: 0; 
-    transform: scale(0.95) translateY(10px); 
+
+  25%,
+  97% {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
     filter: blur(2px);
   }
-  100% { 
-    opacity: 1; 
-    transform: scale(1) translateY(0); 
+
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
     filter: blur(0px);
   }
 }
 
 @keyframes progressDot {
-  0%, 22% { 
-    opacity: 1; 
+
+  0%,
+  22% {
+    opacity: 1;
     background-color: white;
     transform: scale(1.2);
   }
-  25%, 97% { 
-    opacity: 0.5; 
+
+  25%,
+  97% {
+    opacity: 0.5;
     background-color: rgba(255, 255, 255, 0.5);
     transform: scale(1);
   }
-  100% { 
-    opacity: 1; 
+
+  100% {
+    opacity: 1;
     background-color: white;
     transform: scale(1.2);
   }
@@ -727,16 +811,42 @@
   transition: all 0.8s ease-in-out;
 }
 
-.feature-demo .feature-slide:nth-child(1) { animation-delay: 0s; }
-.feature-demo .feature-slide:nth-child(2) { animation-delay: 4s; }
-.feature-demo .feature-slide:nth-child(3) { animation-delay: 8s; }
-.feature-demo .feature-slide:nth-child(4) { animation-delay: 12s; }
+.feature-demo .feature-slide:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.feature-demo .feature-slide:nth-child(2) {
+  animation-delay: 4s;
+}
+
+.feature-demo .feature-slide:nth-child(3) {
+  animation-delay: 8s;
+}
+
+.feature-demo .feature-slide:nth-child(4) {
+  animation-delay: 12s;
+}
 
 /* Progress dots animation */
-.feature-demo .absolute.bottom-4 div:nth-child(1) { animation: progressDot 16s infinite; animation-delay: 0s; }
-.feature-demo .absolute.bottom-4 div:nth-child(2) { animation: progressDot 16s infinite; animation-delay: 4s; }
-.feature-demo .absolute.bottom-4 div:nth-child(3) { animation: progressDot 16s infinite; animation-delay: 8s; }
-.feature-demo .absolute.bottom-4 div:nth-child(4) { animation: progressDot 16s infinite; animation-delay: 12s; }
+.feature-demo .absolute.bottom-4 div:nth-child(1) {
+  animation: progressDot 16s infinite;
+  animation-delay: 0s;
+}
+
+.feature-demo .absolute.bottom-4 div:nth-child(2) {
+  animation: progressDot 16s infinite;
+  animation-delay: 4s;
+}
+
+.feature-demo .absolute.bottom-4 div:nth-child(3) {
+  animation: progressDot 16s infinite;
+  animation-delay: 8s;
+}
+
+.feature-demo .absolute.bottom-4 div:nth-child(4) {
+  animation: progressDot 16s infinite;
+  animation-delay: 12s;
+}
 
 /* Flip Card Styles */
 .perspective-1000 {
@@ -758,4 +868,54 @@
 
 .group:hover .group-hover\:rotate-y-180 {
   transform: rotateY(180deg);
+}
+
+/* Festive Snowfall */
+.snowflake {
+  color: #fff;
+  font-size: 1em;
+  font-family: Arial;
+  text-shadow: 0 0 1px #000;
+  position: fixed;
+  top: -10%;
+  z-index: 9999;
+  user-select: none;
+  cursor: default;
+  animation-name: snowflakes-fall, snowflakes-shake;
+  animation-duration: 10s, 3s;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+  animation-play-state: running, running;
+}
+
+@keyframes snowflakes-fall {
+  0% {
+    top: -10%;
+  }
+
+  100% {
+    top: 100%;
+  }
+}
+
+@keyframes snowflakes-shake {
+  0% {
+    transform: translateX(0px);
+  }
+
+  50% {
+    transform: translateX(80px);
+  }
+
+  100% {
+    transform: translateX(0px);
+  }
+}
+
+.festive-red-glow {
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
+}
+
+.christmas-tree-glow {
+  filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.6));
 }
