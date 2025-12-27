@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Puzzle, ArrowRight, ExternalLink, Github, Database, ShoppingBag, Terminal, Download, Info } from 'lucide-react';
+import { Puzzle, ArrowRight, ExternalLink, Github, Database, ShoppingBag, Terminal, Download, Info, Zap, Smartphone, Monitor } from 'lucide-react';
 import { Link } from 'wouter';
 import Header from '@/components/header';
 import { SEOHead } from '@/components/SEOHead';
@@ -11,8 +11,32 @@ import airtableLogo from '@assets/Airtable_Logo.png';
 import joomLogo from '@assets/Joom_Shopping.png';
 import dotnetLogo from '@assets/dotnet.svg';
 
+// Custom Apple Shortcuts Icon
+const ShortcutsIcon = ({ className }: { className?: string }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="m9 15 3-3 3 3" />
+        <path d="m15 9-3 3-3-3" />
+        <rect width="20" height="20" x="2" y="2" rx="4" />
+    </svg>
+);
+
 export default function IntegrationsPage() {
     const integrations = [
+        {
+            id: 'shortcuts',
+            title: 'Apple Shortcuts',
+            badge: 'iOS, iPadOS & Mac',
+            description: 'Compress and resize images directly from your Apple devices using the official MicroJPEG Shortcut.',
+            longDescription: 'Updated for iOS 18. Seamlessly integrate MicroJPEG into your Apple ecosystem. Compress images, resize them on the fly, and view instant savings in file size. Works via the Share Sheet for maximum convenience.',
+            icon: <ShortcutsIcon className="w-12 h-12 text-blue-400" />,
+            logo: null,
+            color: 'from-blue-600/20 to-pink-500/20',
+            actionText: 'Get Shortcut',
+            actionLink: 'https://www.icloud.com/shortcuts/f35d99d62c1e47728436bd2ea85285c8',
+            secondaryText: 'Shortcuts App',
+            secondaryLink: 'https://apps.apple.com/us/app/shortcuts/id915249334',
+            type: 'shortcut'
+        },
         {
             id: 'dotnet',
             title: '.NET Client Library',
