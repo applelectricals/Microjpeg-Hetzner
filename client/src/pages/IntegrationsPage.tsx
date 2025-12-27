@@ -100,25 +100,25 @@ export default function IntegrationsPage() {
 
                                 {/* Front Side */}
                                 <div className="absolute inset-0 w-full h-full backface-hidden">
-                                    <Card className="w-full h-full bg-gray-800/40 backdrop-blur-xl border border-gray-700/50 flex flex-col p-8 overflow-hidden">
+                                    <Card className="w-full h-full bg-white border border-gray-200 flex flex-col p-8 overflow-hidden shadow-xl hover:shadow-2xl transition-shadow">
                                         <div className="flex flex-col items-center text-center">
-                                            <div className={`w-32 h-32 rounded-3xl bg-gradient-to-br ${item.color} flex items-center justify-center mb-8 shadow-2xl group-hover:scale-110 transition-transform duration-500`}>
+                                            <div className="w-32 h-32 rounded-3xl bg-white border border-gray-100 flex items-center justify-center mb-8 shadow-md group-hover:scale-110 transition-transform duration-500 p-4">
                                                 {item.logo ? (
-                                                    <img src={item.logo} alt={item.title} className="w-24 h-24 object-contain" />
+                                                    <img src={item.logo} alt={item.title} className="w-full h-full object-contain" />
                                                 ) : (
                                                     item.icon
                                                 )}
                                             </div>
-                                            <Badge variant="secondary" className="bg-teal-900/50 text-teal-400 border border-teal-500/30 mb-4">
+                                            <Badge variant="secondary" className="bg-gray-100 text-gray-700 border border-gray-200 mb-4">
                                                 {item.badge}
                                             </Badge>
-                                            <h2 className="text-2xl font-bold text-white mb-4">{item.title}</h2>
-                                            <p className="text-gray-400 line-clamp-3">
+                                            <h2 className="text-2xl font-bold text-gray-900 mb-4">{item.title}</h2>
+                                            <p className="text-gray-600 line-clamp-3">
                                                 {item.description}
                                             </p>
                                         </div>
                                         <div className="mt-auto flex justify-center">
-                                            <div className="flex items-center gap-2 text-teal-400 font-medium">
+                                            <div className="flex items-center gap-2 text-brand-gold font-bold">
                                                 <span>Details</span>
                                                 <Info className="w-4 h-4" />
                                             </div>
@@ -128,18 +128,18 @@ export default function IntegrationsPage() {
 
                                 {/* Back Side */}
                                 <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180">
-                                    <Card className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 border border-teal-500/30 flex flex-col p-8 shadow-2xl">
+                                    <Card className="w-full h-full bg-white border border-brand-gold flex flex-col p-8 shadow-2xl">
                                         <div className="mb-6">
-                                            <h3 className="text-xl font-bold text-white mb-2">About {item.title}</h3>
-                                            <div className="h-1 w-12 bg-teal-500 rounded-full mb-4"></div>
-                                            <p className="text-gray-300 text-sm leading-relaxed">
+                                            <h3 className="text-xl font-bold text-gray-900 mb-2">About {item.title}</h3>
+                                            <div className="h-1 w-12 bg-brand-gold rounded-full mb-4"></div>
+                                            <p className="text-gray-700 text-sm leading-relaxed">
                                                 {item.longDescription}
                                             </p>
                                         </div>
 
                                         <div className="mt-auto space-y-4">
                                             <Button
-                                                className="w-full bg-teal-500 hover:bg-teal-600 shadow-lg shadow-teal-500/30 font-bold"
+                                                className="w-full bg-brand-gold hover:bg-brand-gold-dark text-white shadow-lg shadow-brand-gold/30 font-bold"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     if (item.actionLink.startsWith('http')) {
@@ -154,7 +154,7 @@ export default function IntegrationsPage() {
                                             </Button>
                                             <Button
                                                 variant="outline"
-                                                className="w-full border-gray-600 text-gray-300 hover:bg-gray-700/50 backdrop-blur-sm"
+                                                className="w-full border-gray-200 text-gray-600 hover:bg-gray-50"
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     window.location.href = item.secondaryLink;
